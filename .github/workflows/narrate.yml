@@ -1,0 +1,53 @@
+name: Narrate lessons
+
+# Озвучка уроков голосом автора. Аудио, тайминги и субтитры коммитятся обратно в main
+# (в content/packs/.../audio), отчёт проверки распознаванием — в content-pipeline/reports.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["content/packs/**/scenario.json", "content-pipeline/narrate.py", ".github/workflows/narrate.yml"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: narrate
+  cancel-in-progress: false
+
+jobs:
+  narrate:
+    name: Озвучка (Chatterbox, CPU) + проверка распознаванием
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Установка (torch CPU)
+        run: pip install chatterbox-tts faster-whisper --extra-index-url https://download.pytorch.org/whl/cpu
+      - name: Опорная запись автора
+        env:
+          VOICE_REF_KEY: ${{ secrets.VOICE_REF_KEY }}
+        run: |
+          test -n "$VOICE_REF_KEY" || { echo "Нет секрета VOICE_REF_KEY"; exit 1; }
+          printf '%s' "$VOICE_REF_KEY" > /tmp/k && chmod 600 /tmp/k
+          openssl enc -d -aes-256-cbc -pbkdf2 -in content-pipeline/voices/author_ref.enc -out /tmp/ref.wav -pass file:/tmp/k
+          rm -f /tmp/k
+      - name: Синтез
+        run: |
+          mkdir -p content-pipeline/reports
+          python content-pipeline/narrate.py /tmp/ref.wav content/packs --voice author --report content-pipeline/reports/narration-report.json
+          rm -f /tmp/ref.wav
+      - name: Проверка контента
+        run: pip install jsonschema && python tools/validate_content.py content/packs
+      - name: Коммит аудио
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add content/packs content-pipeline/reports
+          git diff --cached --quiet && { echo "Изменений нет"; exit 0; }
+          git commit -q -m "Озвучка уроков (автоматически)"
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && exit 0; sleep 5; done
+          exit 1

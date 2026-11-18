@@ -28,7 +28,8 @@
                 "lines": {"type": "array", "items": {"type": "integer", "minimum": 1}},
                 "stdin": {"type": "string"},
                 "md": {"type": "string"},
-                "ms": {"type": "integer", "minimum": 0}
+                "ms": {"type": "integer", "minimum": 0},
+                "stream": {"enum": ["stdout", "stderr"], "default": "stdout", "description": "stderr — сообщение об ошибке (показывается красным)"}
               },
               "allOf": [
                 {"if": {"properties": {"type": {"const": "type"}}}, "then": {"required": ["text"]}},

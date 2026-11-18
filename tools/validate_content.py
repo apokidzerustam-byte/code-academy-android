@@ -13,6 +13,7 @@
 Код возврата 1 при ошибках.
 """
 import argparse
+import hashlib
 import json
 import pathlib
 import re
@@ -81,6 +82,16 @@ def validate_scenario(path, scen, rep):
                 files[f] = files.get(f, "") + a["text"]
             elif t == "run":
                 last = run_code(files.get("main.py", ""), a.get("stdin", ""))
+            elif t == "output" and a.get("stream") == "stderr":
+                if last is None:
+                    rep.err(where, f"действие {i}: output без предшествующего run")
+                elif last["status"] == "OK":
+                    rep.err(where, f"действие {i}: анимация показывает ошибку, а код выполнился без ошибок")
+                else:
+                    missing = [ln.strip() for ln in a["text"].splitlines() if ln.strip() and ln.strip() not in last["stderr"]]
+                    if missing:
+                        rep.err(where, f"действие {i}: в сообщении об ошибке нет {missing!r}; фактически: {last['stderr'].strip()[-300:]!r}")
+                last = None
             elif t == "output":
                 if last is None:
                     rep.err(where, f"действие {i}: output без предшествующего run")
@@ -95,7 +106,39 @@ def validate_scenario(path, scen, rep):
                 if bad:
                     rep.err(where, f"действие {i}: подсветка строк {bad}, а в файле {n} строк")
     minutes = words / WORDS_PER_MIN
+    validate_audio(path.parent, scen, rep)
     return words, minutes
+
+
+def validate_audio(ldir, scen, rep):
+    """Озвучка (если уже сделана): совпадение сцен, наличие файлов, разумные тайминги, актуальность текста."""
+    meta_path = ldir / "audio" / "narration.json"
+    if not meta_path.exists():
+        rep.warn(str(ldir), "озвучки ещё нет (появится после workflow «Narrate lessons»)")
+        return
+    meta = json.loads(meta_path.read_text("utf-8"))
+    by_id = {s["id"]: s for s in meta.get("scenes", [])}
+    for scene in scen["scenes"]:
+        where = f"{meta_path}#{scene['id']}"
+        m = by_id.get(scene["id"])
+        if not m:
+            rep.err(where, "нет озвучки сцены")
+            continue
+        if not (ldir / "audio" / m["file"]).exists():
+            rep.err(where, f"нет файла {m['file']}")
+        if m["durationMs"] <= 0 or not m["cues"]:
+            rep.err(where, "пустая озвучка")
+        prev_end = 0
+        for c in m["cues"]:
+            if not (prev_end <= c["startMs"] <= c["endMs"] <= m["durationMs"] + 50):
+                rep.err(where, f"неверный тайминг фразы {c}")
+            prev_end = c["endMs"]
+        payload = json.dumps([scene["narration"], scene.get("stress", {})], ensure_ascii=False)
+        if m.get("textHash") != hashlib.sha256(payload.encode()).hexdigest()[:16]:
+            rep.warn(where, "текст сцены изменился после озвучки — озвучка будет пересобрана")
+    extra = set(by_id) - {s["id"] for s in scen["scenes"]}
+    if extra:
+        rep.err(str(meta_path), f"озвучка лишних сцен: {sorted(extra)}")
 
 
 def validate_assignment(path, a, rep):
