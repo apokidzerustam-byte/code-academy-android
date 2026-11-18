@@ -54,7 +54,13 @@ class PyodideRunner(context: Context) : CodeRunner {
         return withTimeoutOrNull(START_TIMEOUT_MS) { ready.await() }
     }
 
-    override suspend fun run(code: String, timeoutMs: Long, stdin: String, project: String): RunResult {
+    override suspend fun run(code: String, timeoutMs: Long, stdin: String, project: String): RunResult =
+        send(code, timeoutMs, stdin, project, null)
+
+    override suspend fun check(code: String, testsJson: String, timeoutMs: Long, project: String): RunResult =
+        send(code, timeoutMs, "", project, testsJson)
+
+    private suspend fun send(code: String, timeoutMs: Long, stdin: String, project: String, tests: String?): RunResult {
         val info = prepare()
             ?: return RunResult(RunStatus.UNAVAILABLE, stderr = "Интерпретатор не запустился за ${START_TIMEOUT_MS / 1000} с")
         if (!info.pythonStarted) return RunResult(RunStatus.UNAVAILABLE, stderr = info.startError ?: "")
@@ -65,6 +71,8 @@ class PyodideRunner(context: Context) : CodeRunner {
             .put("runId", id).put("code", code).put("stdin", stdin)
             .put("project", project.replace(Regex("[^A-Za-z0-9_-]"), "_"))
             .put("maxOutput", RunnerClient.MAX_OUTPUT_CHARS)
+            .put("mode", if (tests == null) "run" else "check")
+            .put("tests", tests ?: "")
         js("caRun($msg)")
         return withTimeoutOrNull(timeoutMs) { d.await() }
             ?: RunResult(RunStatus.TIMEOUT).also { restartInterpreter(RunStatus.TIMEOUT) }
@@ -174,6 +182,10 @@ class PyodideRunner(context: Context) : CodeRunner {
                 )
             }
             "result" -> {
+                if (o.has("check")) {
+                    pending.remove(o.optLong("runId"))?.complete(RunResult(RunStatus.OK, stdout = o.getString("check")))
+                    return
+                }
                 val r = runCatching { JSONObject(o.getString("result")) }.getOrNull()
                 val res = if (r == null) RunResult(RunStatus.ERROR, stderr = o.optString("error"))
                 else RunResult(

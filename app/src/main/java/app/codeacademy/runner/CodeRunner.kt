@@ -12,6 +12,17 @@ interface CodeRunner {
         project: String = "default",
     ): RunResult
 
+    /**
+     * Автопроверка задания (ca_runner.check). При успехе status = OK, а stdout — JSON-отчёт.
+     * TIMEOUT/STOPPED/CRASHED — проверка не завершилась.
+     */
+    suspend fun check(
+        code: String,
+        testsJson: String,
+        timeoutMs: Long = 10_000,
+        project: String = "check",
+    ): RunResult
+
     fun stop()
     fun close()
 }

@@ -55,6 +55,8 @@ jobs:
       - name: Сборка раннера Pyodide
         working-directory: pyodide-web
         run: npm install --no-audit --no-fund && npm run build
+      - name: Модульные тесты (JVM)
+        run: gradle --no-daemon :app:testDebugUnitTest
       - name: Сборка APK
         run: gradle --no-daemon :app:assembleDebug :app:assembleRelease
       - name: Размер APK

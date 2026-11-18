@@ -49,7 +49,14 @@ async function probe(path) {
 
 onmessage = async (e) => {
   const m = e.data;
-  if (m.type === "run") {
+  if (m.type === "run" && m.mode === "check") {
+    try {
+      const rep = runner.check(m.code, m.tests, "/home/pyodide/project/" + (m.project || "check"), 4096);
+      postMessage({ type: "result", runId: m.runId, check: rep });
+    } catch (err) {
+      postMessage({ type: "result", runId: m.runId, error: String(err) });
+    }
+  } else if (m.type === "run") {
     try {
       const res = runner.run(m.code, "/home/pyodide/project/" + (m.project || "default"), m.stdin || "", m.maxOutput || 16384);
       postMessage({ type: "result", runId: m.runId, result: res });

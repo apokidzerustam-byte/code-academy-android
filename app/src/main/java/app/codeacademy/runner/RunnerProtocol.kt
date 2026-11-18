@@ -14,6 +14,8 @@ object RunnerProtocol {
     const val KEY_TIMEOUT_MS = "timeoutMs"
     const val KEY_SANDBOX_DIR = "sandboxDir"
     const val KEY_MAX_OUTPUT = "maxOutput"
+    const val KEY_MODE = "mode"          // "run" | "check"
+    const val KEY_TESTS = "tests"        // JSON тестов для режима check
 
     const val KEY_STATUS = "status"
     const val KEY_STDOUT = "stdout"

@@ -1,0 +1,45 @@
+package app.codeacademy
+
+import android.app.Application
+import android.content.Context
+import app.codeacademy.assessment.AssessmentService
+import app.codeacademy.content.ContentRepository
+import app.codeacademy.data.AppDatabase
+import app.codeacademy.data.ProgressRepository
+import app.codeacademy.runner.CodeRunner
+import app.codeacademy.runner.PyodideRunner
+import app.codeacademy.runner.RunnerClient
+import app.codeacademy.settings.RunnerMode
+import app.codeacademy.settings.SettingsRepository
+
+/** Ручной контейнер зависимостей (без Hilt — меньше генерации кода, проще сборка на этапе каркаса). */
+class AppContainer(context: Context) {
+    private val app = context.applicationContext
+    val content = ContentRepository(app.assets)
+    val db: AppDatabase by lazy { AppDatabase.create(app) }
+    val progress by lazy { ProgressRepository(db) }
+    val settings = SettingsRepository(app)
+    val assessment = AssessmentService()
+
+    private var runnerW: PyodideRunner? = null
+    private var runnerA: RunnerClient? = null
+
+    /** Исполнитель кода: W по умолчанию; A — если выбран явно или урок требует A, или W недоступен. */
+    @Synchronized
+    fun runner(mode: RunnerMode, lessonRunner: String = "W", wAvailable: Boolean = true): Pair<String, CodeRunner> =
+        if (mode == RunnerMode.A || lessonRunner == "A" || (mode == RunnerMode.AUTO && !wAvailable)) {
+            "A" to (runnerA ?: RunnerClient(app, isolated = false).also { runnerA = it })
+        } else {
+            "W" to (runnerW ?: PyodideRunner(app).also { runnerW = it })
+        }
+}
+
+class CodeAcademyApp : Application() {
+    lateinit var container: AppContainer
+        private set
+
+    override fun onCreate() {
+        super.onCreate()
+        container = AppContainer(this)
+    }
+}

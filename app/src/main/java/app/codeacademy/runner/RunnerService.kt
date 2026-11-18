@@ -80,6 +80,16 @@ open class RunnerService : Service() {
         worker.execute {
             val bundle = try {
                 val module = Python.getInstance().getModule("ca_runner")
+                if (data.getString(P.KEY_MODE) == "check") {
+                    val report = module.callAttr(
+                        "check",
+                        data.getString(P.KEY_CODE, ""),
+                        data.getString(P.KEY_TESTS, "{}"),
+                        data.getString(P.KEY_SANDBOX_DIR),
+                        4096,
+                    ).toString()
+                    return@execute finish(replyTo, runId, resultBundle(runId, RunStatus.OK, stdout = report))
+                }
                 val json = module.callAttr(
                     "run",
                     data.getString(P.KEY_CODE, ""),
@@ -99,8 +109,12 @@ open class RunnerService : Service() {
             } catch (t: Throwable) {
                 resultBundle(runId, RunStatus.ERROR, stderr = Log.getStackTraceString(t).take(4000))
             }
-            if (activeRun.compareAndSet(runId, NO_RUN)) reply(replyTo, P.MSG_RESULT, bundle)
+            finish(replyTo, runId, bundle)
         }
+    }
+
+    private fun finish(replyTo: Messenger?, runId: Long, bundle: Bundle) {
+        if (activeRun.compareAndSet(runId, NO_RUN)) reply(replyTo, P.MSG_RESULT, bundle)
     }
 
     /** Сообщает итог и уничтожает процесс: зависший Python-поток иначе не остановить. */

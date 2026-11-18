@@ -16,3 +16,4 @@ pyodide-web/node_modules/
 app/src/main/assets/pyodide/
 app/src/main/assets/pyrunner/
 tools/__pycache__/
+app/schemas/

@@ -4,6 +4,8 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("org.jetbrains.kotlin.plugin.serialization")
+    id("com.google.devtools.ksp")
     id("com.chaquo.python")
 }
 
@@ -41,6 +43,15 @@ android {
         compose = true
     }
 
+    sourceSets {
+        // Контент-пакеты курса (content/packs) попадают в assets/packs.
+        getByName("main").assets.srcDir("../content")
+    }
+
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+
     androidResources {
         // WebAssembly и stdlib Pyodide читаются быстрее без сжатия в APK.
         noCompress += listOf("wasm", "zip")
@@ -51,6 +62,10 @@ kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)
     }
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 chaquopy {
@@ -69,6 +84,24 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.webkit:webkit:1.13.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
+    implementation("androidx.navigation:navigation-compose:2.8.9")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
+    implementation("androidx.datastore:datastore-preferences:1.1.4")
+    implementation("androidx.compose.material:material-icons-core")
+
+    val room = "2.7.2"
+    implementation("androidx.room:room-runtime:$room")
+    implementation("androidx.room:room-ktx:$room")
+    ksp("androidx.room:room-compiler:$room")
+
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.1")
+
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    androidTestImplementation("androidx.room:room-testing:$room")
 
     androidTestImplementation(composeBom)
     androidTestImplementation("androidx.test.ext:junit:1.2.1")

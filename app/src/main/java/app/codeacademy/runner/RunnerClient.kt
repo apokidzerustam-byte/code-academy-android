@@ -151,11 +151,19 @@ class RunnerClient(context: Context, val isolated: Boolean) : CodeRunner {
 
     override suspend fun prepare(): RunnerInfo? = ping()
 
-    override suspend fun run(
+    override suspend fun run(code: String, timeoutMs: Long, stdin: String, project: String): RunResult =
+        send(code, timeoutMs, stdin, project, mode = "run", tests = null)
+
+    override suspend fun check(code: String, testsJson: String, timeoutMs: Long, project: String): RunResult =
+        send(code, timeoutMs, "", project, mode = "check", tests = testsJson)
+
+    private suspend fun send(
         code: String,
         timeoutMs: Long,
         stdin: String,
         project: String,
+        mode: String,
+        tests: String?,
     ): RunResult {
         val m = ensureBound()
             ?: return RunResult(RunStatus.UNAVAILABLE, stderr = "Не удалось подключиться к раннеру")
@@ -169,6 +177,8 @@ class RunnerClient(context: Context, val isolated: Boolean) : CodeRunner {
             putLong(P.KEY_TIMEOUT_MS, timeoutMs)
             putString(P.KEY_SANDBOX_DIR, sandboxDir(project)?.absolutePath)
             putInt(P.KEY_MAX_OUTPUT, MAX_OUTPUT_CHARS)
+            putString(P.KEY_MODE, mode)
+            putString(P.KEY_TESTS, tests)
         }
         try {
             m.send(Message.obtain(null, P.MSG_RUN).also { it.data = data; it.replyTo = replies })
