@@ -151,7 +151,7 @@ fun IdeScreen(projectId: String, settings: Settings, onBack: () -> Unit) {
     Screen(title, onBack) { padding ->
         Column(Modifier.padding(padding).imePadding().verticalScroll(rememberScrollState()).padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (!loaded) return@Column
+            if (loaded) {
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 files.keys.filter { !it.endsWith("/.keep") }.sorted().forEach { f ->
                     FilterChip(selected = f == current, enabled = !running, onClick = { current = f }, label = { Text(f) },
@@ -219,6 +219,7 @@ fun IdeScreen(projectId: String, settings: Settings, onBack: () -> Unit) {
                     }),
                     modifier = Modifier.fillMaxWidth().testTag("term-input"),
                 )
+            }
             }
         }
     }

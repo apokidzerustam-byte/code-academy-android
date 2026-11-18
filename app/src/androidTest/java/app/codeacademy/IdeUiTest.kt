@@ -35,10 +35,22 @@ class IdeUiTest {
         rule.waitUntil(ms) { rule.onAllNodes(hasText(t, substring = true)).fetchSemanticsNodes().isNotEmpty() }
 
     @Test fun createRunAndUseTerminal() {
+        try {
+            scenario()
+        } catch (t: Throwable) {
+            // Если после падения теста ещё и закрытие activity упадёт, исходная причина останется в логе.
+            Log.e("CAPROBE", "IdeUiTest failed: " + Log.getStackTraceString(t).take(4000))
+            throw t
+        }
+    }
+
+    private fun scenario() {
+        Log.i("CAPROBE", "ide step: open projects")
         rule.onNodeWithTag("open-projects").performScrollTo().performClick()
         rule.onNodeWithTag("new-project").performClick()
         rule.onNodeWithTag("project-title").performTextInput("Приветствие")
         rule.onNodeWithTag("create-project").performClick()
+        Log.i("CAPROBE", "ide step: project created")
         rule.waitUntil(10_000) { rule.onAllNodes(hasTestTag("code")).fetchSemanticsNodes().isNotEmpty() }
 
         rule.onNodeWithTag("stdin").performScrollTo().performTextReplacement("Аня")
