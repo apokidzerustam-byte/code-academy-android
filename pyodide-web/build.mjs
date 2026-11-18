@@ -1,5 +1,5 @@
 // Копирует ядро Pyodide и страницу-раннер в assets приложения.
-import { copyFileSync, mkdirSync, readFileSync, statSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 
 const assets = "../app/src/main/assets";
 const py = `${assets}/pyodide`;
@@ -8,13 +8,18 @@ mkdirSync(py, { recursive: true });
 mkdirSync(runner, { recursive: true });
 
 // Только ядро: интерпретатор + stdlib. Пакеты (numpy и т. п.) — позже, по необходимости.
-const CORE = ["pyodide.js", "pyodide.asm.js", "pyodide.asm.wasm", "python_stdlib.zip", "pyodide-lock.json", "LICENSE"];
+const CORE = ["pyodide.js", "pyodide.asm.js", "pyodide.asm.wasm", "python_stdlib.zip", "pyodide-lock.json"];
+console.log("npm pyodide files:", readdirSync("node_modules/pyodide").join(", "));
 let total = 0;
 for (const f of CORE) {
   const src = `node_modules/pyodide/${f}`;
   copyFileSync(src, `${py}/${f}`);
   total += statSync(src).size;
 }
+// Лицензия MPL-2.0: в npm-пакете файла может не быть — кладём ссылку на исходники.
+const lic = ["LICENSE", "LICENSE.md"].map((f) => `node_modules/pyodide/${f}`).find(existsSync);
+if (lic) copyFileSync(lic, `${py}/LICENSE`);
+else writeFileSync(`${py}/LICENSE.txt`, "Pyodide is licensed under the Mozilla Public License 2.0.\nSource: https://github.com/pyodide/pyodide\n");
 for (const f of ["index.html", "host.js", "worker.js"]) copyFileSync(`src/${f}`, `${runner}/${f}`);
 // Одна и та же песочница для уровней A (Chaquopy) и W (Pyodide).
 copyFileSync("../app/src/main/python/ca_runner.py", `${runner}/ca_runner.py`);

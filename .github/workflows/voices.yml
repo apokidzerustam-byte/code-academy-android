@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ["content-pipeline/voices/**", ".github/workflows/voices.yml"]
+    paths: ["content-pipeline/voices/make_samples.py", ".github/workflows/voices.yml"]
 
 permissions:
   contents: write
@@ -23,10 +23,10 @@ jobs:
       - name: Опубликовать образцы в ветку voice-samples
         run: |
           cat voice-samples/report.json
-          cd voice-samples
-          git init -q -b voice-samples
+          git fetch origin voice-samples --depth 1 || true
+          git worktree add -B voice-samples /tmp/vs origin/voice-samples 2>/dev/null || git worktree add --orphan -b voice-samples /tmp/vs
+          cp voice-samples/* /tmp/vs/
+          cd /tmp/vs
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
-          git add -A
-          git commit -q -m "Образцы голосов Piper ($(date -u +%F))"
-          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" voice-samples
+          git add -A && git commit -q -m "Образцы голосов Piper ($(date -u +%F))" && git push origin voice-samples
