@@ -29,6 +29,7 @@ BLOCKED_MODULES = frozenset({
     "socket", "_socket", "ssl", "_ssl",
     "subprocess", "_posixsubprocess", "multiprocessing",
     "signal", "pty", "fcntl", "mmap", "resource",
+    "js", "pyodide", "pyodide_js", "_pyodide",   # мост Pyodide к JavaScript
 })
 
 JAVA_BRIDGE = frozenset({"java", "com", "android"})

@@ -1,0 +1,9 @@
+{
+  "name": "code-academy-pyrunner",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Pyodide (Python 3.13, WebAssembly) runner assets for Code Academy, loaded offline from app assets",
+  "license": "MIT",
+  "scripts": { "build": "node build.mjs" },
+  "dependencies": { "pyodide": "0.29.5" }
+}

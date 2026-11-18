@@ -1,0 +1,58 @@
+name: Voice clone
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["content-pipeline/voices/clone_sample.py", ".github/workflows/voice-clone.yml"]
+
+permissions:
+  contents: write
+
+jobs:
+  clone:
+    name: Клонирование голоса (Chatterbox, CPU)
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Установка (torch CPU)
+        run: pip install chatterbox-tts piper-tts --extra-index-url https://download.pytorch.org/whl/cpu
+      - name: Опорная запись
+        env:
+          VOICE_REF_B64: ${{ secrets.VOICE_REF_B64 }}
+        run: |
+          mkdir -p out
+          if [ -n "$VOICE_REF_B64" ]; then
+            # Запись автора курса хранится в секрете репозитория, а не в публичном коде.
+            echo "$VOICE_REF_B64" | base64 -d > ref_input
+            ffmpeg -y -loglevel error -i ref_input -ac 1 -ar 24000 ref.wav
+            echo "REF_NAME=author" >> "$GITHUB_ENV"
+          else
+            # Записи автора пока нет: проверяем конвейер на опорном голосе Piper (CC0).
+            curl -sSL -o denis.onnx https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/denis/medium/ru_RU-denis-medium.onnx
+            curl -sSL -o denis.onnx.json https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/denis/medium/ru_RU-denis-medium.onnx.json
+            python - <<'PY'
+          import wave
+          from piper import PiperVoice
+          v = PiperVoice.load("denis.onnx")
+          with wave.open("ref.wav", "wb") as wf:
+              v.synthesize_wav("Сегодня мы разберём, как работают переменные и циклы. Если программа выдаёт ошибку, давайте вместе найдём, в какой строке она возникла.", wf)
+          PY
+            echo "REF_NAME=piper-denis" >> "$GITHUB_ENV"
+          fi
+          ffprobe -v error -show_entries format=duration -of csv=p=0 ref.wav
+      - name: Синтез урока
+        run: python content-pipeline/voices/clone_sample.py ref.wav "out/sample_clone_${REF_NAME}.mp3" "$REF_NAME" | tee out/clone_report_${REF_NAME}.json
+      - name: Опубликовать в ветку voice-samples
+        run: |
+          git fetch origin voice-samples --depth 1 || true
+          git worktree add -B voice-samples /tmp/vs origin/voice-samples 2>/dev/null || git worktree add --orphan -b voice-samples /tmp/vs
+          cp out/* /tmp/vs/
+          cd /tmp/vs
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A && git commit -q -m "Клон голоса: ${REF_NAME}" && git push origin voice-samples

@@ -43,6 +43,9 @@ jobs:
       - name: Сборка редактора CodeMirror
         working-directory: editor-web
         run: npm install --no-audit --no-fund && npm run build
+      - name: Сборка раннера Pyodide
+        working-directory: pyodide-web
+        run: npm install --no-audit --no-fund && npm run build
       - name: Сборка APK
         run: gradle --no-daemon :app:assembleDebug :app:assembleRelease
       - name: Размер APK
@@ -93,6 +96,9 @@ jobs:
           sudo udevadm trigger --name-match=kvm
       - name: Сборка редактора CodeMirror
         working-directory: editor-web
+        run: npm install --no-audit --no-fund && npm run build
+      - name: Сборка раннера Pyodide
+        working-directory: pyodide-web
         run: npm install --no-audit --no-fund && npm run build
       - name: Предсборка тестового APK
         run: gradle --no-daemon :app:assembleDebug :app:assembleDebugAndroidTest

@@ -12,3 +12,6 @@ __pycache__/
 .pytest_cache/
 *.keystore
 *.jks
+pyodide-web/node_modules/
+app/src/main/assets/pyodide/
+app/src/main/assets/pyrunner/

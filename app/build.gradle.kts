@@ -40,6 +40,11 @@ android {
     buildFeatures {
         compose = true
     }
+
+    androidResources {
+        // WebAssembly и stdlib Pyodide читаются быстрее без сжатия в APK.
+        noCompress += listOf("wasm", "zip")
+    }
 }
 
 kotlin {

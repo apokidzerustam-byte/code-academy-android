@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicLong
  * забывает это соединение и перед следующим запуском ждёт фактической гибели
  * процесса, чтобы не отправить код в умирающий процесс.
  */
-class RunnerClient(context: Context, val isolated: Boolean) {
+class RunnerClient(context: Context, val isolated: Boolean) : CodeRunner {
 
     private val app = context.applicationContext
     private val replyThread = HandlerThread("runner-replies").apply { start() }
@@ -149,11 +149,13 @@ class RunnerClient(context: Context, val isolated: Boolean) {
         return withTimeoutOrNull(BIND_TIMEOUT_MS) { d.await() }
     }
 
-    suspend fun run(
+    override suspend fun prepare(): RunnerInfo? = ping()
+
+    override suspend fun run(
         code: String,
-        timeoutMs: Long = RunnerService.DEFAULT_TIMEOUT_MS,
-        stdin: String = "",
-        project: String = "default",
+        timeoutMs: Long,
+        stdin: String,
+        project: String,
     ): RunResult {
         val m = ensureBound()
             ?: return RunResult(RunStatus.UNAVAILABLE, stderr = "Не удалось подключиться к раннеру")
@@ -180,11 +182,11 @@ class RunnerClient(context: Context, val isolated: Boolean) {
             ?: RunResult(RunStatus.TIMEOUT).also { pendingRuns.remove(id); retireCurrent() }
     }
 
-    fun stop() {
+    override fun stop() {
         conn?.messenger?.runCatching { send(Message.obtain(null, P.MSG_STOP).also { it.replyTo = replies }) }
     }
 
-    fun close() {
+    override fun close() {
         conn?.let { runCatching { app.unbindService(it) } }
         conn = null
         replyThread.quitSafely()

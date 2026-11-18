@@ -100,7 +100,7 @@ def test_listdir_inside_allowed(box):
     assert r["stdout"] == "['a.py']\n"
 
 
-@pytest.mark.parametrize("mod", ["socket", "subprocess", "ctypes", "java", "multiprocessing"])
+@pytest.mark.parametrize("mod", ["socket", "subprocess", "ctypes", "java", "multiprocessing", "js", "pyodide"])
 def test_dangerous_imports_blocked(box, mod):
     r = run(f"import {mod}", box)
     assert r["status"] == "ERROR" and "недоступен" in r["stderr"]

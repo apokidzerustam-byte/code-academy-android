@@ -38,6 +38,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import app.codeacademy.editor.EditorActivity
 import app.codeacademy.runner.RunStatus
+import app.codeacademy.runner.CodeRunner
+import app.codeacademy.runner.PyodideRunner
 import app.codeacademy.runner.RunnerClient
 import kotlinx.coroutines.launch
 
@@ -60,12 +62,17 @@ private const val SAMPLE = "name = input()\nprint('Привет,', name)\nfor i 
 private fun RunnerScreen() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var isolated by rememberSaveable { mutableStateOf(false) }
+    var mode by rememberSaveable { mutableStateOf("W") }
     var code by rememberSaveable { mutableStateOf(SAMPLE) }
     var stdin by rememberSaveable { mutableStateOf("Мир") }
     var output by rememberSaveable { mutableStateOf("") }
     var running by remember { mutableStateOf(false) }
-    val client = remember(isolated) { RunnerClient(context, isolated) }
+    val client: CodeRunner = remember(mode) {
+        when (mode) {
+            "A" -> RunnerClient(context, isolated = false)
+            else -> PyodideRunner(context)
+        }
+    }
     DisposableEffect(client) { onDispose { client.close() } }
 
     Column(
@@ -74,8 +81,8 @@ private fun RunnerScreen() {
     ) {
         Text("Code Academy · прототип раннера", style = MaterialTheme.typography.titleMedium)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilterChip(selected = !isolated, onClick = { isolated = false }, label = { Text("Уровень A") })
-            FilterChip(selected = isolated, onClick = { isolated = true }, label = { Text("Уровень B (isolated)") })
+            FilterChip(selected = mode == "W", onClick = { mode = "W" }, label = { Text("W · Pyodide (изоляция)") })
+            FilterChip(selected = mode == "A", onClick = { mode = "A" }, label = { Text("A · Chaquopy") })
         }
         OutlinedTextField(
             value = code, onValueChange = { code = it },
@@ -92,7 +99,7 @@ private fun RunnerScreen() {
                 running = true
                 output = "Выполняется…"
                 scope.launch {
-                    val r = client.run(code, timeoutMs = 5_000, stdin = stdin)
+                    val r = client.run(code, timeoutMs = 5_000, stdin = stdin)  // первый запуск W ждёт загрузки Pyodide
                     output = buildString {
                         append("[${r.status}] ${r.durationMs} мс\n")
                         append(r.stdout)
@@ -105,7 +112,7 @@ private fun RunnerScreen() {
             OutlinedButton(enabled = running, onClick = { client.stop() }) { Text("Стоп") }
             OutlinedButton(onClick = {
                 scope.launch {
-                    val i = client.ping()
+                    val i = client.prepare()
                     output = if (i == null) "Раннер не ответил" else
                         "Python: ${i.pythonStarted}, старт ${i.startMs} мс\npid=${i.pid} uid=${i.uid} isolated=${i.isolated}\n${i.pyInfo ?: ""}\n${i.startError ?: ""}"
                 }
