@@ -1,0 +1,10 @@
+loaded PerthNet (Implicit) at step 250,000
+{
+  "piper-denis": {
+    "seconds": 36.9,
+    "synthSeconds": 464.9,
+    "realtimeFactor": 12.61,
+    "modelLoadSeconds": 37.9,
+    "threads": 2
+  }
+}
