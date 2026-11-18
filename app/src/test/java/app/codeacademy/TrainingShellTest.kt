@@ -5,6 +5,8 @@ import app.codeacademy.runner.ProjectFiles
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.nio.file.Files
@@ -75,5 +77,30 @@ class TrainingShellTest {
         java.io.File(root, "bin.dat").writeBytes(byteArrayOf(-1, -2, 0))
         assertFalse("bin.dat" in ProjectFiles.read(root))
         root.deleteRecursively()
+    }
+
+    @Test fun rejectsFileFolderClashes() {
+        val s = shell("main.py" to "print(1)", "docs/.keep" to "")
+        assertTrue(s.x("touch main.py/x.py").contains("это файл"))
+        assertTrue(s.x("mkdir main.py/sub").contains("это файл"))
+        assertTrue(s.x("echo hi > main.py/x").contains("это файл"))
+        assertTrue(s.x("touch docs").contains("это папка"))
+        assertTrue(s.x("touch .project").contains("служебное"))
+        assertTrue(s.x("mv main.py docs/.keep").contains("служебное"))
+        assertEquals("", s.x("mv main.py docs"))
+        assertEquals(setOf("docs/.keep", "docs/main.py"), s.files.keys)
+        assertNull(ProjectFiles.conflict(s.files.keys))
+        assertEquals("«a» — это файл, внутри него не может быть «a/b»", ProjectFiles.conflict(listOf("a", "a/b")))
+        val dir = java.nio.file.Files.createTempDirectory("pf").toFile()
+        ProjectFiles.write(dir, mapOf("main.py" to "1"))
+        assertThrows(IllegalArgumentException::class.java) { ProjectFiles.write(dir, mapOf("x" to "1", "x/y" to "2")) }
+        assertEquals(mapOf("main.py" to "1"), ProjectFiles.read(dir))
+        // Ссылка за пределы проекта не читается и не удаляется по ней.
+        val outside = java.nio.file.Files.createTempDirectory("out").toFile()
+        java.io.File(outside, "secret.txt").writeText("S")
+        java.nio.file.Files.createSymbolicLink(java.io.File(dir, "link").toPath(), outside.toPath())
+        assertEquals(mapOf("main.py" to "1"), ProjectFiles.read(dir))
+        ProjectFiles.write(dir, mapOf("main.py" to "2"))
+        assertEquals("S", java.io.File(outside, "secret.txt").readText())
     }
 }

@@ -29,14 +29,20 @@ function toHost(obj) {
   if (window.caEditorHost) window.caEditorHost.postMessage(JSON.stringify(obj));
 }
 let changeTimer = null;
+// Небольшой текст отправляется приложению сразу после каждого изменения — тогда «Запустить»/«Проверить»
+// всегда видят последнюю правку. Только очень большие файлы отправляются с короткой задержкой.
+const IMMEDIATE_LIMIT = 32 * 1024;
 function notify(doc) {
   const text = doc.toString();
   if (window.AndroidBridge) window.AndroidBridge.onChange(text);
   if (window.caEditorHost) {
     clearTimeout(changeTimer);
-    changeTimer = setTimeout(() => toHost({ type: "change", text }), 120);
+    if (text.length <= IMMEDIATE_LIMIT) toHost({ type: "change", text });
+    else changeTimer = setTimeout(() => toHost({ type: "change", text }), 120);
   }
 }
+// Изменения, пришедшие из приложения (setText), обратно не отправляются.
+let applyingExternal = false;
 function fontTheme(px) {
   return EditorView.theme({ "&": { fontSize: px + "px" }, ".cm-gutters": { fontSize: px + "px" } });
 }
@@ -44,7 +50,7 @@ function fontTheme(px) {
 const view = new EditorView({
   parent: document.getElementById("editor"),
   state: EditorState.create({
-    doc: "print('Привет, мир')\n",
+    doc: "", // настоящий текст приходит из приложения через setText
     extensions: [
       lineNumbers(),
       highlightActiveLineGutter(),
@@ -65,7 +71,7 @@ const view = new EditorView({
       fontSize.of(fontTheme(15)),
       readOnly.of(EditorState.readOnly.of(false)),
       EditorView.lineWrapping,
-      EditorView.updateListener.of((u) => { if (u.docChanged) notify(u.state.doc); }),
+      EditorView.updateListener.of((u) => { if (u.docChanged && !applyingExternal) notify(u.state.doc); }),
     ],
   }),
 });
@@ -88,9 +94,13 @@ window.caEditor = {
   },
   setText(text) {
     if (text === view.state.doc.toString()) return;
-    // Курсор остаётся на месте, насколько позволяет новая длина текста.
-    const pos = Math.min(view.state.selection.main.head, text.length);
-    view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: text }, selection: { anchor: pos } });
+    // Новый текст целиком (загрузка файла, сброс к заготовке): курсор — в конец.
+    applyingExternal = true;
+    try {
+      view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: text }, selection: { anchor: text.length } });
+    } finally {
+      applyingExternal = false;
+    }
   },
   setTheme(isDark) {
     explicitTheme = !!isDark;
@@ -113,5 +123,4 @@ window.caEditor = {
   redo() { redo(view); },
   ready: true,
 };
-notify(view.state.doc);
 toHost({ type: "ready" });

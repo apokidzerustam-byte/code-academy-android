@@ -25,7 +25,9 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateMapOf
@@ -111,12 +113,24 @@ fun IdeScreen(projectId: String, settings: Settings, onBack: () -> Unit) {
         delay(500)
         c.projects.replaceAll(projectId, snapshot)
     }
+    // При уходе с экрана сохраняем то, что не успело попасть в автосохранение.
+    // Небольшая пауза — чтобы дошёл последний текст из редактора (flush при закрытии).
+    val latestLoaded by rememberUpdatedState(loaded)
+    DisposableEffect(projectId) {
+        onDispose {
+            if (latestLoaded) c.appScope.launch {
+                delay(300)
+                c.projects.replaceAll(projectId, files.toMap())
+            }
+        }
+    }
+    val currentSettings by rememberUpdatedState(settings)
 
     // Файлы, с которыми работает терминал (копия на время команды).
     val shellFiles = remember(projectId) { mutableMapOf<String, String>() }
 
     suspend fun runFile(path: String, input: String, target: MutableMap<String, String> = files): String {
-        val (_, r) = resolveRunner(c, settings.runner, "W")
+        val (_, r) = resolveRunner(c, currentSettings.runner, "W")
         runner = r
         running = true
         val code = target[path] ?: return "Файл $path не найден".also { running = false }
@@ -140,23 +154,26 @@ fun IdeScreen(projectId: String, settings: Settings, onBack: () -> Unit) {
             if (!loaded) return@Column
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 files.keys.filter { !it.endsWith("/.keep") }.sorted().forEach { f ->
-                    FilterChip(selected = f == current, onClick = { current = f }, label = { Text(f) },
+                    FilterChip(selected = f == current, enabled = !running, onClick = { current = f }, label = { Text(f) },
                         modifier = Modifier.testTag("file-$f"))
                 }
-                TextButton(onClick = { newFile = true }, modifier = Modifier.testTag("new-file")) { Text("+ файл") }
+                TextButton(enabled = !running, onClick = { newFile = true }, modifier = Modifier.testTag("new-file")) { Text("+ файл") }
             }
             if (current in files) {
                 key(current) {
+                    val path = current // текст из этого редактора пишется только в его файл
                     CodeEditor(
-                        value = files[current].orEmpty(),
-                        onValueChange = { files[current] = it },
-                        language = languageOf(current),
+                        value = files[path].orEmpty(),
+                        onValueChange = { if (path in files) files[path] = it },
+                        language = languageOf(path),
                         plain = settings.plainEditor,
                         height = 300.dp,
+                        // Пока программа работает, файлы не меняются: результат запуска не затрёт правки.
+                        readOnly = running,
                     )
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = { confirmDelete = true }) { Text("Удалить файл") }
+                    TextButton(enabled = !running, onClick = { confirmDelete = true }) { Text("Удалить файл") }
                 }
             } else {
                 Text("Нет открытого файла. Создайте файл кнопкой «+ файл».")
@@ -183,10 +200,12 @@ fun IdeScreen(projectId: String, settings: Settings, onBack: () -> Unit) {
                 CodeBlock(term.ifEmpty { "Учебный терминал. Введите help." }, Modifier.testTag("term-output"))
                 OutlinedTextField(
                     termLine, { termLine = it },
-                    label = { Text(shell.prompt) }, singleLine = true,
+                    label = { Text(if (running) "выполняется… (Стоп — на вкладке «Консоль»)" else shell.prompt) }, singleLine = true,
+                    enabled = !running,
                     textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
                     keyboardActions = KeyboardActions(onSend = {
+                        if (running) return@KeyboardActions
                         val line = termLine
                         termLine = ""
                         scope.launch {
@@ -221,8 +240,9 @@ fun IdeScreen(projectId: String, settings: Settings, onBack: () -> Unit) {
                     val rel = runCatching { ProjectFiles.safeRel(name.trim()) }.getOrNull()
                     error = when {
                         rel == null || rel == ProjectRepository.META -> "Недопустимое имя файла"
-                        rel in files -> "Такой файл уже есть"
-                        else -> null
+                        rel.substringAfterLast('/') == ".keep" -> "Недопустимое имя файла"
+                        rel in files || files.keys.any { it.startsWith("$rel/") } -> "Такой файл или папка уже есть"
+                        else -> ProjectFiles.conflict(files.keys.filter { !it.endsWith("/.keep") } + rel)
                     }
                     if (error == null && rel != null) { files[rel] = ""; current = rel; newFile = false }
                 }, modifier = Modifier.testTag("create-file")) { Text("Создать") }

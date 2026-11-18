@@ -27,6 +27,20 @@ class TrainingShell(
     }
 
     private fun isDir(p: String) = p in dirs()
+
+    /** Почему по этому пути нельзя создать файл (null — можно). */
+    private fun cannotCreate(p: String, arg: String): String? {
+        if (p.isEmpty()) return "$arg: это корень проекта"
+        if (p.substringAfterLast('/') == ".keep" || p == app.codeacademy.data.ProjectRepository.META) return "$arg: служебное имя"
+        if (isDir(p)) return "$arg: это папка"
+        var i = p.indexOf('/')
+        while (i > 0) {
+            val d = p.substring(0, i)
+            if (isFile(d)) return "$arg: «$d» — это файл, а не папка"
+            i = p.indexOf('/', i + 1)
+        }
+        return null
+    }
     private fun isFile(p: String) = p in files && !p.endsWith("/.keep")
 
     /** Нормализует путь относительно cwd; null — попытка выйти за пределы проекта. */
@@ -109,8 +123,9 @@ class TrainingShell(
                 if (a.isEmpty()) return Result("touch: укажите файл")
                 for (arg in a) {
                     val p = resolve(arg) ?: return bad(arg)
-                    if (isDir(p)) return Result("touch: $arg: это папка")
-                    files.putIfAbsent(p, "")
+                    if (isFile(p)) continue
+                    cannotCreate(p, arg)?.let { return Result("touch: $it") }
+                    files[p] = ""
                 }
                 Result("")
             }
@@ -119,6 +134,7 @@ class TrainingShell(
                 for (arg in a) {
                     val p = resolve(arg) ?: return bad(arg)
                     if (isDir(p) || isFile(p)) return Result("mkdir: $arg: уже существует")
+                    cannotCreate(p, arg)?.let { return Result("mkdir: $it") }
                     files["$p/.keep"] = ""
                 }
                 Result("")
@@ -145,6 +161,8 @@ class TrainingShell(
                 var to = resolve(a[1]) ?: return bad(a[1])
                 if (!isFile(from)) return Result("mv: ${a[0]}: нет такого файла")
                 if (isDir(to)) to = if (to.isEmpty()) from.substringAfterLast('/') else "$to/${from.substringAfterLast('/')}"
+                if (to == from) return Result("")
+                if (!isFile(to)) cannotCreate(to, a[1])?.let { return Result("mv: $it") }
                 files[to] = files.remove(from)!!
                 Result("")
             }
@@ -154,7 +172,7 @@ class TrainingShell(
                 if (i < 0) return Result(text)
                 val target = a.getOrNull(i + 1) ?: return Result("echo: укажите файл после ${a[i]}")
                 val p = resolve(target) ?: return bad(target)
-                if (isDir(p)) return Result("echo: $target: это папка")
+                if (!isFile(p)) cannotCreate(p, target)?.let { return Result("echo: $it") }
                 files[p] = if (a[i] == ">>") (files[p] ?: "") + text + "\n" else text + "\n"
                 Result("")
             }

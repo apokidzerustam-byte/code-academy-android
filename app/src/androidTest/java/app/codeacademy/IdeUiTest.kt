@@ -24,16 +24,18 @@ class IdeUiTest {
     @get:Rule val rule = createAndroidComposeRule<MainActivity>()
     private val app get() = rule.activity.application as CodeAcademyApp
 
-    @Before fun clean() = runBlocking {
-        app.container.db.clearAllTables()
-        app.container.settings.setPlainEditor(true)
+    @Before fun clean() {
+        runBlocking {
+            app.container.db.clearAllTables()
+            app.container.settings.setPlainEditor(true)
+        }
     }
 
     private fun waitText(t: String, ms: Long = 30_000) =
         rule.waitUntil(ms) { rule.onAllNodes(hasText(t, substring = true)).fetchSemanticsNodes().isNotEmpty() }
 
     @Test fun createRunAndUseTerminal() {
-        rule.onNodeWithTag("open-projects").performClick()
+        rule.onNodeWithTag("open-projects").performScrollTo().performClick()
         rule.onNodeWithTag("new-project").performClick()
         rule.onNodeWithTag("project-title").performTextInput("Приветствие")
         rule.onNodeWithTag("create-project").performClick()

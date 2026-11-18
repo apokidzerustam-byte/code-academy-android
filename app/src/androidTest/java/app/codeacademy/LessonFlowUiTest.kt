@@ -42,8 +42,8 @@ class LessonFlowUiTest {
         rule.waitUntil(10_000) { rule.onAllNodes(hasTestTag("code")).fetchSemanticsNodes().isNotEmpty() }
 
         // Неверное решение → видим ожидаемое и фактическое.
-        rule.onNodeWithTag("code").performTextReplacement("print(\"Привет, мир!\")\n")
-        rule.onNodeWithTag("check").performClick()
+        rule.onNodeWithTag("code").performScrollTo().performTextReplacement("print(\"Привет, мир!\")\n")
+        rule.onNodeWithTag("check").performScrollTo().performClick()
         val t0 = System.currentTimeMillis()
         rule.waitUntil(90_000) { rule.onAllNodes(hasTestTag("verdict")).fetchSemanticsNodes().isNotEmpty() }
         Log.i("CAPROBE", "ui first check (incl. interpreter start): ${System.currentTimeMillis() - t0}ms")

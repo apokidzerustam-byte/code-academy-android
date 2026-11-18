@@ -148,7 +148,7 @@ fun AssignmentScreen(ref: LessonRef, index: Int, settings: Settings, onBack: () 
                     modifier = Modifier.fillMaxWidth().heightIn(min = 140.dp).testTag("code"),
                 )
             } else if (loaded) {
-                CodeEditor(value = code, onValueChange = { code = it }, plain = settings.plainEditor, height = 240.dp)
+                CodeEditor(value = code, onValueChange = { code = it }, plain = settings.plainEditor, height = 240.dp, readOnly = busy != null)
             }
 
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {

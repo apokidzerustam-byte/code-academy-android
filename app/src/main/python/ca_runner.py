@@ -556,16 +556,31 @@ def write_files(root, files_json):
     files = json.loads(files_json)
     if len(files) > MAX_FILES:
         raise ValueError("Слишком много файлов в проекте")
-    if os.path.isdir(root):
-        shutil.rmtree(root)
-    os.makedirs(root, exist_ok=True)
-    total = 0
+    # Всё проверяем до удаления старых файлов.
+    prepared, total = [], 0
     for path, text in files.items():
         rel = _safe_rel(path)
         data = text.encode("utf-8")
         total += len(data)
         if len(data) > MAX_FILE_BYTES or total > MAX_PROJECT_BYTES:
             raise ValueError(f"Файл {rel} или проект слишком большой")
+        prepared.append((rel, data))
+    rels = [r for r, _ in prepared]
+    if len(set(rels)) != len(rels):
+        raise ValueError("Один и тот же файл указан дважды")
+    rel_set = set(rels)
+    for r in rels:
+        parts = r.split("/")
+        for i in range(1, len(parts)):
+            d = "/".join(parts[:i])
+            if d in rel_set:
+                raise ValueError(f"«{d}» — это файл, внутри него не может быть «{r}»")
+    if os.path.islink(root):
+        os.unlink(root)
+    elif os.path.isdir(root):
+        shutil.rmtree(root)  # rmtree не переходит по символическим ссылкам
+    os.makedirs(root, exist_ok=True)
+    for rel, data in prepared:
         full = os.path.join(root, rel)
         os.makedirs(os.path.dirname(full), exist_ok=True)
         with open(full, "wb") as f:
@@ -583,6 +598,8 @@ def read_files(root):
         for name in sorted(filenames):
             full = os.path.join(dirpath, name)
             rel = os.path.relpath(full, root).replace(os.sep, "/")
+            if os.path.islink(full):
+                continue  # ссылка может вести за пределы проекта
             try:
                 size = os.path.getsize(full)
                 if size > MAX_FILE_BYTES or total + size > MAX_PROJECT_BYTES or len(out) >= MAX_FILES:

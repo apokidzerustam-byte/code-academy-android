@@ -1,5 +1,7 @@
 package app.codeacademy.runner
 
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -159,13 +161,16 @@ class RunnerClient(context: Context, val isolated: Boolean) : CodeRunner {
         files: Map<String, String>?,
     ): RunResult {
         val dir = sandboxDir(project)
+        if (files != null && dir == null) {
+            return RunResult(RunStatus.ERROR, stderr = "Проекты из нескольких файлов не поддерживаются в режиме B. Выберите режим «Авто» в настройках.")
+        }
         if (files != null && dir != null) {
-            runCatching { ProjectFiles.write(dir, files) }.onFailure {
+            runCatching { withContext(Dispatchers.IO) { ProjectFiles.write(dir, files) } }.onFailure {
                 return RunResult(RunStatus.ERROR, stderr = it.message ?: it.toString())
             }
         }
         val r = send(code, timeoutMs, stdin, project, mode = "run", tests = null)
-        return if (files != null && dir != null) r.copy(files = ProjectFiles.read(dir)) else r
+        return if (files != null && dir != null) r.copy(files = withContext(Dispatchers.IO) { ProjectFiles.read(dir) }) else r
     }
 
     override suspend fun check(code: String, testsJson: String, timeoutMs: Long, project: String): RunResult =

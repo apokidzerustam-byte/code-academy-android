@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -86,48 +87,55 @@ fun CodeEditor(
     height: Dp = 280.dp,
     controller: EditorController = remember { EditorController() },
     label: String = "Код",
+    /** Только чтение (например, пока программа выполняется). */
+    readOnly: Boolean = false,
 ) {
     val useRich = !plain && remember { richEditorSupported() }
     Column(modifier) {
-        if (useRich) RichEditor(value, onValueChange, language, height, controller)
-        else PlainEditor(value, onValueChange, height, controller, label)
-        SymbolBar(controller)
+        if (useRich) RichEditor(value, onValueChange, language, height, controller, readOnly)
+        else PlainEditor(value, onValueChange, height, controller, label, readOnly)
+        SymbolBar(controller, enabled = !readOnly)
     }
 }
 
 @Composable
-private fun SymbolBar(controller: EditorController) {
+private fun SymbolBar(controller: EditorController, enabled: Boolean) {
     Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).testTag("symbol-bar")) {
         for (s in EDITOR_SYMBOLS) {
-            TextButton(onClick = { controller.insert(if (s == "Tab") "\t" else s) }, modifier = Modifier.testTag("sym-$s")) {
+            TextButton(enabled = enabled, onClick = { controller.insert(if (s == "Tab") "\t" else s) }, modifier = Modifier.testTag("sym-$s")) {
                 Text(s, fontFamily = FontFamily.Monospace)
             }
         }
-        TextButton(onClick = { controller.undo() }) { Text("↶") }
-        TextButton(onClick = { controller.redo() }) { Text("↷") }
+        TextButton(enabled = enabled, onClick = { controller.undo() }) { Text("↶") }
+        TextButton(enabled = enabled, onClick = { controller.redo() }) { Text("↷") }
     }
 }
 
 @Composable
-private fun PlainEditor(value: String, onValueChange: (String) -> Unit, height: Dp, controller: EditorController, label: String) {
+private fun PlainEditor(value: String, onValueChange: (String) -> Unit, height: Dp, controller: EditorController, label: String, readOnly: Boolean) {
     var tfv by remember { mutableStateOf(TextFieldValue(value)) }
     if (tfv.text != value) tfv = TextFieldValue(value, TextRange(value.length))
     val latest by rememberUpdatedState(tfv)
+    var pending by remember { mutableStateOf<TextFieldValue?>(null) }
+    SideEffect { if (pending?.text == tfv.text && pending?.selection == tfv.selection) pending = null }
     val latestChange by rememberUpdatedState(onValueChange)
     DisposableEffect(controller) {
         controller.plainInsert = { s ->
-            val t = latest
+            val t = pending ?: latest
             val ins = if (s == "\t") "    " else s
             val text = t.text.replaceRange(t.selection.min, t.selection.max, ins)
             val pos = t.selection.min + ins.length
-            tfv = TextFieldValue(text, TextRange(pos))
+            val next = TextFieldValue(text, TextRange(pos))
+            pending = next // несколько вставок за один кадр не теряются
+            tfv = next
             latestChange(text)
         }
         onDispose { controller.plainInsert = null }
     }
     OutlinedTextField(
         value = tfv,
-        onValueChange = { tfv = it; if (it.text != value) onValueChange(it.text) },
+        onValueChange = { tfv = it; pending = null; if (it.text != value) onValueChange(it.text) },
+        readOnly = readOnly,
         label = { Text(label) },
         textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
         modifier = Modifier.fillMaxWidth().heightIn(min = height).testTag("code"),
@@ -136,18 +144,20 @@ private fun PlainEditor(value: String, onValueChange: (String) -> Unit, height: 
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-private fun RichEditor(value: String, onValueChange: (String) -> Unit, language: String, height: Dp, controller: EditorController) {
+private fun RichEditor(value: String, onValueChange: (String) -> Unit, language: String, height: Dp, controller: EditorController, readOnly: Boolean) {
     val dark = MaterialTheme.colorScheme.background.luminance() < 0.5f
     val fontPx = with(LocalDensity.current) { 15f * fontScale }
     val latestValue by rememberUpdatedState(value)
     val latestOnChange by rememberUpdatedState(onValueChange)
+    val latestReadOnly by rememberUpdatedState(readOnly)
     // Последний текст, известный редактору: не отправляем его обратно (нет петли обновлений).
     val lastFromEditor = remember { arrayOf<String?>(null) }
 
     fun setup(wv: WebView) {
         wv.evaluateJavascript(
             "caEditor.setLanguage(${JSONObject.quote(language)});caEditor.setTheme($dark);" +
-                "caEditor.setFontSize($fontPx);caEditor.setText(${JSONObject.quote(latestValue)});", null,
+                "caEditor.setFontSize($fontPx);caEditor.setText(${JSONObject.quote(latestValue)});" +
+                "caEditor.setReadOnly($latestReadOnly);", null,
         )
         lastFromEditor[0] = latestValue
     }
@@ -189,13 +199,17 @@ private fun RichEditor(value: String, onValueChange: (String) -> Unit, language:
             }
         },
     )
+    LaunchedEffect(readOnly) {
+        if (controller.ready) controller.webView?.evaluateJavascript("caEditor.setReadOnly($readOnly)", null)
+    }
     LaunchedEffect(dark, fontPx) {
         if (controller.ready) controller.webView?.evaluateJavascript("caEditor.setTheme($dark);caEditor.setFontSize($fontPx)", null)
     }
     DisposableEffect(Unit) {
         onDispose {
-            controller.webView?.evaluateJavascript("caEditor.flush()", null)
-            controller.webView?.destroy()
+            val wv = controller.webView
+            // Сначала последний текст уходит в приложение, затем WebView уничтожается.
+            wv?.evaluateJavascript("caEditor.flush()") { wv.destroy() }
             controller.webView = null
             controller.ready = false
         }

@@ -31,7 +31,7 @@ class ProjectRepository(private val db: AppDatabase, private val clock: () -> Lo
         db.projects().files(id).filter { it.path != META }.associate { it.path to it.content }
 
     suspend fun create(title: String): String {
-        val id = "p" + clock().toString(36)
+        val id = "p" + clock().toString(36) + (1000..9999).random()
         val now = clock()
         db.withTransaction {
             db.projects().upsert(ProjectFileEntity(id, META, title.trim().ifBlank { "Проект" }, now))

@@ -48,3 +48,26 @@ def test_limits(tmp_path):
     (root / "huge.txt").write_text("y" * (ca_runner.MAX_FILE_BYTES + 1))
     (root / "ok.txt").write_text("ok")
     assert json.loads(ca_runner.read_files(str(root))) == {"ok.txt": "ok"}
+
+
+def test_invalid_structure_keeps_old_files(tmp_path):
+    root = str(tmp_path / "proj")
+    ca_runner.write_files(root, json.dumps({"main.py": "print(1)"}))
+    for bad in ({"main.py": "x", "main.py/inner.py": "y"}, {"a.py": "1", "./a.py": "2"}, {"/etc/x": "1"}):
+        with pytest.raises(ValueError):
+            ca_runner.write_files(root, json.dumps(bad))
+        # Проверка до удаления: старый проект на месте.
+        assert json.loads(ca_runner.read_files(root)) == {"main.py": "print(1)"}
+
+
+def test_symlinks_not_followed(tmp_path):
+    secret = tmp_path / "secret"
+    secret.mkdir()
+    (secret / "token.txt").write_text("SECRET")
+    root = tmp_path / "proj"
+    ca_runner.write_files(str(root), json.dumps({"main.py": "x"}))
+    os.symlink(secret, root / "link")
+    os.symlink(secret / "token.txt", root / "t.txt")
+    assert json.loads(ca_runner.read_files(str(root))) == {"main.py": "x"}
+    ca_runner.write_files(str(root), json.dumps({"main.py": "y"}))
+    assert (secret / "token.txt").read_text() == "SECRET"  # rmtree не ушёл по ссылке
