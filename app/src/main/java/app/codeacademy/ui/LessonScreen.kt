@@ -19,7 +19,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -44,7 +43,6 @@ fun assignmentTypeName(type: String) = TYPE_NAMES[type] ?: type
 @Composable
 fun LessonScreen(ref: LessonRef, onBack: () -> Unit, openAssignment: (Int) -> Unit) {
     val c = LocalContainer.current
-    val scope = rememberCoroutineScope()
     var lesson by remember { mutableStateOf<Lesson?>(null) }
     var scenario by remember { mutableStateOf<Scenario?>(null) }
     var notes by remember { mutableStateOf("") }

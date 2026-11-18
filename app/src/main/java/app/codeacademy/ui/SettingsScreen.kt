@@ -15,6 +15,9 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,10 +45,12 @@ fun SettingsScreen(onBack: () -> Unit, openLab: () -> Unit) {
             Choice("Светлая", s.theme == ThemeMode.LIGHT, "theme-light") { scope.launch { c.settings.setTheme(ThemeMode.LIGHT) } }
             Choice("Тёмная", s.theme == ThemeMode.DARK, "theme-dark") { scope.launch { c.settings.setTheme(ThemeMode.DARK) } }
             HorizontalDivider()
-            Text("Размер текста: ${(s.textScale * 100).toInt()} %", style = MaterialTheme.typography.titleMedium)
+            var scale by remember(s.textScale) { mutableFloatStateOf(s.textScale) }
+            Text("Размер текста: ${(scale * 100).toInt()} %", style = MaterialTheme.typography.titleMedium)
             Slider(
-                value = s.textScale, valueRange = 0.85f..1.5f, steps = 12,
-                onValueChange = { v -> scope.launch { c.settings.setTextScale(v) } },
+                value = scale, valueRange = 0.85f..1.5f, steps = 12,
+                onValueChange = { scale = it },
+                onValueChangeFinished = { scope.launch { c.settings.setTextScale(scale) } },
                 modifier = Modifier.testTag("text-scale"),
             )
             HorizontalDivider()

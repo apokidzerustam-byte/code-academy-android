@@ -114,3 +114,11 @@ def test_answer_kind(box):
     assert check("2 + 3\n5", spec, box)["allPassed"]
     r = check("5\n5", spec, box)
     assert not r["allPassed"] and r["cases"][0]["hint"]
+
+
+def test_huge_function_result_is_clipped(box):
+    spec = {"kind": "function", "function": "f", "cases": [{"id": "v1", "args": [], "expected": [1, 2]}]}
+    out = ca_runner.check("def f():\n    return list(range(10**6))", json.dumps(spec), str(box))
+    assert len(out) < 10_000
+    r = json.loads(out)
+    assert r["passed"] == 0 and "обрезано" in r["cases"][0]["actual"]

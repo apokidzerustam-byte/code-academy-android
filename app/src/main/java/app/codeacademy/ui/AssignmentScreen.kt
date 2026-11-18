@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -28,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -72,7 +74,9 @@ fun AssignmentScreen(ref: LessonRef, index: Int, settings: Settings, onBack: () 
     val scope = rememberCoroutineScope()
     var lesson by remember { mutableStateOf<Lesson?>(null) }
     var a by remember { mutableStateOf<Assignment?>(null) }
-    var code by remember { mutableStateOf("") }
+    // rememberSaveable: при пересоздании экрана код берётся из сохранённого состояния, а не из более старого черновика в БД.
+    var code by rememberSaveable { mutableStateOf("") }
+    var restored by rememberSaveable { mutableStateOf(false) }
     var loaded by remember { mutableStateOf(false) }
     var hintsShown by remember { mutableStateOf(0) }
     var solutionShown by remember { mutableStateOf(false) }
@@ -90,8 +94,11 @@ fun AssignmentScreen(ref: LessonRef, index: Int, settings: Settings, onBack: () 
         val asg = c.content.assignments(ref)[index]
         a = asg
         val d = c.progress.draft(draftKey)
-        code = d?.content ?: if (asg.isAnswerTask) "" else asg.starterCode.orEmpty()
-        hintsShown = d?.hintsShown?.coerceAtMost(5) ?: 0
+        if (!restored) {
+            code = d?.content ?: if (asg.isAnswerTask) "" else asg.starterCode.orEmpty()
+            restored = true
+        }
+        hintsShown = d?.hintsShown?.coerceAtMost(asg.hints.size) ?: 0
         solutionShown = (d?.hintsShown ?: 0) >= 6
         loaded = true
     }
@@ -122,7 +129,7 @@ fun AssignmentScreen(ref: LessonRef, index: Int, settings: Settings, onBack: () 
     Screen(asg?.title ?: "Задание", onBack) { padding ->
         if (asg == null || lesson == null) return@Screen
         Column(
-            Modifier.padding(padding).padding(16.dp).verticalScroll(rememberScrollState()),
+            Modifier.padding(padding).imePadding().padding(16.dp).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(assignmentTypeName(asg.type), style = MaterialTheme.typography.labelLarge)
@@ -163,13 +170,17 @@ fun AssignmentScreen(ref: LessonRef, index: Int, settings: Settings, onBack: () 
                         busy = "Проверка…"
                         val (name, runner) = resolveRunner(c, settings.runner, lesson!!.runner)
                         runnerName = name
-                        val v = c.assessment.evaluate(runner, asg, code)
-                        verdict = v
-                        attempts++
+                        val submitted = code
+                        val v = c.assessment.evaluate(runner, asg, submitted)
                         val used = if (solutionShown) 6 else hintsShown
                         if (v.failure == null || v.failure == RunStatus.TIMEOUT) {
-                            c.progress.recordAttempt(ref, lesson!!, asg.id, code, v, used, startedAt, name)
+                            // Запись в области приложения: не теряется, если ученик уйдёт с экрана.
+                            c.appScope.launch {
+                                c.progress.recordAttempt(ref, lesson!!, asg.id, submitted, v, used, startedAt, name)
+                            }.join()
                         }
+                        verdict = v
+                        attempts++
                         busy = null
                     }
                 }, modifier = Modifier.testTag("check")) { Text("Проверить") }
@@ -194,18 +205,18 @@ fun AssignmentScreen(ref: LessonRef, index: Int, settings: Settings, onBack: () 
             for (i in 0 until hintsShown) {
                 Card(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(12.dp)) {
-                        Text("${i + 1}. ${HINT_TITLES[i]}", style = MaterialTheme.typography.labelLarge)
+                        Text("${i + 1}. ${HINT_TITLES.getOrElse(i) { "Подсказка" }}", style = MaterialTheme.typography.labelLarge)
                         Text(asg.hints[i])
                     }
                 }
             }
             if (hintsShown < asg.hints.size) {
                 OutlinedButton(onClick = { hintsShown++ }, modifier = Modifier.testTag("hint")) {
-                    Text("Подсказка ${hintsShown + 1} из 6: ${HINT_TITLES[hintsShown]}")
+                    Text("Подсказка ${hintsShown + 1} из ${asg.hints.size + 1}: ${HINT_TITLES.getOrElse(hintsShown) { "ещё подсказка" }}")
                 }
             } else if (!solutionShown) {
                 OutlinedButton(onClick = { if (attempts > 0 || verdict != null) solutionShown = true else askSolution = true },
-                    modifier = Modifier.testTag("solution")) { Text("Подсказка 6 из 6: решение") }
+                    modifier = Modifier.testTag("solution")) { Text("Подсказка ${asg.hints.size + 1} из ${asg.hints.size + 1}: решение") }
             }
             if (solutionShown) {
                 Text("Решение", style = MaterialTheme.typography.titleSmall)

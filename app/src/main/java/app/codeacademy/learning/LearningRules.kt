@@ -21,10 +21,24 @@ data class PracticeResult(
 object ReviewScheduler {
     val INTERVALS = listOf(1, 3, 7, 14, 30)
     private const val MAX_INTERVAL = 180
+    private const val MAX_STEP = 12
 
     fun intervalFor(step: Int): Int =
-        if (step < INTERVALS.size) INTERVALS[step]
-        else (INTERVALS.last().toLong() shl (step - INTERVALS.size + 1)).coerceAtMost(MAX_INTERVAL.toLong()).toInt()
+        if (step < INTERVALS.size) INTERVALS[step.coerceAtLeast(0)]
+        else (INTERVALS.last().toLong() shl minOf(step - INTERVALS.size + 1, 8)).coerceAtMost(MAX_INTERVAL.toLong()).toInt()
+
+    /** Пора ли повторять навык (сегодня или срок прошёл). */
+    fun isDue(current: ReviewItemEntity?, epochDay: Long): Boolean = current != null && epochDay >= current.dueEpochDay
+
+    /**
+     * Практика вне срока повторения не двигает расписание (иначе три задания за день
+     * перескакивали бы интервалы 1 и 3 дня). Исключение — первая практика (создаёт расписание).
+     */
+    fun onPractice(current: ReviewItemEntity?, skillId: String, r: PracticeResult): ReviewItemEntity? = when {
+        current == null -> schedule(null, skillId, r)
+        isDue(current, r.epochDay) -> schedule(current, skillId, r)
+        else -> null
+    }
 
     fun schedule(current: ReviewItemEntity?, skillId: String, r: PracticeResult): ReviewItemEntity {
         val step = current?.step ?: -1
@@ -32,7 +46,7 @@ object ReviewScheduler {
             !r.passed -> (step - 1).coerceAtLeast(0)
             r.hintsUsed >= 3 -> step.coerceAtLeast(0)
             else -> step + 1
-        }
+        }.coerceAtMost(MAX_STEP)
         val interval = intervalFor(next)
         return ReviewItemEntity(
             skillId = skillId,

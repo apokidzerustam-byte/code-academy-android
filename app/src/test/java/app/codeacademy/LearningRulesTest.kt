@@ -91,3 +91,24 @@ class LearningRulesTest {
         assertEquals(SkillStatus.NEEDS_REVIEW, s.status)
     }
 }
+
+class ReviewOnPracticeTest {
+    private fun ok(day: Long) = PracticeResult(true, 0, day)
+
+    @Test fun practiceBeforeDueDoesNotSkipIntervals() {
+        var item = ReviewScheduler.onPractice(null, "s", ok(10))!!
+        assertEquals(1, item.intervalDays)
+        // Ещё два задания в тот же день не двигают расписание.
+        assertEquals(null, ReviewScheduler.onPractice(item, "s", ok(10)))
+        assertEquals(null, ReviewScheduler.onPractice(item, "s", PracticeResult(false, 0, 10)))
+        item = ReviewScheduler.onPractice(item, "s", ok(11))!!
+        assertEquals(3, item.intervalDays)
+    }
+
+    @Test fun hugeStepsDoNotOverflow() {
+        for (step in 0..200) {
+            val i = ReviewScheduler.intervalFor(step)
+            org.junit.Assert.assertTrue("step=$step interval=$i", i in 1..180)
+        }
+    }
+}

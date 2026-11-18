@@ -44,7 +44,8 @@ fun HomeScreen(
     LaunchedEffect(Unit) { lessons = c.content.allLessons() }
     val progress by c.progress.lessons.collectAsStateWithLifecycle(emptyList())
     val last by c.progress.lastActive.collectAsStateWithLifecycle(null)
-    val due by c.progress.dueReviews().collectAsStateWithLifecycle(emptyList())
+    val dueFlow = remember { c.progress.dueReviews() }
+    val due by dueFlow.collectAsStateWithLifecycle(emptyList())
     val skills by c.progress.skills.collectAsStateWithLifecycle(emptyList())
 
     val statusByKey = progress.associate { it.lessonKey to it.status }

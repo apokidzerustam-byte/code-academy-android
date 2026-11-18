@@ -31,7 +31,7 @@ class LessonFlowUiTest {
         rule.waitUntil(10_000) { rule.onAllNodes(hasTestTag("lesson-py-01-print")).fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("lesson-py-01-print").performScrollTo().performClick()
         rule.onNodeWithTag("tab-1").performClick()
-        check(rule.onAllNodes(hasText("Текст берут в", substring = true)).fetchSemanticsNodes().isNotEmpty()) { "нет конспекта" }
+        rule.waitUntil(10_000) { rule.onAllNodes(hasText("Текст берут в", substring = true)).fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("tab-2").performClick()
         rule.waitUntil(10_000) { rule.onAllNodes(hasTestTag("assignment-0")).fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("assignment-0").performClick()
@@ -58,9 +58,9 @@ class LessonFlowUiTest {
 
         // В статистике видна попытка, навык и подсказка.
         val app = rule.activity.application as CodeAcademyApp
-        runBlocking {
-            val attempts = app.container.db.attempts().passedAssignments("python-basics/py-01-print")
-            check(attempts == listOf("a1-hello")) { "ожидалось a1-hello, получено $attempts" }
+        // Попытка записывается до показа вердикта, но проверяем с ожиданием на случай медленного эмулятора.
+        rule.waitUntil(10_000) {
+            runBlocking { app.container.db.attempts().passedAssignments("python-basics/py-01-print") } == listOf("a1-hello")
         }
     }
 

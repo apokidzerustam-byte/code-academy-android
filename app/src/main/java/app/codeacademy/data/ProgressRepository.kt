@@ -6,6 +6,7 @@ import app.codeacademy.content.LessonRef
 import app.codeacademy.learning.PracticeResult
 import app.codeacademy.learning.ReviewScheduler
 import app.codeacademy.learning.SkillRules
+import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
@@ -24,7 +25,7 @@ class ProgressRepository(private val db: AppDatabase, private val clock: () -> L
     val topErrors: Flow<List<ErrorCount>> = db.attempts().topErrors()
     fun activitySince(days: Long): Flow<List<DailyActivityEntity>> = db.activity().since(today() - days)
 
-    suspend fun openLesson(ref: LessonRef) {
+    suspend fun openLesson(ref: LessonRef) = db.withTransaction {
         val now = clock()
         val cur = db.progress().get(ref.key) ?: LessonProgressEntity(ref.key)
         db.progress().upsert(
@@ -36,13 +37,17 @@ class ProgressRepository(private val db: AppDatabase, private val clock: () -> L
         )
     }
 
-    suspend fun saveScene(ref: LessonRef, sceneIndex: Int, positionMs: Long) {
+    suspend fun saveScene(ref: LessonRef, sceneIndex: Int, positionMs: Long) = db.withTransaction {
         val cur = db.progress().get(ref.key) ?: LessonProgressEntity(ref.key, status = LessonStatus.IN_PROGRESS)
         db.progress().upsert(cur.copy(sceneIndex = sceneIndex, scenePositionMs = positionMs, updatedAt = clock()))
     }
 
     suspend fun addActiveTime(ref: LessonRef?, ms: Long) {
         if (ms <= 0) return
+        db.withTransaction { addActiveTimeTx(ref, ms) }
+    }
+
+    private suspend fun addActiveTimeTx(ref: LessonRef?, ms: Long) {
         val day = today()
         val a = db.activity().get(day) ?: DailyActivityEntity(day)
         db.activity().upsert(a.copy(activeMs = a.activeMs + ms))
@@ -69,7 +74,7 @@ class ProgressRepository(private val db: AppDatabase, private val clock: () -> L
         hintsUsed: Int,
         startedAt: Long,
         runner: String,
-    ) {
+    ) = db.withTransaction {
         val now = clock()
         val day = today()
         db.attempts().insert(
@@ -80,11 +85,16 @@ class ProgressRepository(private val db: AppDatabase, private val clock: () -> L
                 hintsUsed = hintsUsed, errorType = verdict.errorType, runner = runner,
             )
         )
-        val result = PracticeResult(verdict.passed, hintsUsed, day)
         for (skill in lesson.skills) {
+            val review = db.reviews().get(skill)
+            val result = PracticeResult(verdict.passed, hintsUsed, day, isReview = ReviewScheduler.isDue(review, day))
             val s = db.skills().get(skill) ?: SkillStateEntity(skill)
             db.skills().upsert(SkillRules.apply(s, result, now))
-            db.reviews().upsert(ReviewScheduler.schedule(db.reviews().get(skill), skill, result))
+            ReviewScheduler.onPractice(review, skill, result)?.let { db.reviews().upsert(it) }
+            if (result.isReview) {
+                val a = db.activity().get(day) ?: DailyActivityEntity(day)
+                db.activity().upsert(a.copy(reviewsDone = a.reviewsDone + 1))
+            }
         }
         if (verdict.passed) {
             val a = db.activity().get(day) ?: DailyActivityEntity(day)

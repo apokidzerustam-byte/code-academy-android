@@ -350,6 +350,20 @@ def _values_equal(expected, actual, tol):
     return expected == actual
 
 
+_MAX_VALUE_CHARS = 2000
+
+
+def _clip(v):
+    """Ограничивает размер значения в отчёте (огромный результат функции не должен ломать передачу)."""
+    try:
+        text = v if isinstance(v, str) else json.dumps(v, ensure_ascii=False)
+    except (TypeError, ValueError):
+        text = repr(v)
+    if len(text) <= _MAX_VALUE_CHARS:
+        return v
+    return text[:_MAX_VALUE_CHARS] + f"… (обрезано, всего {len(text)} символов)"
+
+
 def _case_report(case, passed, expected=None, actual=None, error=None):
     hidden = bool(case.get("hidden"))
     rep = {"id": case.get("id"), "hidden": hidden, "passed": passed}
@@ -359,9 +373,9 @@ def _case_report(case, passed, expected=None, actual=None, error=None):
             # Для скрытых тестов показываем только тип ошибки, без деталей входных данных.
             rep["error"] = error.strip().splitlines()[-1] if hidden else error
     if not hidden:
-        rep["input"] = case.get("stdin", case.get("args"))
-        rep["expected"] = expected
-        rep["actual"] = actual
+        rep["input"] = _clip(case.get("stdin", case.get("args")))
+        rep["expected"] = _clip(expected)
+        rep["actual"] = _clip(actual)
     return rep
 
 

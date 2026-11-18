@@ -11,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -30,7 +31,8 @@ fun StatsScreen(onBack: () -> Unit) {
     val hints by c.progress.hintsTotal.collectAsStateWithLifecycle(0)
     val errors by c.progress.topErrors.collectAsStateWithLifecycle(emptyList())
     val skills by c.progress.skills.collectAsStateWithLifecycle(emptyList())
-    val week by c.progress.activitySince(6).collectAsStateWithLifecycle(emptyList())
+    val weekFlow = remember { c.progress.activitySince(6) }
+    val week by weekFlow.collectAsStateWithLifecycle(emptyList())
     val lessons by c.progress.lessons.collectAsStateWithLifecycle(emptyList())
 
     Screen("Статистика", onBack) { padding ->

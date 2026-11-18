@@ -88,6 +88,9 @@ open class RunnerService : Service() {
                         data.getString(P.KEY_SANDBOX_DIR),
                         4096,
                     ).toString()
+                    if (report.length > MAX_REPORT_CHARS) {
+                        return@execute finish(replyTo, runId, resultBundle(runId, RunStatus.ERROR, stderr = "Отчёт проверки слишком большой"))
+                    }
                     return@execute finish(replyTo, runId, resultBundle(runId, RunStatus.OK, stdout = report))
                 }
                 val json = module.callAttr(
@@ -173,6 +176,7 @@ open class RunnerService : Service() {
         private const val TAG = "CodeAcademyRunner"
         private const val NO_RUN = -1L
         const val DEFAULT_TIMEOUT_MS = 5_000L
+        private const val MAX_REPORT_CHARS = 200_000
     }
 }
 
