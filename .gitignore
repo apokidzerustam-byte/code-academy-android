@@ -17,3 +17,6 @@ app/src/main/assets/pyodide/
 app/src/main/assets/pyrunner/
 tools/__pycache__/
 app/schemas/
+
+# Публичный ключ прототипа (см. TECHNICAL_DECISIONS); любые другие ключи — не в репозиторий.
+!signing/prototype.keystore
