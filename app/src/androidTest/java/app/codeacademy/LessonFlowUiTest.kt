@@ -23,7 +23,11 @@ class LessonFlowUiTest {
 
     @Before fun clean() {
         val app = rule.activity.application as CodeAcademyApp
-        runBlocking { app.container.db.clearAllTables() }
+        runBlocking {
+            app.container.db.clearAllTables()
+            // UI-тест вводит текст в простое поле; CodeMirror проверяется в CodeEditorTest.
+            app.container.settings.setPlainEditor(true)
+        }
     }
 
     @Test fun solveFirstAssignmentEndToEnd() {

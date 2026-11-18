@@ -91,3 +91,24 @@ interface DraftDao {
     @Upsert
     suspend fun upsert(d: DraftEntity)
 }
+
+@Dao
+interface ProjectDao {
+    @Query("SELECT * FROM project_file ORDER BY projectId, path")
+    fun allFiles(): Flow<List<ProjectFileEntity>>
+
+    @Query("SELECT * FROM project_file WHERE projectId = :id ORDER BY path")
+    suspend fun files(id: String): List<ProjectFileEntity>
+
+    @Query("SELECT * FROM project_file WHERE projectId = :id ORDER BY path")
+    fun filesFlow(id: String): Flow<List<ProjectFileEntity>>
+
+    @Upsert
+    suspend fun upsert(f: ProjectFileEntity)
+
+    @Query("DELETE FROM project_file WHERE projectId = :id AND path = :path")
+    suspend fun deleteFile(id: String, path: String)
+
+    @Query("DELETE FROM project_file WHERE projectId = :id")
+    suspend fun deleteProject(id: String)
+}

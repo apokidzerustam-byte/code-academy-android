@@ -20,6 +20,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun reviews(): ReviewDao
     abstract fun activity(): ActivityDao
     abstract fun drafts(): DraftDao
+    abstract fun projects(): ProjectDao
 
     companion object {
         fun create(context: Context): AppDatabase =

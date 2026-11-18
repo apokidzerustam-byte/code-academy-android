@@ -38,6 +38,7 @@ fun HomeScreen(
     openLesson: (LessonRef) -> Unit,
     openStats: () -> Unit,
     openSettings: () -> Unit,
+    openProjects: () -> Unit,
 ) {
     val c = LocalContainer.current
     var lessons by remember { mutableStateOf<List<Pair<PackManifest, Lesson>>>(emptyList()) }
@@ -93,6 +94,7 @@ fun HomeScreen(
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = openProgram, modifier = Modifier.testTag("open-program")) { Text("Программа") }
+                OutlinedButton(onClick = openProjects, modifier = Modifier.testTag("open-projects")) { Text("Проекты") }
                 OutlinedButton(onClick = openStats) { Text("Статистика") }
             }
         }

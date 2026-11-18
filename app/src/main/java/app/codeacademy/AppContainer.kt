@@ -6,6 +6,7 @@ import app.codeacademy.assessment.AssessmentService
 import app.codeacademy.content.ContentRepository
 import app.codeacademy.data.AppDatabase
 import app.codeacademy.data.ProgressRepository
+import app.codeacademy.data.ProjectRepository
 import app.codeacademy.runner.CodeRunner
 import app.codeacademy.runner.PyodideRunner
 import app.codeacademy.runner.RunnerClient
@@ -21,6 +22,7 @@ class AppContainer(context: Context) {
     val content = ContentRepository(app.assets)
     val db: AppDatabase by lazy { AppDatabase.create(app) }
     val progress by lazy { ProgressRepository(db) }
+    val projects by lazy { ProjectRepository(db) }
     val settings = SettingsRepository(app)
     val assessment = AssessmentService()
 

@@ -65,6 +65,10 @@ fun SettingsScreen(onBack: () -> Unit, openLab: () -> Unit) {
                     "A — нужен для asyncio, потоков и сервера FastAPI; защищает от ошибок, но не является полной изоляцией.",
                 style = MaterialTheme.typography.bodySmall,
             )
+            HorizontalDivider()
+            Text("Редактор кода", style = MaterialTheme.typography.titleMedium)
+            Choice("С подсветкой и автоотступами (CodeMirror)", !s.plainEditor, "editor-rich") { scope.launch { c.settings.setPlainEditor(false) } }
+            Choice("Простое поле ввода (для слабых устройств)", s.plainEditor, "editor-plain") { scope.launch { c.settings.setPlainEditor(true) } }
             OutlinedButton(onClick = openLab) { Text("Лаборатория выполнения кода") }
             HorizontalDivider()
             Text("О приложении", style = MaterialTheme.typography.titleMedium)

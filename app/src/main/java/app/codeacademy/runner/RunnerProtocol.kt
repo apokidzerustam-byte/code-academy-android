@@ -52,6 +52,8 @@ data class RunResult(
     val stderr: String = "",
     val truncated: Boolean = false,
     val durationMs: Long = 0,
+    /** Файлы проекта после запуска (если запуск был с файлами). */
+    val files: Map<String, String>? = null,
 )
 
 data class RunnerInfo(

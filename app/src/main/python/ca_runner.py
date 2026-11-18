@@ -527,3 +527,70 @@ def check(code, tests_json, sandbox_dir=None, max_output=4096):
     res["allPassed"] = bool(cases) and res["passed"] == res["total"]
     res["durationMs"] = int((time.monotonic() - started) * 1000)
     return json.dumps(res, ensure_ascii=False, default=repr)
+
+
+# ---------------------------------------------------------------------------
+# Файлы проекта (IDE): запись перед запуском и чтение после.
+# ---------------------------------------------------------------------------
+
+MAX_FILE_BYTES = 256 * 1024
+MAX_PROJECT_BYTES = 2 * 1024 * 1024
+MAX_FILES = 200
+
+
+def _safe_rel(path):
+    """Относительный путь внутри проекта; '..', абсолютные пути и скрытые служебные файлы запрещены."""
+    p = path.replace("\\", "/")
+    if p.startswith("/") or (len(p) > 1 and p[1] == ":"):
+        raise ValueError(f"Абсолютный путь запрещён: {path!r}")
+    p = p.strip("/")
+    parts = [x for x in p.split("/") if x not in ("", ".")]
+    if not parts or any(x == ".." for x in parts):
+        raise ValueError(f"Недопустимый путь: {path!r}")
+    return "/".join(parts)
+
+
+def write_files(root, files_json):
+    """Заменяет содержимое папки проекта переданными файлами {путь: текст}."""
+    import shutil
+    files = json.loads(files_json)
+    if len(files) > MAX_FILES:
+        raise ValueError("Слишком много файлов в проекте")
+    if os.path.isdir(root):
+        shutil.rmtree(root)
+    os.makedirs(root, exist_ok=True)
+    total = 0
+    for path, text in files.items():
+        rel = _safe_rel(path)
+        data = text.encode("utf-8")
+        total += len(data)
+        if len(data) > MAX_FILE_BYTES or total > MAX_PROJECT_BYTES:
+            raise ValueError(f"Файл {rel} или проект слишком большой")
+        full = os.path.join(root, rel)
+        os.makedirs(os.path.dirname(full), exist_ok=True)
+        with open(full, "wb") as f:
+            f.write(data)
+    return len(files)
+
+
+def read_files(root):
+    """Текстовые файлы проекта после запуска {путь: текст}; двоичные и слишком большие пропускаются."""
+    out, total = {}, 0
+    if not os.path.isdir(root):
+        return json.dumps(out)
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = sorted(d for d in dirnames if d != "__pycache__")
+        for name in sorted(filenames):
+            full = os.path.join(dirpath, name)
+            rel = os.path.relpath(full, root).replace(os.sep, "/")
+            try:
+                size = os.path.getsize(full)
+                if size > MAX_FILE_BYTES or total + size > MAX_PROJECT_BYTES or len(out) >= MAX_FILES:
+                    continue
+                with open(full, "rb") as f:
+                    text = f.read().decode("utf-8")
+            except (OSError, UnicodeDecodeError):
+                continue
+            total += size
+            out[rel] = text
+    return json.dumps(out, ensure_ascii=False)

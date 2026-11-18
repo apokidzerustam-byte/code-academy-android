@@ -10,6 +10,8 @@ interface CodeRunner {
         timeoutMs: Long = RunnerService.DEFAULT_TIMEOUT_MS,
         stdin: String = "",
         project: String = "default",
+        /** Файлы проекта {путь: текст}; null — не трогать папку проекта. Результат вернёт файлы после запуска. */
+        files: Map<String, String>? = null,
     ): RunResult
 
     /**

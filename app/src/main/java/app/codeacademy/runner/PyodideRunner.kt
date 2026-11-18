@@ -54,13 +54,25 @@ class PyodideRunner(context: Context) : CodeRunner {
         return withTimeoutOrNull(START_TIMEOUT_MS) { ready.await() }
     }
 
-    override suspend fun run(code: String, timeoutMs: Long, stdin: String, project: String): RunResult =
-        send(code, timeoutMs, stdin, project, null)
+    override suspend fun run(
+        code: String,
+        timeoutMs: Long,
+        stdin: String,
+        project: String,
+        files: Map<String, String>?,
+    ): RunResult = send(code, timeoutMs, stdin, project, null, files)
 
     override suspend fun check(code: String, testsJson: String, timeoutMs: Long, project: String): RunResult =
-        send(code, timeoutMs, "", project, testsJson)
+        send(code, timeoutMs, "", project, testsJson, null)
 
-    private suspend fun send(code: String, timeoutMs: Long, stdin: String, project: String, tests: String?): RunResult {
+    private suspend fun send(
+        code: String,
+        timeoutMs: Long,
+        stdin: String,
+        project: String,
+        tests: String?,
+        files: Map<String, String>?,
+    ): RunResult {
         val info = prepare()
             ?: return RunResult(RunStatus.UNAVAILABLE, stderr = "Интерпретатор не запустился за ${START_TIMEOUT_MS / 1000} с")
         if (!info.pythonStarted) return RunResult(RunStatus.UNAVAILABLE, stderr = info.startError ?: "")
@@ -73,6 +85,7 @@ class PyodideRunner(context: Context) : CodeRunner {
             .put("maxOutput", RunnerClient.MAX_OUTPUT_CHARS)
             .put("mode", if (tests == null) "run" else "check")
             .put("tests", tests ?: "")
+        if (files != null) msg.put("files", JSONObject(files as Map<*, *>))
         js("caRun($msg)")
         return withTimeoutOrNull(timeoutMs) { d.await() }
             ?: RunResult(RunStatus.TIMEOUT).also { restartInterpreter(RunStatus.TIMEOUT) }
@@ -193,7 +206,10 @@ class PyodideRunner(context: Context) : CodeRunner {
                     r.getString("stdout"), r.getString("stderr"),
                     r.getBoolean("truncated"), r.getLong("durationMs"),
                 )
-                pending.remove(o.optLong("runId"))?.complete(res)
+                val files = o.optString("files").takeIf { it.isNotEmpty() }?.let { s ->
+                    runCatching { JSONObject(s).let { j -> j.keys().asSequence().associateWith { k -> j.getString(k) } } }.getOrNull()
+                }
+                pending.remove(o.optLong("runId"))?.complete(res.copy(files = files))
             }
             "probe" -> pendingProbe?.complete(o.optString("result"))
         }

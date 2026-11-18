@@ -151,8 +151,22 @@ class RunnerClient(context: Context, val isolated: Boolean) : CodeRunner {
 
     override suspend fun prepare(): RunnerInfo? = ping()
 
-    override suspend fun run(code: String, timeoutMs: Long, stdin: String, project: String): RunResult =
-        send(code, timeoutMs, stdin, project, mode = "run", tests = null)
+    override suspend fun run(
+        code: String,
+        timeoutMs: Long,
+        stdin: String,
+        project: String,
+        files: Map<String, String>?,
+    ): RunResult {
+        val dir = sandboxDir(project)
+        if (files != null && dir != null) {
+            runCatching { ProjectFiles.write(dir, files) }.onFailure {
+                return RunResult(RunStatus.ERROR, stderr = it.message ?: it.toString())
+            }
+        }
+        val r = send(code, timeoutMs, stdin, project, mode = "run", tests = null)
+        return if (files != null && dir != null) r.copy(files = ProjectFiles.read(dir)) else r
+    }
 
     override suspend fun check(code: String, testsJson: String, timeoutMs: Long, project: String): RunResult =
         send(code, timeoutMs, "", project, mode = "check", tests = testsJson)

@@ -139,13 +139,17 @@ fun AssignmentScreen(ref: LessonRef, index: Int, settings: Settings, onBack: () 
             }
             asg.code?.let { CodeBlock(it) }
 
-            OutlinedTextField(
-                value = code,
-                onValueChange = { code = it },
-                label = { Text(if (asg.isAnswerTask) "Ваш ответ (каждая строка вывода — с новой строки)" else "Код") },
-                textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
-                modifier = Modifier.fillMaxWidth().heightIn(min = 140.dp).testTag("code"),
-            )
+            if (asg.isAnswerTask) {
+                OutlinedTextField(
+                    value = code,
+                    onValueChange = { code = it },
+                    label = { Text("Ваш ответ (каждая строка вывода — с новой строки)") },
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 140.dp).testTag("code"),
+                )
+            } else if (loaded) {
+                CodeEditor(value = code, onValueChange = { code = it }, plain = settings.plainEditor, height = 240.dp)
+            }
 
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (!asg.isAnswerTask) {

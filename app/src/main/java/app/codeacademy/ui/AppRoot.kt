@@ -34,6 +34,9 @@ object Routes {
     const val STATS = "stats"
     const val SETTINGS = "settings"
     const val LAB = "lab"
+    const val PROJECTS = "projects"
+    const val IDE = "ide/{id}"
+    fun ide(id: String) = "ide/$id"
     fun lesson(r: LessonRef) = "lesson/${r.packId}/${r.lessonId}"
     fun assignment(r: LessonRef, index: Int) = "assignment/${r.packId}/${r.lessonId}/$index"
 }
@@ -68,6 +71,7 @@ private fun AppNav(settings: Settings) {
                 openLesson = { nav.navigate(Routes.lesson(it)) },
                 openStats = { nav.navigate(Routes.STATS) },
                 openSettings = { nav.navigate(Routes.SETTINGS) },
+                openProjects = { nav.navigate(Routes.PROJECTS) },
             )
         }
         composable(Routes.PROGRAM) { ProgramScreen(back) { nav.navigate(Routes.lesson(it)) } }
@@ -92,5 +96,9 @@ private fun AppNav(settings: Settings) {
         composable(Routes.STATS) { StatsScreen(back) }
         composable(Routes.SETTINGS) { SettingsScreen(back) { nav.navigate(Routes.LAB) } }
         composable(Routes.LAB) { RunnerLabScreen(back) }
+        composable(Routes.PROJECTS) { ProjectsScreen(back) { id -> nav.navigate(Routes.ide(id)) } }
+        composable(Routes.IDE, listOf(navArgument("id") { type = NavType.StringType })) { e ->
+            IdeScreen(e.arguments!!.getString("id")!!, settings, back)
+        }
     }
 }

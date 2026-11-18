@@ -58,8 +58,11 @@ onmessage = async (e) => {
     }
   } else if (m.type === "run") {
     try {
-      const res = runner.run(m.code, "/home/pyodide/project/" + (m.project || "default"), m.stdin || "", m.maxOutput || 16384);
-      postMessage({ type: "result", runId: m.runId, result: res });
+      const dir = "/home/pyodide/project/" + (m.project || "default");
+      if (m.files) runner.write_files(dir, JSON.stringify(m.files));
+      const res = runner.run(m.code, dir, m.stdin || "", m.maxOutput || 16384);
+      const files = m.files ? runner.read_files(dir) : "";
+      postMessage({ type: "result", runId: m.runId, result: res, files });
     } catch (err) {
       postMessage({ type: "result", runId: m.runId, error: String(err) });
     }
