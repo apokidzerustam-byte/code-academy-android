@@ -28,7 +28,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.codeacademy.data.ProjectInfo
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.DateFormat
 import java.util.Date
 
@@ -78,7 +80,11 @@ fun ProjectsScreen(onBack: () -> Unit, openProject: (String) -> Unit) {
             confirmButton = {
                 TextButton(onClick = {
                     creating = false
-                    scope.launch { openProject(c.projects.create(title)) }
+                    scope.launch {
+                        val id = c.projects.create(title)
+                        // Навигация — строго в главном потоке (после транзакции Room продолжение может прийти из другого).
+                        withContext(Dispatchers.Main.immediate) { openProject(id) }
+                    }
                 }, modifier = Modifier.testTag("create-project")) { Text("Создать") }
             },
             dismissButton = { TextButton(onClick = { creating = false }) { Text("Отмена") } },
