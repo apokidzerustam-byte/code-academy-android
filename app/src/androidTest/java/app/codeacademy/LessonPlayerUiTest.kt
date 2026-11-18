@@ -10,7 +10,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.espresso.Espresso.pressBack
 import app.codeacademy.content.LessonRef
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
@@ -54,7 +53,7 @@ class LessonPlayerUiTest {
         rule.onNodeWithTag("player-next").performClick()
         rule.waitUntil(5_000) { sceneIs(3) }
         repeat(3) { rule.onNodeWithTag("player-speed").performClick() }
-        rule.onNodeWithTag("player-speed").assertExistsWithText("2×")
+        rule.waitUntil(3_000) { rule.has("player-speed", "2×") || rule.onAllNodes(hasTestTag("player-speed") and hasText("2×")).fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("player-play").performClick()
         if (hasAudio) rule.waitUntil(10_000) { rule.onAllNodes(hasTestTag("player-audio-on")).fetchSemanticsNodes().isNotEmpty() }
         val t0 = System.currentTimeMillis()
@@ -71,7 +70,7 @@ class LessonPlayerUiTest {
         rule.onNodeWithTag("player-play").performClick() // пауза
 
         // Позиция сохраняется: после выхода и возврата — та же сцена.
-        pressBack()
+        rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
         rule.waitUntil(5_000) { rule.onAllNodes(hasTestTag("lesson-py-01-print")).fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("lesson-py-01-print").performScrollTo().performClick()
         rule.waitUntil(10_000) { sceneIs(6) || sceneIs(7) }
@@ -91,6 +90,3 @@ class LessonPlayerUiTest {
         rule.waitUntil(5_000) { rule.onAllNodes(hasTestTag("player-caption")).fetchSemanticsNodes().isEmpty() }
     }
 }
-
-private fun androidx.compose.ui.test.SemanticsNodeInteraction.assertExistsWithText(t: String) =
-    assert(androidx.compose.ui.test.hasAnyDescendant(hasText(t)))
