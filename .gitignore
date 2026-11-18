@@ -1,0 +1,14 @@
+.gradle/
+build/
+*/build/
+local.properties
+.idea/
+*.iml
+.DS_Store
+editor-web/node_modules/
+app/src/main/assets/editor/
+voice-samples/
+__pycache__/
+.pytest_cache/
+*.keystore
+*.jks

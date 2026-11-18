@@ -1,0 +1,156 @@
+name: Android
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GRADLE_VERSION: "8.14.3"
+
+jobs:
+  harness:
+    name: Песочница Python (pytest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.13" }
+      - run: pip install pytest
+      - run: python -m pytest harness-tests -v
+
+  build:
+    name: Сборка APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "17" }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.13" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: "${{ env.GRADLE_VERSION }}" }
+      - name: Сборка редактора CodeMirror
+        working-directory: editor-web
+        run: npm install --no-audit --no-fund && npm run build
+      - name: Сборка APK
+        run: gradle --no-daemon :app:assembleDebug :app:assembleRelease
+      - name: Размер APK
+        run: |
+          echo "### Размер APK" >> "$GITHUB_STEP_SUMMARY"
+          find app/build/outputs/apk -name '*.apk' -exec ls -l {} \; | awk '{printf "- %s: %.1f МБ\n", $9, $5/1048576}' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: code-academy-apk
+          path: app/build/outputs/apk/**/*.apk
+
+  emulator:
+    name: Тесты на эмуляторе (API ${{ matrix.api }}, ${{ matrix.ram }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { api: 34, ram: "3072M" }   # «слабый» профиль из ТЗ
+          - { api: 29, ram: "4096M" }   # старый Android
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "17" }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.13" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: "${{ env.GRADLE_VERSION }}" }
+      - name: Включить KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Сборка редактора CodeMirror
+        working-directory: editor-web
+        run: npm install --no-audit --no-fund && npm run build
+      - name: Предсборка тестового APK
+        run: gradle --no-daemon :app:assembleDebug :app:assembleDebugAndroidTest
+      - name: Инструментальные тесты
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api }}
+          arch: x86_64
+          target: default
+          ram-size: ${{ matrix.ram }}
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: bash ci/emulator-tests.sh :app:connectedDebugAndroidTest
+      - name: Замеры в отчёт
+        if: always()
+        run: |
+          echo "### Замеры (API ${{ matrix.api }}, RAM ${{ matrix.ram }})" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          cat build/ci/probe.log >> "$GITHUB_STEP_SUMMARY" || echo "нет probe.log" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: emulator-results-api${{ matrix.api }}
+          path: |
+            build/ci/
+            app/build/reports/androidTests/
+            app/build/outputs/androidTest-results/
+
+  fastapi-probe:
+    name: Зонд FastAPI (${{ matrix.spec }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        spec: [v2, v1]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "17" }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.13" }
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: "${{ env.GRADLE_VERSION }}" }
+      - name: Включить KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Установка пакетов через Chaquopy pip
+        run: gradle --no-daemon :probe-fastapi:assembleDebug :probe-fastapi:assembleDebugAndroidTest -PfastapiSpec=${{ matrix.spec }} 2>&1 | tee build-pip.log; exit ${PIPESTATUS[0]}
+      - name: Тест на эмуляторе
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: default
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: bash ci/emulator-tests.sh :probe-fastapi:connectedDebugAndroidTest -PfastapiSpec=${{ matrix.spec }}
+      - name: Итог
+        if: always()
+        run: |
+          echo "### FastAPI ${{ matrix.spec }}" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          (cat build/ci/probe.log 2>/dev/null || grep -iE "error|pydantic" build-pip.log | tail -40) >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fastapi-probe-${{ matrix.spec }}
+          path: |
+            build/ci/
+            build-pip.log
