@@ -13,6 +13,9 @@ concurrency:
 env:
   GRADLE_VERSION: "8.14.3"
 
+permissions:
+  contents: write
+
 jobs:
   harness:
     name: Песочница Python (pytest)
@@ -50,6 +53,18 @@ jobs:
         with:
           name: code-academy-apk
           path: app/build/outputs/apk/**/*.apk
+      - name: Опубликовать APK в ветку apk (для установки на телефон)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          mkdir -p /tmp/apk && cp app/build/outputs/apk/release/app-release.apk /tmp/apk/code-academy-proto.apk
+          cd /tmp/apk
+          sha256sum code-academy-proto.apk > SHA256SUMS.txt
+          echo "commit ${GITHUB_SHA}" >> SHA256SUMS.txt
+          git init -q -b apk
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A && git commit -q -m "APK ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" apk
 
   emulator:
     name: Тесты на эмуляторе (API ${{ matrix.api }}, ${{ matrix.ram }})
