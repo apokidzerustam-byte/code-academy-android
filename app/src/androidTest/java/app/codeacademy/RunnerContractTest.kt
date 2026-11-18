@@ -136,6 +136,14 @@ abstract class RunnerContractTest(private val isolated: Boolean) {
 
     @Test fun outputCapped() {
         val r = run("print('x' * 200000)")
+        assertEquals(r.stderr, RunStatus.OK, r.status)
+        assertTrue(r.truncated)
+        assertEquals(RunnerClient.MAX_OUTPUT_CHARS, r.stdout.length)
+    }
+
+    @Test fun manyPrintLinesCapped() {
+        val r = run("for i in range(100000):\n    print(i)")
+        assertEquals(r.stderr, RunStatus.OK, r.status)
         assertTrue(r.truncated)
     }
 

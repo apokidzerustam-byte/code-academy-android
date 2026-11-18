@@ -164,7 +164,7 @@ class RunnerClient(context: Context, val isolated: Boolean) {
             putString(P.KEY_STDIN, stdin)
             putLong(P.KEY_TIMEOUT_MS, timeoutMs)
             putString(P.KEY_SANDBOX_DIR, sandboxDir(project)?.absolutePath)
-            putInt(P.KEY_MAX_OUTPUT, 65536)
+            putInt(P.KEY_MAX_OUTPUT, MAX_OUTPUT_CHARS)
         }
         try {
             m.send(Message.obtain(null, P.MSG_RUN).also { it.data = data; it.replyTo = replies })
@@ -212,5 +212,7 @@ class RunnerClient(context: Context, val isolated: Boolean) {
         private const val CLIENT_GRACE_MS = 3_000L
         private const val DEATH_GRACE_MS = 300L
         private const val DEATH_WAIT_MS = 3_000L
+        /** На поток (stdout/stderr). Держит ответ Binder заметно ниже лимита транзакции. */
+        const val MAX_OUTPUT_CHARS = 16_384
     }
 }

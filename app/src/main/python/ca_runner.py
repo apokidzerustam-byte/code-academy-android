@@ -223,7 +223,7 @@ def _forget_user_modules(root):
             del sys.modules[name]
 
 
-def run(code, sandbox_dir=None, stdin_text="", max_output=65536):
+def run(code, sandbox_dir=None, stdin_text="", max_output=16384):
     """Выполняет код ученика. Возвращает JSON-строку с результатом."""
     global _ACTIVE, _SANDBOX
     filename = "main.py"

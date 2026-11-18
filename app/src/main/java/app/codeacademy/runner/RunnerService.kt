@@ -85,7 +85,7 @@ open class RunnerService : Service() {
                     data.getString(P.KEY_CODE, ""),
                     data.getString(P.KEY_SANDBOX_DIR),
                     data.getString(P.KEY_STDIN, ""),
-                    data.getInt(P.KEY_MAX_OUTPUT, 65536),
+                    data.getInt(P.KEY_MAX_OUTPUT, 16_384),
                 ).toString()
                 val o = JSONObject(json)
                 resultBundle(
