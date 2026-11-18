@@ -73,7 +73,10 @@ class LessonFlowUiTest {
         rule.onNodeWithTag("assignment-0").performClick()
         rule.waitUntil(10_000) { rule.onAllNodes(hasTestTag("code")).fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("code").performTextReplacement("print('черновик')")
-        Thread.sleep(1_500) // автосохранение через 600 мс
+        rule.mainClock.advanceTimeBy(1_000) // автосохранение через 600 мс (виртуальные часы Compose)
+        rule.waitForIdle()
+        val app = rule.activity.application as CodeAcademyApp
+        rule.waitUntil(10_000) { runBlocking { app.container.progress.draft("python-basics/py-01-print/0")?.content } == "print('черновик')" }
         rule.activityRule.scenario.recreate()
         rule.waitUntil(10_000) { rule.onAllNodes(hasText("print('черновик')", substring = true)).fetchSemanticsNodes().isNotEmpty() }
     }

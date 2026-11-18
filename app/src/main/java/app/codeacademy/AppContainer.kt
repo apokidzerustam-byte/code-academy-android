@@ -11,6 +11,9 @@ import app.codeacademy.runner.PyodideRunner
 import app.codeacademy.runner.RunnerClient
 import app.codeacademy.settings.RunnerMode
 import app.codeacademy.settings.SettingsRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
 /** Ручной контейнер зависимостей (без Hilt — меньше генерации кода, проще сборка на этапе каркаса). */
 class AppContainer(context: Context) {
@@ -20,6 +23,9 @@ class AppContainer(context: Context) {
     val progress by lazy { ProgressRepository(db) }
     val settings = SettingsRepository(app)
     val assessment = AssessmentService()
+
+    /** Область приложения: записи, которые должны завершиться даже после закрытия экрана. */
+    val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private var runnerW: PyodideRunner? = null
     private var runnerA: RunnerClient? = null

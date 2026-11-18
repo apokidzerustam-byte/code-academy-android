@@ -64,7 +64,7 @@ fun LessonScreen(ref: LessonRef, onBack: () -> Unit, openAssignment: (Int) -> Un
     LaunchedEffect(progress) { passed = c.progress.passedAssignments(ref) }
     DisposableEffect(ref) {
         val t0 = SystemClock.elapsedRealtime()
-        onDispose { scope.launch { c.progress.addActiveTime(ref, SystemClock.elapsedRealtime() - t0) } }
+        onDispose { c.appScope.launch { c.progress.addActiveTime(ref, SystemClock.elapsedRealtime() - t0) } }
     }
 
     Screen(lesson?.title ?: "Урок", onBack) { padding ->

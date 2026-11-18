@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -102,7 +103,19 @@ fun AssignmentScreen(ref: LessonRef, index: Int, settings: Settings, onBack: () 
     }
     DisposableEffect(ref) {
         val t0 = SystemClock.elapsedRealtime()
-        onDispose { scope.launch { c.progress.addActiveTime(ref, SystemClock.elapsedRealtime() - t0) } }
+        onDispose { c.appScope.launch { c.progress.addActiveTime(ref, SystemClock.elapsedRealtime() - t0) } }
+    }
+    // Черновик сохраняется и при уходе с экрана/пересоздании, а не только по таймеру.
+    val latestCode = rememberUpdatedState(code)
+    val latestHints = rememberUpdatedState(if (solutionShown) 6 else hintsShown)
+    DisposableEffect(draftKey) {
+        onDispose {
+            if (loaded) {
+                val text = latestCode.value
+                val hints = latestHints.value
+                c.appScope.launch { c.progress.saveDraft(draftKey, text, hints) }
+            }
+        }
     }
 
     val asg = a
