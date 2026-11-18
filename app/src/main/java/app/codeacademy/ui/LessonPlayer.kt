@@ -7,16 +7,16 @@ import android.media.PlaybackParams
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -114,6 +114,7 @@ class NarrationAudio(private val assets: AssetManager, private val assetPath: (S
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun LessonPlayer(
     timeline: LessonTimeline,
@@ -232,8 +233,8 @@ fun LessonPlayer(
                 Text("${fmt(seeking?.toLong() ?: t)} / ${fmt(timeline.totalMs)}", style = MaterialTheme.typography.labelMedium)
                 if (audioOn) Text("  ♪", modifier = Modifier.testTag("player-audio-on").semantics { contentDescription = "Звук идёт" })
             }
-            Row(Modifier.horizontalScroll(rememberScrollState()), verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            // FlowRow, а не прокрутка вбок: на узком экране кнопки переносятся и всегда видны.
+            FlowRow(verticalArrangement = Arrangement.Center, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 IconButton(onClick = {
                     val i = timeline.sceneAt(t)
                     // Как в плеерах: если сцена идёт дольше 2 с — в её начало, иначе к предыдущей.

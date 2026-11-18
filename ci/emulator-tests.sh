@@ -3,6 +3,7 @@
 # Использование: ci/emulator-tests.sh <gradle-task> [доп. аргументы gradle]
 set -u
 mkdir -p build/ci
+adb logcat -G 16M || true
 adb logcat -c || true
 gradle --no-daemon "$@"
 rc=$?

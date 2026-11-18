@@ -51,14 +51,14 @@ class LessonPlayerUiTest {
 
         // Сразу к сцене «Запуск», скорость 2×.
         rule.onNodeWithTag("player-next").performScrollTo().performClick()
-        rule.onNodeWithTag("player-next").performClick()
+        rule.onNodeWithTag("player-next").performScrollTo().performClick()
         runCatching { rule.waitUntil(5_000) { sceneIs(3) } }.onFailure {
             rule.onNodeWithTag("lesson-player").printToLog("CAPROBE")
             throw it
         }
-        repeat(3) { rule.onNodeWithTag("player-speed").performClick() }
+        repeat(3) { rule.onNodeWithTag("player-speed").performScrollTo().performClick() }
         rule.waitUntil(3_000) { rule.has("player-speed", "2×") || rule.onAllNodes(hasTestTag("player-speed") and hasText("2×")).fetchSemanticsNodes().isNotEmpty() }
-        rule.onNodeWithTag("player-play").performClick()
+        rule.onNodeWithTag("player-play").performScrollTo().performClick()
         if (hasAudio) rule.waitUntil(10_000) { rule.onAllNodes(hasTestTag("player-audio-on")).fetchSemanticsNodes().isNotEmpty() }
         val t0 = System.currentTimeMillis()
         rule.waitUntil(40_000) { rule.has("player-output", "Привет, мир!") }
@@ -66,12 +66,12 @@ class LessonPlayerUiTest {
         assertTrue(rule.onAllNodes(hasText("Привет, мир!", substring = true) and hasAnyAncestor(hasTestTag("player-code"))).fetchSemanticsNodes().isNotEmpty())
 
         // Перемотка к сцене с ошибкой: сообщение SyntaxError в консоли.
-        rule.onNodeWithTag("player-next").performClick() // 4
-        rule.onNodeWithTag("player-next").performClick() // 5
-        rule.onNodeWithTag("player-next").performClick() // 6
+        rule.onNodeWithTag("player-next").performScrollTo().performClick() // 4
+        rule.onNodeWithTag("player-next").performScrollTo().performClick() // 5
+        rule.onNodeWithTag("player-next").performScrollTo().performClick() // 6
         rule.waitUntil(5_000) { sceneIs(6) }
         rule.waitUntil(60_000) { rule.has("player-output", "SyntaxError") }
-        rule.onNodeWithTag("player-play").performClick() // пауза
+        rule.onNodeWithTag("player-play").performScrollTo().performClick() // пауза
 
         // Позиция сохраняется: после выхода и возврата — та же сцена.
         rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
@@ -89,8 +89,8 @@ class LessonPlayerUiTest {
         rule.waitUntil(5_000) { rule.onAllNodes(hasTestTag("player-caption")).fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("player-play").performScrollTo().performClick()
         rule.waitUntil(15_000) { rule.has("lesson-player", "Привет!") }
-        rule.onNodeWithTag("player-play").performClick()
-        rule.onNodeWithTag("player-cc").performClick()
+        rule.onNodeWithTag("player-play").performScrollTo().performClick()
+        rule.onNodeWithTag("player-cc").performScrollTo().performClick()
         rule.waitUntil(5_000) { rule.onAllNodes(hasTestTag("player-caption")).fetchSemanticsNodes().isEmpty() }
     }
 }
