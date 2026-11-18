@@ -1,0 +1,10 @@
+loaded PerthNet (Implicit) at step 250,000
+{
+  "author": {
+    "seconds": 29.7,
+    "synthSeconds": 202.1,
+    "realtimeFactor": 6.8,
+    "modelLoadSeconds": 641.0,
+    "threads": 4
+  }
+}
