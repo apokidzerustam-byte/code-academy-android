@@ -58,15 +58,15 @@ class LessonPlayerUiTest {
         }
         repeat(3) { rule.onNodeWithTag("player-speed").performScrollTo().performClick() }
         rule.waitUntil(3_000) { rule.has("player-speed", "2×") || rule.onAllNodes(hasTestTag("player-speed") and hasText("2×")).fetchSemanticsNodes().isNotEmpty() }
-        rule.onNodeWithTag("player-play").performScrollTo().performClick()
-        if (hasAudio) rule.waitUntil(10_000) { rule.onAllNodes(hasTestTag("player-audio-on")).fetchSemanticsNodes().isNotEmpty() }
         val t0 = System.currentTimeMillis()
-        rule.waitUntil(40_000) { rule.has("player-output", "Привет, мир!") }
-        Log.i("CAPROBE", "player: output after ${System.currentTimeMillis() - t0}ms")
+        playUntil(40_000) {
+            (!hasAudio || rule.onAllNodes(hasTestTag("player-audio-on")).fetchSemanticsNodes().isNotEmpty()) &&
+                rule.has("player-output", "Привет, мир!")
+        }
+        Log.i("CAPROBE", "player: output after ${System.currentTimeMillis() - t0}ms (audio=$hasAudio)")
         assertTrue(rule.onAllNodes(hasText("Привет, мир!", substring = true) and hasAnyAncestor(hasTestTag("player-code"))).fetchSemanticsNodes().isNotEmpty())
 
-        // Пауза, затем перемотка по сценам к сцене с ошибкой (во время проигрывания сцена могла смениться).
-        rule.onNodeWithTag("player-play").performScrollTo().performClick()
+        // Перемотка по сценам к сцене с ошибкой (во время проигрывания сцена могла смениться).
         // «Назад» в середине сцены сначала возвращает к её началу (как в обычных плеерах) — поэтому до 10 нажатий.
         repeat(10) {
             if (!sceneIs(6)) {
@@ -76,15 +76,35 @@ class LessonPlayerUiTest {
             }
         }
         assertTrue(sceneIs(6))
-        rule.onNodeWithTag("player-play").performScrollTo().performClick()
-        rule.waitUntil(60_000) { rule.has("player-output", "SyntaxError") }
-        rule.onNodeWithTag("player-play").performScrollTo().performClick() // пауза
+        playUntil(60_000) { rule.has("player-output", "SyntaxError") }
 
         // Позиция сохраняется: после выхода и возврата — та же сцена.
         rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
         rule.waitUntil(5_000) { rule.onAllNodes(hasTestTag("lesson-py-01-print")).fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("lesson-py-01-print").performScrollTo().performClick()
         rule.waitUntil(10_000) { sceneIs(6) || sceneIs(7) }
+    }
+
+    /**
+     * Воспроизведение в реальном времени: часы плеера обновляют экран каждый кадр, поэтому Compose
+     * никогда не «простаивает». Кадры двигаем вручную и проверяем условие, затем ставим паузу.
+     */
+    private fun playUntil(timeoutMs: Long, cond: () -> Boolean) {
+        rule.onNodeWithTag("player-play").performScrollTo().performClick()
+        rule.mainClock.autoAdvance = false
+        try {
+            val end = System.currentTimeMillis() + timeoutMs
+            while (true) {
+                rule.mainClock.advanceTimeByFrame()
+                if (cond()) break
+                if (System.currentTimeMillis() > end) throw AssertionError("условие не выполнено за $timeoutMs мс")
+                Thread.sleep(30)
+            }
+            rule.onNodeWithTag("player-play").performClick() // пауза
+            repeat(3) { rule.mainClock.advanceTimeByFrame() }
+        } finally {
+            rule.mainClock.autoAdvance = true
+        }
     }
 
     @Test fun subtitlesToggle() {
