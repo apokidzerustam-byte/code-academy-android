@@ -133,10 +133,32 @@ def _safe_builtins():
     return b
 
 
+# Нативные модули stdlib, которые Chaquopy распаковывает в файлы приложения при ПЕРВОМ
+# импорте. Под активным хуком эта запись была бы запрещена, поэтому импортируем их заранее.
+_PRELOAD = (
+    "_asyncio", "asyncio", "select", "selectors", "_socket", "socket", "ssl",
+    "math", "cmath", "_random", "random", "_datetime", "datetime", "_decimal", "decimal",
+    "_bisect", "_heapq", "array", "_struct", "_contextvars", "_queue", "_json", "_csv",
+    "_statistics", "statistics", "unicodedata", "_sqlite3", "sqlite3", "zlib", "_hashlib",
+    "hashlib", "_sha2", "_md5", "binascii", "_pickle", "_zoneinfo", "_bz2", "_lzma",
+    "pyexpat", "_elementtree", "_multibytecodec", "_uuid", "fractions", "itertools",
+)
+
+
+def _preload_native_modules():
+    import importlib
+    for name in _PRELOAD:
+        try:
+            importlib.import_module(name)
+        except Exception:  # noqa: BLE001 — модуля может не быть на платформе
+            pass
+
+
 def _install_hook():
     global _HOOK_INSTALLED, _READ_ROOTS
     if _HOOK_INSTALLED:
         return
+    _preload_native_modules()
     roots = set()
     for entry in sys.path:
         r = _real(entry) if entry else None
@@ -212,6 +234,7 @@ def run(code, sandbox_dir=None, stdin_text="", max_output=65536):
     old_cwd = os.getcwd()
     sys.dont_write_bytecode = True
     try:
+        _install_hook()
         if sandbox_dir:
             os.makedirs(sandbox_dir, exist_ok=True)
             os.chdir(sandbox_dir)
@@ -219,7 +242,6 @@ def run(code, sandbox_dir=None, stdin_text="", max_output=65536):
             sys.path.insert(0, _SANDBOX)  # многофайловые проекты: import своих модулей
         else:
             _SANDBOX = None
-        _install_hook()
         linecache.cache[filename] = (len(code), None, code.splitlines(True), filename)
         try:
             compiled = compile(code, filename, "exec")

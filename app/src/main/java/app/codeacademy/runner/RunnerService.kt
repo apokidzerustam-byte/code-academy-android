@@ -118,11 +118,12 @@ open class RunnerService : Service() {
         putInt(P.KEY_PID, Process.myPid())
         putInt(P.KEY_UID, Process.myUid())
         putBoolean(P.KEY_ISOLATED, if (Build.VERSION.SDK_INT >= 28) Process.isIsolated() else false)
-        if (startError == null) {
+        // Вызов Python во время выполнения может ждать GIL и заблокировать таймаут/Стоп.
+        if (startError == null && activeRun.get() == NO_RUN) {
             putString(P.KEY_PY_INFO, runCatching {
                 Python.getInstance().getModule("ca_runner").callAttr("info").toString()
             }.getOrElse { "info() failed: $it" })
-            if (probePath != null && activeRun.get() == NO_RUN) {
+            if (probePath != null) {
                 putString(P.KEY_PROBE_RESULT, runCatching {
                     Python.getInstance().getModule("ca_runner").callAttr("kernel_probe", probePath).toString()
                 }.getOrElse { "probe failed: $it" })

@@ -31,7 +31,7 @@ abstract class RunnerContractTest(private val isolated: Boolean) {
     protected var info: RunnerInfo? = null
 
     @Before
-    fun setUp() = runBlocking {
+    fun setUp(): Unit = runBlocking {
         client = RunnerClient(ctx, isolated)
         val t0 = SystemClock.elapsedRealtime()
         info = client.ping()
@@ -98,7 +98,7 @@ abstract class RunnerContractTest(private val isolated: Boolean) {
         assertEquals(again.stderr, "ok\n", again.stdout)
     }
 
-    @Test fun stopButtonKillsRun() = runBlocking {
+    @Test fun stopButtonKillsRun(): Unit = runBlocking {
         val job = async { client.run("while True:\n    pass", 30_000, project = "test") }
         delay(1_000)
         val t0 = SystemClock.elapsedRealtime()
@@ -155,7 +155,7 @@ class RunnerLevelATest : RunnerContractTest(isolated = false) {
 @RunWith(AndroidJUnit4::class)
 class RunnerLevelBTest : RunnerContractTest(isolated = true) {
     /** Главный вопрос уровня B: запрещает ли ЯДРО доступ к файлам приложения и сети. */
-    @Test fun kernelDeniesAppFilesAndNetwork() = runBlocking {
+    @Test fun kernelDeniesAppFilesAndNetwork(): Unit = runBlocking {
         val ctx = InstrumentationRegistry.getInstrumentation().targetContext
         val secret = File(ctx.filesDir, "secret_kernel.txt").apply { writeText("x") }
         val kp = client.ping(secret.absolutePath)?.kernelProbe
@@ -169,7 +169,7 @@ class RunnerLevelBTest : RunnerContractTest(isolated = true) {
 /** Для сравнения: в уровне A ядро НЕ защищает — только Python-хуки. Фиксируем это в логе. */
 @RunWith(AndroidJUnit4::class)
 class RunnerLevelAKernelProbe {
-    @Test fun recordKernelBehaviour() = runBlocking {
+    @Test fun recordKernelBehaviour(): Unit = runBlocking {
         val ctx = InstrumentationRegistry.getInstrumentation().targetContext
         val secret = File(ctx.filesDir, "secret_kernel.txt").apply { writeText("x") }
         val c = RunnerClient(ctx, isolated = false)

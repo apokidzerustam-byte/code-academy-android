@@ -168,3 +168,17 @@ def test_sandbox_not_left_on_sys_path(box):
 def test_traceback_hides_harness_on_import_error(box):
     r = run("import nothing_here", box)
     assert "ModuleNotFoundError" in r["stderr"] and "ca_runner" not in r["stderr"]
+
+
+def test_first_project_not_readable_from_other_project(tmp_path):
+    a = tmp_path / "projA"; a.mkdir(); (a / "secret.txt").write_text("A")
+    b = tmp_path / "projB"; b.mkdir()
+    run("pass", a)
+    r = run(f"print(open({str(a / 'secret.txt')!r}).read())", b)
+    assert r["status"] == "ERROR" and r["stdout"] == ""
+
+
+def test_common_native_modules_work_under_hook(box):
+    r = run("import math, random, datetime, decimal, sqlite3, hashlib, statistics\nprint(math.isqrt(49))", box)
+    assert r["status"] == "OK", r["stderr"]
+    assert r["stdout"] == "7\n"

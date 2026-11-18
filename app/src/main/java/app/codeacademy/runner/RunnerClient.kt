@@ -10,6 +10,7 @@ import android.os.HandlerThread
 import android.os.IBinder
 import android.os.Message
 import android.os.Messenger
+import android.os.RemoteException
 import app.codeacademy.runner.RunnerProtocol as P
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.sync.Mutex
@@ -22,24 +23,56 @@ import java.util.concurrent.atomic.AtomicLong
 /**
  * Клиент раннера в основном процессе приложения.
  * [isolated] = false → уровень A (:runner), true → уровень B (isolatedProcess).
+ *
+ * Важно: после TIMEOUT/STOPPED процесс раннера уничтожает себя. Клиент сразу
+ * забывает это соединение и перед следующим запуском ждёт фактической гибели
+ * процесса, чтобы не отправить код в умирающий процесс.
  */
 class RunnerClient(context: Context, val isolated: Boolean) {
 
     private val app = context.applicationContext
     private val replyThread = HandlerThread("runner-replies").apply { start() }
     private val pendingRuns = ConcurrentHashMap<Long, CompletableDeferred<RunResult>>()
-    private var pendingPing: CompletableDeferred<RunnerInfo>? = null
+    @Volatile private var pendingPing: CompletableDeferred<RunnerInfo>? = null
     private val runIds = AtomicLong(1)
     private val bindLock = Mutex()
 
-    @Volatile private var service: Messenger? = null
-    @Volatile private var connection: ServiceConnection? = null
+    /** Одно подключение к одному процессу раннера. */
+    private inner class Conn : ServiceConnection {
+        val ready = CompletableDeferred<Messenger?>()
+        val died = CompletableDeferred<Unit>()
+        @Volatile var messenger: Messenger? = null
+
+        override fun onServiceConnected(name: ComponentName?, binder: IBinder) {
+            try {
+                binder.linkToDeath({ onRunnerDied(this) }, 0)
+            } catch (e: RemoteException) {
+                // Привязались к процессу, который уже умирает.
+                died.complete(Unit)
+                ready.complete(null)
+                return
+            }
+            messenger = Messenger(binder)
+            ready.complete(messenger)
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) = onRunnerDied(this)
+        override fun onBindingDied(name: ComponentName?) = onRunnerDied(this)
+        override fun onNullBinding(name: ComponentName?) {
+            ready.complete(null)
+        }
+    }
+
+    @Volatile private var conn: Conn? = null
+    /** Процесс, который должен умереть (после TIMEOUT/STOPPED); ждём его перед новым bind. */
+    @Volatile private var pendingDeath: CompletableDeferred<Unit>? = null
 
     private val replyHandler = Handler(replyThread.looper) { msg ->
         when (msg.what) {
             P.MSG_RESULT -> {
-                val d = msg.data
-                pendingRuns.remove(d.getLong(P.KEY_RUN_ID))?.complete(d.toResult())
+                val r = msg.data.toResult()
+                if (r.status == RunStatus.TIMEOUT || r.status == RunStatus.STOPPED) retireCurrent()
+                pendingRuns.remove(msg.data.getLong(P.KEY_RUN_ID))?.complete(r)
             }
             P.MSG_PONG -> pendingPing?.complete(msg.data.toInfo())
         }
@@ -54,37 +87,42 @@ class RunnerClient(context: Context, val isolated: Boolean) {
     fun sandboxDir(project: String): File? =
         if (isolated) null else File(app.filesDir, "projects/$project").apply { mkdirs() }
 
-    private suspend fun ensureBound(): Messenger? = bindLock.withLock {
-        service?.let { return it }
-        val ready = CompletableDeferred<Messenger?>()
-        val conn = object : ServiceConnection {
-            override fun onServiceConnected(name: ComponentName?, binder: IBinder) {
-                binder.linkToDeath({ onRunnerDied() }, 0)
-                val m = Messenger(binder)
-                service = m
-                ready.complete(m)
-            }
-
-            override fun onServiceDisconnected(name: ComponentName?) = onRunnerDied()
-            override fun onBindingDied(name: ComponentName?) = onRunnerDied()
-            override fun onNullBinding(name: ComponentName?) { ready.complete(null) }
-        }
-        connection = conn
-        if (!app.bindService(Intent(app, serviceClass), conn, Context.BIND_AUTO_CREATE)) {
-            connection = null
-            return null
-        }
-        withTimeoutOrNull(BIND_TIMEOUT_MS) { ready.await() }
+    /** Текущий процесс раннера обречён: отвязываемся и запоминаем, чью гибель ждать. */
+    private fun retireCurrent() {
+        val c = conn ?: return
+        conn = null
+        pendingDeath = c.died
+        runCatching { app.unbindService(c) }
     }
 
-    private fun onRunnerDied() {
-        service = null
-        connection?.let { runCatching { app.unbindService(it) } }
-        connection = null
-        // Ответ TIMEOUT/STOPPED отправляется до самоуничтожения раннера и уже стоит
-        // в очереди replyThread; даём ему прийти первым. Кто остался без ответа — упал (например, OOM).
+    private suspend fun ensureBound(): Messenger? = bindLock.withLock {
+        conn?.messenger?.let { return it }
+        pendingDeath?.let { withTimeoutOrNull(DEATH_WAIT_MS) { it.await() } }
+        pendingDeath = null
+        val c = Conn()
+        conn = c
+        if (!app.bindService(Intent(app, serviceClass), c, Context.BIND_AUTO_CREATE)) {
+            conn = null
+            return null
+        }
+        val m = withTimeoutOrNull(BIND_TIMEOUT_MS) { c.ready.await() }
+        if (m == null) {
+            if (conn === c) conn = null
+            runCatching { app.unbindService(c) }
+        }
+        m
+    }
+
+    private fun onRunnerDied(c: Conn) {
+        c.died.complete(Unit)
+        if (conn !== c) return // поздний сигнал от старого соединения — новое не трогаем
+        conn = null
+        runCatching { app.unbindService(c) }
+        // Ответ TIMEOUT/STOPPED уже мог встать в очередь replyThread — даём ему прийти первым.
+        // Список фиксируем сейчас: запуски, начатые на новом соединении, не трогаем.
+        val dead = pendingRuns.keys.toList()
         replyHandler.postDelayed({
-            pendingRuns.keys.toList().forEach { id ->
+            dead.forEach { id ->
                 pendingRuns.remove(id)?.complete(
                     RunResult(RunStatus.CRASHED, stderr = "Процесс выполнения завершился аварийно")
                 )
@@ -97,10 +135,15 @@ class RunnerClient(context: Context, val isolated: Boolean) {
         val m = ensureBound() ?: return null
         val d = CompletableDeferred<RunnerInfo>()
         pendingPing = d
-        m.send(Message.obtain(null, P.MSG_PING).also {
-            it.replyTo = replies
-            if (probePath != null) it.data = Bundle().apply { putString(P.KEY_PROBE_PATH, probePath) }
-        })
+        try {
+            m.send(Message.obtain(null, P.MSG_PING).also {
+                it.replyTo = replies
+                if (probePath != null) it.data = Bundle().apply { putString(P.KEY_PROBE_PATH, probePath) }
+            })
+        } catch (e: RemoteException) {
+            conn?.let { onRunnerDied(it) }
+            return null
+        }
         return withTimeoutOrNull(BIND_TIMEOUT_MS) { d.await() }
     }
 
@@ -125,24 +168,23 @@ class RunnerClient(context: Context, val isolated: Boolean) {
         }
         try {
             m.send(Message.obtain(null, P.MSG_RUN).also { it.data = data; it.replyTo = replies })
-        } catch (e: Exception) {
+        } catch (e: RemoteException) {
             pendingRuns.remove(id)
-            onRunnerDied()
+            conn?.let { onRunnerDied(it) }
             return RunResult(RunStatus.CRASHED, stderr = e.toString())
         }
         // Страховка на случай, если раннер не ответил даже после своего таймаута.
         return withTimeoutOrNull(timeoutMs + CLIENT_GRACE_MS) { d.await() }
-            ?: RunResult(RunStatus.TIMEOUT).also { pendingRuns.remove(id); onRunnerDied() }
+            ?: RunResult(RunStatus.TIMEOUT).also { pendingRuns.remove(id); retireCurrent() }
     }
 
     fun stop() {
-        service?.runCatching { send(Message.obtain(null, P.MSG_STOP).also { it.replyTo = replies }) }
+        conn?.messenger?.runCatching { send(Message.obtain(null, P.MSG_STOP).also { it.replyTo = replies }) }
     }
 
     fun close() {
-        connection?.let { runCatching { app.unbindService(it) } }
-        connection = null
-        service = null
+        conn?.let { runCatching { app.unbindService(it) } }
+        conn = null
         replyThread.quitSafely()
     }
 
@@ -169,5 +211,6 @@ class RunnerClient(context: Context, val isolated: Boolean) {
         private const val BIND_TIMEOUT_MS = 20_000L
         private const val CLIENT_GRACE_MS = 3_000L
         private const val DEATH_GRACE_MS = 300L
+        private const val DEATH_WAIT_MS = 3_000L
     }
 }

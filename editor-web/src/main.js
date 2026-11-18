@@ -67,7 +67,7 @@ window.caEditor = {
     view.focus();
   },
   setText(text) {
-    view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: text } });
+    view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: text }, selection: { anchor: text.length } });
   },
   getText() {
     return view.state.doc.toString();
