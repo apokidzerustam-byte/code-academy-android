@@ -29,6 +29,7 @@
                 "stdin": {"type": "string"},
                 "md": {"type": "string"},
                 "ms": {"type": "integer", "minimum": 0},
+                "cue": {"type": "integer", "minimum": 0, "description": "Номер фразы озвучки (с 0), на которой начинается действие"},
                 "stream": {"enum": ["stdout", "stderr"], "default": "stdout", "description": "stderr — сообщение об ошибке (показывается красным)"}
               },
               "allOf": [

@@ -19,6 +19,7 @@ import kotlinx.coroutines.SupervisorJob
 /** Ручной контейнер зависимостей (без Hilt — меньше генерации кода, проще сборка на этапе каркаса). */
 class AppContainer(context: Context) {
     private val app = context.applicationContext
+    val assets: android.content.res.AssetManager get() = app.assets
     val content = ContentRepository(app.assets)
     val db: AppDatabase by lazy { AppDatabase.create(app) }
     val progress by lazy { ProgressRepository(db) }

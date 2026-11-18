@@ -60,6 +60,10 @@ data class SceneAction(
     val stdin: String? = null,
     val md: String? = null,
     val ms: Long = 0,
+    /** stdout | stderr (сообщение об ошибке). */
+    val stream: String = "stdout",
+    /** Номер фразы озвучки (с 0), с которой начинается действие; null — сразу после предыдущего. */
+    val cue: Int? = null,
 )
 
 @Serializable

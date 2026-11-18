@@ -3,6 +3,7 @@ package app.codeacademy.content
 import android.content.res.AssetManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import app.codeacademy.lesson.NarrationMeta
 import kotlinx.serialization.json.Json
 
 /**
@@ -41,6 +42,21 @@ class ContentRepository(private val assets: AssetManager) {
         val l = lesson(ref)
         cached("scenario:${ref.key}") { json.decodeFromString(Scenario.serializer(), read("${lessonDir(ref)}/${l.scenario}")) }
     }
+
+    /** Озвучка урока или null, если её ещё нет (урок показывается с субтитрами по таймеру). */
+    suspend fun narration(ref: LessonRef): NarrationMeta? = withContext(Dispatchers.IO) {
+        val meta = runCatching {
+            cached("narration:${ref.key}") {
+                json.decodeFromString(NarrationMeta.serializer(), read("${lessonDir(ref)}/audio/narration.json"))
+            }
+        }.getOrNull() ?: return@withContext null
+        // Сцены, для которых нет файла, считаются неозвученными.
+        val present = runCatching { assets.list("${lessonDir(ref)}/audio")?.toSet() }.getOrNull().orEmpty()
+        meta.copy(scenes = meta.scenes.filter { it.file in present })
+    }
+
+    /** Путь к файлу озвучки внутри assets (для AssetManager.openFd). */
+    fun audioAsset(ref: LessonRef, file: String) = "${lessonDir(ref)}/audio/$file"
 
     suspend fun notes(ref: LessonRef): String = withContext(Dispatchers.IO) {
         val l = lesson(ref)

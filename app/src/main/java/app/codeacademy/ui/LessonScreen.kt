@@ -1,5 +1,7 @@
 package app.codeacademy.ui
 
+import androidx.compose.material3.Button
+import app.codeacademy.lesson.LessonTimeline
 import android.os.SystemClock
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -45,6 +47,10 @@ fun LessonScreen(ref: LessonRef, onBack: () -> Unit, openAssignment: (Int) -> Un
     val c = LocalContainer.current
     var lesson by remember { mutableStateOf<Lesson?>(null) }
     var scenario by remember { mutableStateOf<Scenario?>(null) }
+    var timeline by remember { mutableStateOf<LessonTimeline?>(null) }
+    var resumeMs by remember { mutableStateOf(0L) }
+    var finished by remember { mutableStateOf(false) }
+    val audio = remember(ref) { NarrationAudio(c.assets) { c.content.audioAsset(ref, it) } }
     var notes by remember { mutableStateOf("") }
     var assignments by remember { mutableStateOf<List<Assignment>>(emptyList()) }
     var passed by remember { mutableStateOf<List<String>>(emptyList()) }
@@ -55,6 +61,8 @@ fun LessonScreen(ref: LessonRef, onBack: () -> Unit, openAssignment: (Int) -> Un
     LaunchedEffect(ref) {
         lesson = c.content.lesson(ref)
         scenario = c.content.scenario(ref)
+        timeline = LessonTimeline(scenario!!, c.content.narration(ref))
+        resumeMs = c.progress.lessonProgress(ref)?.scenePositionMs ?: 0L
         notes = c.content.notes(ref)
         assignments = c.content.assignments(ref)
         c.progress.openLesson(ref)
@@ -81,10 +89,17 @@ fun LessonScreen(ref: LessonRef, onBack: () -> Unit, openAssignment: (Int) -> Un
                     0 -> {
                         Text("Цель: ${l.goal}", style = MaterialTheme.typography.bodyLarge)
                         if (status == LessonStatus.PASSED) Text("✓ Урок пройден", color = MaterialTheme.colorScheme.primary)
-                        Text(
-                            "Анимированный урок с озвучкой появится на этапе 4. Ниже — его сценарий.",
-                            style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.outline,
-                        )
+                        timeline?.let { tl ->
+                            LessonPlayer(
+                                timeline = tl, audio = audio, initialMs = resumeMs,
+                                onProgress = { i, ms -> c.appScope.launch { c.progress.saveScene(ref, i, ms) } },
+                                onFinished = { finished = true },
+                            )
+                        }
+                        if (finished) {
+                            Button(onClick = { tab = 2 }, modifier = Modifier.testTag("to-assignments")) { Text("К заданиям →") }
+                        }
+                        Text("Текст урока", style = MaterialTheme.typography.titleMedium)
                         scenario?.scenes?.forEach { scene ->
                             Card(Modifier.fillMaxWidth()) {
                                 Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {

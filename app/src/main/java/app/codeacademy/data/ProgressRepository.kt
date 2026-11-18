@@ -37,6 +37,9 @@ class ProgressRepository(private val db: AppDatabase, private val clock: () -> L
         )
     }
 
+    suspend fun lessonProgress(ref: LessonRef): LessonProgressEntity? = db.progress().get(ref.key)
+
+    /** positionMs — позиция на общей шкале урока (LessonTimeline). */
     suspend fun saveScene(ref: LessonRef, sceneIndex: Int, positionMs: Long) = db.withTransaction {
         val cur = db.progress().get(ref.key) ?: LessonProgressEntity(ref.key, status = LessonStatus.IN_PROGRESS)
         db.progress().upsert(cur.copy(sceneIndex = sceneIndex, scenePositionMs = positionMs, updatedAt = clock()))
