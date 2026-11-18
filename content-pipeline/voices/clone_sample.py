@@ -24,7 +24,8 @@ def main(ref_wav, out_mp3, name):
     import torchaudio as ta
     from chatterbox.mtl_tts import ChatterboxMultilingualTTS
 
-    torch.set_num_threads(max(1, torch.get_num_threads()))
+    import os
+    torch.set_num_threads(os.cpu_count() or 2)
     t0 = time.monotonic()
     model = ChatterboxMultilingualTTS.from_pretrained(device="cpu")
     load_s = time.monotonic() - t0

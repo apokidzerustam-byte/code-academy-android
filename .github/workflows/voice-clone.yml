@@ -23,13 +23,14 @@ jobs:
         run: pip install chatterbox-tts piper-tts --extra-index-url https://download.pytorch.org/whl/cpu
       - name: Опорная запись
         env:
-          VOICE_REF_B64: ${{ secrets.VOICE_REF_B64 }}
+          VOICE_REF_KEY: ${{ secrets.VOICE_REF_KEY }}
         run: |
           mkdir -p out
-          if [ -n "$VOICE_REF_B64" ]; then
-            # Запись автора курса хранится в секрете репозитория, а не в публичном коде.
-            echo "$VOICE_REF_B64" | base64 -d > ref_input
-            ffmpeg -y -loglevel error -i ref_input -ac 1 -ar 24000 ref.wav
+          if [ -n "$VOICE_REF_KEY" ] && [ -f content-pipeline/voices/author_ref.enc ]; then
+            # Запись автора в репозитории только в зашифрованном виде (AES-256), ключ — в секрете.
+            printf '%s' "$VOICE_REF_KEY" > /tmp/k && chmod 600 /tmp/k
+            openssl enc -d -aes-256-cbc -pbkdf2 -in content-pipeline/voices/author_ref.enc -out ref.wav -pass file:/tmp/k
+            rm -f /tmp/k
             echo "REF_NAME=author" >> "$GITHUB_ENV"
           else
             # Записи автора пока нет: проверяем конвейер на опорном голосе Piper (CC0).
