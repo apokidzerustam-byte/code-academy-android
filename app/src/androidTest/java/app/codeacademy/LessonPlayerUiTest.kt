@@ -67,11 +67,12 @@ class LessonPlayerUiTest {
 
         // Пауза, затем перемотка по сценам к сцене с ошибкой (во время проигрывания сцена могла смениться).
         rule.onNodeWithTag("player-play").performScrollTo().performClick()
-        repeat(8) {
+        // «Назад» в середине сцены сначала возвращает к её началу (как в обычных плеерах) — поэтому до 10 нажатий.
+        repeat(10) {
             if (!sceneIs(6)) {
                 val before = (1..7).first { sceneIs(it) }
                 rule.onNodeWithTag(if (before < 6) "player-next" else "player-prev").performScrollTo().performClick()
-                rule.waitUntil(3_000) { !sceneIs(before) || sceneIs(6) }
+                rule.waitForIdle()
             }
         }
         assertTrue(sceneIs(6))
