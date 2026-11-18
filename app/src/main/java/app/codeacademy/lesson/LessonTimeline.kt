@@ -158,7 +158,7 @@ class LessonTimeline(scenario: Scenario, narration: NarrationMeta? = null) {
 
         /** Те же правила деления на фразы, что в content-pipeline/narrate.py (split_phrases). */
         fun splitPhrases(text: String): List<String> {
-            val sentences = text.trim().split(Regex("(?<=[.!?…])\\s+")).map { it.trim() }.filter { it.isNotEmpty() }
+            val sentences = text.trim().split(Regex("(?U)(?<=[.!?…])\\s+")).map { it.trim() }.filter { it.isNotEmpty() }
             val out = ArrayList<String>()
             for (sentence in sentences) {
                 var s = sentence
@@ -205,8 +205,13 @@ class LessonTimeline(scenario: Scenario, narration: NarrationMeta? = null) {
             val end = (durationMs * 92 / 100).coerceAtLeast(LEAD_IN_MS + 1)
             // Опорные точки: индекс действия → время начала.
             val anchors = sortedMapOf(0 to LEAD_IN_MS)
+            var lastAnchor = LEAD_IN_MS
             actions.forEachIndexed { i, a ->
-                a.cue?.let { c -> cues.getOrNull(c)?.let { anchors[i] = it.startMs.coerceIn(0, end) } }
+                // Номер фразы вне озвучки или идущий назад игнорируется (валидатор сообщает об этом автору).
+                a.cue?.let { c -> cues.getOrNull(c)?.let { cue ->
+                    val at = cue.startMs.coerceIn(0, end)
+                    if (i == 0 || at >= lastAnchor) { anchors[i] = at; lastAnchor = at }
+                } }
             }
             val result = ArrayList<TimedAction>(actions.size)
             val keys = anchors.keys.toList()

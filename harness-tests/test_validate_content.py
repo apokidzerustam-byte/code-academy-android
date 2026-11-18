@@ -90,3 +90,30 @@ def test_broken_notes_code_detected(pack):
 def test_missing_file_detected(pack):
     (pack / LESSON / "notes.md").unlink()
     assert any("нет файла notes.md" in e for e in errors(pack))
+
+
+def test_bad_cues_detected(pack):
+    def f(s):
+        s["scenes"][2]["actions"][0]["cue"] = 99          # нет такой фразы
+        s["scenes"][5]["actions"][4]["cue"] = 0           # раньше предыдущей опорной точки
+    edit_json(pack / LESSON / "scenario.json", f)
+    errs = errors(pack)
+    assert any("фраз в озвучке" in e for e in errs)
+    assert any("раньше предыдущего" in e for e in errs)
+
+
+def test_wrong_error_message_detected(pack):
+    def f(s):
+        s["scenes"][5]["actions"][3]["text"] = "NameError: name 'x' is not defined\n"
+    edit_json(pack / LESSON / "scenario.json", f)
+    assert any("в сообщении об ошибке нет" in e for e in errors(pack))
+
+
+def test_stale_and_missing_audio(pack):
+    audio = pack / LESSON / "audio"
+    (audio / "run.m4a").unlink()
+    edit_json(pack / LESSON / "scenario.json", lambda s: s["scenes"][0].__setitem__("narration", "Новый текст."))
+    rep = vc.Report()
+    vc.validate_pack(pack, rep)
+    assert any("нет файла run.m4a" in e for e in rep.errors)
+    assert any("изменился после озвучки" in w for w in rep.warnings)

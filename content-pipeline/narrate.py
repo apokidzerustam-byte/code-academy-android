@@ -257,6 +257,8 @@ def main():
     print(f"Фраз: {sum(1 for r in report if 'cer' in r)}, выше порога CER: {len(bad)}")
     for r in bad:
         print(f"  ! {r['scene']}: cer={r['cer']} «{r['phrase']}» → «{r['heard']}»")
+    # Плохо распознанные фразы не попадают в приложение: job падает, коммита нет, автор правит текст/ударения.
+    return 1 if bad else 0
 
 
 if __name__ == "__main__":

@@ -24,6 +24,12 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "app" / "src" / "main" / "python"))
 import ca_runner  # noqa: E402
 import jsonschema  # noqa: E402
+import importlib.util as _ilu  # noqa: E402
+
+_spec = _ilu.spec_from_file_location("narrate", pathlib.Path(__file__).resolve().parents[1] / "content-pipeline" / "narrate.py")
+_narrate = _ilu.module_from_spec(_spec)
+_spec.loader.exec_module(_narrate)
+split_phrases = _narrate.split_phrases
 
 SCHEMAS = {n: json.loads((ROOT / "content" / "schema" / f"{n}.schema.json").read_text(encoding="utf-8"))
            for n in ("pack", "lesson", "scenario", "assignment")}
@@ -73,6 +79,16 @@ def validate_scenario(path, scen, rep):
     for scene in scen["scenes"]:
         where = f"{path}#{scene['id']}"
         words += len(re.findall(r"\w+", scene["narration"]))
+        # Привязка к фразам озвучки: номер фразы существует и не идёт назад.
+        n_phr = len(split_phrases(scene["narration"]))
+        prev_cue = -1
+        for i, a in enumerate(scene["actions"]):
+            if "cue" in a:
+                if a["cue"] >= n_phr:
+                    rep.err(where, f"действие {i}: cue={a['cue']}, а фраз в озвучке {n_phr}")
+                elif a["cue"] < prev_cue:
+                    rep.err(where, f"действие {i}: cue={a['cue']} раньше предыдущего ({prev_cue})")
+                prev_cue = max(prev_cue, a["cue"])
         for i, a in enumerate(scene["actions"]):
             f = a.get("file", "main.py")
             t = a["type"]

@@ -5,6 +5,10 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+  # Коммит озвучки делается токеном Actions и сам сборку не запускает — запускаем после «Narrate lessons».
+  workflow_run:
+    workflows: ["Narrate lessons"]
+    types: [completed]
 
 concurrency:
   group: android-${{ github.ref }}
@@ -68,7 +72,7 @@ jobs:
           name: code-academy-apk
           path: app/build/outputs/apk/**/*.apk
       - name: Опубликовать APK в ветку apk (для установки на телефон)
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_run')
         run: |
           mkdir -p /tmp/apk && cp app/build/outputs/apk/release/app-release.apk /tmp/apk/code-academy-proto.apk
           cd /tmp/apk

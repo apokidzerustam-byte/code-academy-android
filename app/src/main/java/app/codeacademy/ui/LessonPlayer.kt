@@ -1,6 +1,11 @@
 package app.codeacademy.ui
 
-import android.content.res.AssetManager
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.media.PlaybackParams
@@ -46,6 +51,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
@@ -62,26 +70,54 @@ val PLAYER_SPEEDS = listOf(1f, 1.25f, 1.5f, 2f, 0.75f)
 /**
  * Озвучка урока: один MediaPlayer на текущую сцену (файлы сцен лежат в assets без сжатия).
  * Время плеера = начало сцены + позиция в её файле, поэтому анимация не уходит от голоса.
+ * Фокус звука: при звонке, другом плеере или отключении наушников вызывается onInterrupt (урок встаёт на паузу).
  */
-class NarrationAudio(private val assets: AssetManager, private val assetPath: (String) -> String) {
+class NarrationAudio(
+    private val context: Context,
+    private val assetPath: (String) -> String,
+) {
     private var player: MediaPlayer? = null
     private var loadedFile: String? = null
-    var failed: String? = null
+    private var broken = false
+    /** Последняя ошибка звука (Compose-состояние: экран включает субтитры). */
+    var failed by mutableStateOf<String?>(null)
         private set
+    var onInterrupt: (() -> Unit)? = null
+
+    private val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    private val attrs = AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
+        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build()
+    private val focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+        .setAudioAttributes(attrs)
+        .setOnAudioFocusChangeListener { change ->
+            if (change == AudioManager.AUDIOFOCUS_LOSS || change == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT ||
+                change == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK
+            ) onInterrupt?.invoke()
+        }.build()
+    private var hasFocus = false
+    private val noisyReceiver = object : BroadcastReceiver() {
+        override fun onReceive(c: Context, i: Intent) { onInterrupt?.invoke() }
+    }
+    private var noisyRegistered = false
 
     fun load(file: String): Boolean {
-        if (loadedFile == file && player != null) return true
+        if (loadedFile == file && player != null && !broken) return true
         release()
         return runCatching {
             val mp = MediaPlayer()
-            mp.setAudioAttributes(
-                AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build(),
-            )
-            assets.openFd(assetPath(file)).use { fd -> mp.setDataSource(fd.fileDescriptor, fd.startOffset, fd.length) }
+            mp.setAudioAttributes(attrs)
+            mp.setOnErrorListener { _, what, extra ->
+                Log.w("CAPLAYER", "MediaPlayer error $what/$extra")
+                broken = true
+                failed = "ошибка воспроизведения ($what/$extra)"
+                true
+            }
+            context.assets.openFd(assetPath(file)).use { fd -> mp.setDataSource(fd.fileDescriptor, fd.startOffset, fd.length) }
             mp.prepare()
             player = mp
             loadedFile = file
+            broken = false
+            failed = null
             true
         }.getOrElse {
             Log.w("CAPLAYER", "audio $file: $it")
@@ -91,26 +127,49 @@ class NarrationAudio(private val assets: AssetManager, private val assetPath: (S
         }
     }
 
-    fun positionMs(): Long? = player?.let { runCatching { it.currentPosition.toLong() }.getOrNull() }
-    val isPlaying: Boolean get() = player?.let { runCatching { it.isPlaying }.getOrDefault(false) } ?: false
+    fun positionMs(): Long? = player?.takeIf { !broken }?.let { runCatching { it.currentPosition.toLong() }.getOrNull() }
+    val isPlaying: Boolean get() = player?.takeIf { !broken }?.let { runCatching { it.isPlaying }.getOrDefault(false) } ?: false
 
-    fun play(fromMs: Long, speed: Float) {
-        val mp = player ?: return
-        runCatching {
+    /** false — звук не запустился (нет фокуса или ошибка). */
+    fun play(fromMs: Long, speed: Float): Boolean {
+        val mp = player?.takeIf { !broken } ?: return false
+        if (!hasFocus) {
+            hasFocus = audioManager.requestAudioFocus(focusRequest) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+            if (!hasFocus) return false
+        }
+        if (!noisyRegistered) {
+            context.registerReceiver(noisyReceiver, IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY))
+            noisyRegistered = true
+        }
+        return runCatching {
             mp.seekTo(fromMs.toInt())
+            // setPlaybackParams запускает воспроизведение — поэтому вызывается только здесь, перед start().
             mp.playbackParams = PlaybackParams().setSpeed(speed).setPitch(1f)
             if (!mp.isPlaying) mp.start()
-        }.onFailure { Log.w("CAPLAYER", "play: $it") }
+            true
+        }.getOrElse { Log.w("CAPLAYER", "play: $it"); false }
     }
 
     fun pause() {
         runCatching { player?.takeIf { it.isPlaying }?.pause() }
+        abandon()
+    }
+
+    private fun abandon() {
+        if (hasFocus) { audioManager.abandonAudioFocusRequest(focusRequest); hasFocus = false }
+        if (noisyRegistered) { runCatching { context.unregisterReceiver(noisyReceiver) }; noisyRegistered = false }
     }
 
     fun release() {
         runCatching { player?.release() }
         player = null
         loadedFile = null
+        broken = false
+    }
+
+    fun close() {
+        release()
+        abandon()
     }
 }
 
@@ -125,10 +184,14 @@ fun LessonPlayer(
     modifier: Modifier = Modifier,
 ) {
     var t by remember(timeline) { mutableLongStateOf(initialMs.coerceIn(0, timeline.totalMs)) }
+    // Первый запуск эффекта (плеер только появился) не сохраняет позицию: она и так из базы.
+    var settled by remember { mutableStateOf(false) }
     var playing by remember { mutableStateOf(false) }
     var speedIdx by remember { mutableStateOf(0) }
     val speed = PLAYER_SPEEDS[speedIdx]
-    var captions by remember { mutableStateOf(!timeline.hasAudio) }
+    var captionsChoice by remember { mutableStateOf(!timeline.hasAudio) }
+    // Если звук не работает, урок без субтитров стал бы немым — субтитры включаются сами.
+    val captions = captionsChoice || audio?.failed != null
     var seeking by remember { mutableStateOf<Float?>(null) }
     var audioOn by remember { mutableStateOf(false) }
     // Перезапуск часов после перемотки (playing мог остаться тем же значением).
@@ -141,16 +204,17 @@ fun LessonPlayer(
     LaunchedEffect(playing, speed, timeline, epoch) {
         if (!playing) {
             audio?.pause(); audioOn = false
-            latestProgress(timeline.sceneAt(t), t) // позиция сохраняется при каждой паузе
+            if (settled) latestProgress(timeline.sceneAt(t), t) // позиция сохраняется при каждой паузе
+            settled = true
             return@LaunchedEffect
         }
+        settled = true
         var scene = timeline.sceneAt(t)
+        var warmup = 0
         fun startAudio() {
             val s = timeline.scenes[scene]
-            if (useAudio && s.audioFile != null && audio!!.load(s.audioFile)) {
-                audio.play(t - s.startMs, speed)
-                audioOn = true
-            } else audioOn = false
+            audioOn = useAudio && s.audioFile != null && audio!!.load(s.audioFile) && audio.play(t - s.startMs, speed)
+            warmup = 3
         }
         startAudio()
         var last = withFrameMillis { it }
@@ -158,9 +222,11 @@ fun LessonPlayer(
         while (playing) {
             val now = withFrameMillis { it }
             val s = timeline.scenes[scene]
-            val pos = if (audioOn) audio!!.positionMs() else null
-            val next = if (pos != null && audio!!.isPlaying) s.startMs + pos
-            else t + ((now - last) * speed).toLong()
+            // Сразу после seekTo позиция может быть ещё старой — первые кадры идём по таймеру.
+            val pos = if (audioOn && warmup == 0) audio!!.positionMs() else null
+            if (warmup > 0) warmup--
+            val byAudio = pos != null && audio!!.isPlaying
+            val next = if (byAudio) s.startMs + pos!! else t + ((now - last) * speed).toLong()
             last = now
             if (next >= s.endMs || (audioOn && !audio!!.isPlaying && (pos ?: 0) >= s.durationMs - 300)) {
                 // Конец сцены: следующая сцена (или конец урока).
@@ -174,7 +240,8 @@ fun LessonPlayer(
                 latestProgress(scene, t)
                 startAudio()
             } else {
-                t = maxOf(t, next)
+                // По звуку время может и чуть отступить (точная подстройка), по таймеру — только вперёд.
+                t = if (byAudio) next else maxOf(t, next)
             }
             if (now - lastSaved > 5000) { latestProgress(scene, t); lastSaved = now }
         }
@@ -184,9 +251,11 @@ fun LessonPlayer(
     DisposableEffect(lifecycle) {
         val obs = LifecycleEventObserver { _, e -> if (e == Lifecycle.Event.ON_PAUSE) playing = false }
         lifecycle.addObserver(obs)
+        audio?.onInterrupt = { playing = false }
         onDispose {
             lifecycle.removeObserver(obs)
-            audio?.release()
+            audio?.onInterrupt = null
+            audio?.close()
             latestProgress(timeline.sceneAt(t), t)
         }
     }
@@ -220,7 +289,8 @@ fun LessonPlayer(
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.fillMaxWidth().heightIn(min = 44.dp)
                         .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                        .padding(8.dp).testTag("player-caption"),
+                        .padding(8.dp).testTag("player-caption")
+                        .semantics { liveRegion = LiveRegionMode.Polite },
                 )
             }
             Slider(
@@ -228,7 +298,10 @@ fun LessonPlayer(
                 onValueChange = { seeking = it },
                 onValueChangeFinished = { seeking?.let { seek(it.toLong()) }; seeking = null },
                 valueRange = 0f..timeline.totalMs.coerceAtLeast(1).toFloat(),
-                modifier = Modifier.testTag("player-seek"),
+                modifier = Modifier.testTag("player-seek").semantics {
+                    contentDescription = "Перемотка урока"
+                    stateDescription = "${fmt(t)} из ${fmt(timeline.totalMs)}"
+                },
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("${fmt(seeking?.toLong() ?: t)} / ${fmt(timeline.totalMs)}", style = MaterialTheme.typography.labelMedium)
@@ -256,7 +329,7 @@ fun LessonPlayer(
                 TextButton(onClick = { speedIdx = (speedIdx + 1) % PLAYER_SPEEDS.size }, modifier = Modifier.testTag("player-speed")) {
                     Text("${speed.toString().removeSuffix(".0")}×")
                 }
-                TextButton(onClick = { captions = !captions }, modifier = Modifier.testTag("player-cc")) {
+                TextButton(onClick = { captionsChoice = !captions }, modifier = Modifier.testTag("player-cc")) {
                     Text(if (captions) "Субтитры: вкл" else "Субтитры: выкл")
                 }
             }
@@ -287,7 +360,8 @@ private fun CodePanel(file: String, code: String, highlight: Set<Int>, typing: B
     Column(
         Modifier.fillMaxWidth().background(CODE_BG, RoundedCornerShape(8.dp)).padding(vertical = 8.dp)
             .heightIn(min = 96.dp).testTag("player-code")
-            .semantics { contentDescription = "Код: $code" },
+            // Во время набора описание не меняется на каждой букве (TalkBack не повторяет его).
+            .semantics { contentDescription = if (typing) "Код набирается" else "Код: $code" },
     ) {
         Text(file, color = LINE_NO, style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(start = 12.dp, bottom = 4.dp))
         lines.forEachIndexed { i, line ->

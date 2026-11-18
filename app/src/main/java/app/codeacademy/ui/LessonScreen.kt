@@ -1,5 +1,9 @@
 package app.codeacademy.ui
 
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.sync.Mutex
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material3.Button
 import app.codeacademy.lesson.LessonTimeline
 import android.os.SystemClock
@@ -50,7 +54,12 @@ fun LessonScreen(ref: LessonRef, onBack: () -> Unit, openAssignment: (Int) -> Un
     var timeline by remember { mutableStateOf<LessonTimeline?>(null) }
     var resumeMs by remember { mutableStateOf(0L) }
     var finished by remember { mutableStateOf(false) }
-    val audio = remember(ref) { NarrationAudio(c.assets) { c.content.audioAsset(ref, it) } }
+    // Сохранения позиции идут строго по очереди: старая позиция не перезапишет новую.
+    val saveMutex = remember { Mutex() }
+    val context = LocalContext.current
+    val audio = remember(ref) { NarrationAudio(context.applicationContext) { c.content.audioAsset(ref, it) } }
+    // Позиция живёт на уровне экрана: при переключении вкладок плеер продолжает с того же места.
+    var positionMs by rememberSaveable(ref) { mutableStateOf<Long?>(null) }
     var notes by remember { mutableStateOf("") }
     var assignments by remember { mutableStateOf<List<Assignment>>(emptyList()) }
     var passed by remember { mutableStateOf<List<String>>(emptyList()) }
@@ -62,7 +71,8 @@ fun LessonScreen(ref: LessonRef, onBack: () -> Unit, openAssignment: (Int) -> Un
         lesson = c.content.lesson(ref)
         scenario = c.content.scenario(ref)
         // Сначала позиция, потом шкала: плеер появляется вместе с timeline и запоминает начальную позицию.
-        resumeMs = c.progress.lessonProgress(ref)?.scenePositionMs ?: 0L
+        resumeMs = positionMs ?: c.progress.lessonProgress(ref)?.scenePositionMs ?: 0L
+        positionMs = resumeMs
         timeline = LessonTimeline(scenario!!, c.content.narration(ref))
         notes = c.content.notes(ref)
         assignments = c.content.assignments(ref)
@@ -92,8 +102,11 @@ fun LessonScreen(ref: LessonRef, onBack: () -> Unit, openAssignment: (Int) -> Un
                         if (status == LessonStatus.PASSED) Text("✓ Урок пройден", color = MaterialTheme.colorScheme.primary)
                         timeline?.let { tl ->
                             LessonPlayer(
-                                timeline = tl, audio = audio, initialMs = resumeMs,
-                                onProgress = { i, ms -> c.appScope.launch { c.progress.saveScene(ref, i, ms) } },
+                                timeline = tl, audio = audio, initialMs = positionMs ?: resumeMs,
+                                onProgress = { i, ms ->
+                                    positionMs = ms
+                                    c.appScope.launch(start = CoroutineStart.UNDISPATCHED) { saveMutex.withLock { c.progress.saveScene(ref, i, ms) } }
+                                },
                                 onFinished = { finished = true },
                             )
                         }
