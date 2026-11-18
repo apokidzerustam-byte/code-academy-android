@@ -9,4 +9,8 @@ rc=$?
 adb logcat -d -s CAPROBE:I > build/ci/probe.log || true
 adb logcat -d '*:E' | tail -n 400 > build/ci/errors.log || true
 echo "gradle exit code: $rc" >> build/ci/probe.log
+echo "===== CAPROBE ====="
+cat build/ci/probe.log
+echo "===== FAILED TESTS ====="
+grep -rhoE '<testcase [^>]*name="[^"]*"[^>]*>[[:space:]]*<failure message="[^"]{0,400}' */build/outputs/androidTest-results 2>/dev/null | head -40
 exit $rc

@@ -8,7 +8,7 @@ await build({
   bundle: true,
   minify: true,
   format: "iife",
-  target: ["chrome69"]  // WebView API 29 без обновлений,
+  target: ["chrome69"], // WebView API 29 без обновлений
   outfile: `${out}/editor.js`,
   legalComments: "external",
 });

@@ -115,7 +115,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        spec: [v2, v1]
+        spec: [v2, v2strict, v1]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4

@@ -7,6 +7,7 @@ plugins {
 }
 
 // -PfastapiSpec=v2 (по умолчанию: актуальный FastAPI + pydantic v2 с Rust-ядром)
+// -PfastapiSpec=v2strict (требует pydantic>=2)
 // -PfastapiSpec=v1 (запасной: FastAPI 0.99 + pydantic 1.10, чистый Python)
 val spec = (findProperty("fastapiSpec") as String?) ?: "v2"
 
@@ -37,6 +38,12 @@ chaquopy {
                 install("pydantic==1.10.21")
                 install("httpx==0.27.2")
                 install("uvicorn==0.29.0")
+            } else if (spec == "v2strict") {
+                // Ожидаемо падает, если pydantic-core (Rust) недоступен для Android.
+                install("pydantic>=2")
+                install("fastapi")
+                install("httpx")
+                install("uvicorn")
             } else {
                 install("fastapi")
                 install("httpx")
