@@ -103,4 +103,14 @@ class TrainingShellTest {
         ProjectFiles.write(dir, mapOf("main.py" to "2"))
         assertEquals("S", java.io.File(outside, "secret.txt").readText())
     }
+
+    @Test fun pastedLinesAreSeparateCommands() {
+        assertEquals(
+            listOf("mkdir data", "echo привет > data/note.txt", "cat data/note.txt", "ls"),
+            app.codeacademy.ui.terminalCommands("mkdir data\necho привет > data/note.txt\r\ncat data/note.txt\n\n  ls  \n"),
+        )
+        val s = shell("main.py" to "")
+        for (c in app.codeacademy.ui.terminalCommands("mkdir data\necho привет > data/note.txt\ncat data/note.txt")) s.x(c)
+        assertEquals("привет\n", s.files["data/note.txt"])
+    }
 }

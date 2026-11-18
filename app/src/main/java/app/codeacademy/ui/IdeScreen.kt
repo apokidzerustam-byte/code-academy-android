@@ -61,6 +61,10 @@ private fun languageOf(path: String) = when (path.substringAfterLast('.', "").lo
     else -> "python"
 }
 
+/** Строки ввода терминала: каждая непустая строка — отдельная команда. */
+fun terminalCommands(input: String): List<String> =
+    input.split('\n', '\r').map { it.trim() }.filter { it.isNotEmpty() }
+
 /** Текст результата запуска для консоли/терминала. */
 fun formatRun(r: RunResult): String = buildString {
     when (r.status) {
@@ -209,11 +213,15 @@ fun IdeScreen(projectId: String, settings: Settings, onBack: () -> Unit) {
                         val line = termLine
                         termLine = ""
                         scope.launch {
-                            shell.files.clear(); shell.files.putAll(files)
-                            val prompt = shell.prompt
-                            val res = shell.exec(line)
-                            files.clear(); files.putAll(shell.files)
-                            term = if (res.clear) "" else (term + prompt + line + "\n" + res.output.let { if (it.isEmpty()) "" else it.trimEnd() + "\n" }).takeLast(20_000)
+                            // Вставка нескольких строк (например, скопированных из инструкции):
+                            // каждая строка выполняется отдельной командой, по порядку.
+                            for (cmd in terminalCommands(line)) {
+                                shell.files.clear(); shell.files.putAll(files)
+                                val prompt = shell.prompt
+                                val res = shell.exec(cmd)
+                                files.clear(); files.putAll(shell.files)
+                                term = if (res.clear) "" else (term + prompt + cmd + "\n" + res.output.let { if (it.isEmpty()) "" else it.trimEnd() + "\n" }).takeLast(20_000)
+                            }
                             if (current !in files) current = files.keys.firstOrNull { !it.endsWith("/.keep") } ?: current
                         }
                     }),
