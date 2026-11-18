@@ -32,16 +32,16 @@ let changeTimer = null;
 // Небольшой текст отправляется приложению сразу после каждого изменения — тогда «Запустить»/«Проверить»
 // всегда видят последнюю правку. Только очень большие файлы отправляются с короткой задержкой.
 const IMMEDIATE_LIMIT = 32 * 1024;
-function notify(doc) {
+function notify(doc, external) {
   const text = doc.toString();
   if (window.AndroidBridge) window.AndroidBridge.onChange(text);
-  if (window.caEditorHost) {
+  if (window.caEditorHost && !external) {
     clearTimeout(changeTimer);
     if (text.length <= IMMEDIATE_LIMIT) toHost({ type: "change", text });
     else changeTimer = setTimeout(() => toHost({ type: "change", text }), 120);
   }
 }
-// Изменения, пришедшие из приложения (setText), обратно не отправляются.
+// Изменения, пришедшие из приложения (setText), обратно в приложение (caEditorHost) не отправляются.
 let applyingExternal = false;
 function fontTheme(px) {
   return EditorView.theme({ "&": { fontSize: px + "px" }, ".cm-gutters": { fontSize: px + "px" } });
@@ -71,7 +71,7 @@ const view = new EditorView({
       fontSize.of(fontTheme(15)),
       readOnly.of(EditorState.readOnly.of(false)),
       EditorView.lineWrapping,
-      EditorView.updateListener.of((u) => { if (u.docChanged && !applyingExternal) notify(u.state.doc); }),
+      EditorView.updateListener.of((u) => { if (u.docChanged) notify(u.state.doc, applyingExternal); }),
     ],
   }),
 });
