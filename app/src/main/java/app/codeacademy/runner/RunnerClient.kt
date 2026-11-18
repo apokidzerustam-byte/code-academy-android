@@ -64,8 +64,6 @@ class RunnerClient(context: Context, val isolated: Boolean) {
     }
 
     @Volatile private var conn: Conn? = null
-    /** Процесс, который должен умереть (после TIMEOUT/STOPPED); ждём его перед новым bind. */
-    @Volatile private var pendingDeath: CompletableDeferred<Unit>? = null
 
     private val replyHandler = Handler(replyThread.looper) { msg ->
         when (msg.what) {
@@ -91,14 +89,18 @@ class RunnerClient(context: Context, val isolated: Boolean) {
     private fun retireCurrent() {
         val c = conn ?: return
         conn = null
-        pendingDeath = c.died
+        dying[isolated] = c.died
         runCatching { app.unbindService(c) }
     }
 
     private suspend fun ensureBound(): Messenger? = bindLock.withLock {
         conn?.messenger?.let { return it }
-        pendingDeath?.let { withTimeoutOrNull(DEATH_WAIT_MS) { it.await() } }
-        pendingDeath = null
+        // Ожидание общее для всех клиентов процесса: процесс раннера один на приложение,
+        // и новый клиент не должен подключиться к процессу, который сейчас самоуничтожается.
+        dying[isolated]?.let { d ->
+            withTimeoutOrNull(DEATH_WAIT_MS) { d.await() }
+            dying.remove(isolated, d)
+        }
         val c = Conn()
         conn = c
         if (!app.bindService(Intent(app, serviceClass), c, Context.BIND_AUTO_CREATE)) {
@@ -208,6 +210,8 @@ class RunnerClient(context: Context, val isolated: Boolean) {
     )
 
     companion object {
+        /** Процессы раннера (по уровню), которые должны умереть после TIMEOUT/STOPPED. */
+        private val dying = ConcurrentHashMap<Boolean, CompletableDeferred<Unit>>()
         private const val BIND_TIMEOUT_MS = 20_000L
         private const val CLIENT_GRACE_MS = 3_000L
         private const val DEATH_GRACE_MS = 300L

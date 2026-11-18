@@ -108,6 +108,21 @@ abstract class RunnerContractTest(private val isolated: Boolean) {
         assertEquals(RunStatus.STOPPED, r.status)
     }
 
+    /** Регрессия: новый клиент сразу после «Стоп» не должен попасть в умирающий процесс. */
+    @Test fun newClientRightAfterStopWorks(): Unit = runBlocking {
+        val job = async { client.run("while True:\n    pass", 30_000, project = "test") }
+        delay(500)
+        client.stop()
+        assertEquals(RunStatus.STOPPED, job.await().status)
+        val fresh = RunnerClient(ctx, isolated)
+        try {
+            val r = fresh.run("print('fresh')", project = "test")
+            assertEquals(r.stderr, "fresh\n", r.stdout)
+        } finally {
+            fresh.close()
+        }
+    }
+
     @Test fun memoryBombDoesNotKillApp() {
         val r = run("x = bytearray(16 * 1024 ** 3)", timeoutMs = 5_000)
         probe("memoryBomb", "status=${r.status} err=${r.stderr.lineSequence().lastOrNull { it.isNotBlank() }}")
