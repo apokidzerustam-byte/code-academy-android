@@ -10,6 +10,8 @@ import kotlinx.serialization.json.JsonElement
 @Serializable
 data class CaseReport(
     val id: String? = null,
+    /** Номер строки ответа (задания «предскажи результат»). */
+    val line: Int? = null,
     val hidden: Boolean = false,
     val passed: Boolean = false,
     val hint: String? = null,
@@ -21,6 +23,8 @@ data class CaseReport(
 
 @Serializable
 data class CheckReport(
+    /** "answer" — построчная проверка ответа текстом. */
+    val kind: String? = null,
     val allPassed: Boolean = false,
     val passed: Int = 0,
     val total: Int = 0,

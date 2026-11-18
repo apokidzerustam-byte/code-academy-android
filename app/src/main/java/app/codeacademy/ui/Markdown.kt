@@ -1,6 +1,7 @@
 package app.codeacademy.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,8 +42,34 @@ fun MarkdownText(md: String, modifier: Modifier = Modifier) {
                     Text(block.marker + " ", style = MaterialTheme.typography.bodyLarge)
                     Text(inline(block.text), style = MaterialTheme.typography.bodyLarge)
                 }
-                is MdBlock.Table -> CodeBlock(block.rows.joinToString("\n") { it.joinToString("  │  ") })
+                is MdBlock.Table -> TableBlock(block.rows)
                 is MdBlock.Paragraph -> Text(inline(block.text), style = MaterialTheme.typography.bodyLarge)
+            }
+        }
+    }
+}
+
+/** Таблица: первая строка — заголовок, ячейки переносятся по словам, инлайн-разметка работает. */
+@Composable
+fun TableBlock(rows: List<List<String>>) {
+    val cols = rows.maxOfOrNull { it.size } ?: return
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+            .padding(4.dp),
+    ) {
+        rows.forEachIndexed { r, row ->
+            if (r > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            Row(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+                for (c in 0 until cols) {
+                    Text(
+                        inline(row.getOrElse(c) { "" }),
+                        style = if (r == 0) MaterialTheme.typography.labelLarge else MaterialTheme.typography.bodyMedium,
+                        fontWeight = if (r == 0) FontWeight.Bold else null,
+                        modifier = Modifier.weight(1f).padding(horizontal = 6.dp),
+                    )
+                }
             }
         }
     }

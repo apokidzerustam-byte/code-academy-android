@@ -34,6 +34,13 @@ class AssessmentOnDeviceTest {
             val bad = service.evaluate(runner, a, a.starterCode ?: "неверный ответ")
             assertFalse("${a.id}: заготовка прошла", bad.passed)
         }
+        // Ответ ученика со скриншота: разбор по строкам, без раскрытия правильного ответа.
+        val predict = content.assignments(ref).first { it.id == "a3-predict" }
+        val p = service.evaluate(runner, predict, "10-4\n6\n\"Готово\"").report!!
+        assertEquals("answer", p.kind)
+        assertEquals(1, p.cases.count { it.line != null && it.passed })
+        assertTrue(p.cases[0].hint!!.contains("пробел"))
+        assertTrue(p.cases[2].hint!!.contains("Кавычки"))
         val fix = content.assignments(ref).first { it.id == "a2-fix-quote" }
         val v = service.evaluate(runner, fix, fix.starterCode!!)
         assertEquals("SyntaxError", v.errorType)

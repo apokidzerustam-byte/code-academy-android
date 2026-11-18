@@ -270,6 +270,23 @@ private fun VerdictView(v: Verdict, asg: Assignment) {
                     Text("Ошибка при запуске кода:", style = MaterialTheme.typography.titleSmall)
                     CodeBlock(r.loadError)
                 }
+                r.kind == "answer" -> {
+                    val lines = r.cases.filter { it.line != null }
+                    val right = lines.count { it.passed }
+                    Text(
+                        if (ok) "Верно! Все строки совпали." else "Верных строк: $right из ${lines.size}",
+                        style = MaterialTheme.typography.titleSmall,
+                    )
+                    r.cases.filter { !it.passed }.forEach { cs ->
+                        val mine = cs.actual.show().takeIf { cs.actual != null && it != "null" }
+                        if (cs.line != null) {
+                            Text("Строка ${cs.line}: " + (mine?.let { "«$it»" } ?: "(нет в ответе)"),
+                                style = MaterialTheme.typography.bodyLarge)
+                        }
+                        cs.hint?.let { Text("→ $it") }
+                    }
+                    if (ok) Text(asg.explanation)
+                }
                 else -> {
                     Text(
                         if (ok) "Верно! Пройдено тестов: ${r.passed} из ${r.total}" else "Пройдено тестов: ${r.passed} из ${r.total}",
@@ -280,10 +297,14 @@ private fun VerdictView(v: Verdict, asg: Assignment) {
                             Text("Скрытый тест не пройден." + (cs.hint?.let { " Подсказка: $it" } ?: ""))
                         } else {
                             if (cs.input != null && cs.input.show().isNotBlank()) Text("Входные данные: ${cs.input.show()}")
-                            Text("Ожидалось:")
-                            CodeBlock(cs.expected.show())
-                            Text("Получено:")
-                            CodeBlock(cs.actual.show())
+                            if (cs.expected != null) {
+                                Text("Ожидалось:")
+                                CodeBlock(cs.expected.show())
+                            }
+                            if (cs.actual != null) {
+                                Text("Получено:")
+                                CodeBlock(cs.actual.show().ifEmpty { "(пусто)" })
+                            }
                             cs.hint?.takeIf { it.isNotBlank() }?.let { Text("Подсказка: $it") }
                         }
                         cs.error?.let { CodeBlock(it) }

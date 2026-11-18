@@ -109,11 +109,35 @@ def test_module_level_output_does_not_break_function_tests(box):
     assert r["allPassed"]
 
 
+PREDICT = {"kind": "answer", "expected_answer": "10 - 4\n6\nГотово\n"}
+
+
 def test_answer_kind(box):
     spec = {"kind": "answer", "expected_answer": "2 + 3\n5\n"}
     assert check("2 + 3\n5", spec, box)["allPassed"]
+    assert check("2 + 3\n5   \n\n", spec, box)["allPassed"]
     r = check("5\n5", spec, box)
     assert not r["allPassed"] and r["cases"][0]["hint"]
+
+
+def test_answer_explains_typical_mistakes(box):
+    # Реальный ответ ученика со скриншота.
+    r = check('10-4\n6\n"Готово"', PREDICT, box)
+    assert r["passed"] == 1 and r["total"] == 3 and not r["allPassed"]
+    l1, l2, l3 = r["cases"]
+    assert "пробелы" in l1["hint"] and l2["passed"] and "Кавычки" in l3["hint"]
+    assert "expected" not in l1  # ответ не раскрывается
+
+
+def test_answer_missing_extra_and_order(box):
+    r = check("10 - 4\n6", PREDICT, box)
+    assert "не хватает" in r["cases"][2]["hint"]
+    r = check("10 - 4\n6\nГотово\nещё", PREDICT, box)
+    assert "Лишняя" in r["cases"][3]["hint"]
+    r = check("6\n10 - 4\nГотово", PREDICT, box)
+    assert any("порядок" in c.get("hint", "") for c in r["cases"])
+    r = check("", PREDICT, box)
+    assert r["passed"] == 0 and r["total"] == 3
 
 
 def test_huge_function_result_is_clipped(box):

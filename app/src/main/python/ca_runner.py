@@ -473,6 +473,40 @@ def _jsonable(v):
         return False
 
 
+def _line_hint(mine, right):
+    """Почему строка ответа неверна: типичные ошибки новичка (Error-Based Learning)."""
+    if mine is None:
+        return "Этой строки не хватает: программа выводит больше строк."
+    if right is None:
+        return "Лишняя строка: программа выводит меньше строк."
+    strip_q = mine.strip().strip("\"'«»")
+    if strip_q == right.strip() and mine.strip() != right.strip():
+        return "Кавычки на экран не выводятся: они только показывают Python, где текст."
+    if "".join(mine.split()) == "".join(right.split()):
+        return "Текст в кавычках выводится символ в символ — проверьте пробелы."
+    if mine.strip().lower() == right.strip().lower():
+        return "Проверьте большие и маленькие буквы."
+    return "Проследите, что делает эта строка программы: выводит текст как есть или сначала вычисляет."
+
+
+def _check_answer(answer, spec):
+    mine = _normalize(answer, "strip").split("\n") if answer.strip() else []
+    right = _normalize(spec["expected_answer"], "strip").split("\n")
+    cases = []
+    for i in range(max(len(mine), len(right))):
+        m = mine[i] if i < len(mine) else None
+        r = right[i] if i < len(right) else None
+        ok = m is not None and r is not None and m.rstrip() == r.rstrip()
+        c = {"id": f"line{i + 1}", "line": i + 1, "hidden": False, "passed": ok, "actual": m}
+        if not ok:
+            c["hint"] = _line_hint(m, r)
+        cases.append(c)
+    if sorted(mine) == sorted(right) and mine != right:
+        cases.append({"id": "order", "hidden": False, "passed": False, "actual": None,
+                      "hint": "Все строки верные, но порядок другой: команды выполняются сверху вниз."})
+    return {"kind": "answer", "cases": cases}
+
+
 def check(code, tests_json, sandbox_dir=None, max_output=4096):
     """Проверка решения. tests_json: {"kind": "stdout"|"function", ...}. Возвращает JSON-отчёт."""
     spec = json.loads(tests_json)
@@ -483,10 +517,8 @@ def check(code, tests_json, sandbox_dir=None, max_output=4096):
         res = _check_function(code, spec, sandbox_dir, max_output)
     elif spec["kind"] == "answer":
         # «Предскажи результат»: code — ответ ученика текстом, код не выполняется.
-        ok = _normalize(code, "strip") == _normalize(spec["expected_answer"], "strip")
-        res = {"cases": [{"id": "answer", "hidden": False, "passed": ok,
-                          **({} if ok else {"hint": spec.get("hint", "Проследите выполнение построчно")})}]}
-        spec = dict(spec, cases=[{"id": "answer"}])
+        res = _check_answer(code, spec)
+        spec = dict(spec, cases=res["cases"])
     else:
         raise ValueError(f"Неизвестный вид тестов: {spec['kind']}")
     cases = res.get("cases", [])
