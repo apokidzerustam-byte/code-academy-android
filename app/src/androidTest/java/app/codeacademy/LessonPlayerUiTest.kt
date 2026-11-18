@@ -65,11 +65,17 @@ class LessonPlayerUiTest {
         Log.i("CAPROBE", "player: output after ${System.currentTimeMillis() - t0}ms")
         assertTrue(rule.onAllNodes(hasText("Привет, мир!", substring = true) and hasAnyAncestor(hasTestTag("player-code"))).fetchSemanticsNodes().isNotEmpty())
 
-        // Перемотка к сцене с ошибкой: сообщение SyntaxError в консоли.
-        rule.onNodeWithTag("player-next").performScrollTo().performClick() // 4
-        rule.onNodeWithTag("player-next").performScrollTo().performClick() // 5
-        rule.onNodeWithTag("player-next").performScrollTo().performClick() // 6
-        rule.waitUntil(5_000) { sceneIs(6) }
+        // Пауза, затем перемотка по сценам к сцене с ошибкой (во время проигрывания сцена могла смениться).
+        rule.onNodeWithTag("player-play").performScrollTo().performClick()
+        repeat(8) {
+            if (!sceneIs(6)) {
+                val before = (1..7).first { sceneIs(it) }
+                rule.onNodeWithTag(if (before < 6) "player-next" else "player-prev").performScrollTo().performClick()
+                rule.waitUntil(3_000) { !sceneIs(before) || sceneIs(6) }
+            }
+        }
+        assertTrue(sceneIs(6))
+        rule.onNodeWithTag("player-play").performScrollTo().performClick()
         rule.waitUntil(60_000) { rule.has("player-output", "SyntaxError") }
         rule.onNodeWithTag("player-play").performScrollTo().performClick() // пауза
 
@@ -86,11 +92,11 @@ class LessonPlayerUiTest {
             ?.scenes?.isNotEmpty() == true
         // Без озвучки субтитры включены сразу, с озвучкой — по кнопке.
         if (hasAudio) rule.onNodeWithTag("player-cc").performScrollTo().performClick()
-        rule.waitUntil(5_000) { rule.onAllNodes(hasTestTag("player-caption")).fetchSemanticsNodes().isNotEmpty() }
-        rule.onNodeWithTag("player-play").performScrollTo().performClick()
-        rule.waitUntil(15_000) { rule.has("lesson-player", "Привет!") }
-        rule.onNodeWithTag("player-play").performScrollTo().performClick()
+        // Без воспроизведения: в начале урока — первая фраза озвучки.
+        rule.waitUntil(5_000) { rule.has("lesson-player", "Привет!") }
         rule.onNodeWithTag("player-cc").performScrollTo().performClick()
         rule.waitUntil(5_000) { rule.onAllNodes(hasTestTag("player-caption")).fetchSemanticsNodes().isEmpty() }
+        rule.onNodeWithTag("player-cc").performScrollTo().performClick()
+        rule.waitUntil(5_000) { rule.onAllNodes(hasTestTag("player-caption")).fetchSemanticsNodes().isNotEmpty() }
     }
 }
