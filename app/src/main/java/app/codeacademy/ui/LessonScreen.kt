@@ -61,8 +61,9 @@ fun LessonScreen(ref: LessonRef, onBack: () -> Unit, openAssignment: (Int) -> Un
     LaunchedEffect(ref) {
         lesson = c.content.lesson(ref)
         scenario = c.content.scenario(ref)
-        timeline = LessonTimeline(scenario!!, c.content.narration(ref))
+        // Сначала позиция, потом шкала: плеер появляется вместе с timeline и запоминает начальную позицию.
         resumeMs = c.progress.lessonProgress(ref)?.scenePositionMs ?: 0L
+        timeline = LessonTimeline(scenario!!, c.content.narration(ref))
         notes = c.content.notes(ref)
         assignments = c.content.assignments(ref)
         c.progress.openLesson(ref)

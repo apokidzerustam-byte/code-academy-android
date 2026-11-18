@@ -141,6 +141,7 @@ fun LessonPlayer(
     LaunchedEffect(playing, speed, timeline, epoch) {
         if (!playing) {
             audio?.pause(); audioOn = false
+            latestProgress(timeline.sceneAt(t), t) // позиция сохраняется при каждой паузе
             return@LaunchedEffect
         }
         var scene = timeline.sceneAt(t)
