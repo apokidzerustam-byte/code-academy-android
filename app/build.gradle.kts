@@ -17,8 +17,10 @@ android {
         applicationId = "app.codeacademy"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.0.1-proto"
+        // Номер сборки CI: каждая новая версия ставится поверх предыдущей.
+        val run = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
+        versionCode = run
+        versionName = "0.0.3-proto.$run"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             // arm64 — телефоны, x86_64 — эмулятор в CI.
@@ -26,11 +28,25 @@ android {
         }
     }
 
+    signingConfigs {
+        // Постоянный ключ прототипа (в репозитории, пароль «android», как у debug-ключа).
+        // Без него CI каждый раз создавал новый debug-ключ, и новая версия не ставилась поверх старой.
+        // Не для публикации в магазине: релизный ключ будет храниться в GitHub Secrets (этап 11).
+        create("prototype") {
+            storeFile = rootProject.file("signing/prototype.keystore")
+            storePassword = "android"
+            keyAlias = "codeacademy-proto"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("prototype")
+        }
         release {
             isMinifyEnabled = false
-            // Прототип: подписываем debug-ключом. Релизный ключ — в GitHub Secrets на этапе 11.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("prototype")
         }
     }
 
@@ -41,6 +57,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     sourceSets {

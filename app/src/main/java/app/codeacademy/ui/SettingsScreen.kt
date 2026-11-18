@@ -73,7 +73,7 @@ fun SettingsScreen(onBack: () -> Unit, openLab: () -> Unit) {
             HorizontalDivider()
             Text("О приложении", style = MaterialTheme.typography.titleMedium)
             Text(
-                "Code Academy · бесплатно и офлайн. Python 3.13: Pyodide 0.29.5 (MPL-2.0), Chaquopy 17 (MIT). " +
+                "Code Academy ${app.codeacademy.BuildConfig.VERSION_NAME} · бесплатно и офлайн. Python 3.13: Pyodide 0.29.5 (MPL-2.0), Chaquopy 17 (MIT). " +
                     "Редактор CodeMirror 6 (MIT). Озвучка уроков: Chatterbox (MIT), аудио содержит водяной знак Perth.",
                 style = MaterialTheme.typography.bodySmall,
             )
