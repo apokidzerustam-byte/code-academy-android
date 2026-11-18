@@ -190,6 +190,7 @@ fun LessonPlayer(
     }
 
     fun seek(to: Long) {
+        Log.i("CAPLAYER", "seek $to (scene ${timeline.sceneAt(to)})")
         t = to.coerceIn(0, timeline.totalMs)
         latestProgress(timeline.sceneAt(t), t)
         epoch++

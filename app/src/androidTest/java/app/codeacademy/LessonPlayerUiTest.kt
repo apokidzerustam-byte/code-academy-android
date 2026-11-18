@@ -9,6 +9,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.printToLog
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.codeacademy.content.LessonRef
 import kotlinx.coroutines.runBlocking
@@ -51,7 +52,10 @@ class LessonPlayerUiTest {
         // Сразу к сцене «Запуск», скорость 2×.
         rule.onNodeWithTag("player-next").performScrollTo().performClick()
         rule.onNodeWithTag("player-next").performClick()
-        rule.waitUntil(5_000) { sceneIs(3) }
+        runCatching { rule.waitUntil(5_000) { sceneIs(3) } }.onFailure {
+            rule.onNodeWithTag("lesson-player").printToLog("CAPROBE")
+            throw it
+        }
         repeat(3) { rule.onNodeWithTag("player-speed").performClick() }
         rule.waitUntil(3_000) { rule.has("player-speed", "2×") || rule.onAllNodes(hasTestTag("player-speed") and hasText("2×")).fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("player-play").performClick()
