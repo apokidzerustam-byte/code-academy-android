@@ -18,14 +18,23 @@ permissions:
 
 jobs:
   harness:
-    name: Песочница Python (pytest)
+    name: Песочница и контент (pytest + валидатор)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.13" }
-      - run: pip install pytest
+      - run: pip install pytest jsonschema
       - run: python -m pytest harness-tests -v
+      - name: Проверка контент-пакетов
+        run: python tools/validate_content.py content/packs --json content-report.json
+      - name: Отчёт о контенте
+        if: always()
+        run: |
+          echo "### Контент" >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          cat content-report.json >> "$GITHUB_STEP_SUMMARY" || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
 
   build:
     name: Сборка APK

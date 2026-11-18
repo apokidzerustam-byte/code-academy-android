@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codeacademy.app/schema/scenario.schema.json",
+  "title": "Сценарий анимированного урока",
+  "description": "Приложение рисует урок по сценарию: набор кода, подсветка, запуск, вывод — синхронно с озвучкой каждой сцены.",
+  "type": "object",
+  "required": ["scenes"],
+  "additionalProperties": false,
+  "properties": {
+    "voice": {"type": "string", "default": "author"},
+    "scenes": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "required": ["id", "narration", "actions"], "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+          "title": {"type": "string"},
+          "narration": {"type": "string", "minLength": 1, "description": "Текст озвучки сцены; из него же делаются субтитры"},
+          "stress": {"type": "object", "additionalProperties": {"type": "string"}, "description": "Подсказки ударений для синтеза: слово -> слово с ударением"},
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "object", "required": ["type"],
+              "properties": {
+                "type": {"enum": ["type", "clear", "highlight", "run", "output", "note", "pause"]},
+                "file": {"type": "string", "default": "main.py"},
+                "text": {"type": "string"},
+                "lines": {"type": "array", "items": {"type": "integer", "minimum": 1}},
+                "stdin": {"type": "string"},
+                "md": {"type": "string"},
+                "ms": {"type": "integer", "minimum": 0}
+              },
+              "allOf": [
+                {"if": {"properties": {"type": {"const": "type"}}}, "then": {"required": ["text"]}},
+                {"if": {"properties": {"type": {"const": "output"}}}, "then": {"required": ["text"]}},
+                {"if": {"properties": {"type": {"const": "highlight"}}}, "then": {"required": ["lines"]}},
+                {"if": {"properties": {"type": {"const": "note"}}}, "then": {"required": ["md"]}}
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

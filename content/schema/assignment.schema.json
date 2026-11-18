@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codeacademy.app/schema/assignment.schema.json",
+  "title": "Задание с автопроверкой",
+  "type": "object",
+  "required": ["id", "type", "title", "statement", "goal", "input", "expectedResult", "constraints", "hints", "tests", "solution", "explanation", "criteria"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+    "type": {"enum": ["write", "complete", "fix", "predict", "optimize", "function", "multi_file", "review", "design", "mini_project"]},
+    "title": {"type": "string"},
+    "statement": {"type": "string", "minLength": 10, "description": "Условие (Markdown)"},
+    "goal": {"type": "string"},
+    "input": {"type": "string", "description": "Входные данные словами"},
+    "expectedResult": {"type": "string"},
+    "constraints": {"type": "array", "items": {"type": "string"}},
+    "starterCode": {"type": "string"},
+    "code": {"type": "string", "description": "Код для разбора (predict/review)"},
+    "hints": {
+      "type": "array", "minItems": 5, "maxItems": 5,
+      "description": "Ступени ТЗ: намёк, направление, концепция, проблемный участок, алгоритм. Шестая ступень — solution.",
+      "items": {"type": "string", "minLength": 5}
+    },
+    "tests": {
+      "type": "object", "required": ["kind"],
+      "properties": {
+        "kind": {"enum": ["stdout", "function", "answer"]},
+        "function": {"type": "string"},
+        "match": {"enum": ["strip", "exact", "lines_unordered"]},
+        "tolerance": {"type": "number"},
+        "expected_answer": {"type": "string"},
+        "cases": {
+          "type": "array",
+          "items": {
+            "type": "object", "required": ["id"],
+            "properties": {
+              "id": {"type": "string"}, "hidden": {"type": "boolean"}, "hint": {"type": "string"},
+              "stdin": {"type": "string"}, "expected_stdout": {"type": "string"},
+              "args": {"type": "array"}, "kwargs": {"type": "object"}, "expected": {}, "expected_error": {"type": "string"}
+            }
+          }
+        }
+      },
+      "allOf": [
+        {"if": {"properties": {"kind": {"const": "function"}}}, "then": {"required": ["function", "cases"]}},
+        {"if": {"properties": {"kind": {"const": "stdout"}}}, "then": {"required": ["cases"]}},
+        {"if": {"properties": {"kind": {"const": "answer"}}}, "then": {"required": ["expected_answer"]}}
+      ]
+    },
+    "solution": {"type": "string", "minLength": 1},
+    "explanation": {"type": "string", "minLength": 10},
+    "criteria": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "wrongSolutions": {
+      "type": "array",
+      "description": "Типовые неверные решения: валидатор проверяет, что тесты их ловят",
+      "items": {"type": "object", "required": ["code", "why"], "additionalProperties": false,
+                "properties": {"code": {"type": "string"}, "why": {"type": "string"}, "answer": {"type": "string"}}}
+    }
+  },
+  "allOf": [
+    {"if": {"properties": {"type": {"enum": ["complete", "fix"]}}}, "then": {"required": ["starterCode"]}},
+    {"if": {"properties": {"type": {"enum": ["predict", "review"]}}}, "then": {"required": ["code"]}}
+  ]
+}

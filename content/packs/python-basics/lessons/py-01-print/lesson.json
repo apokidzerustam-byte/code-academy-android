@@ -1,0 +1,18 @@
+{
+  "id": "py-01-print",
+  "title": "Первая программа: функция print",
+  "goal": "Написать и запустить программу, которая выводит текст на экран, и уметь найти и исправить ошибку SyntaxError.",
+  "skills": ["python.print", "python.strings.literal", "python.errors.syntax"],
+  "prerequisites": [],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": ["assignments/a1-hello.json", "assignments/a2-fix-quote.json", "assignments/a3-predict.json"],
+  "passCriteria": {"minAssignmentsPassed": 2, "minScorePercent": 80},
+  "commonMistakes": [
+    {"mistake": "Забыли закрыть кавычку: print(\"Привет)", "fix": "У каждой строки две кавычки — открывающая и закрывающая, одного вида.", "errorType": "SyntaxError"},
+    {"mistake": "Забыли закрыть скобку: print(\"Привет\"", "fix": "Каждой открывающей скобке нужна закрывающая.", "errorType": "SyntaxError"},
+    {"mistake": "Написали Print с большой буквы", "fix": "Python различает большие и маленькие буквы: функция называется print.", "errorType": "NameError"},
+    {"mistake": "Текст без кавычек: print(Привет)", "fix": "Текст в программе всегда берут в кавычки, иначе Python ищет переменную с таким именем.", "errorType": "NameError"}
+  ]
+}

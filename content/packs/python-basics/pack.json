@@ -1,0 +1,10 @@
+{
+  "id": "python-basics",
+  "version": "0.1.0",
+  "stage": 3,
+  "title": "Python: основы",
+  "description": "Переменные, типы, операторы, условия, циклы. Пилотный пакет.",
+  "language": "python",
+  "minAppVersion": 1,
+  "lessons": ["py-01-print"]
+}

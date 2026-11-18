@@ -321,3 +321,163 @@ def kernel_probe(path):
     except OSError as e:
         res["net"] = f"DENIED {e.errno} {e.strerror}"
     return json.dumps(res)
+
+
+# ---------------------------------------------------------------------------
+# Автопроверка заданий (AssignmentEngine / TestEngine).
+# Проверяется ПОВЕДЕНИЕ кода на разных входных данных, а не текст решения.
+# ---------------------------------------------------------------------------
+
+def _normalize(text, mode):
+    if mode == "exact":
+        return text
+    lines = [ln.rstrip() for ln in text.replace("\r\n", "\n").split("\n")]
+    while lines and lines[-1] == "":
+        lines.pop()
+    if mode == "lines_unordered":
+        return sorted(lines)
+    return "\n".join(lines)  # "strip" по умолчанию: без хвостовых пробелов и пустых строк
+
+
+def _values_equal(expected, actual, tol):
+    if isinstance(expected, float) or isinstance(actual, float):
+        try:
+            return abs(float(expected) - float(actual)) <= tol
+        except (TypeError, ValueError):
+            return False
+    if isinstance(expected, (list, tuple)) and isinstance(actual, (list, tuple)):
+        return len(expected) == len(actual) and all(_values_equal(e, a, tol) for e, a in zip(expected, actual))
+    return expected == actual
+
+
+def _case_report(case, passed, expected=None, actual=None, error=None):
+    hidden = bool(case.get("hidden"))
+    rep = {"id": case.get("id"), "hidden": hidden, "passed": passed}
+    if not passed:
+        rep["hint"] = case.get("hint", "")
+        if error:
+            # Для скрытых тестов показываем только тип ошибки, без деталей входных данных.
+            rep["error"] = error.strip().splitlines()[-1] if hidden else error
+    if not hidden:
+        rep["input"] = case.get("stdin", case.get("args"))
+        rep["expected"] = expected
+        rep["actual"] = actual
+    return rep
+
+
+def _check_stdout(code, spec, sandbox_dir, max_output):
+    mode = spec.get("match", "strip")
+    reports = []
+    for case in spec["cases"]:
+        r = json.loads(run(code, sandbox_dir, case.get("stdin", ""), max_output))
+        exp = _normalize(case["expected_stdout"], mode)
+        act = _normalize(r["stdout"], mode)
+        if r["status"] == "SYNTAX_ERROR":
+            return {"compileError": r["stderr"]}
+        ok = r["status"] == "OK" and exp == act
+        err = r["stderr"] if r["status"] != "OK" else None
+        disp = (lambda v: "\n".join(v) if isinstance(v, list) else v)
+        reports.append(_case_report(case, ok, disp(exp), disp(act), err))
+    return {"cases": reports}
+
+
+def _check_function(code, spec, sandbox_dir, max_output):
+    global _ACTIVE, _SANDBOX
+    fname = spec["function"]
+    tol = float(spec.get("tolerance", 1e-9))
+    filename = "main.py"
+    out, err = _CappedIO(max_output), _CappedIO(max_output)
+    old_streams = sys.stdout, sys.stderr, sys.stdin
+    old_cwd = os.getcwd()
+    sys.dont_write_bytecode = True
+    reports = []
+    try:
+        _install_hook()
+        if sandbox_dir:
+            os.makedirs(sandbox_dir, exist_ok=True)
+            os.chdir(sandbox_dir)
+            _SANDBOX = _real(sandbox_dir)
+            sys.path.insert(0, _SANDBOX)
+        linecache.cache[filename] = (len(code), None, code.splitlines(True), filename)
+        try:
+            compiled = compile(code, filename, "exec")
+        except SyntaxError as e:
+            return {"compileError": "".join(traceback.format_exception_only(type(e), e))}
+        g = {"__name__": "__check__", "__file__": filename, "__builtins__": _safe_builtins()}
+        sys.stdout, sys.stderr, sys.stdin = out, err, io.StringIO("")
+        _ACTIVE = True
+        try:
+            exec(compiled, g)
+        except BaseException as e:  # noqa: BLE001
+            _ACTIVE = False
+            return {"loadError": _user_traceback(e, filename)}
+        fn = g.get(fname)
+        if not callable(fn):
+            _ACTIVE = False
+            return {"loadError": f"Функция {fname}() не найдена. Проверьте имя и что она объявлена через def."}
+        for case in spec["cases"]:
+            args = case.get("args", [])
+            kwargs = case.get("kwargs", {})
+            try:
+                _ACTIVE = True
+                actual = fn(*args, **kwargs)
+                _ACTIVE = False
+                if "expected_error" in case:
+                    reports.append(_case_report(case, False, case["expected_error"], repr(actual)))
+                else:
+                    ok = _values_equal(case["expected"], actual, tol)
+                    reports.append(_case_report(case, ok, case["expected"], actual if _jsonable(actual) else repr(actual)))
+            except BaseException as e:  # noqa: BLE001
+                _ACTIVE = False
+                if "expected_error" in case and type(e).__name__ == case["expected_error"]:
+                    reports.append(_case_report(case, True, case["expected_error"], type(e).__name__))
+                else:
+                    reports.append(_case_report(case, False, case.get("expected", case.get("expected_error")), None,
+                                                _user_traceback(e, filename)))
+    finally:
+        _ACTIVE = False
+        sys.stdout, sys.stderr, sys.stdin = old_streams
+        try:
+            os.chdir(old_cwd)
+        except OSError:
+            pass
+        if _SANDBOX:
+            _forget_user_modules(_SANDBOX)
+            try:
+                sys.path.remove(_SANDBOX)
+            except ValueError:
+                pass
+        _SANDBOX = None
+    return {"cases": reports}
+
+
+def _jsonable(v):
+    try:
+        json.dumps(v)
+        return True
+    except (TypeError, ValueError):
+        return False
+
+
+def check(code, tests_json, sandbox_dir=None, max_output=4096):
+    """Проверка решения. tests_json: {"kind": "stdout"|"function", ...}. Возвращает JSON-отчёт."""
+    spec = json.loads(tests_json)
+    started = time.monotonic()
+    if spec["kind"] == "stdout":
+        res = _check_stdout(code, spec, sandbox_dir, max_output)
+    elif spec["kind"] == "function":
+        res = _check_function(code, spec, sandbox_dir, max_output)
+    elif spec["kind"] == "answer":
+        # «Предскажи результат»: code — ответ ученика текстом, код не выполняется.
+        ok = _normalize(code, "strip") == _normalize(spec["expected_answer"], "strip")
+        res = {"cases": [{"id": "answer", "hidden": False, "passed": ok,
+                          **({} if ok else {"hint": spec.get("hint", "Проследите выполнение построчно")})}]}
+        spec = dict(spec, cases=[{"id": "answer"}])
+    else:
+        raise ValueError(f"Неизвестный вид тестов: {spec['kind']}")
+    cases = res.get("cases", [])
+    res["passed"] = sum(1 for c in cases if c["passed"])
+    res["total"] = len(spec["cases"])
+    res["allPassed"] = bool(cases) and res["passed"] == res["total"]
+    res["durationMs"] = int((time.monotonic() - started) * 1000)
+    return json.dumps(res, ensure_ascii=False, default=repr)
