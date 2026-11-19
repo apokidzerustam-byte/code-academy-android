@@ -65,3 +65,13 @@ def test_latin_parts_inside_words():
     assert narrate.spoken_form("f-строка и user_name", pron) == "эф-строка и ю́зер нэйм"
     # Слова без записи в словаре не меняются.
     assert narrate.spoken_form("Kotlin", pron) == "Kotlin"
+
+
+def test_numbers_in_recognition_are_not_errors():
+    assert narrate.number_words(21) == "двадцать один"
+    assert narrate.number_words(5050) == "пять тысяч пятьдесят"
+    assert narrate.number_words(1024) == "одна тысяча двадцать четыре"
+    assert narrate.cer("Возьмём оценки: пять, четыре, три, пять, четыре.", "Возьмем оценки 5, 4, 3, 5, 4.") == 0
+    assert narrate.cer("четыре целых две десятых", "4,2") == 0
+    assert narrate.cer("Вводим два, семь и один.", "Вводим 2, 7 и 1.") == 0
+    assert narrate.cer("пять тысяч пятьдесят", "5050") == 0

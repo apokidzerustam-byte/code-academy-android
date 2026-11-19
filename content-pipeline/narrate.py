@@ -106,9 +106,58 @@ _TRANSLIT = dict(zip("абвгдеёжзийклмнопрстуфхцчшщъы
                       "t", "u", "f", "h", "ts", "ch", "sh", "sch", "", "y", "", "e", "yu", "ya"]))
 
 
+_ONES = ["ноль", "один", "два", "три", "четыре", "пять", "шесть", "семь", "восемь", "девять", "десять",
+         "одиннадцать", "двенадцать", "тринадцать", "четырнадцать", "пятнадцать", "шестнадцать", "семнадцать",
+         "восемнадцать", "девятнадцать"]
+_TENS = ["", "", "двадцать", "тридцать", "сорок", "пятьдесят", "шестьдесят", "семьдесят", "восемьдесят", "девяносто"]
+_HUNDREDS = ["", "сто", "двести", "триста", "четыреста", "пятьсот", "шестьсот", "семьсот", "восемьсот", "девятьсот"]
+
+
+def _below_1000(n: int, fem=False) -> list:
+    out = []
+    if n >= 100:
+        out.append(_HUNDREDS[n // 100]); n %= 100
+    if n >= 20:
+        out.append(_TENS[n // 10]); n %= 10
+        if n == 0:
+            return out
+    if n or not out:
+        w = _ONES[n]
+        if fem and n in (1, 2):
+            w = "одна" if n == 1 else "две"
+        out.append(w)
+    return out
+
+
+def number_words(n: int, fem=False) -> str:
+    """Целое число словами (до миллиона) — распознавание пишет «5», а в сценарии «пять»."""
+    if n < 0:
+        return "минус " + number_words(-n, fem)
+    if n >= 1_000_000:
+        return str(n)
+    th, rest = divmod(n, 1000)
+    words = []
+    if th:
+        words += _below_1000(th, fem=True)
+        last = th % 100
+        words.append("тысяча" if last % 10 == 1 and last != 11 else
+                     "тысячи" if last % 10 in (2, 3, 4) and last not in (12, 13, 14) else "тысяч")
+    if rest or not words:
+        words += _below_1000(rest, fem)
+    return " ".join(words)
+
+
+def _num_repl(m) -> str:
+    whole, frac = m.group(1), m.group(2)
+    if not frac:
+        return number_words(int(whole))
+    unit = {1: "десятых", 2: "сотых", 3: "тысячных"}.get(len(frac), "")
+    return f"{number_words(int(whole), fem=True)} целых {number_words(int(frac), fem=True)} {unit}"
+
+
 def normalize_for_cer(text: str) -> str:
-    """Сравнение в общей латинской записи: распознавание пишет «принт» вместо print — это не ошибка озвучки."""
-    t = text.lower()
+    """Сравнение в общей латинской записи: распознавание пишет «принт» вместо print и «5» вместо «пять» — это не ошибка озвучки."""
+    t = re.sub(r"(?<![\w.])(\d+)(?:[.,](\d{1,3}))?(?![\d])", _num_repl, text.lower())
     t = "".join(_TRANSLIT.get(ch, ch) for ch in t)
     t = t.replace("th", "t").replace("y", "i").replace("w", "v").replace("c", "k").replace("x", "ks")
     t = re.sub(r"[^a-z0-9 ]+", " ", t)
