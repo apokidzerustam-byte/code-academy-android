@@ -249,7 +249,7 @@ def probe_ms(path: pathlib.Path) -> int:
     return int(round(float(out.strip()) * 1000))
 
 
-def narrate_lesson(lesson_dir: pathlib.Path, narrator_factory, ref_digest: str, voice: str, report: list):
+def narrate_lesson(lesson_dir: pathlib.Path, narrator_factory, ref_digest: str, voice: str, report: list, preparer):
     scenario = json.loads((lesson_dir / "scenario.json").read_text("utf-8"))
     audio_dir = lesson_dir / "audio"
     audio_dir.mkdir(exist_ok=True)
@@ -262,7 +262,10 @@ def narrate_lesson(lesson_dir: pathlib.Path, narrator_factory, ref_digest: str, 
         h = scene_hash(scene, ref_digest)
         file_name = f"{scene['id']}.m4a"
         prev = old_by_id.get(scene["id"])
-        if prev and prev.get("hash") == h and (audio_dir / file_name).exists():
+        # Текст для синтеза (произношение + ударения): правка словаря тоже пересобирает затронутые сцены.
+        spoken = [preparer(ph, scene.get("stress", {})) for ph in split_phrases(scene["narration"])]
+        same_spoken = prev is not None and prev.get("spoken", spoken) == spoken
+        if prev and prev.get("hash") == h and same_spoken and (audio_dir / file_name).exists():
             scenes_meta.append(prev)
             # Сцена не менялась — в отчёте остаются результаты проверки её прошлой озвучки.
             old_rows = [r for r in PREVIOUS_REPORT if r.get("lesson") == lesson_dir.name and r.get("scene") == scene["id"] and "cer" in r]
@@ -275,7 +278,7 @@ def narrate_lesson(lesson_dir: pathlib.Path, narrator_factory, ref_digest: str, 
         chunks, cues, pos = [], [], 0
         t0 = time.monotonic()
         for k, ph in enumerate(phrases):
-            synth = narrator.prepare(ph, scene.get("stress", {}))
+            synth = spoken[k]  # тот же текст, что сохраняется в narration.json
             wav, score, attempts, heard, logprob = narrator.phrase(ph, synth, seed=1000 * idx + k)
             dur = int(wav.shape[-1] * 1000 / narrator.sr)
             cues.append({"startMs": pos, "endMs": pos + dur, "text": ph})
@@ -292,7 +295,7 @@ def narrate_lesson(lesson_dir: pathlib.Path, narrator_factory, ref_digest: str, 
         for c in cues:
             c["startMs"], c["endMs"] = int(c["startMs"] * k), int(c["endMs"] * k)
         scenes_meta.append({"id": scene["id"], "file": file_name, "durationMs": real_ms, "hash": h,
-                            "textHash": text_hash(scene), "cues": cues})
+                            "textHash": text_hash(scene), "spoken": spoken, "cues": cues})
         print(f"[{lesson_dir.name}/{scene['id']}] {real_ms / 1000:.1f} c за {time.monotonic() - t0:.0f} c", flush=True)
 
     # Удаляем аудио сцен, которых больше нет в сценарии.
@@ -345,12 +348,19 @@ def main():
         PREVIOUS_REPORT = json.loads(pathlib.Path(a.report).read_text("utf-8"))
     except (OSError, ValueError):
         PREVIOUS_REPORT = []
+    pron, auto = load_pronunciation(), make_auto_stresser()
+    if auto is None:
+        raise SystemExit("Нет russian_text_stresser: без него ударения будут случайными")
+
+    def preparer(phrase, scene_stress):
+        return apply_stress(spoken_form(phrase, pron), {**pron["stress"], **scene_stress}, auto)
+
     report = []
     for scen in sorted(pathlib.Path(a.packs).glob("*/lessons/*/scenario.json")):
         if a.lesson and scen.parent.name != a.lesson:
             continue
         print(f"== {scen.parent}", flush=True)
-        narrate_lesson(scen.parent, factory, ref_digest, a.voice, report)
+        narrate_lesson(scen.parent, factory, ref_digest, a.voice, report, preparer)
     pathlib.Path(a.report).write_text(json.dumps(report, ensure_ascii=False, indent=1), "utf-8")
     bad = [r for r in report if r.get("cer", 0) > CER_LIMIT]
     print(f"Фраз: {sum(1 for r in report if 'cer' in r)}, выше порога CER: {len(bad)}")
