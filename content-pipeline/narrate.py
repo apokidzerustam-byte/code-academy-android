@@ -23,6 +23,7 @@ import sys
 import tempfile
 import time
 
+PREVIOUS_REPORT: list = []
 SETTINGS_VERSION = "1"  # меняется при изменении параметров синтеза → полная пересборка
 SAMPLE_GAP_MS = 280  # пауза между фразами
 CER_LIMIT = 0.22
@@ -186,7 +187,9 @@ def narrate_lesson(lesson_dir: pathlib.Path, narrator_factory, ref_digest: str, 
         prev = old_by_id.get(scene["id"])
         if prev and prev.get("hash") == h and (audio_dir / file_name).exists():
             scenes_meta.append(prev)
-            report.append({"lesson": lesson_dir.name, "scene": scene["id"], "cached": True})
+            # Сцена не менялась — в отчёте остаются результаты проверки её прошлой озвучки.
+            old_rows = [r for r in PREVIOUS_REPORT if r.get("lesson") == lesson_dir.name and r.get("scene") == scene["id"] and "cer" in r]
+            report.extend(old_rows or [{"lesson": lesson_dir.name, "scene": scene["id"], "cached": True}])
             continue
         narrator = narrator_factory()
         torch = narrator.torch
@@ -248,6 +251,11 @@ def main():
             holder["n"] = Narrator(a.ref)
         return holder["n"]
 
+    global PREVIOUS_REPORT
+    try:
+        PREVIOUS_REPORT = json.loads(pathlib.Path(a.report).read_text("utf-8"))
+    except (OSError, ValueError):
+        PREVIOUS_REPORT = []
     report = []
     for scen in sorted(pathlib.Path(a.packs).glob("*/lessons/*/scenario.json")):
         print(f"== {scen.parent}", flush=True)
