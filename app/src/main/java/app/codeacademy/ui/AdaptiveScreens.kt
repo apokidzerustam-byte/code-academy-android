@@ -23,7 +23,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -44,6 +43,7 @@ import app.codeacademy.content.Lesson
 import app.codeacademy.content.LessonRef
 import app.codeacademy.content.PackManifest
 import app.codeacademy.data.AttemptEntity
+import app.codeacademy.data.LessonProgressEntity
 import app.codeacademy.data.LessonStatus
 import app.codeacademy.data.ReviewItemEntity
 import app.codeacademy.data.SkillStatus
@@ -87,11 +87,14 @@ suspend fun loadCourse(c: AppContainer): CourseData {
     return CourseData(lessons, all.map { it.first }.distinctBy { it.id }.flatMap { it.skills.entries }.associate { it.key to it.value })
 }
 
+/** Курс читается из assets один раз за запуск приложения (он не меняется). */
 @Composable
 fun rememberCourse(): CourseData? {
     val c = LocalContainer.current
-    var course by remember { mutableStateOf<CourseData?>(null) }
-    LaunchedEffect(Unit) { course = loadCourse(c) }
+    var course by remember { mutableStateOf(c.courseCache) }
+    LaunchedEffect(Unit) {
+        if (course == null) course = loadCourse(c).also { c.courseCache = it }
+    }
     return course
 }
 
@@ -104,22 +107,23 @@ fun lessonScores(attempts: List<AttemptEntity>): Map<String, Int?> =
 /** Недельный план из курса, прогресса и расписания повторений. */
 fun buildPlan(
     course: CourseData,
-    statusByKey: Map<String, String>,
+    progress: List<LessonProgressEntity>,
     reviews: List<ReviewItemEntity>,
     passedByLesson: Map<String, Set<String>>,
     today: Long,
     sessionMinutes: Int,
     daysPerWeek: Int,
 ): List<DayPlan> {
-    val work = course.lessons.filter { !LessonStatus.isDone(statusByKey[it.ref.key]) }.map { cl ->
+    val byKey = progress.associateBy { it.lessonKey }
+    val work = course.lessons.filter { !LessonStatus.isDone(byKey[it.ref.key]?.status) }.map { cl ->
         val w = WeeklyPlanner.estimate(cl.ref.key, cl.lesson.title, cl.audioMinutes, cl.assignments.size)
-        // Решённые задания уже не планируются; начатый урок — без повторного объяснения.
+        // Решённые задания уже не планируются; объяснение — если урок ещё не досмотрен (90 % озвучки).
         val left = cl.assignments.count { it.id !in passedByLesson[cl.ref.key].orEmpty() }
-        val started = statusByKey[cl.ref.key] == LessonStatus.IN_PROGRESS
-        LessonWork(w.lessonKey, w.title, if (started) 0 else w.theoryMinutes, (left * 8).coerceAtLeast(8))
-    }.map { if (it.theoryMinutes == 0) it.copy(theoryMinutes = 1) else it }
-    return WeeklyPlanner.plan(today, sessionMinutes, daysPerWeek, work) { day ->
-        if (day == today) reviews.count { it.dueEpochDay <= day } else reviews.count { it.dueEpochDay == day }
+        val watched = (byKey[cl.ref.key]?.scenePositionMs ?: 0) >= cl.audioMinutes * 60_000 * 0.9
+        LessonWork(w.lessonKey, w.title, if (watched) 0 else w.theoryMinutes, if (left == 0) 0 else left * 8)
+    }
+    return WeeklyPlanner.plan(today, sessionMinutes, daysPerWeek, work) { from, to ->
+        reviews.count { it.dueEpochDay <= to && (from == null || it.dueEpochDay >= from) }
     }
 }
 
@@ -145,17 +149,26 @@ fun DiagnosticScreen(onBack: () -> Unit, onFinish: () -> Unit) {
     var index by rememberSaveable { mutableStateOf(0) }
     var answer by rememberSaveable { mutableStateOf("") }
     var finished by rememberSaveable { mutableStateOf(false) }
-    val results = remember { mutableStateListOf<Boolean>() }
-    val questions = course?.lessons?.mapNotNull { cl -> cl.assignments.firstOrNull { it.type == "predict" }?.let { cl to it } }.orEmpty()
+    // Ответы строкой «1101» — переживают поворот экрана вместе с номером вопроса.
+    var resultsRaw by rememberSaveable { mutableStateOf("") }
+    val results = resultsRaw.map { it == '1' }
+    // Цепочка уроков подряд; урок без вопроса обрывает её (иначе можно «перепрыгнуть» непроверенный урок).
+    val questions = course?.lessons.orEmpty()
+        .map { cl -> cl to cl.assignments.firstOrNull { it.type == "predict" } }
+        .takeWhile { it.second != null }.map { it.first to it.second!! }
+    var saved by rememberSaveable { mutableStateOf(false) }
 
     fun finish() {
         finished = true
-        val n = Diagnostic.confirmedPrefix(results.map { listOf(it) })
-        scope.launch {
+        val n = Diagnostic.confirmedPrefix(resultsRaw.map { listOf(it == '1') })
+        // В области приложения: уход с экрана не должен отменить запись результата.
+        c.appScope.launch {
             c.progress.testOut(questions.take(n).map { it.first.ref to it.first.lesson })
             c.settings.setOnboardingDone(true)
+            saved = true
         }
     }
+    LaunchedEffect(course) { if (course != null && questions.isEmpty() && !finished) finish() }
 
     Screen("Диагностика", onBack) { padding ->
         Column(Modifier.padding(padding).padding(16.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -173,11 +186,11 @@ fun DiagnosticScreen(onBack: () -> Unit, onFinish: () -> Unit) {
                     Button(enabled = answer.isNotBlank(), onClick = {
                         val expected = (q.tests["expected_answer"] as? kotlinx.serialization.json.JsonPrimitive)?.content.orEmpty()
                         val ok = Diagnostic.answerMatches(expected, answer)
-                        results += ok
+                        resultsRaw += if (ok) "1" else "0"
                         answer = ""
                         if (ok && index + 1 < questions.size) index++ else finish()
                     }, modifier = Modifier.testTag("diag-submit")) { Text("Ответить") }
-                    OutlinedButton(onClick = { results += false; answer = ""; finish() }, modifier = Modifier.testTag("diag-dontknow")) { Text("Не знаю") }
+                    OutlinedButton(onClick = { resultsRaw += "0"; answer = ""; finish() }, modifier = Modifier.testTag("diag-dontknow")) { Text("Не знаю") }
                 }
                 Text("Тест закончится на первом неверном ответе — темы дальше опираются на эту.",
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
@@ -191,7 +204,7 @@ fun DiagnosticScreen(onBack: () -> Unit, onFinish: () -> Unit) {
                     questions.take(n).forEach { Text("✓ " + it.first.lesson.title) }
                 }
                 questions.getOrNull(n)?.let { Text("Начнём с урока «${it.first.lesson.title}».", style = MaterialTheme.typography.titleMedium) }
-                Button(onClick = onFinish, modifier = Modifier.testTag("diag-done")) { Text("К обучению") }
+                Button(enabled = saved, onClick = onFinish, modifier = Modifier.testTag("diag-done")) { Text("К обучению") }
             }
         }
     }
@@ -383,8 +396,10 @@ fun PlanScreen(onBack: () -> Unit, openLesson: (LessonRef) -> Unit, openReview: 
             }
             Text("Пропустили день — ничего страшного: план каждый раз строится заново от сегодняшнего дня.",
                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
-            val passedBy = attempts.filter { it.passed }.groupBy { it.lessonKey }.mapValues { (_, a) -> a.map { it.assignmentId }.toSet() }
-            val plan = buildPlan(course, progress.associate { it.lessonKey to it.status }, reviews, passedBy, today, s.sessionMinutes, s.daysPerWeek)
+            val plan = remember(course, progress, reviews, attempts, s.sessionMinutes, s.daysPerWeek, today) {
+                val passedBy = attempts.filter { it.passed }.groupBy { it.lessonKey }.mapValues { (_, a) -> a.map { it.assignmentId }.toSet() }
+                buildPlan(course, progress, reviews, passedBy, today, s.sessionMinutes, s.daysPerWeek)
+            }
             plan.forEach { day ->
                 Card(Modifier.fillMaxWidth().testTag("plan-day-${day.epochDay - today}")) {
                     Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {

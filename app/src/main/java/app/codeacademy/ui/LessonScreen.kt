@@ -153,7 +153,7 @@ fun LessonScreen(ref: LessonRef, onBack: () -> Unit, openAssignment: (Int) -> Un
                         )
                         // Адаптация по порогам 60/80/90 (раздел 10 ТЗ): что делать дальше.
                         Scoring.lessonScore(lessonAttempts.map { it.lite() })?.let { score ->
-                            val rec = Advisor.forLesson(score)
+                            val rec = Advisor.forLesson(score, solved = passed.size, required = l.passCriteria.minAssignmentsPassed)
                             Card(
                                 Modifier.fillMaxWidth().testTag("recommendation"),
                                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),

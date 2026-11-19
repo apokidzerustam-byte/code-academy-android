@@ -91,6 +91,8 @@ class AdaptiveTest {
         assertTrue(!Diagnostic.answerMatches("8\n10\n", "10\n8"))
         assertTrue(!Diagnostic.answerMatches("8\n", ""))
         assertTrue(!Diagnostic.answerMatches("Привет, мир\n", "Привет,мир"))
+        // Правила те же, что в проверке заданий: текст целиком без пробелов по краям.
+        assertTrue(Diagnostic.answerMatches("  ПРИВЕТ\n", "ПРИВЕТ"))
     }
 
     @Test fun studyDaysSpreadOverWeek() {
@@ -106,7 +108,8 @@ class AdaptiveTest {
             LessonWork("l2", "Второй", theoryMinutes = 10, practiceMinutes = 30),
             LessonWork("l3", "Третий", theoryMinutes = 10, practiceMinutes = 30),
         )
-        val plan = WeeklyPlanner.plan(0, 60, 3, lessons) { day -> if (day == 2L) 4 else 0 }
+        // Срок 4 навыков — день 1 (не учебный): они переносятся на день 2.
+        val plan = WeeklyPlanner.plan(0, 60, 3, lessons) { from, to -> if (from != null && 1L in from..to) 4 else 0 }
         assertEquals(3, plan.size)
         // День 1: весь первый урок (10 + 30) и начало второго (20 мин).
         assertEquals(listOf(PlanKind.THEORY, PlanKind.PRACTICE, PlanKind.THEORY, PlanKind.PRACTICE), plan[0].items.map { it.kind })
@@ -125,8 +128,24 @@ class AdaptiveTest {
     }
 
     @Test fun planWhenCourseDoneSuggestsReview() {
-        val plan = WeeklyPlanner.plan(0, 30, 2, emptyList()) { 0 }
+        val plan = WeeklyPlanner.plan(0, 30, 2, emptyList()) { _, _ -> 0 }
         assertTrue(plan.all { d -> d.items.single().kind == PlanKind.REVIEW })
+    }
+
+    @Test fun repeatedSuccessRaisesScoreAndAdvanceNeedsPassCriteria() {
+        val peeked = listOf(a("x", 1, true, hints = 6))
+        assertEquals(40, Scoring.assignmentScore(peeked))
+        assertEquals(90, Scoring.assignmentScore(peeked + a("x", 5, true)))
+        assertEquals(40, Scoring.assignmentScore(peeked + a("x", 5, true, hints = 4)))
+        // Одно идеально решённое задание из трёх нужных — ещё не «можно идти дальше».
+        assertEquals(NextAction.EXTRA_CHECK, Advisor.forLesson(100, solved = 1, required = 3).action)
+        assertEquals(NextAction.ADVANCE, Advisor.forLesson(100, solved = 3, required = 3).action)
+        assertEquals(NextAction.REEXPLAIN, Advisor.forLesson(40, solved = 1, required = 3).action)
+    }
+
+    @Test fun zeroMinuteParts() {
+        val plan = WeeklyPlanner.plan(0, 60, 1, listOf(LessonWork("l", "Л", theoryMinutes = 0, practiceMinutes = 20))) { _, _ -> 0 }
+        assertEquals(listOf(PlanKind.PRACTICE, PlanKind.REVIEW), plan[0].items.map { it.kind })
     }
 
     @Test fun lessonEstimate() {

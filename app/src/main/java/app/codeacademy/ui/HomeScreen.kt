@@ -70,11 +70,15 @@ fun HomeScreen(
     val next = continueRef?.takeIf { !LessonStatus.isDone(statusByKey[it.first.key]) }
         ?: refs.firstOrNull { !LessonStatus.isDone(statusByKey[it.first.key]) }
     val today = java.time.LocalDate.now().toEpochDay()
-    val todayPlan = if (course != null && settings != null) {
-        val passedBy = attempts.filter { it.passed }.groupBy { it.lessonKey }.mapValues { (_, a) -> a.map { it.assignmentId }.toSet() }
-        buildPlan(course, statusByKey, reviews, passedBy, today, settings!!.sessionMinutes, settings!!.daysPerWeek)
-            .firstOrNull()?.takeIf { it.epochDay == today }
-    } else null
+    val todayPlan = remember(course, progress, reviews, attempts, settings, today) {
+        val s = settings
+        if (course != null && s != null) {
+            val passedBy = attempts.filter { it.passed }.groupBy { it.lessonKey }.mapValues { (_, a) -> a.map { it.assignmentId }.toSet() }
+            buildPlan(course, progress, reviews, passedBy, today, s.sessionMinutes, s.daysPerWeek)
+                .firstOrNull()?.takeIf { it.epochDay == today }
+        } else null
+    }
+    val progressLoaded by c.progress.lessons.collectAsStateWithLifecycle<List<app.codeacademy.data.LessonProgressEntity>?>(null)
     val weak = skills.filter { it.attempts > 0 && it.accuracy < 0.6 }
 
     Screen("Code Academy", onBack = null, actions = {
@@ -84,7 +88,8 @@ fun HomeScreen(
             Modifier.padding(padding).padding(16.dp).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            if (settings?.onboardingDone == false && progress.isEmpty()) {
+            // Карточка выбора — только когда прогресс уже прочитан и пуст (без мигания у тех, кто учится).
+            if (settings?.onboardingDone == false && progressLoaded?.isEmpty() == true) {
                 StartChoiceCard(onZero = { scope.launch { c.settings.setOnboardingDone(true) } }, onDiagnostic = openDiagnostic)
             }
             Card(Modifier.fillMaxWidth().testTag("continue")) {

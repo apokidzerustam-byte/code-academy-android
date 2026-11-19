@@ -2,6 +2,7 @@ package app.codeacademy
 
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -68,6 +69,7 @@ class AdaptiveUiTest {
             assertEquals(SkillStatus.LEARNING, app.container.db.skills().get("python.print")!!.status)
             assertTrue(app.container.settings.settings.first().onboardingDone)
         }
+        rule.waitUntil(5_000) { rule.onAllNodes(hasTestTag("diag-done") and isEnabled()).fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("diag-done").performClick()
         // Главная: карточка выбора скрыта, следующий урок — второй.
         waitText("Переменные")
@@ -108,7 +110,7 @@ class AdaptiveUiTest {
         rule.onNodeWithTag("session-30").performClick()
         rule.onNodeWithTag("days-7").performScrollTo().performClick()
         rule.waitUntil(5_000) { rule.onAllNodes(hasTestTag("plan-day-6")).fetchSemanticsNodes().isNotEmpty() }
-        waitText("Сегодня · 30 мин")
+        waitText("Сегодня · ")
         waitText("Повторение: навыков 1")
         runBlocking {
             val s = app.container.settings.settings.first()

@@ -36,6 +36,11 @@ object Scoring {
         val maxHints = upToPass.maxOf { it.hintsUsed }
         var score = 100 - minOf(firstPass, 3) * 10 - maxOf(0, maxHints - 2) * 10
         if (maxHints >= SOLUTION_HINT) score = minOf(score, 40)
+        // Повторные результаты: если позже задание решено заново самостоятельно (без подсказок дальше
+        // направления и без ошибок перед этим), балл растёт до 90 — навык закрепился.
+        val later = sorted.subList(firstPass + 1, sorted.size)
+        val lastTry = later.lastOrNull()
+        if (lastTry != null && lastTry.passed && lastTry.hintsUsed <= 2) score = maxOf(score, 90)
         return score.coerceIn(0, 100)
     }
 
@@ -51,7 +56,22 @@ object Scoring {
 data class Recommendation(val action: NextAction, val title: String, val details: String)
 
 object Advisor {
-    fun forLesson(score: Int, t: Thresholds = Thresholds()): Recommendation = when (SkillRules.nextAction(score, t)) {
+    /**
+     * @param solved сколько заданий урока решено; @param required сколько нужно для прохождения.
+     * «Можно идти дальше» — только когда выполнен критерий урока: освоение не подтверждается одним заданием.
+     */
+    fun forLesson(score: Int, t: Thresholds = Thresholds(), solved: Int = Int.MAX_VALUE, required: Int = 0): Recommendation {
+        val r = byScore(score, t)
+        if (r.action == NextAction.ADVANCE && solved < required) {
+            return Recommendation(
+                NextAction.EXTRA_CHECK, "Хорошее начало",
+                "Результат $score %. Для прохождения урока решите ещё ${required - solved} — так навык закрепится.",
+            )
+        }
+        return r
+    }
+
+    private fun byScore(score: Int, t: Thresholds): Recommendation = when (SkillRules.nextAction(score, t)) {
         NextAction.REEXPLAIN -> Recommendation(
             NextAction.REEXPLAIN, "Стоит пересмотреть объяснение",
             "Результат $score %. Посмотрите урок ещё раз и откройте конспект, затем вернитесь к заданиям.",
@@ -74,6 +94,8 @@ object Advisor {
 object Diagnostic {
     /** Ответ на «что выведет программа» — как в проверке заданий: построчно, без пробелов в конце строк. */
     fun answerMatches(expected: String, given: String): Boolean {
+        // Ровно как проверка заданий (ca_runner: текст целиком strip, строки — rstrip), чтобы ответ,
+        // принятый в задании, принимался и в диагностике.
         fun norm(t: String) = t.replace("\r\n", "\n").trim().lines().map { it.trimEnd() }
         return given.isNotBlank() && norm(expected) == norm(given)
     }
@@ -128,17 +150,22 @@ object WeeklyPlanner {
         sessionMinutes: Int,
         daysPerWeek: Int,
         lessons: List<LessonWork>,
-        dueReviewsByDay: (Long) -> Int,
+        /** Сколько повторений нужно провести в этот учебный день: срок с from (null — всё просроченное) по to. */
+        dueReviews: (from: Long?, to: Long) -> Int,
     ): List<DayPlan> {
         val queue = ArrayDeque<Pair<LessonWork, PlanKind>>()
-        lessons.forEach { queue.add(it to PlanKind.THEORY); queue.add(it to PlanKind.PRACTICE) }
+        lessons.forEach {
+            if (it.theoryMinutes > 0) queue.add(it to PlanKind.THEORY)
+            if (it.practiceMinutes > 0) queue.add(it to PlanKind.PRACTICE)
+        }
         // Сколько минут текущей части урока ещё осталось.
         var remaining = queue.firstOrNull()?.let { (l, k) -> if (k == PlanKind.THEORY) l.theoryMinutes else l.practiceMinutes } ?: 0
         val days = studyDays(startEpochDay, daysPerWeek)
-        return days.map { day ->
+        return days.mapIndexed { i, day ->
             val items = mutableListOf<PlanItem>()
             var budget = sessionMinutes
-            val due = dueReviewsByDay(day)
+            // Повторения, срок которых выпал на день без занятий, переносятся на ближайший учебный день.
+            val due = dueReviews(if (i == 0) null else days[i - 1] + 1, day)
             if (due > 0) {
                 val reviewMinutes = (due * REVIEW_MIN_PER_SKILL).coerceIn(5, maxOf(5, sessionMinutes / 10 + 5))
                 items += PlanItem(PlanKind.REVIEW, reviewMinutes, "Повторение: навыков $due")

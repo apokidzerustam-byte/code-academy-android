@@ -21,6 +21,8 @@ class AppContainer(context: Context) {
     private val app = context.applicationContext
     val assets: android.content.res.AssetManager get() = app.assets
     val content = ContentRepository(app.assets)
+    /** Курс для адаптивных экранов (загружается один раз). */
+    @Volatile var courseCache: app.codeacademy.ui.CourseData? = null
     val db: AppDatabase by lazy { AppDatabase.create(app) }
     val progress by lazy { ProgressRepository(db) }
     val projects by lazy { ProjectRepository(db) }
