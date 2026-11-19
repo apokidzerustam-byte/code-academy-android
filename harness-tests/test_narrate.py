@@ -58,3 +58,10 @@ def test_spoken_form_and_dictionary_stress():
         for i, ch in enumerate(v):
             if ch == narrate.ACUTE:
                 assert v[i - 1].lower() in "аеёиоуыэюя", v
+
+
+def test_latin_parts_inside_words():
+    pron = narrate.load_pronunciation()
+    assert narrate.spoken_form("f-строка и user_name", pron) == "эф-строка и ю́зер нэйм"
+    # Слова без записи в словаре не меняются.
+    assert narrate.spoken_form("Kotlin", pron) == "Kotlin"

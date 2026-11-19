@@ -70,7 +70,8 @@ def spoken_form(text: str, pron: dict) -> str:
         if r is None:
             return w
         return r[0].upper() + r[1:] if w[:1].isupper() and w.lower() != w.upper() and not w.isupper() else r
-    return _WORD.sub(repl, text)
+    # Латинские части отдельно: f в «f-строка», user и name в user_name; подчёркивание читается как пауза.
+    return re.sub(r"[A-Za-z]+", repl, text).replace("_", " ")
 
 
 def apply_stress(text: str, stress: dict, auto=None) -> str:
