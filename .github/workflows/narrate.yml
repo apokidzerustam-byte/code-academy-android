@@ -13,7 +13,7 @@ permissions:
 
 concurrency:
   group: narrate
-  cancel-in-progress: true  # новая правка текста/ударений заменяет незаконченную озвучку
+  cancel-in-progress: false  # правки встают в очередь: после текущей озвучки пересоберутся только изменённые сцены
 
 jobs:
   plan:
