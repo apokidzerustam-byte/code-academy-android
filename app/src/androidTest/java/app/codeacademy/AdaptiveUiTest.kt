@@ -10,6 +10,7 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.codeacademy.data.LessonStatus
 import app.codeacademy.data.ReviewItemEntity
+import app.codeacademy.data.SkillStateEntity
 import app.codeacademy.data.SkillStatus
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -81,7 +82,7 @@ class AdaptiveUiTest {
         runBlocking {
             app.container.settings.setOnboardingDone(true)
             app.container.db.reviews().upsert(ReviewItemEntity("python.variables", 0, 1, today))
-            app.container.db.skills().upsert(app.codeacademy.data.SkillStateEntity("python.variables", SkillStatus.NEEDS_REVIEW, 3, 1))
+            app.container.db.skills().upsert(SkillStateEntity("python.variables", SkillStatus.NEEDS_REVIEW, 3, 1))
         }
         waitTag("open-map")
         rule.onNodeWithTag("open-map").performScrollTo().performClick()
