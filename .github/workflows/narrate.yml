@@ -6,14 +6,14 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ["content/packs/**/scenario.json", "content-pipeline/narrate.py", ".github/workflows/narrate.yml"]
+    paths: ["content/packs/**/scenario.json", "content-pipeline/narrate.py", "content-pipeline/pronunciation.json", ".github/workflows/narrate.yml"]
 
 permissions:
   contents: write
 
 concurrency:
   group: narrate
-  cancel-in-progress: false
+  cancel-in-progress: true  # новая правка текста/ударений заменяет незаконченную озвучку
 
 jobs:
   narrate:
@@ -28,7 +28,11 @@ jobs:
         with: { python-version: "3.11" }
       - run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - name: Установка (torch CPU)
-        run: pip install chatterbox-tts faster-whisper --extra-index-url https://download.pytorch.org/whl/cpu
+        run: |
+          pip install chatterbox-tts faster-whisper --extra-index-url https://download.pytorch.org/whl/cpu
+          # Ударения: тот же инструмент, на котором обучена русская часть Chatterbox.
+          pip install "git+https://github.com/Vuizur/add-stress-to-epub"
+          python content-pipeline/narrate.py --probe /dev/null content/packs | head -20
       - name: Опорная запись автора
         env:
           VOICE_REF_KEY: ${{ secrets.VOICE_REF_KEY }}

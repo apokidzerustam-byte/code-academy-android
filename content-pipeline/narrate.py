@@ -24,7 +24,11 @@ import tempfile
 import time
 
 PREVIOUS_REPORT: list = []
-SETTINGS_VERSION = "1"  # меняется при изменении параметров синтеза → полная пересборка
+SETTINGS_VERSION = "2"  # меняется при изменении параметров синтеза → полная пересборка
+CANDIDATES = 3  # вариантов каждой фразы; выбирается самый разборчивый по распознаванию
+GEN_PARAMS = {"exaggeration": 0.45, "cfg_weight": 0.5, "temperature": 0.65}
+ACUTE = "\u0301"
+PRON_PATH = pathlib.Path(__file__).with_name("pronunciation.json")
 SAMPLE_GAP_MS = 280  # пауза между фразами
 CER_LIMIT = 0.22
 MAX_ATTEMPTS = 3
@@ -49,10 +53,51 @@ def split_phrases(text: str) -> list[str]:
     return out
 
 
-def apply_stress(text: str, stress: dict) -> str:
-    for word, repl in stress.items():
-        text = re.sub(rf"\b{re.escape(word)}\b", repl, text)
-    return text
+def load_pronunciation() -> dict:
+    data = json.loads(PRON_PATH.read_text("utf-8"))
+    return {"words": {k.lower(): v for k, v in data.get("words", {}).items()},
+            "stress": {k.lower(): v for k, v in data.get("stress", {}).items()}}
+
+
+_WORD = re.compile(r"[A-Za-zА-Яа-яЁё\u0301-]+")
+
+
+def spoken_form(text: str, pron: dict) -> str:
+    """Как произносить: латиница и сокращения → русская запись (print → принт)."""
+    def repl(m):
+        w = m.group(0)
+        r = pron["words"].get(w.lower())
+        if r is None:
+            return w
+        return r[0].upper() + r[1:] if w[:1].isupper() and w.lower() != w.upper() and not w.isupper() else r
+    return _WORD.sub(repl, text)
+
+
+def apply_stress(text: str, stress: dict, auto=None) -> str:
+    """Ударения: автоматическая расстановка (если есть), затем словарь курса и сцены поверх неё.
+    Слово сравнивается без знаков ударения и без учёта регистра."""
+    if auto is not None:
+        text = auto(text)
+    lower = {k.lower(): v for k, v in stress.items()}
+
+    def repl(m):
+        w = m.group(0)
+        key = w.replace(ACUTE, "").lower()
+        if key in lower:
+            fixed = lower[key]
+            return fixed[0].upper() + fixed[1:] if w[:1].isupper() else fixed
+        return w
+    return _WORD.sub(repl, text)
+
+
+def make_auto_stresser():
+    """Автоматические ударения тем же инструментом, что ожидает Chatterbox (russian_text_stresser)."""
+    try:
+        from russian_text_stresser.text_stresser import RussianTextStresser
+    except ImportError:
+        return None
+    ts = RussianTextStresser()
+    return lambda t: ts.stress_text(t)
 
 
 _TRANSLIT = dict(zip("абвгдеёжзийклмнопрстуфхцчшщъыьэюя",
@@ -118,39 +163,71 @@ def trim_silence(wav, sr, threshold=0.012, pad_ms=60):
     return wav[..., start:end]
 
 
+def clean_reference(src: str, dst: str):
+    """Чистая опорная запись: срез низкого гула, шумоподавление, ровная громкость, моно 24 кГц, до 15 с."""
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", src, "-t", "15",
+                    "-af", "highpass=f=70,afftdn=nf=-25,loudnorm=I=-20:TP=-2", "-ac", "1", "-ar", "24000", dst],
+                   check=True)
+
+
 class Narrator:
     def __init__(self, ref_wav: str):
         import torch
         from chatterbox.mtl_tts import ChatterboxMultilingualTTS
         from faster_whisper import WhisperModel
+        import chatterbox.models.tokenizers.tokenizer as tk
+
+        # Ударения расставляем сами (с правками словаря) — встроенную расстановку отключаем, чтобы не было двойной.
+        tk.add_russian_stress = lambda t: t
 
         torch.set_num_threads(os.cpu_count() or 2)
         self.torch = torch
         self.model = ChatterboxMultilingualTTS.from_pretrained(device="cpu")
         self.sr = self.model.sr
-        self.ref = ref_wav
+        self.ref = "/tmp/ref_clean.wav"
+        clean_reference(ref_wav, self.ref)
+        self.pron = load_pronunciation()
+        self.auto_stress = make_auto_stresser()
+        if self.auto_stress is None:
+            raise SystemExit("Нет russian_text_stresser: без него ударения будут случайными")
         self.asr = WhisperModel("small", device="cpu", compute_type="int8")
 
-    def transcribe(self, wav) -> str:
+    def prepare(self, phrase: str, scene_stress: dict) -> str:
+        """Текст для синтеза: произношение слов + ударения (автоматические, словарь курса, правки сцены)."""
+        stress = {**self.pron["stress"], **scene_stress}
+        return apply_stress(spoken_form(phrase, self.pron), stress, self.auto_stress)
+
+    def transcribe(self, wav):
         import numpy as np
         import torchaudio.functional as F
         audio = F.resample(wav, self.sr, 16000).squeeze(0).numpy().astype(np.float32)
         segments, _ = self.asr.transcribe(audio, language="ru", beam_size=1, vad_filter=False)
-        return " ".join(s.text.strip() for s in segments)
+        segments = list(segments)
+        text = " ".join(s.text.strip() for s in segments)
+        # Средняя уверенность распознавания: чем ближе к 0, тем разборчивее речь.
+        logprob = sum(s.avg_logprob for s in segments) / len(segments) if segments else -5.0
+        return text, logprob
+
+    def generate(self, text: str):
+        try:
+            return self.model.generate(text, language_id="ru", audio_prompt_path=self.ref, **GEN_PARAMS)
+        except TypeError:  # старая версия без этих параметров
+            return self.model.generate(text, language_id="ru", audio_prompt_path=self.ref)
 
     def phrase(self, text: str, synth_text: str, seed: int):
-        """Синтез с проверкой распознаванием; возвращает (wav, cer, attempts, heard)."""
-        best = None
-        for attempt in range(MAX_ATTEMPTS):
+        """Несколько вариантов фразы; выбирается самый разборчивый (точность распознавания + уверенность).
+        Возвращает (wav, cer, attempts, heard, logprob)."""
+        best, best_score = None, None
+        attempt = 0
+        while attempt < CANDIDATES or (best[1] > CER_LIMIT and attempt < CANDIDATES + MAX_ATTEMPTS):
             self.torch.manual_seed(seed + attempt * 7919)
-            wav = self.model.generate(synth_text, language_id="ru", audio_prompt_path=self.ref)
-            wav = trim_silence(wav, self.sr)
-            heard = self.transcribe(wav)
-            score = cer(text, heard)
-            if best is None or score < best[1]:
-                best = (wav, score, attempt + 1, heard)
-            if score <= CER_LIMIT:
-                break
+            wav = trim_silence(self.generate(synth_text), self.sr)
+            heard, logprob = self.transcribe(wav)
+            c = cer(text, heard)
+            score = 2.0 * c - logprob
+            attempt += 1
+            if best is None or score < best_score:
+                best, best_score = (wav, c, attempt, heard, logprob), score
         return best
 
 
@@ -198,14 +275,14 @@ def narrate_lesson(lesson_dir: pathlib.Path, narrator_factory, ref_digest: str, 
         chunks, cues, pos = [], [], 0
         t0 = time.monotonic()
         for k, ph in enumerate(phrases):
-            wav, score, attempts, heard = narrator.phrase(ph, apply_stress(ph, scene.get("stress", {})),
-                                                         seed=1000 * idx + k)
+            synth = narrator.prepare(ph, scene.get("stress", {}))
+            wav, score, attempts, heard, logprob = narrator.phrase(ph, synth, seed=1000 * idx + k)
             dur = int(wav.shape[-1] * 1000 / narrator.sr)
             cues.append({"startMs": pos, "endMs": pos + dur, "text": ph})
             chunks += [wav, gap]
             pos += dur + SAMPLE_GAP_MS
-            report.append({"lesson": lesson_dir.name, "scene": scene["id"], "phrase": ph, "cer": round(score, 3),
-                           "attempts": attempts, "heard": heard})
+            report.append({"lesson": lesson_dir.name, "scene": scene["id"], "phrase": ph, "spoken": synth,
+                           "cer": round(score, 3), "logprob": round(logprob, 3), "attempts": attempts, "heard": heard})
             print(f"  [{scene['id']}] {k + 1}/{len(phrases)} cer={score:.2f} x{attempts}", flush=True)
         wav = torch.cat(chunks[:-1], dim=-1)
         encode_m4a(wav, narrator.sr, audio_dir / file_name, torch)
@@ -241,7 +318,18 @@ def main():
     ap.add_argument("packs", nargs="?", default="content/packs")
     ap.add_argument("--voice", default="author")
     ap.add_argument("--report", default="narration-report.json")
+    ap.add_argument("--probe", action="store_true", help="только показать текст для синтеза с ударениями")
     a = ap.parse_args()
+
+    if a.probe:
+        pron, auto = load_pronunciation(), make_auto_stresser()
+        print("Автоматические ударения:", "есть" if auto else "НЕТ (russian_text_stresser не установлен)")
+        for scen in sorted(pathlib.Path(a.packs).glob("*/lessons/*/scenario.json")):
+            for scene in json.loads(scen.read_text("utf-8"))["scenes"]:
+                for ph in split_phrases(scene["narration"]):
+                    stress = {**pron["stress"], **scene.get("stress", {})}
+                    print(f"[{scene['id']}] {apply_stress(spoken_form(ph, pron), stress, auto)}")
+        return 0
 
     ref_digest = hashlib.sha256(pathlib.Path(a.ref).read_bytes()).hexdigest()[:16]
     holder = {}

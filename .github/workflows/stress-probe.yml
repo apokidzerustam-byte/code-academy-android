@@ -1,0 +1,32 @@
+name: Stress probe
+
+# Быстрая проверка ударений и произношения без синтеза: текст, который получит синтезатор, — в сводке запуска.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["content/packs/**/scenario.json", "content-pipeline/narrate.py", "content-pipeline/pronunciation.json", ".github/workflows/stress-probe.yml"]
+
+jobs:
+  probe:
+    name: Ударения (russian_text_stresser + словарь курса)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install "git+https://github.com/Vuizur/add-stress-to-epub"
+      - name: Проверка инструмента
+        run: |
+          python - <<'PY'
+          from russian_text_stresser.text_stresser import RussianTextStresser
+          ts = RussianTextStresser()
+          for t in ["Замок стоит на горе.", "Пишем слово print, маленькими буквами.", "Програ́мма выводит текст."]:
+              out = ts.stress_text(t)
+              print(repr(out), [hex(ord(c)) for c in out if ord(c) > 0x2ff and ord(c) < 0x370])
+          PY
+      - name: Текст для синтеза
+        run: |
+          python content-pipeline/narrate.py --probe /dev/null content/packs | tee probe.txt
+          { echo '```'; cat probe.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"

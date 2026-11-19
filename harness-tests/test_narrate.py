@@ -42,3 +42,19 @@ def test_real_scenarios_split_reasonably():
         for scene in json.loads(p.read_text("utf-8"))["scenes"]:
             phrases = narrate.split_phrases(scene["narration"])
             assert phrases and all(3 <= len(x) <= narrate.MAX_PHRASE_CHARS for x in phrases), scene["id"]
+
+
+def test_spoken_form_and_dictionary_stress():
+    pron = narrate.load_pronunciation()
+    out = narrate.apply_stress(narrate.spoken_form("Python сообщает: SyntaxError — синтаксическая ошибка.", pron), pron["stress"])
+    assert out == "Пайтон сообщает: Си́нтакс э́ррор — синтакси́ческая оши́бка."
+    # Словарь поверх автоматических ударений; регистр сохраняется.
+    auto = lambda t: t.replace("Программа", "Програ́мма").replace("ошибка", "ошибка́")
+    assert narrate.apply_stress("Программа и ошибка", pron["stress"], auto) == "Програ́мма и оши́бка"
+    # Каждое слово-ключ словаря произношения — одно слово без пробелов.
+    assert all(" " not in k for k in pron["words"])
+    # Знак ударения стоит только после гласной.
+    for v in list(pron["stress"].values()) + list(pron["words"].values()):
+        for i, ch in enumerate(v):
+            if ch == narrate.ACUTE:
+                assert v[i - 1].lower() in "аеёиоуыэюя", v
