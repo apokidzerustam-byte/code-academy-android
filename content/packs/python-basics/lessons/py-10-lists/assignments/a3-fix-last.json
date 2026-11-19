@@ -2,14 +2,12 @@
   "id": "a3-fix-last",
   "type": "fix",
   "title": "Последний элемент",
-  "statement": "Программа должна выводить последний элемент списка, но падает с IndexError. Исправьте так, чтобы она работала для списка любой длины.",
+  "statement": "Программа читает n, затем n слов (каждое на своей строке), собирает их в список и должна выводить последнее слово. Сейчас она падает с IndexError. Исправьте так, чтобы она работала для списка любой длины.\n\nВвод:\n```\n3\nхлеб\nкефир\nсыр\n```\nВывод:\n```\nсыр\n```",
   "goal": "Понимать индексы списка.",
-  "input": "Нет.",
-  "expectedResult": "сыр",
-  "constraints": [
-    "Не меняйте сам список."
-  ],
-  "starterCode": "items = [\"хлеб\", \"кефир\", \"сыр\"]\nprint(items[len(items)])\n",
+  "input": "n и n слов.",
+  "expectedResult": "Последнее слово.",
+  "constraints": [],
+  "starterCode": "n = int(input())\nitems = []\nfor i in range(n):\n    items.append(input())\nprint(items[len(items)])\n",
   "hints": [
     "Какой индекс у последнего элемента списка из трёх элементов?",
     "Индексы начинаются с нуля.",
@@ -23,23 +21,36 @@
     "cases": [
       {
         "id": "v1",
+        "stdin": "3\nхлеб\nкефир\nсыр\n",
         "expected_stdout": "сыр\n"
+      },
+      {
+        "id": "h1",
+        "stdin": "1\nчай\n",
+        "expected_stdout": "чай\n",
+        "hidden": true
+      },
+      {
+        "id": "h2",
+        "stdin": "5\nа\nб\nв\nг\nд\n",
+        "expected_stdout": "д\n",
+        "hidden": true
       }
     ]
   },
-  "solution": "items = [\"хлеб\", \"кефир\", \"сыр\"]\nprint(items[-1])\n",
-  "explanation": "В списке из трёх элементов индексы 0, 1 и 2, поэтому items[3] не существует. items[-1] — всегда последний элемент.",
+  "solution": "n = int(input())\nitems = []\nfor i in range(n):\n    items.append(input())\nprint(items[-1])\n",
+  "explanation": "В списке из n элементов индексы от 0 до n − 1, поэтому items[len(items)] не существует. items[-1] — всегда последний элемент.",
   "criteria": [
-    "Нет ошибки."
+    "Нет ошибки для любой длины."
   ],
   "wrongSolutions": [
     {
-      "code": "items = [\"хлеб\", \"кефир\", \"сыр\"]\nprint(items[0])\n",
-      "why": "Выводится первый элемент."
+      "code": "n = int(input())\nitems = []\nfor i in range(n):\n    items.append(input())\nprint(items[2])\n",
+      "why": "Индекс подходит только для трёх элементов."
     },
     {
-      "code": "items = [\"хлеб\", \"кефир\", \"сыр\"]\nprint(items)\n",
-      "why": "Выводится весь список."
+      "code": "n = int(input())\nitems = []\nfor i in range(n):\n    items.append(input())\nprint(\"сыр\")\n",
+      "why": "Ответ «зашит»."
     }
   ]
 }
