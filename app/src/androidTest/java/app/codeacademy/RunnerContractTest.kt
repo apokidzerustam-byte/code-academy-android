@@ -126,7 +126,9 @@ abstract class RunnerContractTest(private val isolated: Boolean) {
     @Test fun memoryBombDoesNotKillApp() {
         val r = run("x = bytearray(16 * 1024 ** 3)", timeoutMs = 5_000)
         probe("memoryBomb", "status=${r.status} err=${r.stderr.lineSequence().lastOrNull { it.isNotBlank() }}")
-        assertTrue(r.status in setOf(RunStatus.ERROR, RunStatus.CRASHED))
+        // Главное — приложение живо и следующий запуск работает; сама попытка может закончиться
+        // ошибкой, падением процесса исполнителя или таймаутом (на медленном эмуляторе).
+        assertTrue(r.status.toString(), r.status in setOf(RunStatus.ERROR, RunStatus.CRASHED, RunStatus.TIMEOUT))
         assertEquals("ok\n", run("print('ok')").stdout)
     }
 

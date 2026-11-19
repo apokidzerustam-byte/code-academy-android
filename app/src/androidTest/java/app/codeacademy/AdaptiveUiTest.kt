@@ -56,7 +56,10 @@ class AdaptiveUiTest {
         rule.onNodeWithTag("diag-submit").performClick()
         waitText("Подтверждено уроков: 1 из 10")
         rule.waitUntil(5_000) {
-            runBlocking { app.container.db.progress().get("python-basics/py-01-print")?.status == LessonStatus.TESTED_OUT }
+            runBlocking {
+                app.container.db.progress().get("python-basics/py-01-print")?.status == LessonStatus.TESTED_OUT &&
+                    app.container.settings.settings.first().onboardingDone
+            }
         }
         runBlocking {
             assertEquals(null, app.container.db.progress().get("python-basics/py-02-variables")?.status?.takeIf { it == LessonStatus.TESTED_OUT })
