@@ -83,6 +83,8 @@ data class Assignment(
     val solution: String,
     val explanation: String,
     val criteria: List<String>,
+    /** Типовые неверные решения (для автопроверки контента). */
+    val wrongSolutions: List<WrongSolution> = emptyList(),
 ) {
     /** «Предскажи результат»: ученик вводит текст, код не выполняется. */
     val isAnswerTask: Boolean get() = type == "predict" || type == "review"
@@ -92,3 +94,7 @@ data class Assignment(
 data class LessonRef(val packId: String, val lessonId: String) {
     val key: String get() = "$packId/$lessonId"
 }
+
+@Serializable
+data class WrongSolution(val code: String, val why: String, val answer: String? = null)
+
