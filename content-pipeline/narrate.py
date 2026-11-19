@@ -416,8 +416,14 @@ def main():
     print(f"Фраз: {sum(1 for r in report if 'cer' in r)}, выше порога CER: {len(bad)}")
     for r in bad:
         print(f"  ! {r['scene']}: cer={r['cer']} «{r['phrase']}» → «{r['heard']}»")
-    # Плохо распознанные фразы не попадают в приложение: job падает, коммита нет, автор правит текст/ударения.
-    return 1 if bad else 0
+    # Фразы выше порога не роняют задачу (иначе теряется озвучка всего урока из-за одной фразы с числами):
+    # они попадают в отчёт и в сводку запуска, автор правит текст или ударения, и пересобирается только эта сцена.
+    if bad and os.environ.get("GITHUB_STEP_SUMMARY"):
+        with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as f:
+            f.write("### Фразы с ошибкой распознавания выше порога\n")
+            for r in bad:
+                f.write(f"- {r['lesson']}/{r['scene']}: CER {r['cer']} «{r['phrase']}» → «{r['heard']}»\n")
+    return 0
 
 
 if __name__ == "__main__":
