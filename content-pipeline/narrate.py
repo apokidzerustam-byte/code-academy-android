@@ -157,7 +157,7 @@ def _num_repl(m) -> str:
 
 def normalize_for_cer(text: str) -> str:
     """Сравнение в общей латинской записи: распознавание пишет «принт» вместо print и «5» вместо «пять» — это не ошибка озвучки."""
-    t = re.sub(r"(?<![\w.])(\d+)(?:[.,](\d{1,3}))?(?![\d])", _num_repl, text.lower())
+    t = re.sub(r"(?<![\w.])(\d+)(?:[.,](\d{1,3}))?(?![\d])", _num_repl, text.lower().replace("%", " процентов"))
     t = "".join(_TRANSLIT.get(ch, ch) for ch in t)
     t = t.replace("th", "t").replace("y", "i").replace("w", "v").replace("c", "k").replace("x", "ks")
     t = re.sub(r"[^a-z0-9 ]+", " ", t)

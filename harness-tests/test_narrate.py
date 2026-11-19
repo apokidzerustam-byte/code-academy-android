@@ -75,3 +75,7 @@ def test_numbers_in_recognition_are_not_errors():
     assert narrate.cer("четыре целых две десятых", "4,2") == 0
     assert narrate.cer("Вводим два, семь и один.", "Вводим 2, 7 и 1.") == 0
     assert narrate.cer("пять тысяч пятьдесят", "5050") == 0
+
+
+def test_percent_sign():
+    assert narrate.cer("Запускаем: Скидка десять процентов.", "Запускаем скидка 10%.") == 0
