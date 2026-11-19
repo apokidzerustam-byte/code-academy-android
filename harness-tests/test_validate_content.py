@@ -17,6 +17,11 @@ LESSON = "lessons/py-01-print"
 def pack(tmp_path):
     dst = tmp_path / "python-basics"
     shutil.copytree(ROOT / "content" / "packs" / "python-basics", dst)
+    # Мутационные тесты — на первом уроке (весь пакет целиком проверяет CI-валидатор).
+    pj = dst / "pack.json"
+    data = json.loads(pj.read_text(encoding="utf-8"))
+    data["lessons"] = [LESSON.split("/")[-1]]
+    pj.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
     return dst
 
 

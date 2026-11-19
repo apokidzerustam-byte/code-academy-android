@@ -1,0 +1,52 @@
+{
+  "id": "a1-purchase",
+  "type": "write",
+  "title": "Сколько стоит покупка",
+  "statement": "Ручка стоит 45 рублей, нужно купить 4 штуки.\n\nСоздайте переменные `price` и `count`, вычислите стоимость в переменной `total` и выведите её.\n\nОжидаемый вывод:\n\n```\n180\n```",
+  "goal": "Хранить данные в переменных и считать с ними.",
+  "input": "Нет.",
+  "expectedResult": "Число 180.",
+  "constraints": [
+    "Используйте переменные price, count и total.",
+    "Умножение в Python — знак *."
+  ],
+  "starterCode": "# Создайте переменные price и count\n",
+  "hints": [
+    "Сначала сохраните цену и количество, потом посчитайте.",
+    "Понадобятся три переменные: две с данными и одна с результатом.",
+    "Присваивание: имя = значение. Умножение: звёздочка *.",
+    "В print пишите имя переменной без кавычек, иначе выведется само слово total.",
+    "price = 45, count = 4, total = price * count, затем print(total)."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "expected_stdout": "180\n",
+        "hint": "Должно получиться одно число — 180."
+      }
+    ]
+  },
+  "solution": "price = 45\ncount = 4\ntotal = price * count\nprint(total)\n",
+  "explanation": "Цена и количество хранятся в переменных, их произведение — в total. print(total) выводит значение переменной, а не её имя.",
+  "criteria": [
+    "Выводится 180.",
+    "Используются переменные."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "price = 45\ncount = 4\ntotal = price * count\nprint(\"total\")\n",
+      "why": "Имя переменной в кавычках — выводится слово total."
+    },
+    {
+      "code": "price = 45\ncount = 4\ntotal = price + count\nprint(total)\n",
+      "why": "Сложение вместо умножения."
+    },
+    {
+      "code": "price = 45\ncount = 4\ntotal = price * count\n",
+      "why": "Нет вывода."
+    }
+  ]
+}

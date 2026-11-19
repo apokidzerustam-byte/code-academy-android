@@ -1,10 +1,21 @@
 {
   "id": "python-basics",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "stage": 3,
   "title": "Python: основы",
-  "description": "Переменные, типы, операторы, условия, циклы. Пилотный пакет.",
+  "description": "Переменные, ввод, числа, строки, условия, циклы, списки. Пилот: 10 уроков.",
   "language": "python",
   "minAppVersion": 1,
-  "lessons": ["py-01-print"]
+  "lessons": [
+    "py-01-print",
+    "py-02-variables",
+    "py-03-input",
+    "py-04-numbers",
+    "py-05-strings",
+    "py-06-conditions",
+    "py-07-logic",
+    "py-08-while",
+    "py-09-for",
+    "py-10-lists"
+  ]
 }

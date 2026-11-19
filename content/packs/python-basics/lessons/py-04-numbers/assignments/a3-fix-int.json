@@ -1,0 +1,56 @@
+{
+  "id": "a3-fix-int",
+  "type": "fix",
+  "title": "Удвоить число",
+  "statement": "Программа должна читать число и выводить его удвоенное значение: для `21` — `42`. Сейчас для `21` она выводит `2121`. Исправьте.",
+  "goal": "Понимать разницу строки и числа.",
+  "input": "Целое число.",
+  "expectedResult": "Удвоенное число.",
+  "constraints": [],
+  "starterCode": "x = input()\nprint(x * 2)\n",
+  "hints": [
+    "Какого типа x после input()?",
+    "Строку, умноженную на 2, Python повторяет дважды.",
+    "Нужно превратить строку в число.",
+    "Оберните input() в функцию int.",
+    "x = int(input())"
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "21\n",
+        "expected_stdout": "42\n"
+      },
+      {
+        "id": "h1",
+        "stdin": "-7\n",
+        "expected_stdout": "-14\n",
+        "hidden": true
+      },
+      {
+        "id": "h2",
+        "stdin": "0\n",
+        "expected_stdout": "0\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "x = int(input())\nprint(x * 2)\n",
+  "explanation": "Строка «21», умноженная на 2, — это «2121» (повтор). После int(...) x — число, и умножение работает как в математике.",
+  "criteria": [
+    "Удвоение для любых целых."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "x = input()\nprint(x + x)\n",
+      "why": "Строки склеиваются."
+    },
+    {
+      "code": "x = input()\nprint(int(x * 2))\n",
+      "why": "Сначала повтор строки, потом int — получается 2121."
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "id": "a1-first-last",
+  "type": "write",
+  "title": "Первая и последняя буквы",
+  "statement": "Программа читает слово и выводит его первую и последнюю буквы через пробел, а на второй строке — длину слова.\n\nВвод:\n```\nпрограмма\n```\nВывод:\n```\nп а\n9\n```",
+  "goal": "Использовать индексы и len.",
+  "input": "Одно слово.",
+  "expectedResult": "Две строки.",
+  "constraints": [],
+  "starterCode": "word = input()\n",
+  "hints": [
+    "Нужны первый символ, последний символ и длина.",
+    "Первый символ — индекс 0.",
+    "Последний удобно взять индексом -1, длину — функцией len.",
+    "print с двумя значениями через запятую сам поставит пробел.",
+    "print(word[0], word[-1]); print(len(word))"
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "программа\n",
+        "expected_stdout": "п а\n9\n"
+      },
+      {
+        "id": "h1",
+        "stdin": "кот\n",
+        "expected_stdout": "к т\n3\n",
+        "hidden": true
+      },
+      {
+        "id": "h2",
+        "stdin": "я\n",
+        "expected_stdout": "я я\n1\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "word = input()\nprint(word[0], word[-1])\nprint(len(word))\n",
+  "explanation": "word[0] — первый символ, word[-1] — последний, len(word) — количество символов.",
+  "criteria": [
+    "Работает для слов любой длины."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "word = input()\nprint(word[1], word[-1])\nprint(len(word))\n",
+      "why": "Индексы начинаются с 0, а не с 1."
+    },
+    {
+      "code": "word = input()\nprint(word[0], word[len(word)])\nprint(len(word))\n",
+      "why": "Индекс len(word) за пределами строки."
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "id": "py-06-conditions",
+  "title": "Условия: if, elif, else",
+  "goal": "Сравнивать значения, строить ветвления if/elif/else и исправлять IndentationError.",
+  "skills": [
+    "python.bool",
+    "python.if",
+    "python.indentation",
+    "python.errors.indentation"
+  ],
+  "prerequisites": [
+    "py-05-strings"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-sign.json",
+    "assignments/a2-ticket.json",
+    "assignments/a3-fix-indent.json",
+    "assignments/a4-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 2,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Один знак = в условии: if x = 5:",
+      "fix": "Для сравнения нужен ==.",
+      "errorType": "SyntaxError"
+    },
+    {
+      "mistake": "Нет отступа после if",
+      "fix": "Команды ветки пишут с отступом в 4 пробела.",
+      "errorType": "IndentationError"
+    },
+    {
+      "mistake": "Забыли двоеточие после условия",
+      "fix": "if, elif и else заканчиваются двоеточием.",
+      "errorType": "SyntaxError"
+    },
+    {
+      "mistake": "Неверный порядок elif",
+      "fix": "Проверяйте сначала более узкие условия."
+    }
+  ]
+}

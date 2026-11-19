@@ -21,7 +21,8 @@ import sys
 import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "app" / "src" / "main" / "python"))
+RUNNER_DIR = ROOT / "app" / "src" / "main" / "python"
+sys.path.insert(0, str(RUNNER_DIR))
 import ca_runner  # noqa: E402
 import jsonschema  # noqa: E402
 import importlib.util as _ilu  # noqa: E402
@@ -64,14 +65,39 @@ def norm(text):
     return ca_runner._normalize(text or "", "strip")
 
 
+RUN_TIMEOUT_S = 5
+_CHILD = """
+import json, sys, tempfile
+sys.path.insert(0, sys.argv[1])
+import ca_runner
+req = json.loads(sys.stdin.read())
+with tempfile.TemporaryDirectory() as d:
+    if req["mode"] == "run":
+        sys.__stdout__.write(ca_runner.run(req["code"], d, req["stdin"], 65536))
+    else:
+        sys.__stdout__.write(ca_runner.check(req["code"], json.dumps(req["tests"]), d, 65536))
+"""
+
+
+def _child(req):
+    """Код ученика/контента — в отдельном процессе с таймаутом: бесконечный цикл не вешает валидатор."""
+    import subprocess
+    try:
+        p = subprocess.run([sys.executable, "-c", _CHILD, str(RUNNER_DIR)], input=json.dumps(req), capture_output=True,
+                           text=True, timeout=RUN_TIMEOUT_S)
+    except subprocess.TimeoutExpired:
+        return None
+    return json.loads(p.stdout)
+
+
 def run_code(code, stdin=""):
-    with tempfile.TemporaryDirectory() as d:
-        return json.loads(ca_runner.run(code, d, stdin, 65536))
+    r = _child({"mode": "run", "code": code, "stdin": stdin})
+    return r if r is not None else {"status": "TIMEOUT", "stdout": "", "stderr": f"превышено время ({RUN_TIMEOUT_S} с)"}
 
 
 def check_code(code, tests):
-    with tempfile.TemporaryDirectory() as d:
-        return json.loads(ca_runner.check(code, json.dumps(tests), d, 65536))
+    r = _child({"mode": "check", "code": code, "tests": tests})
+    return r if r is not None else {"allPassed": False, "timeout": True}
 
 
 def validate_scenario(path, scen, rep):
@@ -180,7 +206,7 @@ def validate_assignment(path, a, rep):
     if tests["kind"] == "function" and not hidden:
         rep.err(where, "у задания с функцией нет скрытых тестов")
     if tests["kind"] == "stdout" and any(c.get("stdin") for c in cases) and not hidden:
-        rep.warn(where, "задание с вводом без скрытых тестов: «зашитый» ответ пройдёт")
+        rep.err(where, "задание с вводом без скрытых тестов: «зашитый» ответ пройдёт")
     r = check_code(a["solution"], tests)
     if not r.get("allPassed"):
         rep.err(where, f"эталонное решение НЕ проходит тесты: {json.dumps(r, ensure_ascii=False)[:400]}")
@@ -190,7 +216,9 @@ def validate_assignment(path, a, rep):
         if check_code(w["code"], tests).get("allPassed"):
             rep.err(where, f"тесты НЕ ловят типовую ошибку «{w['why']}»")
     if not a.get("wrongSolutions"):
-        rep.warn(where, "нет wrongSolutions — непроверено, что тесты ловят типовые ошибки")
+        rep.err(where, "нет wrongSolutions — непроверено, что тесты ловят типовые ошибки")
+    elif len(a["wrongSolutions"]) < 2:
+        rep.warn(where, "меньше двух типовых неверных решений")
 
 
 def validate_notes(path, rep):

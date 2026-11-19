@@ -1,0 +1,46 @@
+{
+  "id": "py-03-input",
+  "title": "Ввод данных: input и строки",
+  "goal": "Читать ввод пользователя, собирать строки склеиванием и f-строками, понимать, что input возвращает текст.",
+  "skills": [
+    "python.input",
+    "python.strings.concat",
+    "python.strings.fstring",
+    "python.errors.type"
+  ],
+  "prerequisites": [
+    "py-02-variables"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-greet.json",
+    "assignments/a2-address.json",
+    "assignments/a3-fix-type.json",
+    "assignments/a4-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 2,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Подсказка в input() попала в ответ задания",
+      "fix": "Если проверяется вывод, вызывайте input() без текста в скобках."
+    },
+    {
+      "mistake": "Забыли букву f перед f-строкой",
+      "fix": "Без f фигурные скобки выводятся как есть."
+    },
+    {
+      "mistake": "Сложили строку из input с числом",
+      "fix": "input() возвращает текст; строку и число складывать нельзя.",
+      "errorType": "TypeError"
+    },
+    {
+      "mistake": "Склеили строки без пробела",
+      "fix": "Плюс не добавляет пробел — добавьте \" \" сами."
+    }
+  ]
+}

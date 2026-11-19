@@ -1,0 +1,46 @@
+{
+  "id": "py-05-strings",
+  "title": "Строки: индексы, срезы, методы",
+  "goal": "Узнавать длину строки, брать символы и срезы, применять методы upper, lower, strip, replace.",
+  "skills": [
+    "python.strings.index",
+    "python.strings.slice",
+    "python.strings.methods",
+    "python.errors.index"
+  ],
+  "prerequisites": [
+    "py-04-numbers"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-first-last.json",
+    "assignments/a2-clean.json",
+    "assignments/a3-fix-slice.json",
+    "assignments/a4-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 2,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Считают индексы с единицы",
+      "fix": "Первый символ — s[0], последний — s[-1]."
+    },
+    {
+      "mistake": "Индекс равен длине строки",
+      "fix": "Последний допустимый индекс — len(s) - 1.",
+      "errorType": "IndexError"
+    },
+    {
+      "mistake": "Вызвали метод, но не сохранили результат",
+      "fix": "Строки не меняются: пишите s = s.strip()."
+    },
+    {
+      "mistake": "Ожидали, что конец среза войдёт",
+      "fix": "В s[a:b] символ с индексом b не входит."
+    }
+  ]
+}

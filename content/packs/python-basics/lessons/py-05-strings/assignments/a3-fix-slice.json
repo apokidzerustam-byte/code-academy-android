@@ -1,0 +1,52 @@
+{
+  "id": "a3-fix-slice",
+  "type": "fix",
+  "title": "Первые три буквы",
+  "statement": "Программа должна выводить первые три буквы слова: для `Python` — `Pyt`. Сейчас выводится `yth`. Исправьте.",
+  "goal": "Понимать границы среза.",
+  "input": "Слово.",
+  "expectedResult": "Первые три символа.",
+  "constraints": [
+    "Используйте срез."
+  ],
+  "starterCode": "word = input()\nprint(word[1:4])\n",
+  "hints": [
+    "С какого индекса начинается строка?",
+    "Первый символ имеет индекс 0.",
+    "В срезе [a:b] символ b не входит.",
+    "Нужны индексы 0, 1, 2.",
+    "print(word[0:3]) или print(word[:3])"
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "Python\n",
+        "expected_stdout": "Pyt\n"
+      },
+      {
+        "id": "h1",
+        "stdin": "абвгд\n",
+        "expected_stdout": "абв\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "word = input()\nprint(word[:3])\n",
+  "explanation": "Срез [:3] берёт символы с индексами 0, 1 и 2 — первые три.",
+  "criteria": [
+    "Верно для любого слова."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "word = input()\nprint(word[0:2])\n",
+      "why": "Конец среза не входит — получились две буквы."
+    },
+    {
+      "code": "word = input()\nprint(word[1:3])\n",
+      "why": "Пропущен первый символ."
+    }
+  ]
+}

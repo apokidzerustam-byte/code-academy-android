@@ -319,6 +319,7 @@ def main():
     ap.add_argument("--voice", default="author")
     ap.add_argument("--report", default="narration-report.json")
     ap.add_argument("--probe", action="store_true", help="только показать текст для синтеза с ударениями")
+    ap.add_argument("--lesson", help="озвучить только этот урок (id папки), для параллельных запусков")
     a = ap.parse_args()
 
     if a.probe:
@@ -346,6 +347,8 @@ def main():
         PREVIOUS_REPORT = []
     report = []
     for scen in sorted(pathlib.Path(a.packs).glob("*/lessons/*/scenario.json")):
+        if a.lesson and scen.parent.name != a.lesson:
+            continue
         print(f"== {scen.parent}", flush=True)
         narrate_lesson(scen.parent, factory, ref_digest, a.voice, report)
     pathlib.Path(a.report).write_text(json.dumps(report, ensure_ascii=False, indent=1), "utf-8")

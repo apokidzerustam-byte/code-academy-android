@@ -1,0 +1,59 @@
+{
+  "id": "a2-clean",
+  "type": "write",
+  "title": "Наводим порядок",
+  "statement": "Пользователь вводит название города, случайно добавляя пробелы по краям и путая регистр. Выведите название без пробелов по краям и большими буквами.\n\nВвод:\n```\n   краков \n```\nВывод:\n```\nКРАКОВ\n```",
+  "goal": "Применять методы строк.",
+  "input": "Строка с пробелами.",
+  "expectedResult": "Город большими буквами.",
+  "constraints": [
+    "Используйте strip и upper."
+  ],
+  "starterCode": "city = input()\n",
+  "hints": [
+    "Нужно два преобразования.",
+    "Один метод убирает пробелы по краям, другой меняет регистр.",
+    "strip() убирает пробелы, upper() делает буквы большими.",
+    "Методы можно вызывать цепочкой: s.strip().upper().",
+    "print(city.strip().upper())"
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "exact",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "   краков \n",
+        "expected_stdout": "КРАКОВ\n"
+      },
+      {
+        "id": "h1",
+        "stdin": "Варшава\n",
+        "expected_stdout": "ВАРШАВА\n",
+        "hidden": true
+      },
+      {
+        "id": "h2",
+        "stdin": "  нью-йорк  \n",
+        "expected_stdout": "НЬЮ-ЙОРК\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "city = input()\nprint(city.strip().upper())\n",
+  "explanation": "strip() возвращает строку без пробелов по краям, upper() — ту же строку большими буквами.",
+  "criteria": [
+    "Нет пробелов по краям.",
+    "Все буквы большие."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "city = input()\nprint(city.upper())\n",
+      "why": "Пробелы по краям остались."
+    },
+    {
+      "code": "city = input()\ncity.strip()\nprint(city.upper())\n",
+      "why": "Результат strip не сохранён."
+    }
+  ]
+}

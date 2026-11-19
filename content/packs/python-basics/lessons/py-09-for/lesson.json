@@ -1,0 +1,46 @@
+{
+  "id": "py-09-for",
+  "title": "Цикл for и range",
+  "goal": "Перебирать числа с range и символы строки циклом for, пропускать итерации continue и строить вложенные циклы.",
+  "skills": [
+    "python.loops.for",
+    "python.range",
+    "python.loops.continue"
+  ],
+  "prerequisites": [
+    "py-08-while"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-multiples.json",
+    "assignments/a2-count-char.json",
+    "assignments/a3-fix-range.json",
+    "assignments/a4-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 2,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Ожидали, что конец range войдёт",
+      "fix": "range(1, 10) заканчивается на 9; чтобы включить 10, пишите range(1, 11)."
+    },
+    {
+      "mistake": "Перепутали continue и break",
+      "fix": "continue — к следующей итерации, break — выйти из цикла совсем."
+    },
+    {
+      "mistake": "Забыли двоеточие после for",
+      "fix": "Строка for заканчивается двоеточием.",
+      "errorType": "SyntaxError"
+    },
+    {
+      "mistake": "range от строки: range(input())",
+      "fix": "Сначала превратите ввод в число: range(int(input())).",
+      "errorType": "TypeError"
+    }
+  ]
+}

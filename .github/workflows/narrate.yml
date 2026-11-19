@@ -1,7 +1,7 @@
 name: Narrate lessons
 
-# Озвучка уроков голосом автора. Аудио, тайминги и субтитры коммитятся обратно в main
-# (в content/packs/.../audio), отчёт проверки распознаванием — в content-pipeline/reports.
+# Озвучка уроков голосом автора: каждый урок — отдельная параллельная задача (синтез идёт часами на CPU),
+# затем общий шаг собирает аудио, проверяет контент и коммитит в main одним коммитом.
 on:
   workflow_dispatch:
   push:
@@ -16,14 +16,29 @@ concurrency:
   cancel-in-progress: true  # новая правка текста/ударений заменяет незаконченную озвучку
 
 jobs:
-  narrate:
-    name: Озвучка (Chatterbox, CPU) + проверка распознаванием
+  plan:
     runs-on: ubuntu-latest
-    timeout-minutes: 300
+    outputs:
+      lessons: ${{ steps.list.outputs.lessons }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: main  # всегда свежий main: иначе пересекающиеся запуски не видят уже готовую озвучку
+        with: { ref: main }
+      - id: list
+        run: |
+          echo "lessons=$(ls -d content/packs/*/lessons/*/ | xargs -n1 basename | jq -R . | jq -cs .)" >> "$GITHUB_OUTPUT"
+
+  narrate:
+    name: Озвучка ${{ matrix.lesson }}
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      matrix:
+        lesson: ${{ fromJson(needs.plan.outputs.lessons) }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: main }
       - uses: actions/setup-python@v5
         with: { python-version: "3.11" }
       - run: sudo apt-get update && sudo apt-get install -y ffmpeg
@@ -32,7 +47,7 @@ jobs:
           pip install chatterbox-tts faster-whisper --extra-index-url https://download.pytorch.org/whl/cpu
           # Ударения: тот же инструмент, на котором обучена русская часть Chatterbox.
           pip install "numpy<2" "git+https://github.com/Vuizur/add-stress-to-epub"
-          python content-pipeline/narrate.py --probe /dev/null content/packs > /tmp/probe.txt && head -20 /tmp/probe.txt
+          python content-pipeline/narrate.py --probe /dev/null content/packs > /tmp/probe.txt && head -5 /tmp/probe.txt
       - name: Опорная запись автора
         env:
           VOICE_REF_KEY: ${{ secrets.VOICE_REF_KEY }}
@@ -44,11 +59,43 @@ jobs:
       - name: Синтез
         run: |
           mkdir -p content-pipeline/reports
-          python content-pipeline/narrate.py /tmp/ref.wav content/packs --voice author --report content-pipeline/reports/narration-report.json
+          python content-pipeline/narrate.py /tmp/ref.wav content/packs --voice author --lesson "${{ matrix.lesson }}" \
+            --report "content-pipeline/reports/${{ matrix.lesson }}.json"
           rm -f /tmp/ref.wav
+      - name: Результат урока
+        run: |
+          mkdir -p /tmp/out/reports
+          d=$(ls -d content/packs/*/lessons/${{ matrix.lesson }})
+          mkdir -p "/tmp/out/$d" && cp -r "$d/audio" "/tmp/out/$d/"
+          cp "content-pipeline/reports/${{ matrix.lesson }}.json" /tmp/out/reports/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: narration-${{ matrix.lesson }}
+          path: /tmp/out
+          retention-days: 3
+
+  commit:
+    name: Коммит озвучки
+    needs: narrate
+    # Коммитим всё, что получилось, даже если какой-то урок не прошёл проверку распознаванием.
+    if: ${{ always() && needs.narrate.result != 'cancelled' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: main }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - uses: actions/download-artifact@v4
+        with: { path: /tmp/art, pattern: "narration-*" }
+      - name: Собрать
+        run: |
+          for a in /tmp/art/narration-*; do
+            cp -r "$a/content/." content/
+            cp "$a"/reports/*.json content-pipeline/reports/
+          done
       - name: Проверка контента
         run: pip install jsonschema && python tools/validate_content.py content/packs
-      - name: Коммит аудио
+      - name: Коммит
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"

@@ -1,0 +1,56 @@
+{
+  "id": "a3-fix-range",
+  "type": "fix",
+  "title": "Сумма чётных",
+  "statement": "Программа должна читать n и выводить сумму чётных чисел от 2 до n включительно. Для `10` должно быть `30` (2+4+6+8+10), а выводится `20`. Исправьте.",
+  "goal": "Понимать границы range.",
+  "input": "Целое n ≥ 2.",
+  "expectedResult": "Сумма.",
+  "constraints": [],
+  "starterCode": "n = int(input())\ntotal = 0\nfor i in range(2, n, 2):\n    total += i\nprint(total)\n",
+  "hints": [
+    "Какие числа перебирает цикл для n = 10?",
+    "Конец range не входит.",
+    "Чтобы n вошло, конец должен быть больше n.",
+    "Достаточно увеличить конец на 1.",
+    "range(2, n + 1, 2)"
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "10\n",
+        "expected_stdout": "30\n"
+      },
+      {
+        "id": "h1",
+        "stdin": "2\n",
+        "expected_stdout": "2\n",
+        "hidden": true
+      },
+      {
+        "id": "h2",
+        "stdin": "7\n",
+        "expected_stdout": "12\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "n = int(input())\ntotal = 0\nfor i in range(2, n + 1, 2):\n    total += i\nprint(total)\n",
+  "explanation": "range(2, n, 2) останавливается до n, поэтому 10 не входило. range(2, n + 1, 2) включает n, если оно чётное.",
+  "criteria": [
+    "Верно для чётных и нечётных n."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "n = int(input())\ntotal = 0\nfor i in range(0, n, 2):\n    total += i\nprint(total)\n",
+      "why": "n всё ещё не входит."
+    },
+    {
+      "code": "n = int(input())\ntotal = 0\nfor i in range(2, n + 2, 2):\n    total += i\nprint(total)\n",
+      "why": "Для нечётного n прибавляется лишнее число."
+    }
+  ]
+}

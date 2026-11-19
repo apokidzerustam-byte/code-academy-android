@@ -1,0 +1,44 @@
+{
+  "id": "py-08-while",
+  "title": "Цикл while",
+  "goal": "Повторять действия циклом while, накапливать сумму, выходить из цикла через break и останавливать бесконечный цикл.",
+  "skills": [
+    "python.loops.while",
+    "python.loops.accumulate",
+    "python.loops.break"
+  ],
+  "prerequisites": [
+    "py-07-logic"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-countdown.json",
+    "assignments/a2-sum-until-zero.json",
+    "assignments/a3-fix-infinite.json",
+    "assignments/a4-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 2,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Забыли изменить счётчик",
+      "fix": "Цикл станет бесконечным: нажмите Стоп и добавьте i += 1 внутрь цикла."
+    },
+    {
+      "mistake": "Изменение счётчика без отступа",
+      "fix": "Строка без отступа выполняется после цикла, а не в нём."
+    },
+    {
+      "mistake": "Вывод результата внутри цикла",
+      "fix": "Чтобы вывести итог один раз, print пишут после цикла без отступа."
+    },
+    {
+      "mistake": "Ошибка на единицу: < вместо <=",
+      "fix": "Проверьте первое и последнее значение счётчика."
+    }
+  ]
+}

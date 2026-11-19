@@ -1,0 +1,70 @@
+{
+  "id": "a2-ticket",
+  "type": "write",
+  "title": "Цена билета",
+  "statement": "В кино билет для детей до 7 лет бесплатный, до 18 лет — 200, для остальных — 350. Программа читает возраст и выводит цену.\n\nВвод:\n```\n12\n```\nВывод:\n```\n200\n```",
+  "goal": "Строить цепочку условий в правильном порядке.",
+  "input": "Возраст — целое число.",
+  "expectedResult": "Цена: 0, 200 или 350.",
+  "constraints": [
+    "«До 7 лет» значит 6 и меньше; «до 18» — 17 и меньше."
+  ],
+  "starterCode": "age = int(input())\n",
+  "hints": [
+    "Сколько разных цен? Столько и веток.",
+    "Проверяйте сначала самое узкое условие — маленький возраст.",
+    "До 7 лет: age < 7. До 18: age < 18.",
+    "Если сначала проверить age < 18, ребёнок 5 лет получит 200.",
+    "if age < 7: 0, elif age < 18: 200, else: 350"
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "12\n",
+        "expected_stdout": "200\n"
+      },
+      {
+        "id": "h1",
+        "stdin": "6\n",
+        "expected_stdout": "0\n",
+        "hidden": true
+      },
+      {
+        "id": "h2",
+        "stdin": "7\n",
+        "expected_stdout": "200\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "18\n",
+        "expected_stdout": "350\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "17\n",
+        "expected_stdout": "200\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "age = int(input())\nif age < 7:\n    print(0)\nelif age < 18:\n    print(200)\nelse:\n    print(350)\n",
+  "explanation": "elif проверяется, только если предыдущие условия ложны, поэтому сначала отсекаем самых маленьких, потом подростков.",
+  "criteria": [
+    "Верно на границах 7 и 18."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "age = int(input())\nif age < 18:\n    print(200)\nelif age < 7:\n    print(0)\nelse:\n    print(350)\n",
+      "why": "Неверный порядок условий."
+    },
+    {
+      "code": "age = int(input())\nif age <= 7:\n    print(0)\nelif age <= 18:\n    print(200)\nelse:\n    print(350)\n",
+      "why": "Ошибка на границах: 7 и 18 лет."
+    }
+  ]
+}

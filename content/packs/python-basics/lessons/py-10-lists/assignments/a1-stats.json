@@ -1,0 +1,57 @@
+{
+  "id": "a1-stats",
+  "type": "write",
+  "title": "Статистика оценок",
+  "statement": "Первая строка ввода — количество оценок n, далее n строк с оценками. Выведите через пробел минимальную, максимальную и среднюю оценку (среднее округлите до 2 знаков с помощью round).\n\nВвод:\n```\n4\n5\n3\n4\n4\n```\nВывод:\n```\n3 5 4.0\n```",
+  "goal": "Собирать список и использовать sum, min, max.",
+  "input": "n и n целых чисел.",
+  "expectedResult": "min max среднее.",
+  "constraints": [],
+  "starterCode": "n = int(input())\nmarks = []\n",
+  "hints": [
+    "Сначала соберите все оценки в список.",
+    "Цикл for на n итераций, внутри — append(int(input())).",
+    "min и max — готовые функции, среднее — sum / len.",
+    "round(x, 2) округляет до двух знаков.",
+    "print(min(marks), max(marks), round(sum(marks) / len(marks), 2))"
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "4\n5\n3\n4\n4\n",
+        "expected_stdout": "3 5 4.0\n"
+      },
+      {
+        "id": "h1",
+        "stdin": "3\n5\n5\n4\n",
+        "expected_stdout": "4 5 4.67\n",
+        "hidden": true
+      },
+      {
+        "id": "h2",
+        "stdin": "1\n2\n",
+        "expected_stdout": "2 2 2.0\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "n = int(input())\nmarks = []\nfor i in range(n):\n    marks.append(int(input()))\nprint(min(marks), max(marks), round(sum(marks) / len(marks), 2))\n",
+  "explanation": "Цикл собирает n оценок в список, затем готовые функции считают минимум, максимум и сумму; среднее — сумма на количество.",
+  "criteria": [
+    "Верно для одной оценки.",
+    "Среднее округлено."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "n = int(input())\nmarks = []\nfor i in range(n):\n    marks.append(int(input()))\nprint(min(marks), max(marks), sum(marks) / len(marks))\n",
+      "why": "Среднее не округлено."
+    },
+    {
+      "code": "n = int(input())\nmarks = []\nfor i in range(n):\n    marks.append(input())\nprint(min(marks), max(marks), 4.0)\n",
+      "why": "Оценки не превращены в числа, среднее «зашито»."
+    }
+  ]
+}

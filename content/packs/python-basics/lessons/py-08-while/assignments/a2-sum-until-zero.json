@@ -1,0 +1,62 @@
+{
+  "id": "a2-sum-until-zero",
+  "type": "write",
+  "title": "Сумма до нуля",
+  "statement": "Программа читает целые числа по одному на строке, пока не встретит 0, и выводит их сумму (ноль не считается).\n\nВвод:\n```\n5\n10\n-3\n0\n```\nВывод:\n```\n12\n```",
+  "goal": "Использовать while True и break.",
+  "input": "Числа, последнее — 0.",
+  "expectedResult": "Сумма.",
+  "constraints": [],
+  "starterCode": "total = 0\n",
+  "hints": [
+    "Сколько будет чисел, заранее неизвестно.",
+    "Подойдёт while True с выходом по условию.",
+    "Внутри: прочитать число; если оно 0 — break; иначе прибавить к total.",
+    "Выводить сумму нужно после цикла.",
+    "while True: x = int(input()); if x == 0: break; total += x. print(total)"
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "5\n10\n-3\n0\n",
+        "expected_stdout": "12\n"
+      },
+      {
+        "id": "h1",
+        "stdin": "0\n",
+        "expected_stdout": "0\n",
+        "hidden": true
+      },
+      {
+        "id": "h2",
+        "stdin": "7\n0\n",
+        "expected_stdout": "7\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "1\n1\n1\n1\n0\n",
+        "expected_stdout": "4\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "total = 0\nwhile True:\n    x = int(input())\n    if x == 0:\n        break\n    total += x\nprint(total)\n",
+  "explanation": "Цикл читает числа, пока не придёт 0; break выходит из цикла до прибавления нуля.",
+  "criteria": [
+    "Верно, если первым введён 0."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "total = 0\nx = int(input())\nwhile x != 0:\n    total += x\nprint(total)\n",
+      "why": "Новое число не читается — бесконечный цикл."
+    },
+    {
+      "code": "total = 0\nwhile True:\n    x = int(input())\n    total += x\n    if x == 0:\n        break\n    print(total)\n",
+      "why": "Сумма печатается на каждом шаге."
+    }
+  ]
+}

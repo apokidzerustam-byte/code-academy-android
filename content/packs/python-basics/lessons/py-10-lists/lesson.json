@@ -1,0 +1,46 @@
+{
+  "id": "py-10-lists",
+  "title": "Списки",
+  "goal": "Создавать списки, обращаться к элементам, добавлять и перебирать их, считать сумму, минимум и максимум.",
+  "skills": [
+    "python.lists",
+    "python.lists.append",
+    "python.lists.iterate",
+    "python.builtins.aggregate"
+  ],
+  "prerequisites": [
+    "py-09-for"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-stats.json",
+    "assignments/a2-filter.json",
+    "assignments/a3-fix-last.json",
+    "assignments/a4-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 2,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "lst[len(lst)] для последнего элемента",
+      "fix": "Последний элемент — lst[-1] или lst[len(lst) - 1].",
+      "errorType": "IndexError"
+    },
+    {
+      "mistake": "Добавили строки из input вместо чисел",
+      "fix": "Превращайте ввод: lst.append(int(input()))."
+    },
+    {
+      "mistake": "lst = lst.append(x)",
+      "fix": "append меняет список сам и возвращает None — не присваивайте результат."
+    },
+    {
+      "mistake": "Пустой список записали как {}",
+      "fix": "Пустой список — []."
+    }
+  ]
+}

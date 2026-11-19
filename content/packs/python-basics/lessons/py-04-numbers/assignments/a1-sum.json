@@ -1,0 +1,58 @@
+{
+  "id": "a1-sum",
+  "type": "write",
+  "title": "Сумма двух чисел",
+  "statement": "Программа читает два целых числа (каждое на своей строке) и выводит их сумму.\n\nВвод:\n```\n12\n30\n```\nВывод:\n```\n42\n```",
+  "goal": "Превращать ввод в числа.",
+  "input": "Два целых числа на разных строках.",
+  "expectedResult": "Сумма.",
+  "constraints": [
+    "Используйте int(input())."
+  ],
+  "starterCode": "",
+  "hints": [
+    "Что вернёт input() — число или текст?",
+    "Строки нужно превратить в числа до сложения.",
+    "Функция int превращает строку из цифр в целое число.",
+    "Без int плюс склеит строки и получится «1230».",
+    "a = int(input()); b = int(input()); print(a + b)"
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "12\n30\n",
+        "expected_stdout": "42\n"
+      },
+      {
+        "id": "h1",
+        "stdin": "-5\n5\n",
+        "expected_stdout": "0\n",
+        "hidden": true
+      },
+      {
+        "id": "h2",
+        "stdin": "1000\n999\n",
+        "expected_stdout": "1999\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "a = int(input())\nb = int(input())\nprint(a + b)\n",
+  "explanation": "int превращает введённые строки в числа, поэтому + складывает, а не склеивает.",
+  "criteria": [
+    "Верно для любых целых чисел."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "a = input()\nb = input()\nprint(a + b)\n",
+      "why": "Без int строки склеиваются."
+    },
+    {
+      "code": "print(42)\n",
+      "why": "Ответ «зашит»."
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "id": "a4-predict",
+  "type": "predict",
+  "title": "Что напечатает цикл?",
+  "statement": "Что выведет программа?",
+  "goal": "Читать range и continue.",
+  "input": "Нет.",
+  "expectedResult": "Строки вывода.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "for i in range(10, 0, -3):\n    if i == 4:\n        continue\n    print(i)\n",
+  "hints": [
+    "Выпишите числа range(10, 0, -3).",
+    "Это 10, 7, 4, 1.",
+    "continue пропускает print для i = 4.",
+    "0 не входит — конец не включается.",
+    "10, 7, 1."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "10\n7\n1\n"
+  },
+  "solution": "10\n7\n1\n",
+  "explanation": "range(10, 0, -3) даёт 10, 7, 4, 1; для 4 срабатывает continue, поэтому выводятся 10, 7 и 1.",
+  "criteria": [
+    "Ответ верен."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "",
+      "answer": "10\n7\n4\n1\n",
+      "why": "continue пропускает 4."
+    },
+    {
+      "code": "",
+      "answer": "10\n7\n",
+      "why": "continue не останавливает цикл — это делает break."
+    }
+  ]
+}

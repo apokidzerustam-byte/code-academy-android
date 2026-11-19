@@ -1,0 +1,46 @@
+{
+  "id": "py-04-numbers",
+  "title": "Числа и арифметика",
+  "goal": "Считать с целыми и дробными числами, использовать // и %, превращать ввод в число и понимать ValueError.",
+  "skills": [
+    "python.numbers",
+    "python.arithmetic",
+    "python.conversion",
+    "python.errors.value"
+  ],
+  "prerequisites": [
+    "py-03-input"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-sum.json",
+    "assignments/a2-minutes.json",
+    "assignments/a3-fix-int.json",
+    "assignments/a4-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 2,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Сложили введённые значения без int: получилось «1230» вместо 42",
+      "fix": "Оборачивайте input() в int(...) или float(...)."
+    },
+    {
+      "mistake": "Дробь с запятой: 2,5",
+      "fix": "В Python дробную часть отделяют точкой: 2.5."
+    },
+    {
+      "mistake": "Ввели слово вместо числа",
+      "fix": "int() понимает только цифры (и знак минус).",
+      "errorType": "ValueError"
+    },
+    {
+      "mistake": "Ожидали целое от /",
+      "fix": "/ всегда даёт дробь; для целой части используйте //."
+    }
+  ]
+}

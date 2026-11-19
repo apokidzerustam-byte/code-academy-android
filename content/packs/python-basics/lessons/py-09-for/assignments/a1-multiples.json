@@ -1,0 +1,58 @@
+{
+  "id": "a1-multiples",
+  "type": "write",
+  "title": "Таблица умножения на n",
+  "statement": "Программа читает число n и выводит таблицу умножения на n от 1 до 10 в формате `n x i = результат`.\n\nВвод:\n```\n7\n```\nВывод (начало):\n```\n7 x 1 = 7\n7 x 2 = 14\n...\n7 x 10 = 70\n```",
+  "goal": "Использовать for и range.",
+  "input": "Целое n.",
+  "expectedResult": "10 строк.",
+  "constraints": [
+    "Используйте for."
+  ],
+  "starterCode": "n = int(input())\n",
+  "hints": [
+    "Строк ровно десять — число повторений известно.",
+    "Нужен for i in range(...) с i от 1 до 10.",
+    "Конец range не входит: range(1, 11).",
+    "Строку удобно собрать f-строкой: f\"{n} x {i} = {n * i}\".",
+    "for i in range(1, 11): print(f\"{n} x {i} = {n * i}\")"
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "7\n",
+        "expected_stdout": "7 x 1 = 7\n7 x 2 = 14\n7 x 3 = 21\n7 x 4 = 28\n7 x 5 = 35\n7 x 6 = 42\n7 x 7 = 49\n7 x 8 = 56\n7 x 9 = 63\n7 x 10 = 70\n"
+      },
+      {
+        "id": "h1",
+        "stdin": "1\n",
+        "expected_stdout": "1 x 1 = 1\n1 x 2 = 2\n1 x 3 = 3\n1 x 4 = 4\n1 x 5 = 5\n1 x 6 = 6\n1 x 7 = 7\n1 x 8 = 8\n1 x 9 = 9\n1 x 10 = 10\n",
+        "hidden": true
+      },
+      {
+        "id": "h2",
+        "stdin": "12\n",
+        "expected_stdout": "12 x 1 = 12\n12 x 2 = 24\n12 x 3 = 36\n12 x 4 = 48\n12 x 5 = 60\n12 x 6 = 72\n12 x 7 = 84\n12 x 8 = 96\n12 x 9 = 108\n12 x 10 = 120\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "n = int(input())\nfor i in range(1, 11):\n    print(f\"{n} x {i} = {n * i}\")\n",
+  "explanation": "range(1, 11) перебирает i от 1 до 10; на каждой итерации выводится одна строка таблицы.",
+  "criteria": [
+    "10 строк, формат совпадает."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "n = int(input())\nfor i in range(1, 10):\n    print(f\"{n} x {i} = {n * i}\")\n",
+      "why": "range(1, 10) не включает 10."
+    },
+    {
+      "code": "n = int(input())\nfor i in range(10):\n    print(f\"{n} x {i} = {n * i}\")\n",
+      "why": "Начинается с 0."
+    }
+  ]
+}

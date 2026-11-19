@@ -1,0 +1,57 @@
+{
+  "id": "a2-filter",
+  "type": "write",
+  "title": "Только положительные",
+  "statement": "Программа читает 5 целых чисел (каждое на своей строке) и выводит список только положительных из них в формате Python-списка.\n\nВвод:\n```\n3\n-1\n0\n8\n-5\n```\nВывод:\n```\n[3, 8]\n```",
+  "goal": "Наполнять список по условию.",
+  "input": "5 целых чисел.",
+  "expectedResult": "Список положительных.",
+  "constraints": [],
+  "starterCode": "result = []\n",
+  "hints": [
+    "Нужно 5 раз прочитать число и решить, брать ли его.",
+    "Цикл for на 5 итераций.",
+    "Внутри: x = int(input()); если x > 0 — append.",
+    "Ноль положительным не считается.",
+    "print(result) после цикла."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "3\n-1\n0\n8\n-5\n",
+        "expected_stdout": "[3, 8]\n"
+      },
+      {
+        "id": "h1",
+        "stdin": "-1\n-2\n-3\n-4\n-5\n",
+        "expected_stdout": "[]\n",
+        "hidden": true
+      },
+      {
+        "id": "h2",
+        "stdin": "1\n2\n3\n4\n5\n",
+        "expected_stdout": "[1, 2, 3, 4, 5]\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "result = []\nfor i in range(5):\n    x = int(input())\n    if x > 0:\n        result.append(x)\nprint(result)\n",
+  "explanation": "В список добавляются только числа больше нуля; если таких нет, выводится пустой список [].",
+  "criteria": [
+    "Ноль не попадает в список.",
+    "Пустой список — []."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "result = []\nfor i in range(5):\n    x = int(input())\n    if x >= 0:\n        result.append(x)\nprint(result)\n",
+      "why": "Ноль попал в список."
+    },
+    {
+      "code": "result = []\nfor i in range(5):\n    x = input()\n    if int(x) > 0:\n        result.append(x)\nprint(result)\n",
+      "why": "В список добавлены строки, а не числа."
+    }
+  ]
+}

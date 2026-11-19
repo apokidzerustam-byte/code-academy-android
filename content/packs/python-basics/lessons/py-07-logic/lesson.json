@@ -1,0 +1,44 @@
+{
+  "id": "py-07-logic",
+  "title": "Логические операторы",
+  "goal": "Строить составные условия с and, or, not, проверять промежутки и использовать вложенные условия.",
+  "skills": [
+    "python.bool.ops",
+    "python.if.nested"
+  ],
+  "prerequisites": [
+    "py-06-conditions"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-range.json",
+    "assignments/a2-weekend.json",
+    "assignments/a3-fix-logic.json",
+    "assignments/a4-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 2,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "if day == \"сб\" or \"вс\":",
+      "fix": "Пишите сравнение полностью с каждой стороны or: day == \"сб\" or day == \"вс\"."
+    },
+    {
+      "mistake": "Перепутали and и or",
+      "fix": "and — оба условия, or — хотя бы одно. Проверьте на граничных примерах."
+    },
+    {
+      "mistake": "Не тот знак на границе промежутка",
+      "fix": "Решите, входит ли граница: < или <=."
+    },
+    {
+      "mistake": "Неверный отступ во вложенном if",
+      "fix": "Каждый уровень вложенности — плюс 4 пробела.",
+      "errorType": "IndentationError"
+    }
+  ]
+}

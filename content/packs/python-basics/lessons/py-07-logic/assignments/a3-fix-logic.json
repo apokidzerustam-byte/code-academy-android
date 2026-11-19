@@ -1,0 +1,62 @@
+{
+  "id": "a3-fix-logic",
+  "type": "fix",
+  "title": "Треугольник",
+  "statement": "Три стороны образуют треугольник, если каждая сторона меньше суммы двух других. Программа читает три целых числа и должна выводить `да` или `нет`, но ошибается. Исправьте логику.",
+  "goal": "Правильно выбирать and/or.",
+  "input": "Три целых числа на отдельных строках.",
+  "expectedResult": "да / нет.",
+  "constraints": [],
+  "starterCode": "a = int(input())\nb = int(input())\nc = int(input())\nif a < b + c or b < a + c or c < a + b:\n    print(\"да\")\nelse:\n    print(\"нет\")\n",
+  "hints": [
+    "Проверьте программу на сторонах 1, 2, 10.",
+    "Условие должно выполняться для всех трёх сторон одновременно.",
+    "«Каждая сторона» — это «и», а не «или».",
+    "Замените оператор между тремя проверками.",
+    "a < b + c and b < a + c and c < a + b"
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "1\n2\n10\n",
+        "expected_stdout": "нет\n"
+      },
+      {
+        "id": "h1",
+        "stdin": "3\n4\n5\n",
+        "expected_stdout": "да\n",
+        "hidden": true
+      },
+      {
+        "id": "h2",
+        "stdin": "1\n1\n2\n",
+        "expected_stdout": "нет\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "2\n2\n3\n",
+        "expected_stdout": "да\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "a = int(input())\nb = int(input())\nc = int(input())\nif a < b + c and b < a + c and c < a + b:\n    print(\"да\")\nelse:\n    print(\"нет\")\n",
+  "explanation": "Неравенство должно выполняться для каждой стороны, поэтому три проверки соединяются через and.",
+  "criteria": [
+    "Верно, в том числе для вырожденного случая 1, 1, 2."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "a = int(input())\nb = int(input())\nc = int(input())\nif a <= b + c and b <= a + c and c <= a + b:\n    print(\"да\")\nelse:\n    print(\"нет\")\n",
+      "why": "<= пропускает вырожденный треугольник."
+    },
+    {
+      "code": "a = int(input())\nb = int(input())\nc = int(input())\nif a < b + c:\n    print(\"да\")\nelse:\n    print(\"нет\")\n",
+      "why": "Проверена только одна сторона."
+    }
+  ]
+}

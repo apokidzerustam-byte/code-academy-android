@@ -1,0 +1,46 @@
+{
+  "id": "py-02-variables",
+  "title": "Переменные",
+  "goal": "Создавать переменные, менять их значение, считать с их помощью и исправлять NameError.",
+  "skills": [
+    "python.variables",
+    "python.assignment",
+    "python.errors.name"
+  ],
+  "prerequisites": [
+    "py-01-print"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-purchase.json",
+    "assignments/a2-fix-name.json",
+    "assignments/a3-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 2,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Имя переменной в кавычках: print(\"name\")",
+      "fix": "Имя переменной пишут без кавычек, иначе выводится текст."
+    },
+    {
+      "mistake": "Другая буква в имени: Name вместо name",
+      "fix": "Python различает регистр: пишите имя ровно так, как при создании.",
+      "errorType": "NameError"
+    },
+    {
+      "mistake": "Переменная используется до создания",
+      "fix": "Присваивание должно стоять выше строки, где переменная используется.",
+      "errorType": "NameError"
+    },
+    {
+      "mistake": "Имя с пробелом или начинается с цифры",
+      "fix": "Используйте буквы, цифры и подчёркивание: user_name, total2.",
+      "errorType": "SyntaxError"
+    }
+  ]
+}

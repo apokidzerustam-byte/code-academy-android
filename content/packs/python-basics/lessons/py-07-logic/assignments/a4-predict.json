@@ -1,0 +1,41 @@
+{
+  "id": "a4-predict",
+  "type": "predict",
+  "title": "True или False?",
+  "statement": "Что выведет программа?",
+  "goal": "Вычислять логические выражения.",
+  "input": "Нет.",
+  "expectedResult": "Три строки.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "x = 7\nprint(x > 5 and x < 7)\nprint(x > 5 or x < 0)\nprint(not x == 7)\n",
+  "hints": [
+    "Вычислите каждое сравнение отдельно.",
+    "7 < 7 — ложь.",
+    "and ложно, если ложна хоть одна часть.",
+    "not переворачивает результат x == 7.",
+    "False, True, False."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "False\nTrue\nFalse\n"
+  },
+  "solution": "False\nTrue\nFalse\n",
+  "explanation": "7 > 5 истинно, но 7 < 7 ложно, значит and даёт False. Во второй строке достаточно первой части. x == 7 истинно, not делает его False.",
+  "criteria": [
+    "Ответ верен."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "",
+      "answer": "True\nTrue\nFalse\n",
+      "why": "7 < 7 — ложь."
+    },
+    {
+      "code": "",
+      "answer": "False\nTrue\nTrue\n",
+      "why": "not переворачивает True в False."
+    }
+  ]
+}

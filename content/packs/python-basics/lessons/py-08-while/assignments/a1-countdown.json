@@ -1,0 +1,58 @@
+{
+  "id": "a1-countdown",
+  "type": "write",
+  "title": "Обратный отсчёт",
+  "statement": "Программа читает целое число n (n ≥ 1) и выводит числа от n до 1, каждое с новой строки, а затем слово `Старт!`.\n\nВвод:\n```\n3\n```\nВывод:\n```\n3\n2\n1\nСтарт!\n```",
+  "goal": "Писать цикл со счётчиком.",
+  "input": "Целое n ≥ 1.",
+  "expectedResult": "n строк чисел и «Старт!».",
+  "constraints": [
+    "Используйте while."
+  ],
+  "starterCode": "n = int(input())\n",
+  "hints": [
+    "Нужно повторять вывод, уменьшая число.",
+    "Цикл while, пока число больше нуля.",
+    "Внутри — print(n) и n -= 1.",
+    "«Старт!» выводится один раз — после цикла, без отступа.",
+    "while n > 0: print(n); n -= 1. Потом print(\"Старт!\")."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "3\n",
+        "expected_stdout": "3\n2\n1\nСтарт!\n"
+      },
+      {
+        "id": "h1",
+        "stdin": "1\n",
+        "expected_stdout": "1\nСтарт!\n",
+        "hidden": true
+      },
+      {
+        "id": "h2",
+        "stdin": "5\n",
+        "expected_stdout": "5\n4\n3\n2\n1\nСтарт!\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "n = int(input())\nwhile n > 0:\n    print(n)\n    n -= 1\nprint(\"Старт!\")\n",
+  "explanation": "Пока n положительное, выводим его и уменьшаем на 1. Когда n станет 0, цикл закончится и выведется «Старт!».",
+  "criteria": [
+    "Верно для любого n ≥ 1."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "n = int(input())\nwhile n >= 0:\n    print(n)\n    n -= 1\nprint(\"Старт!\")\n",
+      "why": "Выводится лишний 0."
+    },
+    {
+      "code": "n = int(input())\nwhile n > 0:\n    print(n)\n    n -= 1\n    print(\"Старт!\")\n",
+      "why": "«Старт!» внутри цикла — печатается много раз."
+    }
+  ]
+}

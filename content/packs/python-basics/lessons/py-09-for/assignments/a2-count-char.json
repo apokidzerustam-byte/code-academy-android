@@ -1,0 +1,64 @@
+{
+  "id": "a2-count-char",
+  "type": "write",
+  "title": "Сколько раз встречается буква",
+  "statement": "Программа читает строку и букву (две строки ввода) и выводит, сколько раз буква встречается в строке.\n\nВвод:\n```\nмама мыла раму\nм\n```\nВывод:\n```\n4\n```",
+  "goal": "Перебирать символы строки.",
+  "input": "Строка и одна буква.",
+  "expectedResult": "Число.",
+  "constraints": [
+    "Решите циклом for, без метода count."
+  ],
+  "starterCode": "s = input()\nc = input()\n",
+  "hints": [
+    "Нужно пройти по всем символам строки.",
+    "for ch in s перебирает символы по одному.",
+    "Заведите счётчик до цикла и увеличивайте его при совпадении.",
+    "Сравнение символа с буквой: ch == c.",
+    "count = 0; for ch in s: if ch == c: count += 1; print(count)"
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "мама мыла раму\nм\n",
+        "expected_stdout": "4\n"
+      },
+      {
+        "id": "h1",
+        "stdin": "банан\nа\n",
+        "expected_stdout": "2\n",
+        "hidden": true
+      },
+      {
+        "id": "h2",
+        "stdin": "кот\nя\n",
+        "expected_stdout": "0\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "ааа\nа\n",
+        "expected_stdout": "3\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "s = input()\nc = input()\ncount = 0\nfor ch in s:\n    if ch == c:\n        count += 1\nprint(count)\n",
+  "explanation": "Цикл проходит по всем символам, счётчик растёт при каждом совпадении; вывод — после цикла.",
+  "criteria": [
+    "Верно, если буквы нет."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "s = input()\nc = input()\ncount = 0\nfor ch in s:\n    if ch == c:\n        count += 1\n    print(count)\n",
+      "why": "Вывод внутри цикла."
+    },
+    {
+      "code": "s = input()\nc = input()\ncount = 0\nfor ch in s:\n    count += 1\nprint(count)\n",
+      "why": "Считаются все символы."
+    }
+  ]
+}
