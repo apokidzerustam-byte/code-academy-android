@@ -31,8 +31,8 @@ jobs:
         run: |
           pip install chatterbox-tts faster-whisper --extra-index-url https://download.pytorch.org/whl/cpu
           # Ударения: тот же инструмент, на котором обучена русская часть Chatterbox.
-          pip install "git+https://github.com/Vuizur/add-stress-to-epub"
-          python content-pipeline/narrate.py --probe /dev/null content/packs | head -20
+          pip install "numpy<2" "git+https://github.com/Vuizur/add-stress-to-epub"
+          python content-pipeline/narrate.py --probe /dev/null content/packs > /tmp/probe.txt && head -20 /tmp/probe.txt
       - name: Опорная запись автора
         env:
           VOICE_REF_KEY: ${{ secrets.VOICE_REF_KEY }}
