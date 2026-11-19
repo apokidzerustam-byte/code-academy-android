@@ -20,7 +20,7 @@ android {
         // Номер сборки CI: каждая новая версия ставится поверх предыдущей.
         val run = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
         versionCode = run
-        versionName = "0.0.5-proto.$run"
+        versionName = "0.0.6-proto.$run"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             // arm64 — телефоны, x86_64 — эмулятор в CI.
