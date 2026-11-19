@@ -33,7 +33,7 @@ class LessonPlayerUiTest {
         onAllNodes(hasText(text, substring = true) and hasAnyAncestor(hasTestTag(tag))).fetchSemanticsNodes().isNotEmpty()
 
     private fun openLesson() {
-        rule.onNodeWithTag("open-program").performClick()
+        rule.onNodeWithTag("open-program").performScrollTo().performClick()
         rule.waitUntil(10_000) { rule.onAllNodes(hasTestTag("lesson-py-01-print")).fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("lesson-py-01-print").performScrollTo().performClick()
         rule.waitUntil(10_000) { rule.onAllNodes(hasTestTag("lesson-player")).fetchSemanticsNodes().isNotEmpty() }
