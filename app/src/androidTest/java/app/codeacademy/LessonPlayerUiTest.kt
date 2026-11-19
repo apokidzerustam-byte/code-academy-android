@@ -26,7 +26,7 @@ class LessonPlayerUiTest {
     private val app get() = rule.activity.application as CodeAcademyApp
 
     @Before fun clean() {
-        runBlocking { app.container.db.clearAllTables() }
+        runBlocking { app.container.db.clearAllTables(); app.container.settings.setOnboardingDone(true) }
     }
 
     private fun SemanticsNodeInteractionsProvider.has(tag: String, text: String) =

@@ -2,6 +2,8 @@ package app.codeacademy.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -22,6 +24,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -31,7 +34,9 @@ import app.codeacademy.content.Lesson
 import app.codeacademy.content.LessonRef
 import app.codeacademy.content.PackManifest
 import app.codeacademy.data.LessonStatus
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun HomeScreen(
     openProgram: () -> Unit,
@@ -39,6 +44,10 @@ fun HomeScreen(
     openStats: () -> Unit,
     openSettings: () -> Unit,
     openProjects: () -> Unit,
+    openDiagnostic: () -> Unit = {},
+    openReview: () -> Unit = {},
+    openMap: () -> Unit = {},
+    openPlan: () -> Unit = {},
 ) {
     val c = LocalContainer.current
     var lessons by remember { mutableStateOf<List<Pair<PackManifest, Lesson>>>(emptyList()) }
@@ -48,13 +57,24 @@ fun HomeScreen(
     val dueFlow = remember { c.progress.dueReviews() }
     val due by dueFlow.collectAsStateWithLifecycle(emptyList())
     val skills by c.progress.skills.collectAsStateWithLifecycle(emptyList())
+    val settings by c.settings.settings.collectAsStateWithLifecycle(null)
+    val reviews by c.progress.reviews.collectAsStateWithLifecycle(emptyList())
+    val attempts by c.progress.attempts.collectAsStateWithLifecycle(emptyList())
+    val course = rememberCourse()
+    val scope = rememberCoroutineScope()
 
     val statusByKey = progress.associate { it.lessonKey to it.status }
     val refs = lessons.map { (p, l) -> LessonRef(p.id, l.id) to l }
-    val passed = refs.count { statusByKey[it.first.key] == LessonStatus.PASSED }
+    val passed = refs.count { LessonStatus.isDone(statusByKey[it.first.key]) }
     val continueRef = last?.lessonKey?.let { k -> refs.firstOrNull { it.first.key == k } }
-    val next = continueRef?.takeIf { statusByKey[it.first.key] != LessonStatus.PASSED }
-        ?: refs.firstOrNull { statusByKey[it.first.key] != LessonStatus.PASSED }
+    val next = continueRef?.takeIf { !LessonStatus.isDone(statusByKey[it.first.key]) }
+        ?: refs.firstOrNull { !LessonStatus.isDone(statusByKey[it.first.key]) }
+    val today = java.time.LocalDate.now().toEpochDay()
+    val todayPlan = if (course != null && settings != null) {
+        val passedBy = attempts.filter { it.passed }.groupBy { it.lessonKey }.mapValues { (_, a) -> a.map { it.assignmentId }.toSet() }
+        buildPlan(course, statusByKey, reviews, passedBy, today, settings!!.sessionMinutes, settings!!.daysPerWeek)
+            .firstOrNull()?.takeIf { it.epochDay == today }
+    } else null
     val weak = skills.filter { it.attempts > 0 && it.accuracy < 0.6 }
 
     Screen("Code Academy", onBack = null, actions = {
@@ -64,6 +84,9 @@ fun HomeScreen(
             Modifier.padding(padding).padding(16.dp).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            if (settings?.onboardingDone == false && progress.isEmpty()) {
+                StartChoiceCard(onZero = { scope.launch { c.settings.setOnboardingDone(true) } }, onDiagnostic = openDiagnostic)
+            }
             Card(Modifier.fillMaxWidth().testTag("continue")) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     if (next != null) {
@@ -89,10 +112,23 @@ fun HomeScreen(
                         modifier = Modifier.fillMaxWidth(),
                     )
                     Text("Повторить сегодня: ${due.size}")
-                    if (weak.isNotEmpty()) Text("Слабые темы: " + weak.joinToString { it.skillId })
+                    if (weak.isNotEmpty()) Text("Слабые темы: " + weak.joinToString { course?.title(it.skillId) ?: it.skillId })
                 }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (todayPlan != null && course != null && todayPlan.items.isNotEmpty()) {
+                Card(Modifier.fillMaxWidth().testTag("today-plan")) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text("Сегодня по плану · ${todayPlan.minutes} мин", style = MaterialTheme.typography.titleMedium)
+                        todayPlan.items.forEach { PlanItemRow(it, course, openLesson, openReview) }
+                    }
+                }
+            }
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = openReview, modifier = Modifier.testTag("open-review")) { Text("Повторение (${due.size})") }
+                OutlinedButton(onClick = openMap, modifier = Modifier.testTag("open-map")) { Text("Карта знаний") }
+                OutlinedButton(onClick = openPlan, modifier = Modifier.testTag("open-plan")) { Text("План") }
+            }
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = openProgram, modifier = Modifier.testTag("open-program")) { Text("Программа") }
                 OutlinedButton(onClick = openProjects, modifier = Modifier.testTag("open-projects")) { Text("Проекты") }
                 OutlinedButton(onClick = openStats) { Text("Статистика") }

@@ -69,7 +69,14 @@ private fun JsonElement?.show(): String = when (this) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun AssignmentScreen(ref: LessonRef, index: Int, settings: Settings, onBack: () -> Unit) {
+fun AssignmentScreen(
+    ref: LessonRef,
+    index: Int,
+    settings: Settings,
+    onBack: () -> Unit,
+    openAssignment: (LessonRef, Int) -> Unit = { _, _ -> },
+) {
+    val course = rememberCourse()
     val c = LocalContainer.current
     val scope = rememberCoroutineScope()
     var lesson by remember { mutableStateOf<Lesson?>(null) }
@@ -204,6 +211,9 @@ fun AssignmentScreen(ref: LessonRef, index: Int, settings: Settings, onBack: () 
                 CodeBlock(it, Modifier.testTag("console"))
             }
             verdict?.let { VerdictView(it, asg) }
+            verdict?.takeIf { !it.passed }?.errorType?.let { et ->
+                ErrorAdvice(et, lesson!!, course, ref, asg.id, openAssignment)
+            }
 
             Text("Подсказки", style = MaterialTheme.typography.titleMedium)
             for (i in 0 until hintsShown) {
@@ -319,3 +329,46 @@ private fun VerdictView(v: Verdict, asg: Assignment) {
         }
     }
 }
+
+/** Ошибка → навык урока, где она разбирается (Error-Based Learning, раздел 10 ТЗ). */
+private val ERROR_SKILL = mapOf(
+    "SyntaxError" to "python.errors.syntax", "NameError" to "python.errors.name", "TypeError" to "python.errors.type",
+    "ValueError" to "python.errors.value", "IndexError" to "python.errors.index", "IndentationError" to "python.errors.indentation",
+)
+
+/** Причина ошибки и упражнение, которое тренирует именно её. */
+@Composable
+private fun ErrorAdvice(
+    errorType: String,
+    lesson: Lesson,
+    course: CourseData?,
+    ref: LessonRef,
+    currentId: String,
+    open: (LessonRef, Int) -> Unit,
+) {
+    val skillLesson = ERROR_SKILL[errorType]?.let { course?.lessonOfSkill(it) }
+    val mistake = lesson.commonMistakes.firstOrNull { it.errorType == errorType }
+        ?: skillLesson?.lesson?.commonMistakes?.firstOrNull { it.errorType == errorType }
+    val exercise = skillLesson?.let { cl ->
+        cl.assignments.indexOfFirst { it.type == "fix" && !(cl.ref == ref && it.id == currentId) }.takeIf { it >= 0 }?.let { cl to it }
+    }
+    if (mistake == null && exercise == null) return
+    Card(
+        Modifier.fillMaxWidth().testTag("error-advice"),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
+    ) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text("Разбор ошибки $errorType", style = MaterialTheme.typography.titleSmall)
+            mistake?.let {
+                Text("Частая причина: ${it.mistake}", style = MaterialTheme.typography.bodyMedium)
+                Text("Как исправить: ${it.fix}", style = MaterialTheme.typography.bodyMedium)
+            }
+            exercise?.let { (cl, i) ->
+                OutlinedButton(onClick = { open(cl.ref, i) }, modifier = Modifier.testTag("error-exercise")) {
+                    Text("Упражнение: ${cl.assignments[i].title}")
+                }
+            }
+        }
+    }
+}
+

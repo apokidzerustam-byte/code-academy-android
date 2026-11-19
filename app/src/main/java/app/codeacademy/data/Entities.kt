@@ -8,6 +8,10 @@ object LessonStatus {
     const val NOT_STARTED = "NOT_STARTED"
     const val IN_PROGRESS = "IN_PROGRESS"
     const val PASSED = "PASSED"
+    /** Подтверждён диагностикой; закрепляется повторением (освоение не подтверждается одним тестом). */
+    const val TESTED_OUT = "TESTED_OUT"
+
+    fun isDone(status: String?) = status == PASSED || status == TESTED_OUT
 }
 
 object SkillStatus {

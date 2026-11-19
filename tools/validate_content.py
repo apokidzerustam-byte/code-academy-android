@@ -244,6 +244,10 @@ def validate_pack(pack_dir, rep):
             continue
         if lesson["id"] != lid:
             rep.err(str(ldir), f"id урока {lesson['id']!r} не совпадает с папкой {lid!r}")
+        titles = pack.get("skills", {})
+        for sk in lesson["skills"]:
+            if sk not in titles:
+                rep.err(str(ldir), f"навык {sk!r} без названия в pack.json → skills (нужно для карты знаний)")
         for ref in [lesson["scenario"], lesson["notes"], *lesson["assignments"]]:
             if not (ldir / ref).exists():
                 rep.err(str(ldir), f"нет файла {ref}")

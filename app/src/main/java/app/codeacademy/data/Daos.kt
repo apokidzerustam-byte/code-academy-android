@@ -35,6 +35,9 @@ interface AttemptDao {
     @Query("SELECT COUNT(*) FROM attempt")
     fun count(): Flow<Int>
 
+    @Query("SELECT * FROM attempt ORDER BY startedAt")
+    fun all(): Flow<List<AttemptEntity>>
+
     @Query("SELECT COUNT(*) FROM attempt WHERE passed = 1")
     fun passedCount(): Flow<Int>
 
@@ -66,6 +69,9 @@ interface ReviewDao {
 
     @Query("SELECT * FROM review_item WHERE skillId = :id")
     suspend fun get(id: String): ReviewItemEntity?
+
+    @Query("SELECT * FROM review_item ORDER BY dueEpochDay")
+    fun all(): Flow<List<ReviewItemEntity>>
 
     @Upsert
     suspend fun upsert(r: ReviewItemEntity)

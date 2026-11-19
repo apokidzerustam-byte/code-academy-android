@@ -54,6 +54,7 @@ fun ProgramScreen(onBack: () -> Unit, openLesson: (LessonRef) -> Unit) {
                             val ref = LessonRef(p.id, l.id)
                             val mark = when (status[ref.key]) {
                                 LessonStatus.PASSED -> "✓"
+                                LessonStatus.TESTED_OUT -> "✓ (диагностика)"
                                 LessonStatus.IN_PROGRESS -> "●"
                                 else -> "○"
                             }

@@ -6,6 +6,11 @@ import kotlinx.coroutines.sync.Mutex
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material3.Button
 import app.codeacademy.lesson.LessonTimeline
+import app.codeacademy.learning.Advisor
+import app.codeacademy.learning.NextAction
+import app.codeacademy.learning.Scoring
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.OutlinedButton
 import android.os.SystemClock
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -63,6 +68,8 @@ fun LessonScreen(ref: LessonRef, onBack: () -> Unit, openAssignment: (Int) -> Un
     var notes by remember { mutableStateOf("") }
     var assignments by remember { mutableStateOf<List<Assignment>>(emptyList()) }
     var passed by remember { mutableStateOf<List<String>>(emptyList()) }
+    val attemptsFlow = remember(ref) { c.progress.attemptsFor(ref) }
+    val lessonAttempts by attemptsFlow.collectAsStateWithLifecycle(emptyList())
     var tab by rememberSaveable { mutableStateOf(0) }
     val progress by c.progress.lessons.collectAsStateWithLifecycle(emptyList())
     val status = progress.firstOrNull { it.lessonKey == ref.key }?.status
@@ -100,6 +107,7 @@ fun LessonScreen(ref: LessonRef, onBack: () -> Unit, openAssignment: (Int) -> Un
                     0 -> {
                         Text("Цель: ${l.goal}", style = MaterialTheme.typography.bodyLarge)
                         if (status == LessonStatus.PASSED) Text("✓ Урок пройден", color = MaterialTheme.colorScheme.primary)
+                        if (status == LessonStatus.TESTED_OUT) Text("✓ Подтверждено диагностикой — задания помогут закрепить", color = MaterialTheme.colorScheme.primary)
                         timeline?.let { tl ->
                             LessonPlayer(
                                 timeline = tl, audio = audio, initialMs = positionMs ?: resumeMs,
@@ -143,6 +151,27 @@ fun LessonScreen(ref: LessonRef, onBack: () -> Unit, openAssignment: (Int) -> Un
                             "Для прохождения урока нужно решить ${l.passCriteria.minAssignmentsPassed} из ${assignments.size}.",
                             style = MaterialTheme.typography.bodyMedium,
                         )
+                        // Адаптация по порогам 60/80/90 (раздел 10 ТЗ): что делать дальше.
+                        Scoring.lessonScore(lessonAttempts.map { it.lite() })?.let { score ->
+                            val rec = Advisor.forLesson(score)
+                            Card(
+                                Modifier.fillMaxWidth().testTag("recommendation"),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+                            ) {
+                                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    Text(rec.title, style = MaterialTheme.typography.titleMedium)
+                                    Text(rec.details, style = MaterialTheme.typography.bodyMedium)
+                                    when (rec.action) {
+                                        NextAction.REEXPLAIN -> OutlinedButton(onClick = { tab = 0 }) { Text("Пересмотреть урок") }
+                                        NextAction.CONSOLIDATE, NextAction.EXTRA_CHECK -> {
+                                            val nextIdx = assignments.indexOfFirst { it.id !in passed }
+                                            if (nextIdx >= 0) OutlinedButton(onClick = { openAssignment(nextIdx) }) { Text("Следующее задание") }
+                                        }
+                                        NextAction.ADVANCE -> {}
+                                    }
+                                }
+                            }
+                        }
                         assignments.forEachIndexed { i, a ->
                             Card(Modifier.fillMaxWidth().clickable { openAssignment(i) }.testTag("assignment-$i")) {
                                 Column(Modifier.padding(12.dp)) {

@@ -27,6 +27,7 @@ class IdeUiTest {
     @Before fun clean() {
         runBlocking {
             app.container.db.clearAllTables()
+            app.container.settings.setOnboardingDone(true)
             app.container.settings.setPlainEditor(true)
         }
     }

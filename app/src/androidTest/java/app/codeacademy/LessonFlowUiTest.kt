@@ -25,6 +25,7 @@ class LessonFlowUiTest {
         val app = rule.activity.application as CodeAcademyApp
         runBlocking {
             app.container.db.clearAllTables()
+            app.container.settings.setOnboardingDone(true)
             // UI-тест вводит текст в простое поле; CodeMirror проверяется в CodeEditorTest.
             app.container.settings.setPlainEditor(true)
         }

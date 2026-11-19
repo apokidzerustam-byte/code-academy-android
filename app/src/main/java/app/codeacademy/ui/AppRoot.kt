@@ -35,6 +35,10 @@ object Routes {
     const val SETTINGS = "settings"
     const val LAB = "lab"
     const val PROJECTS = "projects"
+    const val DIAGNOSTIC = "diagnostic"
+    const val MAP = "map"
+    const val REVIEW = "review"
+    const val PLAN = "plan"
     const val IDE = "ide/{id}"
     fun ide(id: String) = "ide/$id"
     fun lesson(r: LessonRef) = "lesson/${r.packId}/${r.lessonId}"
@@ -72,6 +76,10 @@ private fun AppNav(settings: Settings) {
                 openStats = { nav.navigate(Routes.STATS) },
                 openSettings = { nav.navigate(Routes.SETTINGS) },
                 openProjects = { nav.navigate(Routes.PROJECTS) },
+                openDiagnostic = { nav.navigate(Routes.DIAGNOSTIC) },
+                openReview = { nav.navigate(Routes.REVIEW) },
+                openMap = { nav.navigate(Routes.MAP) },
+                openPlan = { nav.navigate(Routes.PLAN) },
             )
         }
         composable(Routes.PROGRAM) { ProgramScreen(back) { nav.navigate(Routes.lesson(it)) } }
@@ -91,9 +99,13 @@ private fun AppNav(settings: Settings) {
             ),
         ) { e ->
             val ref = LessonRef(e.arguments!!.getString("pack")!!, e.arguments!!.getString("lesson")!!)
-            AssignmentScreen(ref, e.arguments!!.getInt("index"), settings, back)
+            AssignmentScreen(ref, e.arguments!!.getInt("index"), settings, back) { r, i -> nav.navigate(Routes.assignment(r, i)) }
         }
         composable(Routes.STATS) { StatsScreen(back) }
+        composable(Routes.DIAGNOSTIC) { DiagnosticScreen(back) { nav.popBackStack(Routes.HOME, inclusive = false) } }
+        composable(Routes.MAP) { KnowledgeMapScreen(back) { nav.navigate(Routes.lesson(it)) } }
+        composable(Routes.REVIEW) { ReviewScreen(back) { r, i -> nav.navigate(Routes.assignment(r, i)) } }
+        composable(Routes.PLAN) { PlanScreen(back, { nav.navigate(Routes.lesson(it)) }, { nav.navigate(Routes.REVIEW) }) }
         composable(Routes.SETTINGS) { SettingsScreen(back) { nav.navigate(Routes.LAB) } }
         composable(Routes.LAB) { RunnerLabScreen(back) }
         composable(Routes.PROJECTS) { ProjectsScreen(back) { id -> nav.navigate(Routes.ide(id)) } }

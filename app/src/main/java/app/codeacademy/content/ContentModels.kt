@@ -16,6 +16,8 @@ data class PackManifest(
     val minAppVersion: Int = 1,
     val requiresPacks: List<String> = emptyList(),
     val lessons: List<String>,
+    /** Названия навыков для карты знаний. */
+    val skills: Map<String, String> = emptyMap(),
 )
 
 @Serializable
