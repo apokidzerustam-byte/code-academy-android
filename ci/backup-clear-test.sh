@@ -14,6 +14,8 @@ phase() {
   out=$(adb shell am instrument -w -e backupPhase "$1" -e class "$CLS" "$RUNNER" | tr -d '\r')
   echo "$out"
   echo "$out" | grep -q "^OK (1 test)" || { echo "Фаза $1 не прошла"; exit 1; }
+  # Пропущенный тест тоже даёт «OK»: фаза подтверждается своим файлом-отметкой.
+  [ "$(adb exec-out run-as $APP cat "files/ci-phase$1.ok" 2>/dev/null)" = "ok" ] || { echo "Фаза $1 не выполнилась (нет отметки)"; exit 1; }
 }
 
 echo "== Установка приложения и тестов"
@@ -27,7 +29,9 @@ test -s "$TMP/backup.zip" && test -s "$TMP/dump.bin"
 unzip -l "$TMP/backup.zip"
 echo "== pm clear: Android удаляет все данные приложения"
 adb shell pm clear $APP
-left=$(adb shell run-as $APP ls -A 2>/dev/null | tr -d '\r' | grep -vE '^(cache|code_cache)$' || true)
+listing=$(adb shell "run-as $APP ls -A; echo rc=\$?" | tr -d '\r')
+echo "$listing" | grep -q "^rc=0$" || { echo "run-as не работает: $listing"; exit 1; }
+left=$(echo "$listing" | grep -vE '^(cache|code_cache|rc=0)$' || true)
 echo "после очистки в папке приложения: [${left}]"
 [ -z "$left" ] || { echo "Данные не удалены"; exit 1; }
 echo "== Возвращаем файл копии (как если бы ученик выбрал его в «Загрузках»)"

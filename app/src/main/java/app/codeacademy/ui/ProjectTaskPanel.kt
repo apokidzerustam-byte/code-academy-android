@@ -36,6 +36,9 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
+/** Предел снимка проекта в попытке: строки таблицы должны помещаться в окно курсора Android (2 МБ). */
+const val MAX_SNAPSHOT_CHARS = 400_000
+
 /** Номер текущего этапа: первый не пройденный; null — все пройдены. */
 fun currentMilestone(project: CourseProject, passed: Set<String>): Int? =
     project.milestones.indexOfFirst { it.id !in passed }.takeIf { it >= 0 }
@@ -65,9 +68,17 @@ fun ProjectTaskPanel(
     var expanded by rememberSaveable { mutableStateOf(true) }
     LaunchedEffect(courseKey) {
         if (ref == null) { loadError = "Учебный проект не найден"; return@LaunchedEffect }
-        runCatching { c.content.project(ref) }
-            .onSuccess { project = it; passed = c.progress.passedMilestones(ref) }
-            .onFailure { loadError = "Учебный проект «$courseKey» не найден в установленных пакетах" }
+        val loaded = runCatching { c.content.project(ref) }.getOrNull()
+        if (loaded == null) { loadError = "Учебный проект «$courseKey» не найден в установленных пакетах"; return@LaunchedEffect }
+        val done = c.progress.passedMilestones(ref)
+        // Этап мог быть пройден, а «Дальше» не нажато: файлы текущего этапа добавляются при открытии.
+        currentMilestone(loaded, done)?.let { i ->
+            val starter = loaded.milestones[i].starterFiles
+            val added = c.projects.addMissingFiles(projectId, starter)
+            if (added.isNotEmpty()) onFilesAdded(starter.filterKeys { it in added })
+        }
+        project = loaded
+        passed = done
     }
     loadError?.let { Text(it, color = MaterialTheme.colorScheme.error); return }
     val p = project ?: return
@@ -111,8 +122,12 @@ fun ProjectTaskPanel(
                             val (name, r) = resolveRunner(c, settings.runner, lang)
                             runner = r
                             val v = c.assessment.evaluateProject(r, p.language, m.tests, snapshot, "check-$projectId")
-                            if (v.failure == null || v.failure == RunStatus.TIMEOUT) {
+                            // Не попытка: проверка не состоялась или в проекте нет нужного файла (ни одного теста не выполнено).
+                            val counts = v.report?.let { it.total > 0 && (it.cases.isNotEmpty() || it.compileError != null) } ?: (v.failure == RunStatus.TIMEOUT)
+                            if (counts) {
+                                // Снимок проекта — только если он не слишком большой (строка БД должна читаться целиком).
                                 val filesJson = JsonObject(snapshot.mapValues { JsonPrimitive(it.value) }).toString()
+                                    .takeIf { it.length <= MAX_SNAPSHOT_CHARS } ?: "{}"
                                 c.appScope.launch {
                                     c.progress.recordMilestone(ref!!, p.skills, m.id, filesJson, v, if (solution) 6 else hints, startedAt, name)
                                 }.join()

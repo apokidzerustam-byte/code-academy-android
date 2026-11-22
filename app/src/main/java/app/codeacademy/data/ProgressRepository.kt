@@ -169,6 +169,15 @@ class ProgressRepository(private val db: AppDatabase, private val clock: () -> L
         practiceSkills(skills, verdict.passed, hintsUsed, now, today())
     }
 
+    /** Файлы проекта на момент последнего успешного прохождения этапа (снимок из попытки) или null. */
+    suspend fun passedSnapshot(ref: app.codeacademy.content.ProjectRef, milestoneId: String): Map<String, String>? =
+        db.attempts().lastPassed(ref.attemptKey, milestoneId)?.code?.let { code ->
+            runCatching {
+                kotlinx.serialization.json.Json.parseToJsonElement(code).let { it as kotlinx.serialization.json.JsonObject }
+                    .mapValues { (it.value as kotlinx.serialization.json.JsonPrimitive).content }
+            }.getOrNull()?.takeIf { it.isNotEmpty() }
+        }
+
     suspend fun passedMilestones(ref: app.codeacademy.content.ProjectRef): Set<String> =
         db.attempts().passedAssignments(ref.attemptKey).toSet()
 }

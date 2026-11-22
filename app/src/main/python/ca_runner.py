@@ -542,7 +542,10 @@ def _check_project(files_json, spec, sandbox_dir, max_output):
         rep = r["cases"][0]
         if rep["passed"] and case.get("expected_files"):
             for path, want in case["expected_files"].items():
-                got = _read_text(os.path.join(sandbox_dir, _safe_rel(path)))
+                try:
+                    got = _read_text(os.path.join(sandbox_dir, _safe_rel(path)))
+                except ValueError:
+                    got = None
                 if got is None or _normalize(got, mode) != _normalize(want, mode):
                     rep = _case_report(case, False, want, got,
                                        None if got is not None else f"Файл {path} не создан")

@@ -19,6 +19,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertArrayEquals
@@ -32,12 +33,39 @@ import org.junit.runner.RunWith
 
 /** Тестовые данные для резервной копии: все таблицы, юникод, пустые значения, большой текст, «дыры» в id. */
 object BackupFixture {
+    val big = buildString { repeat(20_000) { append("print('строка $it')\n") } }
+
+    /**
+     * Дамп должен содержать исходные значения ЦЕЛИКОМ: сравнение «до» и «после» не заметило бы потерю,
+     * одинаковую в обоих дампах (например, обрезку длинной строки при чтении из базы).
+     */
+    fun assertLossless(dump: ByteArray) {
+        val text = dump.toString(Charsets.UTF_8)
+        val tables = kotlinx.serialization.json.Json.parseToJsonElement(text.substringBefore('\u0000'))
+        val strings = mutableSetOf<String>()
+        fun walk(e: kotlinx.serialization.json.JsonElement) {
+            when (e) {
+                is kotlinx.serialization.json.JsonArray -> e.forEach(::walk)
+                is kotlinx.serialization.json.JsonObject -> e.values.forEach(::walk)
+                is kotlinx.serialization.json.JsonPrimitive -> if (e.isString) strings += e.content
+                else -> {}
+            }
+        }
+        walk(tables)
+        org.junit.Assert.assertTrue("длинная строка (${big.length} симв.) потеряна или обрезана: " +
+            "есть строки длиной ${strings.map { it.length }.sortedDescending().take(3)}", big in strings)
+        org.junit.Assert.assertTrue("строка с юникодом изменилась", tricky in strings)
+        for (v in listOf(Long.MAX_VALUE, Long.MIN_VALUE, 1_700_000_100_000)) {
+            org.junit.Assert.assertTrue("нет числа $v", text.contains(v.toString()))
+        }
+    }
+
     val tricky = "Привет, мир! 🐍 «кавычки» \"двойные\" 'одинарные' \\ \t табуляция\nвторая строка\r\nCRLF ∑ 中文"
 
     suspend fun fill(db: AppDatabase) {
         db.progress().upsert(LessonProgressEntity("python-basics/py-01-print", "PASSED", 7, 123_456, 1_700_000_000_000, 1_700_000_100_000, 98_765, 1_700_000_100_001))
         db.progress().upsert(LessonProgressEntity("python-basics/py-02-variables", "IN_PROGRESS", 2, 0, null, null, 0, 5))
-        val big = buildString { repeat(20_000) { append("print('строка $it')\n") } } // ≈ 400 КБ
+        // ≈ 550 КБ в UTF-8: больше предела одного файла проекта (256 КБ) — проверка длинных значений.
         val ids = listOf(
             AttemptEntity(lessonKey = "python-basics/py-01-print", assignmentId = "a1", startedAt = 1, durationMs = 2, code = tricky,
                 passed = true, testsPassed = 3, testsTotal = 3, hintsUsed = 0, errorType = null, runner = "W"),
@@ -60,6 +88,14 @@ object BackupFixture {
         db.projects().upsert(ProjectFileEntity("p1", "data/notes.txt", "", 12))
         db.projects().upsert(ProjectFileEntity("p2", ProjectRepository.META, "Мой «проект» 1", 13)) // то же название
         db.projects().upsert(ProjectFileEntity("p2", "index.html", "<h1>Привет</h1>", 14))
+    }
+
+    /** Независимая проверка: сколько строк должно быть в каждой таблице после fill (считается SQL, не дампом). */
+    val expectedCounts = mapOf("lesson_progress" to 2, "attempt" to 2, "skill_state" to 2, "review_item" to 2,
+        "daily_activity" to 1, "draft" to 1, "project_file" to 6)
+
+    fun counts(db: AppDatabase): Map<String, Int> = expectedCounts.keys.associateWith { t ->
+        db.openHelper.readableDatabase.query("SELECT COUNT(*) FROM $t").use { it.moveToFirst(); it.getInt(0) }
     }
 
     val settings: Map<String, Any> = mapOf(
@@ -85,6 +121,8 @@ class BackupOnDeviceTest {
     @Before fun setUp() {
         ctx.deleteDatabase(name)
         db = AppDatabase.create(ctx, name)
+        // Таблица со всеми типами SQLite (в схеме приложения нет REAL и BLOB): проверяет их путь в копии.
+        db.openHelper.writableDatabase.execSQL("CREATE TABLE ci_types (id INTEGER PRIMARY KEY, r REAL, b BLOB, t TEXT, n INTEGER)")
         settings = MemorySettings()
         backup = BackupManager(db, settings, "test", clock = { 1_763_800_000_000 })
     }
@@ -103,15 +141,27 @@ class BackupOnDeviceTest {
             db.openHelper.readableDatabase.query("SELECT COUNT(*) FROM $t").use { it.moveToFirst(); it.getInt(0) }
         }
 
+    private val blob = ByteArray(256) { it.toByte() }
+
     @Test fun exportWipeImportIsByteIdentical() = runBlocking<Unit> {
         BackupFixture.fill(db)
+        val w = db.openHelper.writableDatabase
+        w.execSQL("INSERT INTO ci_types VALUES (1, ?, ?, ?, NULL)", arrayOf<Any?>(0.1 + 0.2, blob, ""))
+        w.execSQL("INSERT INTO ci_types VALUES (2, ?, NULL, NULL, ?)", arrayOf<Any?>(-1.5e300, Long.MIN_VALUE))
         settings.values = BackupFixture.settings
         val before = dump()
+        BackupFixture.assertLossless(before)
+        assertEquals(BackupFixture.big, db.attempts().all().first().single { it.assignmentId == "calculator" }.code)
         val zipA = export()
         val nextIdBefore = db.openHelper.readableDatabase.query("SELECT seq FROM sqlite_sequence WHERE name = 'attempt'").use { it.moveToFirst(); it.getLong(0) } + 1
 
+        assertEquals(BackupFixture.expectedCounts, BackupFixture.counts(db))
         backup.wipe()
         assertEquals("после удаления в таблицах остались строки", 0, rowCount())
+        // Наблюдатель Room подписан ДО восстановления: он должен увидеть новые данные.
+        val seen = java.util.concurrent.CopyOnWriteArrayList<Int>()
+        val job = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch { db.progress().all().collect { seen += it.size } }
+        kotlinx.coroutines.delay(500)
         assertTrue(settings.values.isEmpty())
         assertFalse(before.contentEquals(dump()))
 
@@ -119,11 +169,22 @@ class BackupOnDeviceTest {
         assertEquals(2, sum.projects)
         assertEquals(2, sum.attempts)
         assertArrayEquals("данные после восстановления отличаются", before, dump())
+        BackupFixture.assertLossless(dump())
+        assertEquals(BackupFixture.expectedCounts, BackupFixture.counts(db))
+        db.openHelper.readableDatabase.query("SELECT r, b, n FROM ci_types ORDER BY id").use { c ->
+            c.moveToNext(); assertEquals(0.1 + 0.2, c.getDouble(0), 0.0); assertArrayEquals(blob, c.getBlob(1))
+            c.moveToNext(); assertEquals(-1.5e300, c.getDouble(0), 0.0); assertTrue(c.isNull(1)); assertEquals(Long.MIN_VALUE, c.getLong(2))
+        }
+        val t1 = System.currentTimeMillis()
+        while (2 !in seen && System.currentTimeMillis() - t1 < 5_000) kotlinx.coroutines.delay(50)
+        job.cancel()
+        assertTrue("наблюдатель не увидел восстановление: $seen", 2 in seen)
+        assertEquals(BackupFixture.big, db.attempts().all().first().single { it.assignmentId == "calculator" }.code)
         assertEquals(BackupFixture.settings, settings.values)
 
         // Повторный экспорт — те же байты файлов данных.
-        val a = BackupFormat.readZip(ByteArrayInputStream(zipA))
-        val b = BackupFormat.readZip(ByteArrayInputStream(export()))
+        val a = BackupFormat.readZip(ByteArrayInputStream(zipA), all = true)
+        val b = BackupFormat.readZip(ByteArrayInputStream(export()), all = true)
         for (entry in listOf(BackupFormat.DB, BackupFormat.SETTINGS)) assertArrayEquals(entry, a.getValue(entry), b.getValue(entry))
         assertEquals(a.keys, b.keys)
         // Копии проектов для чтения на компьютере: одинаковые названия разведены по папкам.
@@ -145,7 +206,7 @@ class BackupOnDeviceTest {
         val before = dump()
 
         fun rezip(change: (MutableMap<String, ByteArray>) -> Unit): ByteArray {
-            val e = BackupFormat.readZip(ByteArrayInputStream(zip)).toMutableMap()
+            val e = BackupFormat.readZip(ByteArrayInputStream(zip), all = true).toMutableMap()
             change(e)
             return ByteArrayOutputStream().also { BackupFormat.writeZip(it, e.toList(), 0) }.toByteArray()
         }
@@ -217,14 +278,21 @@ class BackupClearDataTest {
                 c.settings.replaceAll(BackupFixture.settings)
                 zipFile.outputStream().use { c.backup.export(it) }
                 dumpFile.writeBytes(dump())
+                BackupFixture.assertLossless(dumpFile.readBytes())
+                assertEquals(BackupFixture.expectedCounts, BackupFixture.counts(c.db))
+                File(ctx.filesDir, "ci-phase1.ok").writeText("ok")
                 Log.i("CAPROBE", "backup phase 1: копия ${zipFile.length()} байт, дамп ${dumpFile.length()} байт")
             }
             "2" -> {
-                val empty = c.backup.dumpDatabase().toString(Charsets.UTF_8)
-                assertFalse("после pm clear данные остались", empty.contains("python-basics/py-01-print"))
+                assertTrue("после pm clear данные остались: ${BackupFixture.counts(c.db)}", BackupFixture.counts(c.db).values.all { it == 0 })
                 assertTrue("после pm clear настройки остались", c.settings.snapshot().isEmpty())
                 val sum = zipFile.inputStream().use { c.backup.restore(it) }
                 assertArrayEquals("после pm clear и восстановления данные отличаются", dumpFile.readBytes(), dump())
+                BackupFixture.assertLossless(dump())
+                assertEquals(BackupFixture.big, c.db.attempts().all().first().single { it.assignmentId == "calculator" }.code)
+                assertEquals(BackupFixture.expectedCounts, BackupFixture.counts(c.db))
+                assertEquals(BackupFixture.settings, c.settings.snapshot())
+                File(ctx.filesDir, "ci-phase2.ok").writeText("ok")
                 Log.i("CAPROBE", "backup phase 2: восстановлено ${sum.tables}, совпало байт в байт")
             }
             else -> fail("неизвестная фаза $phase")

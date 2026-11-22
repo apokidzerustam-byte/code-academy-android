@@ -71,14 +71,16 @@ fun ProjectsScreen(onBack: () -> Unit, openProject: (String) -> Unit) {
             }.getOrNull()?.removeSuffix(".zip")?.ifBlank { null } ?: "Импортированный проект"
             val res = withContext(Dispatchers.IO) {
                 runCatching {
-                    val files = context.contentResolver.openInputStream(uri)?.use { ProjectZip.read(it) }
+                    val r = context.contentResolver.openInputStream(uri)?.use { ProjectZip.readWithReport(it) }
                         ?: throw java.io.IOException("не удалось открыть файл")
-                    c.projects.importFiles(name, files) to files.size
+                    c.projects.importFiles(name, r.files) to r
                 }
             }
             val ok = res.getOrNull()
             if (ok != null) {
-                message = "Проект «$name» импортирован: файлов ${ok.second}."
+                val sk = ok.second.skipped
+                message = "Проект «$name» импортирован: файлов ${ok.second.files.size}." +
+                    (if (sk.isNotEmpty()) " Пропущены не текстовые файлы (${sk.size}): ${sk.take(5).joinToString()}" + (if (sk.size > 5) "…" else "") else "")
                 withContext(Dispatchers.Main.immediate) { openProject(ok.first) }
             } else {
                 message = "Импорт не удался: ${res.exceptionOrNull()?.message}"
@@ -118,9 +120,14 @@ fun ProjectsScreen(onBack: () -> Unit, openProject: (String) -> Unit) {
                             )
                             Button(onClick = {
                                 scope.launch {
-                                    // Новый проект — с файлами всех этапов до текущего (этапы могли быть пройдены раньше).
-                                    val upTo = currentMilestone(cp, passed[ref.key].orEmpty()) ?: (cp.milestones.size - 1)
-                                    val starter = cp.milestones.take(upTo + 1).fold(emptyMap<String, String>()) { acc, m ->
+                                    // Новый проект после удаления старого: этапы уже могли быть пройдены. Тогда берём
+                                    // СОБСТВЕННЫЙ код ученика из последнего пройденного этапа (снимок в попытке),
+                                    // а файлы этапов — только недостающие.
+                                    val done = passed[ref.key].orEmpty()
+                                    val upTo = currentMilestone(cp, done) ?: (cp.milestones.size - 1)
+                                    val own = cp.milestones.take(upTo + 1).lastOrNull { it.id in done }
+                                        ?.let { c.progress.passedSnapshot(ref, it.id) }.orEmpty()
+                                    val starter = cp.milestones.take(upTo + 1).fold(own) { acc, m ->
                                         acc + m.starterFiles.filterKeys { it !in acc }
                                     }
                                     val id = started?.id ?: c.projects.startCourse(ref.key, cp.title, starter)

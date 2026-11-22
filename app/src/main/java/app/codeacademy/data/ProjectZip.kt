@@ -14,10 +14,16 @@ class ProjectZipException(message: String) : IOException(message)
 /**
  * Чтение проекта из ZIP (импорт). Те же ограничения, что у проектов в приложении:
  * не больше 200 текстовых файлов, файл ≤ 256 КБ, проект ≤ 2 МБ; пути — только внутри проекта.
- * Общая верхняя папка (как в архивах GitHub «repo-main/…») убирается. Служебные файлы macOS пропускаются.
+ * Общая верхняя папка (как в архивах GitHub «repo-main/…») убирается. Служебные файлы macOS, .git
+ * и не текстовые файлы (картинки и т. п.) пропускаются — о них сообщается.
  */
 object ProjectZip {
-    fun read(input: InputStream): Map<String, String> {
+    /** files — текстовые файлы проекта; skipped — что не импортировано (картинки и другие не текстовые файлы, .git). */
+    data class Result(val files: Map<String, String>, val skipped: List<String>)
+
+    fun read(input: InputStream): Map<String, String> = readWithReport(input).files
+
+    fun readWithReport(input: InputStream): Result {
         val raw = LinkedHashMap<String, ByteArray>()
         var total = 0L
         ZipInputStream(input).use { zip ->
@@ -37,15 +43,19 @@ object ProjectZip {
         if (raw.isEmpty()) throw ProjectZipException("В архиве нет файлов")
         val strip = commonTopFolder(raw.keys)
         val out = sortedMapOf<String, String>()
+        val skipped = mutableListOf<String>()
         for ((name, bytes) in raw) {
             val rel = runCatching { ProjectFiles.safeRel(name.removePrefix(strip)) }.getOrNull()
                 ?: throw ProjectZipException("Недопустимый путь в архиве: $name")
             if (rel in ProjectRepository.META_FILES || rel.substringAfterLast('/') == ".keep") continue
-            out[rel] = utf8(bytes) ?: throw ProjectZipException("$rel — не текстовый файл (UTF-8). В проектах хранятся только тексты.")
+            if (rel == ".git" || rel.startsWith(".git/")) { skipped += rel; continue }
+            val text = utf8(bytes)
+            if (text == null) { skipped += rel; continue } // в проектах хранятся только тексты
+            if (out.put(rel, text) != null) throw ProjectZipException("Файл $rel встречается в архиве дважды")
         }
         ProjectFiles.conflict(out.keys)?.let { throw ProjectZipException(it) }
-        if (out.isEmpty()) throw ProjectZipException("В архиве нет файлов проекта")
-        return out
+        if (out.isEmpty()) throw ProjectZipException(if (skipped.isEmpty()) "В архиве нет файлов проекта" else "В архиве нет текстовых файлов")
+        return Result(out, skipped)
     }
 
     /** "folder/" если все файлы лежат в одной верхней папке, иначе "". */

@@ -66,7 +66,8 @@ class BackupFormatTest {
         val one = ByteArrayOutputStream().also { BackupFormat.writeZip(it, entries, 1_700_000_000_000) }.toByteArray()
         val two = ByteArrayOutputStream().also { BackupFormat.writeZip(it, entries, 1_700_000_000_000) }.toByteArray()
         assertArrayEquals(one, two)
-        val back = BackupFormat.readZip(ByteArrayInputStream(one))
+        val back = BackupFormat.readZip(ByteArrayInputStream(one), all = true)
+        assertTrue("лишние файлы не читаются при восстановлении", runCatching { BackupFormat.readZip(ByteArrayInputStream(one)) }.isFailure)
         assertEquals(entries.map { it.first }, back.keys.toList())
         entries.forEach { (n, b) -> assertArrayEquals(b, back.getValue(n)) }
         assertThrows(BackupException::class.java) { BackupFormat.readZip(ByteArrayInputStream("не zip".toByteArray())) }
@@ -95,6 +96,11 @@ class ProjectZipTest {
     @Test fun unsafeOrBinaryRejected() {
         assertThrows(ProjectZipException::class.java) { ProjectZip.read(ByteArrayInputStream(zip("../evil.py" to "x".toByteArray(), "ok.py" to "y".toByteArray()))) }
         assertThrows(ProjectZipException::class.java) { ProjectZip.read(ByteArrayInputStream(zip("img.png" to byteArrayOf(-1, -40, 0, 1)))) }
+        val mixed = ProjectZip.readWithReport(ByteArrayInputStream(zip("main.py" to "x".toByteArray(), "img.png" to byteArrayOf(-1, -40, 0, 1),
+            ".git/HEAD" to "ref".toByteArray())))
+        assertEquals(setOf("main.py"), mixed.files.keys)
+        assertEquals(listOf("img.png", ".git/HEAD").sorted(), mixed.skipped.sorted())
+        assertThrows(ProjectZipException::class.java) { ProjectZip.read(ByteArrayInputStream(zip("a//b.py" to "1".toByteArray(), "a/b.py" to "2".toByteArray()))) }
         assertThrows(ProjectZipException::class.java) { ProjectZip.read(ByteArrayInputStream(zip("big.txt" to ByteArray(300 * 1024) { 'a'.code.toByte() }))) }
         assertThrows(ProjectZipException::class.java) { ProjectZip.read(ByteArrayInputStream(zip())) }
         assertThrows(ProjectZipException::class.java) { ProjectZip.read(ByteArrayInputStream(zip("a" to "1".toByteArray(), "a/b" to "2".toByteArray()))) }

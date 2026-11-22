@@ -105,6 +105,9 @@ class ProjectRepository(private val db: AppDatabase, private val clock: () -> Lo
     suspend fun replaceAll(id: String, files: Map<String, String>) = db.withTransaction {
         val now = clock()
         val current = db.projects().files(id).associateBy { it.path }
+        // Проекта уже нет (удалён, данные удалены или восстановлены из копии): отложенное автосохранение
+        // экрана не должно воскрешать его без названия.
+        if (META !in current) return@withTransaction
         for (path in current.keys) if (path !in META_FILES && path !in files) db.projects().deleteFile(id, path)
         for ((path, text) in files) {
             if (path in META_FILES) continue

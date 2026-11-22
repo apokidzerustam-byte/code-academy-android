@@ -23,11 +23,10 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.int
+import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.long
 import kotlinx.serialization.json.longOrNull
 import kotlinx.serialization.json.put
 
@@ -64,8 +63,10 @@ object BackupFormat {
     const val SETTINGS = "data/settings.json"
     const val README = "README.txt"
     /** Предел распакованного размера одного файла копии (защита от «zip-бомбы»). */
-    const val MAX_ENTRY_BYTES = 64L * 1024 * 1024
-    const val MAX_ENTRIES = 5_000
+    const val MAX_ENTRY_BYTES = 128L * 1024 * 1024
+    const val MAX_ENTRIES = 20_000
+    /** При восстановлении читаются только эти файлы; остальные (копии проектов, README) пропускаются без буферизации. */
+    val NEEDED = setOf(MANIFEST, DB, SETTINGS)
 
     val json = Json { prettyPrint = false }
 
@@ -146,13 +147,17 @@ object BackupFormat {
         }
     }
 
-    fun readZip(input: InputStream): Map<String, ByteArray> {
+    /** all = false: только файлы, нужные для восстановления (NEEDED). */
+    fun readZip(input: InputStream, all: Boolean = false): Map<String, ByteArray> {
         val out = LinkedHashMap<String, ByteArray>()
+        var seen = 0
         try {
             ZipInputStream(input).use { zip ->
                 while (true) {
                     val e = zip.nextEntry ?: break
                     if (e.isDirectory) continue
+                    if (++seen > MAX_ENTRIES) throw BackupException("В архиве слишком много файлов — это не резервная копия Code Academy")
+                    if (!all && e.name !in NEEDED) continue
                     if (out.size >= MAX_ENTRIES) throw BackupException("В архиве слишком много файлов — это не резервная копия Code Academy")
                     val buf = ByteArrayOutputStream()
                     val chunk = ByteArray(64 * 1024)
@@ -180,16 +185,16 @@ object BackupFormat {
         val manifest = runCatching { json.parseToJsonElement(m.toString(Charsets.UTF_8)).jsonObject }.getOrNull()
             ?: throw BackupException("manifest.json повреждён")
         if (manifest["format"]?.jsonPrimitive?.contentOrNull != FORMAT) throw BackupException("Это не резервная копия Code Academy")
-        val fv = manifest["formatVersion"]?.jsonPrimitive?.int ?: 0
+        val fv = manifest["formatVersion"]?.jsonPrimitive?.intOrNull ?: throw BackupException("manifest.json повреждён: нет версии формата")
         if (fv > FORMAT_VERSION) throw BackupException("Копия создана более новой версией приложения — обновите приложение")
-        val dv = manifest["dbVersion"]?.jsonPrimitive?.int ?: 0
+        val dv = manifest["dbVersion"]?.jsonPrimitive?.intOrNull ?: throw BackupException("manifest.json повреждён: нет версии базы")
         if (dv > dbVersion) throw BackupException("Копия создана более новой версией приложения (база v$dv) — обновите приложение")
         if (dv < dbVersion) throw BackupException("Копия от старой версии базы (v$dv), перенос в v$dbVersion пока не поддерживается")
         val sums = manifest["entries"]?.jsonObject ?: throw BackupException("manifest.json повреждён: нет списка файлов")
         for (name in listOf(DB, SETTINGS)) {
             val data = entries[name] ?: throw BackupException("В копии нет $name")
             val want = sums[name]?.jsonObject ?: throw BackupException("В manifest.json нет $name")
-            if (want["size"]?.jsonPrimitive?.long != data.size.toLong() ||
+            if (want["size"]?.jsonPrimitive?.longOrNull != data.size.toLong() ||
                 want["sha256"]?.jsonPrimitive?.content != sha256(data)) {
                 throw BackupException("Копия повреждена: контрольная сумма $name не совпадает")
             }
@@ -280,6 +285,7 @@ class BackupManager(
     suspend fun export(out: OutputStream): BackupSummary {
         val dbBytes = dumpDatabase()
         val setBytes = dumpSettings()
+        if (dbBytes.size > BackupFormat.MAX_ENTRY_BYTES) throw BackupException("Данных больше ${BackupFormat.MAX_ENTRY_BYTES / 1024 / 1024} МБ — такую копию нельзя будет восстановить")
         val now = clock()
         val summary = summarize(dbBytes, setBytes, now, appVersion)
         val manifest = buildJsonObject {
@@ -319,6 +325,14 @@ class BackupManager(
         val (dbBytes, setBytes, manifest) = load(input)
         val tablesJson = parseDb(dbBytes)
         val prefs = BackupFormat.decodeSettings(setBytes)
+        // Настройки — первыми, со снимком прежних: если база не восстановится, настройки вернутся как были.
+        val oldPrefs = settings.snapshot()
+        try {
+            settings.replaceAll(prefs)
+        } catch (e: Exception) {
+            runCatching { settings.replaceAll(oldPrefs) }
+            throw BackupException("Не удалось восстановить настройки (ничего не изменено): ${e.message}", e)
+        }
         try {
             db.runInTransaction(Runnable {
                 val sdb = db.openHelper.writableDatabase
@@ -355,12 +369,11 @@ class BackupManager(
                     stmt.close()
                 }
             })
-        } catch (e: BackupException) {
-            throw e
         } catch (e: Exception) {
+            runCatching { settings.replaceAll(oldPrefs) }
+            if (e is BackupException) throw e
             throw BackupException("Не удалось восстановить данные (ничего не изменено): ${e.message}", e)
         }
-        settings.replaceAll(prefs)
         runCatching(wipeFiles)
         summarize(dbBytes, setBytes, manifest["createdAt"]?.jsonPrimitive?.longOrNull ?: 0,
             manifest["appVersion"]?.jsonPrimitive?.contentOrNull ?: "?")
@@ -424,10 +437,12 @@ class BackupManager(
         val titles = rows.filter { it.second == ProjectRepository.META }.associate { it.first to it.third }
         val used = HashSet<String>()
         val folder = rows.map { it.first }.distinct().associateWith { id ->
-            val base = (titles[id] ?: id).replace(Regex("[^\\p{L}\\p{N}._ -]+"), "_").trim().ifBlank { id }.take(60)
+            // Только буквы, цифры, пробел, «_», «-», «.»; без точек и пробелов по краям — никаких «..» и «.».
+            val base = (titles[id] ?: id).replace(Regex("[^\\p{L}\\p{N}._ -]+"), "_").take(60)
+                .trim(' ', '.').ifBlank { id.trim(' ', '.').ifBlank { "project" } }
             var name = base
             var n = 2
-            while (!used.add(name)) name = "$base (${n++})"
+            while (!used.add(name.lowercase())) name = "$base (${n++})" // без различия регистра (Windows, macOS)
             name
         }
         return rows.filter { it.second !in ProjectRepository.META_FILES }

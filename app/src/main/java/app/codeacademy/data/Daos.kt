@@ -35,6 +35,9 @@ interface AttemptDao {
     @Query("SELECT COUNT(*) FROM attempt")
     fun count(): Flow<Int>
 
+    @Query("SELECT * FROM attempt WHERE lessonKey = :lessonKey AND assignmentId = :assignmentId AND passed = 1 ORDER BY id DESC LIMIT 1")
+    suspend fun lastPassed(lessonKey: String, assignmentId: String): AttemptEntity?
+
     @Query("SELECT * FROM attempt ORDER BY startedAt")
     fun all(): Flow<List<AttemptEntity>>
 

@@ -568,6 +568,11 @@ def validate_project(pack_dir, pack, pid, rep, pstats):
         where = f"{where0} [{m['id']}]"
         t = m["tests"]
         hidden = [c for c in t["cases"] if c.get("hidden")]
+        if proj["language"] == "python":
+            for c in t["cases"]:
+                f = c.get("file", t.get("entry", "main.py"))
+                if f not in m["solutionFiles"]:
+                    rep.err(where, f"тест {c.get('id')}: файла {f} нет в эталоне")
         if not hidden:
             rep.err(where, "нет скрытых тестов")
         start = dict(prev)
