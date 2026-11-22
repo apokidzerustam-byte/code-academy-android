@@ -4,7 +4,8 @@ package app.codeacademy.mentor
  * Обёртка JNI над llama.cpp (libmentor.so). Используется только в процессе :mentor.
  * Модель работает на CPU, сеть не используется.
  */
-class NativeLlm private constructor(private var handle: Long) {
+class NativeLlm private constructor(@Volatile private var handle: Long) {
+    private val lock = Any()
 
     fun interface PieceCallback {
         /** false — остановить генерацию. */
@@ -20,11 +21,11 @@ class NativeLlm private constructor(private var handle: Long) {
     }
 
     /** Безопасно вызывать с другого потока: прерывает текущую генерацию. */
-    fun stop() { if (handle != 0L) nativeStop(handle) }
+    fun stop() = synchronized(lock) { if (handle != 0L) nativeStop(handle) }
 
+    /** Вызывается только из потока генерации (после её завершения); stop() с другого потока не попадёт в освобождённую память. */
     fun close() {
-        val h = handle
-        handle = 0
+        val h = synchronized(lock) { handle.also { handle = 0 } }
         if (h != 0L) nativeFree(h)
     }
 

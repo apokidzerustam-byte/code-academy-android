@@ -16,5 +16,7 @@
 | Piper TTS | GPL-3.0-or-later | нет (конвейер контента) |
 | Chatterbox Multilingual | MIT | нет (конвейер контента); аудио содержит водяной знак Perth |
 | Голоса Piper ru_RU-denis, ru_RU-dmitri | датасет CC0 | аудио уроков |
+| llama.cpp / ggml (b12628, коммит 8a97fa9) | MIT | да (libmentor, libllama, libggml*) |
+| Qwen2.5-Coder-0.5B/1.5B-Instruct GGUF | Apache-2.0 | нет: ученик скачивает файл сам, приложение проверяет SHA-256 |
 
 Полный реестр с версиями будет генерироваться автоматически в CI (этап 11).

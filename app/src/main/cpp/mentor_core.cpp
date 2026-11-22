@@ -148,7 +148,7 @@ GenStats Engine::generate(const std::string & prompt, const GenParams & p, const
         if (rc == 2) { st.stopped = true; break; }
         if (rc != 0) { st.error = "ошибка генерации (" + std::to_string(rc) + ")"; break; }
     }
-    if (!pending.empty() && st.error.empty()) on_piece(pending);
+    if (!pending.empty() && st.error.empty() && !st.stopped) on_piece(pending);
     st.gen_ms = now_ms() - t0;
     llama_batch_ext_free(batch);
     llama_sampler_free(smpl);

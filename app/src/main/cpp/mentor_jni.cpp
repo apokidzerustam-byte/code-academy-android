@@ -3,6 +3,7 @@
 #include <jni.h>
 #include <android/log.h>
 
+#include <exception>
 #include <memory>
 #include <string>
 #include <thread>
@@ -55,7 +56,12 @@ Java_app_codeacademy_mentor_NativeLlm_00024Init_nativeInit(JNIEnv * env, jclass,
 extern "C" JNIEXPORT jlong JNICALL
 Java_app_codeacademy_mentor_NativeLlm_00024Init_nativeLoad(JNIEnv * env, jclass, jstring path, jint nCtx, jint nThreads) {
     auto e = std::make_unique<mentor::Engine>();
-    const std::string err = e->load(to_utf8(env, path), nCtx, nThreads);
+    std::string err;
+    try {
+        err = e->load(to_utf8(env, path), nCtx, nThreads);
+    } catch (const std::exception & ex) {
+        err = std::string("не удалось загрузить модель: ") + ex.what();
+    }
     if (!err.empty()) {
         throw_state(env, err);
         return 0;
@@ -80,13 +86,21 @@ Java_app_codeacademy_mentor_NativeLlm_nativeGenerate(JNIEnv * env, jobject, jlon
     p.max_tokens = maxTokens;
     p.temperature = temperature;
     p.seed = static_cast<uint32_t>(seed);
-    const mentor::GenStats st = engine(h)->generate(to_utf8(env, prompt), p, [&](const std::string & piece) {
-        jstring js = to_java(env, piece);
-        const jboolean go = env->CallBooleanMethod(callback, onPiece, js);
-        env->DeleteLocalRef(js);
-        if (env->ExceptionCheck()) return false;
-        return go == JNI_TRUE;
-    });
+    mentor::GenStats st;
+    try {
+        st = engine(h)->generate(to_utf8(env, prompt), p, [&](const std::string & piece) {
+            if (env->ExceptionCheck()) return false;
+            jstring js = to_java(env, piece);
+            const jboolean go = env->CallBooleanMethod(callback, onPiece, js);
+            env->DeleteLocalRef(js);
+            if (env->ExceptionCheck()) return false;
+            return go == JNI_TRUE;
+        });
+    } catch (const std::exception & e) {
+        // Исключения C++ не должны пересекать JNI: иначе std::terminate завершит процесс.
+        if (!env->ExceptionCheck()) throw_state(env, std::string("сбой нейросети: ") + e.what());
+        return nullptr;
+    }
     if (env->ExceptionCheck()) return nullptr;
     const std::string json = std::string("{\"promptTokens\":") + std::to_string(st.prompt_tokens) +
         ",\"generatedTokens\":" + std::to_string(st.generated_tokens) +

@@ -24,8 +24,11 @@ check() { # имя_файла url SIZE_CONST SHA_CONST
   want_size=$(const "$3"); want_sha=$(const "$4")
   echo "МОДЕЛЬ $1: размер $size, sha256 $sha (в приложении: $want_size / ${want_sha:-не задан})"
   echo "- \`$1\`: $size байт, SHA-256 \`$sha\`" >> "$ROOT/app/build/reports/mentor-hashes.md"
-  if [ -n "$want_sha" ] && [ "$want_sha" != "$sha" ]; then echo "SHA-256 не совпадает с ModelHashes.kt"; exit 1; fi
-  if [ "$want_size" != "0" ] && [ -n "$want_size" ] && [ "$want_size" != "$size" ]; then echo "Размер не совпадает с ModelHashes.kt"; exit 1; fi
+  # Пустые константы — ошибка: иначе проверка в приложении и здесь проходила бы вхолостую.
+  if [ -z "$want_sha" ] || [ "${#want_sha}" != 64 ]; then echo "В ModelHashes.kt не задан $4 (нужно 64 hex-символа); фактический: $sha"; exit 1; fi
+  if [ -z "$want_size" ] || [ "$want_size" = "0" ]; then echo "В ModelHashes.kt не задан $3; фактический: $size"; exit 1; fi
+  if [ "$want_sha" != "$sha" ]; then echo "SHA-256 не совпадает с ModelHashes.kt"; exit 1; fi
+  if [ "$want_size" != "$size" ]; then echo "Размер не совпадает с ModelHashes.kt"; exit 1; fi
 }
 : > "$ROOT/app/build/reports/mentor-hashes.md"
 HF=https://huggingface.co/Qwen
@@ -34,7 +37,7 @@ check qwen2.5-coder-1.5b-instruct-q4_k_m.gguf "$HF/Qwen2.5-Coder-1.5B-Instruct-G
 
 echo "== Проверка CLI"
 printf '<|im_start|>system\nОтвечай по-русски.<|im_end|>\n<|im_start|>user\nЧто такое переменная? Одно предложение.<|im_end|>\n<|im_start|>assistant\n\n<<<END>>>\n' \
-  | "$CLI" "$MODELS/qwen2.5-coder-0.5b-instruct-q4_k_m.gguf" 2048 60
+  | "$CLI" "$MODELS/qwen2.5-coder-0.5b-instruct-q4_k_m.gguf" 4096 60
 
 echo "== 20 провокаций с моделью 0.5B"
 export CA_MENTOR_CLI="$CLI" CA_MENTOR_MODEL="$MODELS/qwen2.5-coder-0.5b-instruct-q4_k_m.gguf"

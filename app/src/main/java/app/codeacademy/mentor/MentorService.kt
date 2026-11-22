@@ -95,7 +95,11 @@ class MentorService : Service() {
                 control.removeCallbacks(unloadIdle)
                 worker.execute { generate(reply, id, data) }
             }
-            P.MSG_STOP -> llm?.stop()
+            P.MSG_STOP -> {
+                // Отмена, пришедшая во время загрузки модели, тоже действует: колбэк сверяет activeId.
+                activeId.set(0)
+                llm?.stop()
+            }
             P.MSG_UNLOAD -> { llm?.stop(); worker.execute { unload() } }
         }
     }
@@ -161,7 +165,8 @@ class MentorService : Service() {
 
     companion object {
         private const val TAG = "CodeAcademyMentor"
-        const val N_CTX = 2048
+        /** Контекст: промпт с конспектом и кодом на кириллице может занимать 1500–2500 токенов. */
+        const val N_CTX = 4096
         /** Модель выгружается из памяти через 3 минуты без запросов. */
         const val IDLE_UNLOAD_MS = 180_000L
     }

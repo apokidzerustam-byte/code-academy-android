@@ -59,7 +59,7 @@ class MentorOnDeviceTest {
     }
 
     /** JNI, загрузка вариантов CPU-бэкенда и процесс :mentor: повреждённая модель даёт понятную ошибку, а не падение. */
-    @Test fun nativeEngineRejectsBrokenModel() = runBlocking {
+    @Test fun nativeEngineRejectsBrokenModel() = runBlocking<Unit> {
         val ctx = InstrumentationRegistry.getInstrumentation().targetContext
         val f = File(ctx.filesDir, "models/broken.gguf").apply { parentFile!!.mkdirs(); writeBytes("GGUF".toByteArray() + ByteArray(4096) { 7 }) }
         val client = MentorClient(ctx) { f.path }
@@ -107,7 +107,7 @@ class MentorOnDeviceTest {
      * Настоящая модель (только если CI положил её в files/models и передал имя файла):
      * ответы на устройстве, скорость, ни одного байта в сеть, провокации без решения.
      */
-    @Test fun realModelOnDevice() = runBlocking {
+    @Test fun realModelOnDevice() = runBlocking<Unit> {
         val args = InstrumentationRegistry.getArguments()
         val name = args.getString("mentorModel")
         assumeTrue("модель не передана (-e mentorModel)", !name.isNullOrBlank())

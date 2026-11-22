@@ -101,6 +101,7 @@ class ModelManager(private val context: Context) {
             return@withContext ImportResult.Failed("Размер файла (${size / 1_000_000} МБ) не совпадает ни с одной моделью каталога. Скачайте файл по ссылке из инструкции.")
         }
         val expected = candidates.maxOf { it.sizeBytes }
+        // Если модель уже стоит, временная копия занимает место рядом со старой.
         if (freeSpaceBytes < expected + 50_000_000) {
             return@withContext ImportResult.Failed("Не хватает места: нужно ${expected / 1_000_000 + 50} МБ свободных.")
         }
@@ -140,6 +141,11 @@ class ModelManager(private val context: Context) {
             dst.delete()
             if (!tmp.renameTo(dst)) return@withContext ImportResult.Failed("Не удалось сохранить модель.")
             ImportResult.Ok(m)
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // Нет места, нет доступа к файлу, ошибка чтения — сообщение, а не падение приложения.
+            ImportResult.Failed("Не удалось скопировать файл: ${e.message ?: e.javaClass.simpleName}")
         } finally {
             tmp.delete()
         }

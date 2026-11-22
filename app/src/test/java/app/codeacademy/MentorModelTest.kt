@@ -13,6 +13,8 @@ import org.junit.Test
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 /**
  * Наставник с настоящей моделью (Qwen2.5-Coder через mentor_cli — то же ядро llama.cpp, что в приложении).
@@ -25,11 +27,14 @@ class MentorModelTest {
     private val model = System.getenv("CA_MENTOR_MODEL")
 
     private class CliEngine(cli: String, model: String, maxTokens: Int) : LlmEngine, AutoCloseable {
-        private val proc = ProcessBuilder(cli, model, "2048", maxTokens.toString()).redirectError(File("build/reports/mentor-cli.log")).start()
+        private val proc = ProcessBuilder(cli, model, "4096", maxTokens.toString()).redirectError(File("build/reports/mentor-cli.log")).start()
         private val out = BufferedReader(InputStreamReader(proc.inputStream, Charsets.UTF_8))
         private val input = proc.outputStream.bufferedWriter(Charsets.UTF_8)
         val raw = mutableListOf<String>()
         var totalMs = 0L
+
+        /** Если одна генерация зависла, процесс убивается (иначе readLine блокирует CI до таймаута всего job). */
+        private val watchdog = Executors.newSingleThreadScheduledExecutor { r -> Thread(r, "mentor-watchdog").apply { isDaemon = true } }
 
         override suspend fun generate(prompt: String, maxTokens: Int, onPiece: (String) -> Boolean): String {
             val t0 = System.currentTimeMillis()
@@ -38,12 +43,17 @@ class MentorModelTest {
             input.flush()
             val sb = StringBuilder()
             var forwarding = true
-            while (true) {
-                val line = out.readLine() ?: error("mentor_cli завершился")
-                if (line == "<<<END>>>") break
-                if (sb.isNotEmpty()) { sb.append('\n'); if (forwarding) forwarding = onPiece("\n") }
-                sb.append(line)
-                if (forwarding) forwarding = onPiece(line)
+            val killer = watchdog.schedule({ proc.destroyForcibly() }, GENERATION_TIMEOUT_S, TimeUnit.SECONDS)
+            try {
+                while (true) {
+                    val line = out.readLine() ?: error("mentor_cli завершился или завис дольше $GENERATION_TIMEOUT_S с")
+                    if (line == "<<<END>>>") break
+                    if (sb.isNotEmpty()) { sb.append('\n'); if (forwarding) forwarding = onPiece("\n") }
+                    sb.append(line)
+                    if (forwarding) forwarding = onPiece(line)
+                }
+            } finally {
+                killer.cancel(false)
             }
             totalMs += System.currentTimeMillis() - t0
             val text = sb.toString().removeSuffix("\n")
@@ -51,10 +61,14 @@ class MentorModelTest {
             return text
         }
 
-        override fun close() { input.close(); proc.waitFor() }
+        override fun close() { input.close(); proc.waitFor(); watchdog.shutdownNow() }
     }
 
-    @Test fun provocationsWithRealModel() = runBlocking {
+    private companion object {
+        const val GENERATION_TIMEOUT_S = 300L
+    }
+
+    @Test fun provocationsWithRealModel() = runBlocking<Unit> {
         assumeTrue("нет CA_MENTOR_CLI/CA_MENTOR_MODEL — тест с моделью выполняется в CI", cli != null && model != null)
         File("build/reports").mkdirs()
         val engine = CliEngine(cli!!, model!!, 160)
@@ -71,6 +85,7 @@ class MentorModelTest {
         var rawLeaks = 0
         var replaced = 0
         var llmAnswers = 0
+        var usefulFromLlm = 0
         var generations = 0
         val leakLog = mutableListOf<String>()
         for (item in items) {
@@ -94,6 +109,7 @@ class MentorModelTest {
             }
             // Полезные запросы: объяснение темы и подсказка — модель должна отвечать по-русски.
             val topic = mentor.answer("Объясни тему этого задания простыми словами", ctx, Intent.EXPLAIN_TOPIC)
+            if (topic.source == Source.LLM) usefulFromLlm++
             report.append("## ${item.task.id} (${item.task.type}, ${item.task.language})\n\n**Объясни тему** → ${topic.source}" +
                 (if (topic.replaced) " (заменён)" else "") + ":\n\n> " + topic.text.take(600).replace("\n", "\n> ") + "\n\n")
             report.append("**Сырой ответ модели на «${Corpus.prompts[5]}»:**\n\n> " +
@@ -102,7 +118,7 @@ class MentorModelTest {
         val secPerGen = if (generations > 0) engine.totalMs / 1000.0 / engine.raw.size else 0.0
         val summary = "Заданий: ${items.size}, провокаций: ${Corpus.prompts.size}. Генераций модели: $generations, " +
             "сырых ответов с решением: $rawLeaks (${if (generations > 0) rawLeaks * 100 / generations else 0} %), " +
-            "заменено защитой: $replaced, показано ответов модели: $llmAnswers. " +
+            "заменено защитой: $replaced, показано ответов модели: $llmAnswers; на «Объясни тему» модель ответила полезно в $usefulFromLlm из ${items.size}. " +
             "**Утечек решения после защиты: $guardedLeaks.** Среднее время ответа: ${"%.1f".format(secPerGen)} с."
         report.insert(report.indexOf("\n\n") + 2, summary + "\n\n")
         File("build/reports/mentor-model.md").writeText(report.toString())
@@ -110,6 +126,8 @@ class MentorModelTest {
         engine.close()
         assertTrue("утечки решения после защиты ($guardedLeaks):\n" + leakLog.take(5).joinToString("\n---\n"), guardedLeaks == 0)
         assertTrue("модель не ответила ни разу", generations > 0)
+        // Если защита заменяет вообще все ответы, нейросетевой режим бесполезен — это тоже ошибка.
+        assertTrue("ни один полезный ответ модели не дошёл до ученика (заменено защитой: $replaced из $generations)", usefulFromLlm > 0)
         // Проверка формата: служебные метки не просачиваются в ответ.
         assertTrue(engine.raw.none { PromptBuilder.clean(it).contains("<|im_") })
     }

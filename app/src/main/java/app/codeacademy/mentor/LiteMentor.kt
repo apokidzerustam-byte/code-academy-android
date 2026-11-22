@@ -7,7 +7,11 @@ package app.codeacademy.mentor
  */
 class LiteMentor(private val kb: KnowledgeBase) {
 
-    fun answer(question: String, ctx: MentorContext, intent: Intent = IntentClassifier.classify(question)): MentorReply {
+    fun answer(
+        question: String,
+        ctx: MentorContext,
+        intent: Intent = IntentClassifier.classify(question, ctx.task?.isAnswerTask == true),
+    ): MentorReply {
         val guard = ctx.task?.let { SolutionGuard(it, listOf(ctx.code)) }
         val reply = when (intent) {
             Intent.SOLUTION_REQUEST -> solution(ctx, guard)
@@ -56,6 +60,16 @@ class LiteMentor(private val kb: KnowledgeBase) {
         }
         val text = task.hints[shown]
         val level = shown + 1
+        // Поздние ступени («где искать», «алгоритм») наставник даёт только после попытки, а в «предскажи» —
+        // никогда: там они почти называют ответ. Их открывает кнопка под заданием.
+        if (shown >= EARLY_HINTS && (task.isAnswerTask || ctx.attempts == 0)) {
+            return MentorReply(
+                "Дальше идут подсказки, которые близко подводят к ответу («${HINT_STEP.getOrElse(shown) { "подсказка" }}»). " +
+                    (if (task.isAnswerTask) "Проследите код построчно и запишите значения переменных; если не получится — подсказку $level можно открыть кнопкой под заданием."
+                    else "Сначала попробуйте написать и отправить своё решение — после попытки я подскажу дальше. Подсказку $level можно открыть и кнопкой под заданием."),
+                intent, Source.LITE,
+            )
+        }
         if (guard != null && guard.check(text).leak) {
             return MentorReply(
                 "Следующая подсказка («${HINT_STEP.getOrElse(shown) { "подсказка" }}») почти раскрывает решение, поэтому я её не пересказываю. " +
@@ -85,6 +99,15 @@ class LiteMentor(private val kb: KnowledgeBase) {
                 Intent.EXPLAIN_ERROR, Source.LITE,
             )
         val links = mutableListOf<LessonLink>()
+        // В задании «найди ошибку» точное исправление — и есть ответ: до попыток и подсказок даём только тип,
+        // строку и смысл ошибки, без «что проверить» и похожих имён.
+        val task = ctx.task
+        if (task != null && task.type == "fix" && ctx.hintsShown < 3 && ctx.attempts < 2) {
+            val short = "**${a.type}**" + (a.line?.let { " в строке $it" } ?: "") + ". " +
+                a.explanation.substringBefore(". ").trimEnd('.') + ".\n\nВ этом задании ошибку нужно найти самому: " +
+                "перечитайте указанную строку и сравните её с условием. Если не получится — попросите подсказку."
+            return MentorReply(short, Intent.EXPLAIN_ERROR, Source.LITE)
+        }
         val sb = StringBuilder(a.render())
         val mistake = ctx.commonMistakes.firstOrNull { it.errorType == a.type }
             ?: a.skill?.let { kb.lessonOfSkill(it) }?.commonMistakes?.firstOrNull { it.errorType == a.type }
@@ -183,6 +206,8 @@ class LiteMentor(private val kb: KnowledgeBase) {
     }
 
     companion object {
+        /** Сколько первых ступеней лестницы наставник даёт без попытки. */
+        const val EARLY_HINTS = 3
         val HINT_STEP = listOf("намёк", "направление", "концепция", "где искать", "алгоритм", "решение")
         const val SAFE_FALLBACK = "Этот ответ слишком близко подходил к готовому решению, поэтому я его не показываю. " +
             "Попросите подсказку — я дам следующий шаг, или спросите про конкретную строку или ошибку."

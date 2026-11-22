@@ -63,7 +63,8 @@ fun MentorPanel(
     var reply by remember { mutableStateOf<MentorReply?>(null) }
     var partial by remember { mutableStateOf<String?>(null) }
     var job by remember { mutableStateOf<Job?>(null) }
-    val model = c.activeModel(settings)
+    // Проверка файлов модели — один раз на смену настроек, а не на каждую перерисовку.
+    val model = remember(settings) { c.activeModel(settings) }
 
     fun ask(q: String, forced: Intent?) {
         job?.cancel()
@@ -72,7 +73,7 @@ fun MentorPanel(
         val j = scope.launch {
             val ctx = context()
             val mentor = c.mentor(settings)
-            val intent = forced ?: IntentClassifier.classify(q)
+            val intent = forced ?: IntentClassifier.classify(q, ctx.task?.isAnswerTask == true)
             val r = mentor.answer(q, ctx, intent) { p -> partial = p }
             reply = r
             partial = null

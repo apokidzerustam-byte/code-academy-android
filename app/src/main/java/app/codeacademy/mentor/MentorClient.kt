@@ -74,6 +74,8 @@ class MentorClient(private val context: Context, private val modelPath: () -> St
         val path = modelPath() ?: throw IllegalStateException("модель не установлена")
         val svc = connect()
         val id = ids.incrementAndGet()
+        // Один запрос за раз: прежний (если остался) завершается ошибкой, а не висит.
+        failPending("запрос заменён новым")
         return suspendCancellableCoroutine { cont ->
             pending = Pending(id, onPiece) { r ->
                 if (cont.isActive) r.fold({ cont.resume(it) }, { cont.resumeWithException(it) })
@@ -116,7 +118,9 @@ class MentorClient(private val context: Context, private val modelPath: () -> St
             MentorProtocol.MSG_DONE -> {
                 lastStats = data.getString(MentorProtocol.KEY_STATS)?.let(::parseStats)
                 pending = null
-                p.done(Result.success(p.text.toString()))
+                if (data.getBoolean(MentorProtocol.KEY_HOT)) {
+                    p.done(Result.failure(IllegalStateException("Телефон перегрелся — нейросеть остановлена, ответил лёгкий режим.")))
+                } else p.done(Result.success(p.text.toString()))
             }
             MentorProtocol.MSG_ERROR -> {
                 pending = null
