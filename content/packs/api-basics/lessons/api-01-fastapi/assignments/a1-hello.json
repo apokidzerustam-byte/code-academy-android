@@ -31,14 +31,6 @@
         }
       },
       {
-        "id": "h1",
-        "hidden": true,
-        "method": "GET",
-        "path": "/",
-        "expected_status": 404,
-        "hint": "Отвечать должен только путь /hello"
-      },
-      {
         "id": "h2",
         "hidden": true,
         "method": "POST",

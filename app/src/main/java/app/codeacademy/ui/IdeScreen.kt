@@ -223,7 +223,7 @@ fun IdeScreen(projectId: String, settings: Settings, onBack: () -> Unit) {
             }
         }
         // FastAPI есть только в режиме A (Chaquopy): в Pyodide его нет.
-        val needsA = Regex("^\\s*(from|import)\\s+(fastapi|starlette|pydantic)\\b", RegexOption.MULTILINE).containsMatchIn(code)
+        val needsA = Regex("^\\s*(from|import)\\s[^\\n]*\\b(fastapi|starlette|pydantic)\\b", RegexOption.MULTILINE).containsMatchIn(code)
         val (_, r) = resolveRunner(c, currentSettings.runner, if (needsA) "A" else "W")
         runner = r
         running = true

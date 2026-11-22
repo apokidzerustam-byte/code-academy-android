@@ -38,7 +38,13 @@ class WebPreviewController {
     suspend fun run(lang: String, code: String, files: Map<String, String>? = null, entry: String? = null, stdin: String = "",
                     timeoutMs: Long = 10_000): RunResult {
         if (!WebSandbox.supported()) return RunResult(RunStatus.UNAVAILABLE, stderr = "Предпросмотр недоступен — обновите «Android System WebView»")
-        if (withTimeoutOrNull(15_000) { ready.await() } == null) return RunResult(RunStatus.UNAVAILABLE, stderr = "Предпросмотр не загрузился")
+        // Страница может появиться (или пересоздаться) уже после вызова: ждём ту «готовность», что актуальна сейчас.
+        val deadline = System.currentTimeMillis() + 15_000
+        while (true) {
+            val r = ready
+            if (withTimeoutOrNull(250) { r.await() } != null && r === ready && webView != null) break
+            if (System.currentTimeMillis() > deadline) return RunResult(RunStatus.UNAVAILABLE, stderr = "Предпросмотр не загрузился")
+        }
         pending?.complete(RunResult(RunStatus.STOPPED))
         val d = CompletableDeferred<RunResult>()
         pending = d
@@ -59,7 +65,11 @@ class WebPreviewController {
     fun stop() {
         pending?.complete(RunResult(RunStatus.STOPPED))
         pending = null
-        webView?.evaluateJavascript("caStop()", null)
+        val wv = webView ?: return
+        // Зависшая страница не выполнит caStop(): если ответа нет, останавливаем рендер-процесс (страница пересоздастся).
+        var answered = false
+        wv.evaluateJavascript("caStop();1") { answered = true }
+        wv.postDelayed({ if (!answered && webView === wv) WebSandbox.terminateRenderer(wv) }, 1_500)
     }
 
     internal fun onMessage(data: String) {
@@ -90,7 +100,7 @@ fun WebPreview(controller: WebPreviewController, modifier: Modifier = Modifier, 
             modifier = modifier.fillMaxWidth().height(height)
                 .border(1.dp, MaterialTheme.colorScheme.outlineVariant).testTag("web-preview"),
             factory = { ctx ->
-                ctl.ready = CompletableDeferred()
+                if (ctl.ready.isCompleted) ctl.ready = CompletableDeferred() // пересоздание после падения
                 WebSandbox.create(ctx, WebSandbox.PAGE + "?preview=1", { ctl.onMessage(it) }) { view ->
                     if (ctl.webView === view) ctl.webView = null
                     ctl.stop()

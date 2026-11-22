@@ -205,6 +205,29 @@ await t("check: бесконечный цикл верхнего уровня н
   // Цикл прерван ошибкой, страница загрузилась — DOM доступен, но ошибка показана.
   assert.equal(r.cases.length, 1);
 });
+await t("js: остановку цикла нельзя «проглотить» try/catch во внешнем цикле", async () => {
+  const t0 = Date.now();
+  const r = await run({ lang: "js", code: "while (true) {\n  try { while (true) {} } catch (e) {}\n}" });
+  assert.equal(r.status, "ERROR");
+  assert.match(r.stderr, /InfiniteLoopError/);
+  assert.ok(Date.now() - t0 < 5000, "долго: " + (Date.now() - t0));
+});
+await t("html: внешний скрипт с defer выполняется после разбора страницы", async () => {
+  const files = { "index.html": '<html><head><script src="s.js" defer></script></head><body><p id="x">1</p></body></html>',
+    "s.js": "document.getElementById('x').textContent = '2'; console.log('ok')" };
+  const r = await run({ lang: "html", code: files["index.html"], files, entry: "index.html" });
+  assert.equal(r.status, "OK", r.stderr);
+  assert.equal(r.stdout, "ok\n");
+});
+await t("check: вывод из короткого таймера засчитывается, как при запуске", async () => {
+  const r = await check("setTimeout(() => console.log('готово'), 100)", { kind: "web", lang: "js", cases: [{ id: "a", expected_stdout: "готово" }] });
+  assert.equal(r.allPassed, true, JSON.stringify(r));
+});
+await t("ввод со строкой </script> не ломает страницу", async () => {
+  const r = await run({ lang: "js", code: "console.log('ok')", stdin: "</script><b>" });
+  assert.equal(r.status, "OK", r.stderr);
+  assert.equal(r.stdout, "ok\n");
+});
 const allowed = requests.filter((u) => !u.startsWith("file://") && !u.startsWith("data:") && !u.startsWith("about:"));
 await t("никаких сетевых запросов", async () => assert.deepEqual(allowed, []));
 await browser.close();

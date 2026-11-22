@@ -120,15 +120,20 @@ export function caHarness(cfg) {
   // ---- Защита циклов -----------------------------------------------------------
   var starts = {};
   var counts = {};
+  // После первой остановки цикла любая следующая проверка цикла снова бросает ту же ошибку:
+  // её нельзя «проглотить» try/catch во внешнем цикле.
+  var dead = null;
   window.__caL = {
-    s: function (id) { starts[id] = Date.now(); counts[id] = 0; },
+    s: function (id) { if (dead) throw dead; starts[id] = Date.now(); counts[id] = 0; },
     c: function (id, ln) {
+      if (dead) throw dead;
       if ((++counts[id] & 63) === 0 && Date.now() - starts[id] > cfg.loopMs) {
         starts[id] = Date.now();
         var e = new Error("цикл в строке " + ln + " работает дольше " + cfg.loopMs / 1000 +
           " с — похоже, он бесконечный. Проверьте условие выхода из цикла.");
         e.name = "InfiniteLoopError";
         e.__caLine = ln;
+        dead = e;
         throw e;
       }
     },

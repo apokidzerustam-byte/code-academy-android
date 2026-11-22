@@ -7,7 +7,12 @@
 - **Исполнение** — `CodeRunner`:
   - **W** (по умолчанию): Pyodide 0.29.5 / Python 3.13 в Web Worker WebView — изолированный процесс рендерера Chromium, без сети и файлов устройства.
   - **A** («ограниченный режим»): Chaquopy / Python 3.13 в процессе `:runner` — для asyncio, потоков, FastAPI-сервера и устройств со старым WebView.
-  - Одна песочница `ca_runner.py` для обоих: запуск (`run`) и автопроверка (`check`).
+  - Одна песочница `ca_runner.py` для обоих: запуск (`run`) и автопроверка (`check`, виды stdout / function / answer / fastapi).
+  - **Веб-раннер** (`assets/webrunner`, исходники в `web-runner/`): одна невидимая WebView с хост-страницей
+    (WebViewAssetLoader, CSP, WebMessageListener только для своего origin). HTML/CSS/JS — iframe `sandbox` + CSP
+    `connect-src 'none'`, циклы инструментированы (acorn); SQL — Web Worker с sql.js; Kotlin — Web Worker с tree-sitter.
+    Зависшая страница: таймаут → `caStop()` → проверка ответа → остановка рендер-процесса (API 29+) или пересоздание WebView.
+  - Язык задания: веб-задание несёт свой `tests.lang`; FastAPI и «предскажи результат» — всегда Python.
 
 ## 22 модуля ТЗ → Gradle-модули
 | Модуль ТЗ | Где |
@@ -29,5 +34,6 @@
 ## Схема процессов
 ```
 Приложение (UI, Room) ──CodeRunner──┬─► WebView renderer (изолированный) ─► Worker: Pyodide + ca_runner   [W]
-                                    └─► :runner (Binder)                   ─► Chaquopy + ca_runner          [A]
+                                    ├─► :runner (Binder)                   ─► Chaquopy + ca_runner (+FastAPI) [A]
+                                    └─► WebView renderer: хост webrunner   ─► iframe (HTML/CSS/JS) | Worker sql.js | Worker tree-sitter
 ```

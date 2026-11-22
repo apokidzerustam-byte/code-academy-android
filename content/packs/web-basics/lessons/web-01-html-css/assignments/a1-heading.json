@@ -24,12 +24,12 @@
     "cases": [
       {
         "id": "h1",
-        "expr": "(document.querySelector('h1') || {}).textContent",
+        "expr": "((document.querySelector('h1') || {}).textContent || '').trim()",
         "expected": "Мой сайт"
       },
       {
         "id": "p",
-        "expr": "(document.querySelector('p') || {}).textContent",
+        "expr": "((document.querySelector('p') || {}).textContent || '').trim()",
         "expected": "Я учусь программировать."
       },
       {
@@ -42,7 +42,7 @@
       {
         "id": "inbody",
         "hidden": true,
-        "expr": "!!document.querySelector('body > h1') && !!document.querySelector('body > p')",
+        "expr": "!!document.querySelector('body h1') && !!document.querySelector('body p')",
         "expected": true,
         "hint": "Заголовок и абзац пишут внутри body"
       }

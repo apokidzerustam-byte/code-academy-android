@@ -53,18 +53,65 @@ function collect(node, type, acc = []) {
 
 const norm = (t) => t.replace(/\s+/g, "");
 
-/** Объявления функций: [{ name, params: [типы], returns, line }]. */
+/** Объявления функций: [{ name, params: [типы], returns, line }]. returns: тип, "Unit" (блок без типа) или null (тип выводится). */
 export function functions(tree, cleanCode) {
   return collect(tree.rootNode, "function_declaration").map((n) => {
-    const head = cleanCode.slice(n.startIndex, n.endIndex).split(/[{=]/)[0];
-    const m = head.match(/fun\s+(?:<[^>]*>\s*)?(?:[\w.]+\.)?([A-Za-z_]\w*)\s*\(([\s\S]*)\)\s*(?::\s*([\s\S]+))?$/);
-    if (!m) return null;
-    const params = m[2].trim() ? splitTop(m[2]).map((p) => {
-      const colon = p.indexOf(":");
-      return colon < 0 ? "" : norm(p.slice(colon + 1).split("=")[0]);
+    const text = cleanCode.slice(n.startIndex, n.endIndex);
+    const f = text.match(/\bfun\b\s*/);
+    if (!f) return null;
+    let i = f.index + f[0].length;
+    if (text[i] === "<") i = skipBalanced(text, i);
+    const rest = text.slice(i);
+    const nm = rest.match(/^\s*(?:[\w.<>?, ]+\.)?([A-Za-z_]\w*)\s*\(/);
+    if (!nm) return null;
+    const open = i + nm[0].length - 1;
+    const close = skipBalanced(text, open) - 1; // индекс ')'
+    const inner = text.slice(open + 1, close);
+    const params = inner.trim() ? splitTop(inner).map((p) => {
+      const colon = topIndex(p, ":");
+      if (colon < 0) return "";
+      const eq = topIndex(p, "=", colon);
+      return norm(p.slice(colon + 1, eq < 0 ? p.length : eq));
     }) : [];
-    return { name: m[1], params, returns: m[3] ? norm(m[3]) : "Unit", line: n.startPosition.row + 1 };
+    const after = text.slice(close + 1);
+    let returns;
+    const rt = after.match(/^\s*:/);
+    if (rt) {
+      const body = Math.min(...["{", "="].map((ch) => { const k = topIndex(after, ch, rt[0].length); return k < 0 ? after.length : k; }));
+      returns = norm(after.slice(rt[0].length, body).replace(/\bwhere\b[\s\S]*$/, ""));
+    } else {
+      returns = /^\s*=/.test(after) ? null : "Unit";
+    }
+    return { name: nm[1], params, returns, line: n.startPosition.row + 1 };
   }).filter(Boolean);
+}
+
+const OPEN = "<([{";
+const CLOSE = ">)]}";
+
+/** Индекс после парной скобки, начиная с открывающей в позиции i (стрелка -> не считается скобкой). */
+function skipBalanced(s, i) {
+  let depth = 0;
+  for (let k = i; k < s.length; k++) {
+    const ch = s[k];
+    if (ch === ">" && s[k - 1] === "-") continue;
+    if (OPEN.includes(ch)) depth++;
+    else if (CLOSE.includes(ch)) { depth--; if (depth === 0) return k + 1; }
+  }
+  return s.length;
+}
+
+/** Первый символ ch на нулевой глубине скобок (с позиции from). */
+function topIndex(s, ch, from = 0) {
+  let depth = 0;
+  for (let k = from; k < s.length; k++) {
+    const c = s[k];
+    if (c === ">" && s[k - 1] === "-") { if (ch === ">" && depth === 0) return k; continue; }
+    if (depth === 0 && c === ch) return k;
+    if (OPEN.includes(c)) depth++;
+    else if (CLOSE.includes(c)) depth--;
+  }
+  return -1;
 }
 
 /** Классы: [{ name, kind: "class" | "data class" | "interface" | "object", line }]. */
@@ -84,9 +131,12 @@ function splitTop(s) {
   const parts = [];
   let depth = 0;
   let cur = "";
+  let prev = "";
   for (const ch of s) {
-    if ("<([".includes(ch)) depth++;
-    if (">)]".includes(ch)) depth--;
+    if (ch === ">" && prev === "-") { cur += ch; prev = ch; continue; }
+    prev = ch;
+    if ("<([{".includes(ch)) depth++;
+    if (">)]}".includes(ch)) depth--;
     if (ch === "," && depth === 0) { parts.push(cur); cur = ""; } else cur += ch;
   }
   if (cur.trim()) parts.push(cur);
@@ -123,10 +173,12 @@ export function checkKotlin(parse, code, spec) {
             base.actual = fns.length ? "есть: " + fns.map((f) => f.name + "()").join(", ") : "функций нет";
             base.hint = base.hint || `Объявите функцию ${c.name}: fun ${c.name}(…) { … }`;
           } else {
-            const f = found[0];
-            base.actual = `fun ${f.name}(${f.params.join(", ")}): ${f.returns}`;
-            const okParams = !types || (f.params.length === types.length && f.params.every((p, i) => p === norm(types[i])));
-            const okRet = !c.returns || f.returns === norm(c.returns);
+            const okP = (f) => !types || (f.params.length === types.length && f.params.every((p, i) => p === norm(types[i])));
+            const okR = (f) => !c.returns || f.returns === norm(c.returns);
+            const f = found.find((x) => okP(x) && okR(x)) || found.find(okP) || found[0];
+            base.actual = `fun ${f.name}(${f.params.join(", ")})${f.returns ? ": " + f.returns : " = …"}`;
+            const okParams = okP(f);
+            const okRet = okR(f);
             base.passed = okParams && okRet;
             if (!okParams) base.hint = base.hint || `Параметры должны быть такими: (${types.map((p, i) => `p${i + 1}: ${p}`).join(", ")})`;
             else if (!okRet) base.hint = base.hint || `Функция должна возвращать ${c.returns}: после скобок напишите «: ${c.returns}»`;

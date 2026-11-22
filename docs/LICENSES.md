@@ -7,7 +7,11 @@
 | AndroidX / Jetpack Compose / Kotlin coroutines | Apache-2.0 | да |
 | CodeMirror 6 | MIT | да |
 | esbuild | MIT | нет (сборка) |
-| FastAPI / Starlette / pydantic / httpx / uvicorn | MIT / BSD-3 | только зонд |
+| FastAPI 0.125 / Starlette / pydantic 1.10 / httpx 0.28 / anyio | MIT / BSD-3 | да (режим A) |
+| sql.js 1.13 (SQLite) | MIT (SQLite — public domain) | да |
+| web-tree-sitter 0.20.8, tree-sitter-kotlin (tree-sitter-wasms 0.1.12) | MIT | да |
+| acorn 8.14, acorn-walk 8.3 | MIT | да |
+| Kotlin compiler (kotlinc 2.1.20) | Apache-2.0 | нет (CI и шаблон GitHub Actions) |
 | Pyodide 0.29.5 | MPL-2.0 | да (без изменений) |
 | Piper TTS | GPL-3.0-or-later | нет (конвейер контента) |
 | Chatterbox Multilingual | MIT | нет (конвейер контента); аудио содержит водяной знак Perth |

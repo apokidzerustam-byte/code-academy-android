@@ -40,7 +40,7 @@ function syntaxText(e, file, line) {
 export function buildPage({ lang, code, files = {}, entry, stdin = "", nonce, tail = "", options = {} }) {
   const cfg = Object.assign({}, DEFAULTS, options, { nonce, stdin });
   const warnings = [];
-  const head = `<meta http-equiv="Content-Security-Policy" content="${FRAME_CSP}"><script>(${HARNESS})(${JSON.stringify(cfg)})</script>`;
+  const head = `<meta http-equiv="Content-Security-Policy" content="${FRAME_CSP}"><script>(${HARNESS})(${JSON.stringify(cfg).replace(/</g, "\\u003c")})</script>`;
   const supports = typeof CSS !== "undefined" && CSS.supports ? (p, v) => CSS.supports(p, v) : null;
   let idBase = 0;
 
@@ -67,6 +67,8 @@ export function buildPage({ lang, code, files = {}, entry, stdin = "", nonce, ta
     }
     const file = entry || "index.html";
     for (const w of lintHtml(code)) warnings.push({ file, ...w });
+    // Внешние скрипты с defer/async выполняются после разбора страницы: встраиваем их в конец body.
+    const deferred = [];
     let html = code.replace(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi, (all, attrs, body, offset) => {
       const type = (attr(attrs, "type") || "").trim();
       if (!JS_TYPES.test(type)) return all;
@@ -84,12 +86,18 @@ export function buildPage({ lang, code, files = {}, entry, stdin = "", nonce, ta
           return "<script></script>";
         }
         const js = protect(files[p], p, 1, module);
-        return `<script${module ? ' type="module"' : ""}>${escapeScript(js)}\n//# sourceURL=${p}\n</script>`;
+        const tag = `<script${module ? ' type="module"' : ""}>${escapeScript(js)}\n//# sourceURL=${p}\n</script>`;
+        if (!module && /(?:^|\s)(defer|async)(?:\s|=|$)/i.test(attrs)) { deferred.push(tag); return ""; }
+        return tag;
       }
       const openLen = all.indexOf(">") + 1;
       const js = protect(body, file, lineAt(code, offset + openLen), module);
       return all.slice(0, openLen) + escapeScript(js) + all.slice(openLen + body.length);
     });
+    if (deferred.length) {
+      const i = html.search(/<\/body\s*>/i);
+      html = i >= 0 ? html.slice(0, i) + deferred.join("") + html.slice(i) : html + deferred.join("");
+    }
     // Подключённые CSS-файлы проекта встраиваются; внешние — предупреждение.
     html = html.replace(/<link\b([^>]*)>/gi, (all, attrs, offset) => {
       if (!/stylesheet/i.test(attr(attrs, "rel") || "")) return all;
@@ -314,7 +322,8 @@ export async function checkWeb(code, spec, { container, files = {}, entry, abort
         } else base.error = r.error;
         if (!base.passed && s.errors.length && !base.error) base.error = withLine(s.errors[0]);
       } else {
-        // Вывод консоли после загрузки (и действий before).
+        // Вывод консоли после загрузки (и действий before). Короткие таймеры успевают вывести, как в «Запустить».
+        await sleep(spec.outputWaitMs ?? 300);
         const exp = normalize(c.expected_stdout, mode);
         const act = normalize(s.stdout, mode);
         if (c.stdin) base.input = c.stdin;

@@ -16,7 +16,6 @@ import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.json.JSONObject
@@ -139,8 +138,15 @@ class WebRunnerHost(context: Context) {
     private val ids = AtomicLong(1)
 
     suspend fun prepare(): Boolean {
-        withContext(Dispatchers.Main) { if (webView == null) create() }
-        return withTimeoutOrNull(START_TIMEOUT_MS) { ready.await() } ?: false
+        val deadline = System.currentTimeMillis() + START_TIMEOUT_MS
+        while (true) {
+            withContext(Dispatchers.Main) { if (webView == null) create() }
+            // Страницу могли пересоздать, пока ждали: ждём актуальную «готовность».
+            val r = ready
+            val ok = withTimeoutOrNull(500) { r.await() }
+            if (ok != null && r === ready) return ok
+            if (System.currentTimeMillis() > deadline) return false
+        }
     }
 
     private fun create() {
@@ -150,9 +156,11 @@ class WebRunnerHost(context: Context) {
         }
         webView = WebSandbox.create(app, WebSandbox.PAGE, ::onMessage) { view ->
             view.destroy()
-            if (webView === view) webView = null
-            ready = CompletableDeferred()
-            failAll(RunResult(RunStatus.CRASHED, stderr = "Страница завершилась аварийно (например, не хватило памяти)"))
+            if (webView === view) {
+                webView = null
+                ready = CompletableDeferred()
+                failAll(RunResult(RunStatus.CRASHED, stderr = "Страница завершилась аварийно (например, не хватило памяти)"))
+            }
         }.also {
             // Размер «экрана» для вёрстки страницы ученика при проверке (WebView не прикреплена к окну).
             it.layout(0, 0, 720, 1280)
@@ -177,7 +185,23 @@ class WebRunnerHost(context: Context) {
 
     fun stop() {
         failAll(RunResult(RunStatus.STOPPED))
-        js("caStop()")
+        main.post {
+            val wv = webView ?: return@post
+            // Зависшая страница не выполнит caStop() — тогда останавливаем её принудительно.
+            var answered = false
+            wv.evaluateJavascript("caStop();1") { answered = true }
+            main.postDelayed({ if (!answered && webView === wv) killPage(wv) }, 1_500)
+        }
+    }
+
+    /** Отвязать страницу сразу (новые запросы создадут новую) и остановить её рендер-процесс. Только главный поток. */
+    private fun killPage(wv: WebView) {
+        if (webView === wv) {
+            webView = null
+            ready = CompletableDeferred()
+        }
+        failAll(RunResult(RunStatus.CRASHED, stderr = "Страница перезапущена: она перестала отвечать"))
+        if (!WebSandbox.terminateRenderer(wv)) wv.destroy()
     }
 
     /** «Стоп» на странице; если страница не отвечает — останавливаем рендер-процесс. */
@@ -188,15 +212,7 @@ class WebRunnerHost(context: Context) {
         js("window.caHost&&caHost.postMessage(JSON.stringify({type:'pong'}))")
         if (withTimeoutOrNull(2_000) { p.await() } == null) {
             Log.w("CodeAcademyWeb", "Страница не отвечает — перезапуск")
-            withContext(Dispatchers.Main) {
-                val wv = webView ?: return@withContext
-                if (!WebSandbox.terminateRenderer(wv)) {
-                    wv.destroy()
-                    if (webView === wv) webView = null
-                    ready = CompletableDeferred()
-                }
-            }
-            delay(100)
+            withContext(Dispatchers.Main) { webView?.let(::killPage) }
         }
     }
 

@@ -135,7 +135,7 @@ t1 = {"kind": "kotlin", "cases": [
 a1 = asg("a1-square", "write", "Квадрат числа",
          "Напишите функцию `square`, которая принимает целое число `x` (тип `Int`) и **возвращает** его квадрат (тип `Int`).",
          "Объявлять функцию с типами параметра и результата.", "Целое x.", "x * x.",
-         ["Функция main не нужна.", "На телефоне проверяются синтаксис и заголовок функции."],
+         ["Функция main не нужна.", "На телефоне проверяются синтаксис и устройство кода (заголовок функции, нужные конструкции)."],
          hints("Функцию объявляют словом fun.",
                "Тип параметра пишут через двоеточие: x: Int.",
                "Тип результата — после скобок: ): Int.",
@@ -157,11 +157,12 @@ t2 = {"kind": "kotlin", "cases": [
     {"id": "fn", "type": "function", "name": "grade", "paramTypes": ["Int"], "returns": "String"},
     {"id": "when", "type": "contains", "pattern": "\\bwhen\\b", "message": "Используйте when"},
     {"id": "else", "hidden": True, "type": "contains", "pattern": "\\belse\\s*->", "message": "В when нужна ветка else для остальных случаев"},
+    {"id": "bounds", "hidden": True, "type": "contains", "pattern": "\\b90\\b[\\s\\S]*\\b60\\b", "message": "Границы оценок — 90 и 60, сначала самая строгая"},
 ], "jvm": {"main": 'fun main() {\n    for (s in listOf(95, 90, 75, 60, 59, 0)) println(grade(s))\n}',
            "expected_stdout": "отлично\nотлично\nзачёт\nзачёт\nнезачёт\nнезачёт"}}
 a2 = asg("a2-grade", "write", "Оценка через when",
          "Напишите функцию `grade(score: Int): String` с помощью `when`:\n\n"
-         "- 90 и больше → `отлично`;\n- от 60 до 89 → `зачёт`;\n- меньше 60 → `незачёт`.",
+         "- 90 и больше → `отлично`;\n- от 60 до 89 → `зачёт`;\n- меньше 60 → `незачёт`.\n\nНа телефоне проверяются синтаксис и устройство кода; результат программы можно увидеть в GitHub Actions.",
          "Выбирать результат конструкцией when.", "Целое score от 0 до 100.", "Строка-оценка.",
          ["Используйте when (не цепочку if).", "90 — уже «отлично», 60 — уже «зачёт»."],
          hints("Заголовок: fun grade(score: Int): String.",
@@ -187,10 +188,10 @@ t3 = {"kind": "kotlin", "cases": [
     {"id": "syntax", "type": "syntax"},
     {"id": "add", "type": "function", "name": "add", "paramTypes": ["Int", "Int"], "returns": "Int"},
     {"id": "main", "type": "function", "name": "main", "paramTypes": []},
-    {"id": "call", "hidden": True, "type": "contains", "pattern": "add\\s*\\(\\s*2\\s*,\\s*3\\s*\\)", "message": "main должна вызывать add(2, 3)"},
+    {"id": "call", "hidden": True, "type": "contains", "raw": True, "pattern": "add\\s*\\(\\s*2\\s*,\\s*3\\s*\\)", "message": "main должна вызывать add(2, 3)"},
 ], "jvm": {"main": "", "expected_stdout": "Сумма: 5"}}
 a3 = asg("a3-fix", "fix", "Две потерянные скобки",
-         "Программа должна напечатать `Сумма: 5`, но не компилируется. Найдите и исправьте **две** синтаксические ошибки.",
+         "Программа должна напечатать `Сумма: 5`, но не компилируется. Найдите и исправьте **две** синтаксические ошибки. На телефоне проверяются синтаксис и устройство кода; результат программы можно увидеть в GitHub Actions.",
          "Читать сообщения о синтаксических ошибках.", "—", "Программа без синтаксических ошибок.",
          ["Не меняйте логику — только скобки."],
          hints("Нажмите «Запустить»: приложение покажет первую ошибку и её строку.",
@@ -214,16 +215,17 @@ t4 = {"kind": "kotlin", "cases": [
     {"id": "syntax", "type": "syntax"},
     {"id": "cls", "type": "class", "name": "Book", "kind": "data class"},
     {"id": "fn", "type": "function", "name": "oldBooks", "paramTypes": ["List<Book>"], "returns": "List<Book>"},
-    {"id": "props", "hidden": True, "type": "contains", "pattern": "data\\s+class\\s+Book\\s*\\(\\s*val\\s+title\\s*:\\s*String\\s*,\\s*val\\s+year\\s*:\\s*Int\\s*\\)",
+    {"id": "props", "hidden": True, "type": "contains", "pattern": "data\\s+class\\s+Book\\s*\\(\\s*val\\s+title\\s*:\\s*String\\s*,\\s*val\\s+year\\s*:\\s*Int\\s*,?\\s*\\)",
      "message": "У Book два свойства: val title: String и val year: Int"},
-    {"id": "loop", "hidden": True, "type": "contains", "pattern": "\\bfilter\\b|\\bfor\\b", "message": "Отберите книги: filter или цикл for"},
+    {"id": "loop", "hidden": True, "type": "contains", "pattern": "\\bfilter\\w*|\\bfor\\b|\\bpartition\\b", "message": "Отберите книги: filter или цикл for"},
+    {"id": "year", "hidden": True, "type": "contains", "pattern": "\\b1900\\b", "message": "Граница — 1900 год"},
 ], "jvm": {"main": 'fun main() {\n    val b = listOf(Book("Онегин", 1833), Book("Мастер", 1967), Book("Анна", 1878), Book("Ровно", 1900))\n'
                    '    println(oldBooks(b).map { it.title })\n    println(oldBooks(listOf()).size)\n}',
            "expected_stdout": "[Онегин, Анна]\n0"}}
 a4 = asg("a4-books", "write", "Старые книги",
          "1. Объявите `data class Book` со свойствами `title: String` и `year: Int` (оба `val`).\n"
          "2. Напишите функцию `oldBooks(books: List<Book>): List<Book>`, которая возвращает только книги, "
-         "написанные **раньше 1900 года**.",
+         "написанные **раньше 1900 года**.\n\nНа телефоне проверяются синтаксис и устройство кода; результат программы можно увидеть в GitHub Actions.",
          "Описывать данные классом data class и фильтровать список.", "Список книг.", "Список книг до 1900 года.",
          ["1900 год уже не подходит."],
          hints("data class Book(val title: String, val year: Int).",

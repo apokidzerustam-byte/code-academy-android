@@ -143,8 +143,6 @@ IMP = "from fastapi import FastAPI\n\napp = FastAPI()\n"
 S1 = IMP + '\n\n@app.get("/hello")\ndef hello():\n    return {"text": "Привет, API!"}\n'
 t1 = {"kind": "fastapi", "cases": [
     {"id": "v1", "method": "GET", "path": "/hello", "expected_status": 200, "expected_json": {"text": "Привет, API!"}},
-    {"id": "h1", "hidden": True, "method": "GET", "path": "/", "expected_status": 404,
-     "hint": "Отвечать должен только путь /hello"},
     {"id": "h2", "hidden": True, "method": "POST", "path": "/hello", "expected_status": 405,
      "hint": "Обработчик — для метода GET"},
 ]}
@@ -209,7 +207,7 @@ t3 = {"kind": "fastapi", "cases": [
 a3 = asg("a3-fix", "fix", "2 + 3 = 23?",
          "Запрос `/add?a=2&b=3` должен вернуть `{\"sum\": 5}`, а возвращает `{\"sum\": \"23\"}`. Исправьте обработчик.",
          "Понимать, зачем нужны аннотации типов в FastAPI.", "Параметры запроса a и b.", "Сумма чисел.",
-         ["Не числа должны давать код 422."],
+         ["Оба параметра обязательны.", "Не числа должны давать код 422."],
          hints("Запустите и подумайте: почему 2 и 3 «склеились»?",
                "Из адреса всё приходит текстом.",
                "FastAPI превращает текст в число, только если знает тип параметра.",

@@ -7,6 +7,7 @@
   "input": "Параметры запроса a и b.",
   "expectedResult": "Сумма чисел.",
   "constraints": [
+    "Оба параметра обязательны.",
     "Не числа должны давать код 422."
   ],
   "starterCode": "from fastapi import FastAPI\n\napp = FastAPI()\n\n\n@app.get(\"/add\")\ndef add(a, b):\n    return {\"sum\": a + b}\n",

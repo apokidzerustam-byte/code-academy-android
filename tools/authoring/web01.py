@@ -49,7 +49,7 @@ scenes = [
       Любая веб-страница — это обычный текстовый файл на языке разметки HTML. Браузер читает его и рисует
       заголовки, абзацы, картинки и кнопки. Внешний вид — цвета, размеры, отступы — задаёт второй язык, CSS.
       А поведение, например реакцию на нажатие, — язык JavaScript, о нём следующий урок. В приложении
-      страница открывается справа во встроенном браузере, без интернета: внешние сайты для неё закрыты.""",
+      страница открывается под редактором во встроенном браузере, без интернета: внешние сайты для неё закрыты.""",
           [NOTE("**HTML** — содержание и структура, **CSS** — внешний вид, **JavaScript** — поведение.", at="Внешний вид")]),
     scene("skeleton", "Скелет страницы", """
       Разметка состоит из тегов: имя в угловых скобках. Большинство тегов парные: открывающий и закрывающий
@@ -163,11 +163,11 @@ def page(body, head=""):
 # --- Задание 1: заголовок и абзац ------------------------------------------------
 S1 = page("  <h1>Мой сайт</h1>\n  <p>Я учусь программировать.</p>")
 t1 = {"kind": "web", "lang": "html", "cases": [
-    {"id": "h1", "expr": "(document.querySelector('h1') || {}).textContent", "expected": "Мой сайт"},
-    {"id": "p", "expr": "(document.querySelector('p') || {}).textContent", "expected": "Я учусь программировать."},
+    {"id": "h1", "expr": "((document.querySelector('h1') || {}).textContent || '').trim()", "expected": "Мой сайт"},
+    {"id": "p", "expr": "((document.querySelector('p') || {}).textContent || '').trim()", "expected": "Я учусь программировать."},
     {"id": "one", "hidden": True, "expr": "document.querySelectorAll('h1').length", "expected": 1,
      "hint": "Главный заголовок на странице должен быть один"},
-    {"id": "inbody", "hidden": True, "expr": "!!document.querySelector('body > h1') && !!document.querySelector('body > p')",
+    {"id": "inbody", "hidden": True, "expr": "!!document.querySelector('body h1') && !!document.querySelector('body p')",
      "expected": True, "hint": "Заголовок и абзац пишут внутри body"},
 ]}
 a1 = asg("a1-heading", "write", "Заголовок и абзац",

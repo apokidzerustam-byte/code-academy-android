@@ -2,7 +2,7 @@
   "id": "a4-books",
   "type": "write",
   "title": "Старые книги",
-  "statement": "1. Объявите `data class Book` со свойствами `title: String` и `year: Int` (оба `val`).\n2. Напишите функцию `oldBooks(books: List<Book>): List<Book>`, которая возвращает только книги, написанные **раньше 1900 года**.",
+  "statement": "1. Объявите `data class Book` со свойствами `title: String` и `year: Int` (оба `val`).\n2. Напишите функцию `oldBooks(books: List<Book>): List<Book>`, которая возвращает только книги, написанные **раньше 1900 года**.\n\nНа телефоне проверяются синтаксис и устройство кода; результат программы можно увидеть в GitHub Actions.",
   "goal": "Описывать данные классом data class и фильтровать список.",
   "input": "Список книг.",
   "expectedResult": "Список книг до 1900 года.",
@@ -43,15 +43,22 @@
         "id": "props",
         "hidden": true,
         "type": "contains",
-        "pattern": "data\\s+class\\s+Book\\s*\\(\\s*val\\s+title\\s*:\\s*String\\s*,\\s*val\\s+year\\s*:\\s*Int\\s*\\)",
+        "pattern": "data\\s+class\\s+Book\\s*\\(\\s*val\\s+title\\s*:\\s*String\\s*,\\s*val\\s+year\\s*:\\s*Int\\s*,?\\s*\\)",
         "message": "У Book два свойства: val title: String и val year: Int"
       },
       {
         "id": "loop",
         "hidden": true,
         "type": "contains",
-        "pattern": "\\bfilter\\b|\\bfor\\b",
+        "pattern": "\\bfilter\\w*|\\bfor\\b|\\bpartition\\b",
         "message": "Отберите книги: filter или цикл for"
+      },
+      {
+        "id": "year",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "\\b1900\\b",
+        "message": "Граница — 1900 год"
       }
     ],
     "jvm": {
