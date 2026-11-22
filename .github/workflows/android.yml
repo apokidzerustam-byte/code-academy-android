@@ -80,7 +80,7 @@ jobs:
         run: npm install --no-audit --no-fund && npm run build
       - name: NDK и CMake для llama.cpp (как в примере llama.android)
         run: |
-          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;29.0.13113456" "cmake;3.31.6" > /dev/null
+          bash tools/install-ndk.sh
           bash tools/fetch-llama.sh
       - name: Модульные тесты (JVM)
         run: gradle --no-daemon :app:testDebugUnitTest
@@ -147,7 +147,7 @@ jobs:
       - run: sudo apt-get install -y ninja-build > /dev/null
       - name: NDK и CMake для llama.cpp (как в примере llama.android)
         run: |
-          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;29.0.13113456" "cmake;3.31.6" > /dev/null
+          bash tools/install-ndk.sh
           bash tools/fetch-llama.sh
       - name: Сборка редактора CodeMirror
         working-directory: editor-web
@@ -218,7 +218,7 @@ jobs:
         run: npm install --no-audit --no-fund && npm run build
       - name: NDK и CMake для llama.cpp (как в примере llama.android)
         run: |
-          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;29.0.13113456" "cmake;3.31.6" > /dev/null
+          bash tools/install-ndk.sh
           bash tools/fetch-llama.sh
       - name: Модель наставника для теста на устройстве (API 34)
         if: matrix.api == 34

@@ -96,7 +96,7 @@ class MentorOnDeviceTest {
             rule.onAllNodes(hasText("{name}!\")", substring = true)).fetchSemanticsNodes().isEmpty())
 
         // Ошибка → разбор с объяснением.
-        rule.onNodeWithTag("code").performScrollTo().performTextReplacement("name = input()\nprint(nmae)\n")
+        rule.onNodeWithTag("code").performScrollTo().performTextReplacement("name = \"Аня\"\nprint(nmae)\n")
         rule.onNodeWithTag("run").performScrollTo().performClick()
         rule.waitUntil(90_000) { rule.onAllNodes(hasText("NameError", substring = true)).fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("mentor-error").performScrollTo().performClick()
