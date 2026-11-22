@@ -13,7 +13,11 @@ import android.os.Messenger
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
+import app.codeacademy.BuildConfig
+import app.codeacademy.CodeAcademyApp
+import app.codeacademy.CrashLog
 import org.json.JSONObject
+import java.io.File
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -34,6 +38,8 @@ class MentorClient(
     private val context: Context,
     /** Что дописать к запросу после метки ассистента (зависит от модели). */
     private val promptSuffix: () -> String = { "" },
+    /** Режим производительности на момент запроса. */
+    private val perfMode: () -> PerfMode = { PerfMode.STANDARD },
     private val modelPath: () -> String?,
 ) : LlmEngine {
     private val ids = AtomicLong(0)
@@ -64,6 +70,14 @@ class MentorClient(
         override fun onServiceDisconnected(name: ComponentName?) {
             service = null
             connecting = null
+            // Процесс нейросети погиб (чаще всего — нехватка памяти): запись в журнал сбоев для разбора.
+            if (pending != null) runCatching {
+                CrashLog.append(
+                    File(context.filesDir, "logs/${CrashLog.FILE_NAME}"),
+                    CrashLog.note("main", "Процесс нейросети (:mentor) завершился во время ответа — вероятно, не хватило памяти.",
+                        BuildConfig.VERSION_NAME, CodeAcademyApp.deviceInfo(), System.currentTimeMillis()),
+                )
+            }
             failPending("Процесс нейросети завершился — вероятно, не хватило памяти. Ответил лёгкий режим.")
         }
 
@@ -101,6 +115,7 @@ class MentorClient(
                 putString(MentorProtocol.KEY_MODEL, path)
                 putString(MentorProtocol.KEY_PROMPT, prompt + promptSuffix())
                 putInt(MentorProtocol.KEY_MAX_TOKENS, maxTokens)
+                putString(MentorProtocol.KEY_PERF, perfMode().name)
             }
             try {
                 svc.send(Message.obtain(null, MentorProtocol.MSG_GENERATE).apply { data = b; replyTo = replies })
@@ -122,6 +137,7 @@ class MentorClient(
         val b = Bundle().apply {
             putString(MentorProtocol.KEY_MODEL, path)
             putString(MentorProtocol.KEY_PROMPT, PromptBuilder.PREFIX)
+            putString(MentorProtocol.KEY_PERF, perfMode().name)
         }
         runCatching { svc.send(Message.obtain(null, MentorProtocol.MSG_LOAD).apply { data = b }) }
     }

@@ -37,6 +37,8 @@ object MentorProtocol {
     const val KEY_TEXT = "text"
     const val KEY_STATS = "stats"
     const val KEY_HOT = "hot"
+    /** Имя режима производительности (PerfMode) на момент запроса. */
+    const val KEY_PERF = "perf"
 }
 
 /**
@@ -51,6 +53,9 @@ class MentorService : Service() {
     private lateinit var messenger: Messenger
     @Volatile private var llm: NativeLlm? = null
     @Volatile private var loadedPath: String? = null
+    @Volatile private var loadedPerf: PerfMode? = null
+    /** Через сколько простоя выгружать модель — по режиму последнего запроса. */
+    @Volatile private var idleMs = IDLE_UNLOAD_MS
     @Volatile private var loadMs = 0L
     @Volatile private var info = ""
     @Volatile private var hot = false
@@ -125,8 +130,9 @@ class MentorService : Service() {
             P.MSG_LOAD -> {
                 val path = m.data.getString(P.KEY_MODEL)
                 val prefix = m.data.getString(P.KEY_PROMPT).orEmpty()
+                val perf = PerfPolicy.parse(m.data.getString(P.KEY_PERF))
                 control.removeCallbacks(unloadIdle)
-                runCatching { worker.execute { preload(path, prefix) } }
+                runCatching { worker.execute { preload(path, prefix, perf) } }
             }
         }
     }
@@ -136,17 +142,17 @@ class MentorService : Service() {
      * (секунды) и посчитать правила наставника, и первый ответ не тратит на это время. Ошибки не сообщаются:
      * настоящий запрос повторит загрузку и покажет причину.
      */
-    private fun preload(path: String?, prefix: String) {
+    private fun preload(path: String?, prefix: String, perf: PerfMode) {
         try {
             if (hot || path == null) return
-            val engine = ensureLoaded(path)
+            val engine = ensureLoaded(path, perf)
             // Один токен: запрос разбирается, и его начало остаётся в кэше контекста для следующих вопросов.
             if (prefix.isNotEmpty()) engine.generate(prefix, 1, temperature = 0.3f, seed = 42) { false }
         } catch (t: Throwable) {
             Log.w(TAG, "предзагрузка не удалась", t)
         } finally {
             control.removeCallbacks(unloadIdle)
-            control.postDelayed(unloadIdle, IDLE_UNLOAD_MS)
+            control.postDelayed(unloadIdle, idleMs)
         }
     }
 
@@ -161,8 +167,9 @@ class MentorService : Service() {
                 return
             }
             val path = data.getString(P.KEY_MODEL) ?: error("не указан файл модели")
-            val wasLoaded = llm != null && loadedPath == path
-            val engine = ensureLoaded(path)
+            val perf = PerfPolicy.parse(data.getString(P.KEY_PERF))
+            val wasLoaded = llm != null && loadedPath == path && loadedPerf == perf
+            val engine = ensureLoaded(path, perf)
             val loadedNow = if (wasLoaded) 0L else loadMs
             val stats = engine.generate(data.getString(P.KEY_PROMPT).orEmpty(), data.getInt(P.KEY_MAX_TOKENS, 320).coerceIn(16, 1024),
                 temperature = 0.3f, seed = 42) cb@{ piece ->
@@ -180,17 +187,20 @@ class MentorService : Service() {
             send(reply, P.MSG_ERROR, id, Bundle().apply { putString(P.KEY_TEXT, t.message ?: t.javaClass.simpleName) })
         } finally {
             control.removeCallbacks(unloadIdle)
-            control.postDelayed(unloadIdle, IDLE_UNLOAD_MS)
+            control.postDelayed(unloadIdle, idleMs)
         }
     }
 
-    private fun ensureLoaded(path: String): NativeLlm {
-        llm?.let { if (loadedPath == path) return it }
+    /** Модель загружается заново, если сменился файл или режим производительности (число потоков задаётся при загрузке). */
+    private fun ensureLoaded(path: String, perf: PerfMode): NativeLlm {
+        val policy = PerfPolicy.of(perf)
+        idleMs = policy.idleUnloadMs
+        llm?.let { if (loadedPath == path && loadedPerf == perf) return it }
         unload()
         val f = File(path)
         require(f.isFile && f.canonicalPath.startsWith(File(filesDir, "models").canonicalPath + File.separator)) { "файл модели не найден" }
         NativeLlm.init(applicationInfo.nativeLibraryDir)
-        val threads = CpuTopology.detect()
+        val threads = policy.threads(CpuTopology.detect())
         val t0 = System.currentTimeMillis()
         val engine = NativeLlm.load(f.path, N_CTX, threads.generation, threads.prompt)
         loadMs = System.currentTimeMillis() - t0
@@ -199,6 +209,7 @@ class MentorService : Service() {
         Log.i(TAG, info)
         llm = engine
         loadedPath = path
+        loadedPerf = perf
         return engine
     }
 
@@ -206,6 +217,7 @@ class MentorService : Service() {
         llm?.close()
         llm = null
         loadedPath = null
+        loadedPerf = null
     }
 
     private fun send(to: Messenger, what: Int, id: Long, b: Bundle): Boolean = try {

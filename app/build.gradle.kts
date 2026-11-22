@@ -22,7 +22,8 @@ android {
         // Номер сборки CI: каждая новая версия ставится поверх предыдущей.
         val run = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
         versionCode = run
-        versionName = "0.0.9-proto.$run"
+        // Сборка тега v1.2.3 получает версию 1.2.3 (CA_VERSION_NAME из CI); обычные сборки — 0.10.0-mvp.<номер>.
+        versionName = System.getenv("CA_VERSION_NAME")?.takeIf { it.isNotBlank() } ?: "0.10.0-mvp.$run"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             // arm64 — телефоны, x86_64 — эмулятор в CI.
@@ -52,15 +53,31 @@ android {
         }
     }
 
+    // Релизный ключ (этап 10): если заданы переменные окружения, релиз подписывается им,
+    // иначе — постоянным ключом прототипа. Порядок и риски — docs/RELEASE.md.
+    val releaseStoreFile = System.getenv("CA_RELEASE_KEYSTORE")?.takeIf { it.isNotBlank() }?.let { file(it) }
+    val hasReleaseKey = releaseStoreFile != null && releaseStoreFile.isFile &&
+        !System.getenv("CA_RELEASE_STORE_PASSWORD").isNullOrBlank() &&
+        !System.getenv("CA_RELEASE_KEY_ALIAS").isNullOrBlank()
+
     signingConfigs {
         // Постоянный ключ прототипа (в репозитории, пароль «android», как у debug-ключа).
         // Без него CI каждый раз создавал новый debug-ключ, и новая версия не ставилась поверх старой.
-        // Не для публикации в магазине: релизный ключ будет храниться в GitHub Secrets (этап 11).
+        // Не для публикации в магазине: настоящий релизный ключ хранится только в секретах (docs/RELEASE.md).
         create("prototype") {
             storeFile = rootProject.file("signing/prototype.keystore")
             storePassword = "android"
             keyAlias = "codeacademy-proto"
             keyPassword = "android"
+        }
+        if (hasReleaseKey) {
+            create("release") {
+                storeFile = releaseStoreFile
+                storePassword = System.getenv("CA_RELEASE_STORE_PASSWORD")
+                keyAlias = System.getenv("CA_RELEASE_KEY_ALIAS")
+                keyPassword = System.getenv("CA_RELEASE_KEY_PASSWORD")?.takeIf { it.isNotBlank() }
+                    ?: System.getenv("CA_RELEASE_STORE_PASSWORD")
+            }
         }
     }
 
@@ -69,8 +86,10 @@ android {
             signingConfig = signingConfigs.getByName("prototype")
         }
         release {
+            // R8 не включён сознательно: Chaquopy, Pyodide-мост, JNI и kotlinx.serialization требуют
+            // отдельных правил, а выигрыш в размере мал (основной вес — модели и Python/Pyodide). См. TECHNICAL_DECISIONS.
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("prototype")
+            signingConfig = signingConfigs.getByName(if (hasReleaseKey) "release" else "prototype")
         }
     }
 

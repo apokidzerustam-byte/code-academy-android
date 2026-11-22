@@ -72,7 +72,7 @@ fun MentorPanel(
 
     // Панель открыта — ученик, скорее всего, сейчас спросит: модель загружается заранее, пока он набирает вопрос.
     LaunchedEffect(open, model?.id) {
-        if (open && model != null) {
+        if (open && model != null && app.codeacademy.mentor.PerfPolicy.of(settings.perfMode).preload) {
             try {
                 c.mentor(settings)
                 c.mentorClient.warmUp()

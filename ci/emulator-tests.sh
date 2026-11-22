@@ -17,6 +17,10 @@ if [ "$rc" = 0 ] && [ -n "${CA_MENTOR_MODEL:-}" ]; then
   bash ci/mentor-device-test.sh 2>&1 | tee build/ci/mentor-device.log
   rc=${PIPESTATUS[0]}
 fi
+# Этап 10: холодный старт и память (замер, не проверка; сбой замера сборку не валит).
+if [ "$rc" = 0 ] && [ -f app/build/outputs/apk/debug/app-debug.apk ]; then
+  bash ci/startup-measure.sh app/build/outputs/apk/debug/app-debug.apk 2>&1 | tee -a build/ci/startup-run.log
+fi
 adb logcat -d -s CAPROBE:I CAPROBE:E CAPLAYER:I CAPLAYER:W > build/ci/probe.log || true
 adb logcat -d '*:E' | tail -n 400 > build/ci/errors.log || true
 echo "exit code: $rc" >> build/ci/probe.log

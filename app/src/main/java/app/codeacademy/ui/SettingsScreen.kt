@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.codeacademy.mentor.PerfMode
 import app.codeacademy.settings.RunnerMode
 import app.codeacademy.settings.Settings
 import app.codeacademy.settings.ThemeMode
@@ -72,9 +73,27 @@ fun SettingsScreen(onBack: () -> Unit, openLab: () -> Unit) {
             Choice("Простое поле ввода (для слабых устройств)", s.plainEditor, "editor-plain") { scope.launch { c.settings.setPlainEditor(true) } }
             OutlinedButton(onClick = openLab) { Text("Лаборатория выполнения кода") }
             HorizontalDivider()
+            Text("Режим производительности", style = MaterialTheme.typography.titleMedium)
+            Choice("Экономичный: меньше нагрева и батареи (2 потока, ответы короче, модель выгружается через 2 минуты)", s.perfMode == PerfMode.ECONOMY, "perf-economy") {
+                scope.launch { c.settings.setPerfMode(PerfMode.ECONOMY) }
+            }
+            Choice("Стандартный (4 потока, модель загружается заранее и держится 10 минут)", s.perfMode == PerfMode.STANDARD, "perf-standard") {
+                scope.launch { c.settings.setPerfMode(PerfMode.STANDARD) }
+            }
+            Choice("Расширенный: подробнее ответы, модель держится 30 минут (больше памяти и батареи)", s.perfMode == PerfMode.EXTENDED, "perf-extended") {
+                scope.launch { c.settings.setPerfMode(PerfMode.EXTENDED) }
+            }
+            Text(
+                "Режим влияет на нейросетевого наставника — самую тяжёлую часть приложения. Уроки, редактор и запуск кода от него не зависят: " +
+                    "для слабых телефонов есть ещё «Простое поле ввода» выше. Лёгкий режим наставника работает во всех режимах.",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            HorizontalDivider()
             MentorSettingsSection()
             HorizontalDivider()
             BackupSection()
+            HorizontalDivider()
+            CrashLogSection()
             HorizontalDivider()
             Text("О приложении", style = MaterialTheme.typography.titleMedium)
             Text(
@@ -201,5 +220,42 @@ private fun BackupSection() {
             },
             dismissButton = { androidx.compose.material3.TextButton(onClick = { wipeStep = 0 }) { Text("Отмена") } },
         )
+    }
+}
+
+/** Журнал сбоев: причина, если приложение закрылось само. Хранится только на телефоне и никуда не отправляется. */
+@Composable
+private fun CrashLogSection() {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val file = remember { (context.applicationContext as app.codeacademy.CodeAcademyApp).crashLogFile }
+    var text by remember { mutableStateOf(app.codeacademy.CrashLog.read(file)) }
+    var shown by remember { mutableStateOf(false) }
+    val clipboard = androidx.compose.ui.platform.LocalClipboardManager.current
+    val count = app.codeacademy.CrashLog.count(text)
+
+    Text("Журнал сбоев", style = MaterialTheme.typography.titleMedium)
+    Text(
+        if (count == 0) "Сбоев не было. Если приложение закроется само, причина сохранится здесь: только на этом телефоне, никуда не отправляется."
+        else "Записей: $count. Журнал хранится только на этом телефоне; показать его разработчику или нет — решаете вы.",
+        style = MaterialTheme.typography.bodySmall, modifier = Modifier.testTag("crash-status"),
+    )
+    if (count > 0) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick = { shown = !shown }, modifier = Modifier.testTag("crash-show")) { Text(if (shown) "Скрыть" else "Показать") }
+            OutlinedButton(onClick = { clipboard.setText(androidx.compose.ui.text.AnnotatedString(text)) }, modifier = Modifier.testTag("crash-copy")) { Text("Копировать") }
+            OutlinedButton(onClick = {
+                val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(android.content.Intent.EXTRA_SUBJECT, "Code Academy: журнал сбоев")
+                    putExtra(android.content.Intent.EXTRA_TEXT, text)
+                }
+                runCatching { context.startActivity(android.content.Intent.createChooser(send, "Отправить журнал").addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) }
+            }, modifier = Modifier.testTag("crash-share")) { Text("Поделиться") }
+        }
+        OutlinedButton(onClick = { app.codeacademy.CrashLog.clear(file); text = ""; shown = false }, modifier = Modifier.testTag("crash-clear")) { Text("Очистить журнал") }
+        if (shown) {
+            Text(text.takeLast(6_000), style = MaterialTheme.typography.bodySmall.copy(fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace),
+                modifier = Modifier.testTag("crash-text"))
+        }
     }
 }

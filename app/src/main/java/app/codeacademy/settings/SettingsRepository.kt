@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
+import app.codeacademy.mentor.PerfMode
 import kotlinx.coroutines.flow.first
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -36,6 +37,8 @@ data class Settings(
     val mentorNeural: Boolean = false,
     /** Id модели из ModelCatalog. */
     val mentorModel: String? = null,
+    /** Режим производительности: влияет на нейросетевого наставника (потоки, память, длина ответа). */
+    val perfMode: PerfMode = PerfMode.STANDARD,
 )
 
 class SettingsRepository(private val context: Context) {
@@ -48,6 +51,7 @@ class SettingsRepository(private val context: Context) {
     private val days = intPreferencesKey("days_per_week")
     private val mentorNeural = booleanPreferencesKey("mentor_neural")
     private val mentorModel = stringPreferencesKey("mentor_model")
+    private val perf = stringPreferencesKey("perf_mode")
 
     val settings: Flow<Settings> = context.dataStore.data.map { p ->
         Settings(
@@ -60,6 +64,7 @@ class SettingsRepository(private val context: Context) {
             daysPerWeek = (p[days] ?: 5).coerceIn(1, 7),
             mentorNeural = p[mentorNeural] ?: false,
             mentorModel = p[mentorModel],
+            perfMode = app.codeacademy.mentor.PerfPolicy.parse(p[perf]),
         )
     }
 
@@ -72,6 +77,7 @@ class SettingsRepository(private val context: Context) {
     suspend fun setSessionMinutes(v: Int) = context.dataStore.edit { it[session] = v }
     suspend fun setMentorNeural(v: Boolean) = context.dataStore.edit { it[mentorNeural] = v }
     suspend fun setMentorModel(id: String?) = context.dataStore.edit { if (id == null) it.remove(mentorModel) else it[mentorModel] = id }
+    suspend fun setPerfMode(m: PerfMode) = context.dataStore.edit { it[perf] = m.name }
     suspend fun setDaysPerWeek(v: Int) = context.dataStore.edit { it[days] = v.coerceIn(1, 7) }
 
     /** Все сохранённые настройки как есть (для резервной копии): имя → значение. */

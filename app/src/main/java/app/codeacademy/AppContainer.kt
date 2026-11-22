@@ -17,6 +17,8 @@ import app.codeacademy.mentor.MentorContent
 import app.codeacademy.mentor.ModelCatalog
 import app.codeacademy.mentor.ModelInfo
 import app.codeacademy.mentor.ModelManager
+import app.codeacademy.mentor.PerfMode
+import app.codeacademy.mentor.PerfPolicy
 import app.codeacademy.runner.CodeRunner
 import app.codeacademy.runner.ProjectFiles
 import app.codeacademy.runner.PyodideRunner
@@ -61,7 +63,8 @@ class AppContainer(context: Context) {
     /** Путь к выбранной модели для процесса :mentor. */
     @Volatile var mentorModelPath: String? = null
     @Volatile var mentorPromptSuffix: String = ""
-    val mentorClient by lazy { MentorClient(app, promptSuffix = { mentorPromptSuffix }) { mentorModelPath } }
+    @Volatile var perfMode: PerfMode = PerfMode.STANDARD
+    val mentorClient by lazy { MentorClient(app, promptSuffix = { mentorPromptSuffix }, perfMode = { perfMode }) { mentorModelPath } }
     @Volatile private var kb: KnowledgeBase? = null
 
     /** База знаний наставника: конспекты и частые ошибки всех уроков (строится один раз). */
@@ -85,7 +88,8 @@ class AppContainer(context: Context) {
         val m = activeModel(s)
         mentorModelPath = m?.let { models.file(it).path }
         mentorPromptSuffix = m?.promptSuffix.orEmpty()
-        return Mentor(knowledgeBase(), if (m != null) mentorClient else null)
+        perfMode = s.perfMode
+        return Mentor(knowledgeBase(), if (m != null) mentorClient else null, PerfPolicy.of(s.perfMode))
     }
 
     /** Область приложения: записи, которые должны завершиться даже после закрытия экрана. */
@@ -118,6 +122,34 @@ class CodeAcademyApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        installCrashLog()
         container = AppContainer(this)
+    }
+
+    /** Файл журнала сбоев (виден только этому приложению). */
+    val crashLogFile: java.io.File get() = java.io.File(filesDir, "logs/${CrashLog.FILE_NAME}")
+
+    /** Необработанное исключение любого процесса приложения попадает в журнал, затем обрабатывается как обычно. */
+    private fun installCrashLog() {
+        Thread.setDefaultUncaughtExceptionHandler(crashHandler(Thread.getDefaultUncaughtExceptionHandler()))
+    }
+
+    /** Обработчик сбоев: пишет в журнал и передаёт исключение [previous] (в тестах — null, чтобы процесс не завершался). */
+    fun crashHandler(previous: Thread.UncaughtExceptionHandler?): Thread.UncaughtExceptionHandler {
+        val process = processNameCompat()
+        return Thread.UncaughtExceptionHandler { thread, error ->
+            runCatching {
+                CrashLog.append(crashLogFile, CrashLog.entry(process, thread.name, error, BuildConfig.VERSION_NAME, deviceInfo(), System.currentTimeMillis()))
+            }
+            previous?.uncaughtException(thread, error)
+        }
+    }
+
+    private fun processNameCompat(): String = runCatching {
+        if (android.os.Build.VERSION.SDK_INT >= 28) getProcessName() else java.io.File("/proc/self/cmdline").readText().trim('\u0000')
+    }.getOrDefault("?")
+
+    companion object {
+        fun deviceInfo() = "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}, Android ${android.os.Build.VERSION.RELEASE} (API ${android.os.Build.VERSION.SDK_INT})"
     }
 }

@@ -3,6 +3,8 @@ name: Android
 on:
   push:
     branches: [main]
+    # Тег v* — выпуск: после всех проверок создаётся ЧЕРНОВИК релиза (публикует его владелец, docs/RELEASE.md).
+    tags: ["v*"]
   pull_request:
   workflow_dispatch:
   # Коммит озвучки делается токеном Actions и сам сборку не запускает — запускаем после «Narrate lessons».
@@ -97,6 +99,27 @@ jobs:
           cat steps.sh
           bash -e steps.sh | tee run.log
           grep -q "Привет, Мир!" run.log
+      - name: Версия по тегу и релизный ключ (только тег v*; ключ — если секреты заданы)
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          KS_B64: ${{ secrets.CA_RELEASE_KEYSTORE_B64 }}
+          KS_PASS: ${{ secrets.CA_RELEASE_STORE_PASSWORD }}
+          KS_ALIAS: ${{ secrets.CA_RELEASE_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.CA_RELEASE_KEY_PASSWORD }}
+        run: |
+          echo "CA_VERSION_NAME=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+          if [ -n "$KS_B64" ] && [ -n "$KS_PASS" ] && [ -n "$KS_ALIAS" ]; then
+            echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+            {
+              echo "CA_RELEASE_KEYSTORE=$RUNNER_TEMP/release.keystore"
+              echo "CA_RELEASE_STORE_PASSWORD=$KS_PASS"
+              echo "CA_RELEASE_KEY_ALIAS=$KS_ALIAS"
+              echo "CA_RELEASE_KEY_PASSWORD=$KEY_PASS"
+            } >> "$GITHUB_ENV"
+            echo "Релиз подписывается релизным ключом из секретов."
+          else
+            echo "::warning::Секреты релизного ключа не заданы: релиз будет подписан публичным ключом прототипа (см. docs/RELEASE.md)."
+          fi
       - name: Сборка APK
         run: gradle --no-daemon :app:assembleDebug :app:assembleRelease
       - name: В APK нет разрешения INTERNET и есть наставник (llama.cpp)
@@ -109,6 +132,57 @@ jobs:
           grep -q "lib/arm64-v8a/libmentor.so" /tmp/libs.txt && grep -q "lib/arm64-v8a/libggml-cpu" /tmp/libs.txt
           echo "### Наставник в APK" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"; cat /tmp/libs.txt >> "$GITHUB_STEP_SUMMARY"; echo '```' >> "$GITHUB_STEP_SUMMARY"
+      - name: Аудит APK (разрешения, компоненты, подпись, размер, выравнивание библиотек)
+        run: |
+          mkdir -p build/audit
+          python3 ci/audit_apk.py app/build/outputs/apk/release/app-release.apk --report build/audit/audit.md --signer-file build/audit/signer.txt; rc=$?
+          cat build/audit/audit.md >> "$GITHUB_STEP_SUMMARY"
+          exit $rc
+      - name: Реестр зависимостей с версиями (к реестру лицензий docs/LICENSES.md)
+        continue-on-error: true
+        run: |
+          {
+            echo "# Зависимости release-сборки (Gradle, releaseRuntimeClasspath)"
+            gradle --no-daemon -q :app:dependencies --configuration releaseRuntimeClasspath
+            echo
+            echo "# Python-пакеты режима A (Chaquopy, app/build.gradle.kts)"
+            grep -E 'install\("' app/build.gradle.kts | sed -E 's/.*install\("([^"]+)"\).*/\1/'
+          } > build/audit/dependencies.txt
+          cp docs/LICENSES.md build/audit/LICENSES.md
+          echo "Зависимостей Gradle (строк с версиями): $(grep -c -- '---' build/audit/dependencies.txt)" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: code-academy-audit
+          path: build/audit/
+      - name: Lint (отчёт, сборку не блокирует)
+        continue-on-error: true
+        timeout-minutes: 20
+        run: gradle --no-daemon :app:lintRelease
+      - name: Lint — итог в отчёт
+        if: always()
+        run: |
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import glob, re, collections
+          fs = glob.glob("app/build/reports/lint-results-release.xml")
+          print("### Lint (release)")
+          if not fs:
+              print("Отчёта нет: lint не завершился (см. лог шага).")
+          else:
+              x = open(fs[0], encoding="utf-8").read()
+              sev = collections.Counter(re.findall(r'<issue[^>]*?severity="(\w+)"', x))
+              ids = collections.Counter(re.findall(r'<issue[^>]*?id="(\w+)"', x))
+              print("Серьёзность: " + (", ".join(f"{k} {v}" for k, v in sev.most_common()) or "замечаний нет"))
+              print("\nЧаще всего: " + (", ".join(f"{k} ×{v}" for k, v in ids.most_common(8)) or "—"))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lint-report
+          path: |
+            app/build/reports/lint-results-release.html
+            app/build/reports/lint-results-release.xml
+          if-no-files-found: ignore
       - name: Размер APK
         run: |
           echo "### Размер APK" >> "$GITHUB_STEP_SUMMARY"
@@ -279,6 +353,10 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           cat build/ci/probe.log >> "$GITHUB_STEP_SUMMARY" || echo "нет probe.log" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "### Холодный старт и память (API ${{ matrix.api }}, эмулятор, debug-сборка)" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          cat build/ci/startup.log >> "$GITHUB_STEP_SUMMARY" || echo "нет startup.log" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -287,3 +365,51 @@ jobs:
             build/ci/
             app/build/reports/androidTests/
             app/build/outputs/androidTest-results/
+
+  release:
+    name: Черновик релиза (только тег v*)
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [build, mentor-model, emulator]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: code-academy-apk, path: dl/apk }
+      - uses: actions/download-artifact@v4
+        with: { name: code-academy-audit, path: dl/audit }
+      - name: Черновик релиза (публикует владелец)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -e
+          APK=$(find dl/apk -name app-release.apk | head -1)
+          test -n "$APK"
+          VER=${TAG#v}
+          mkdir -p out && cp "$APK" "out/code-academy-$VER.apk"
+          (cd out && sha256sum "code-academy-$VER.apk" > SHA256SUMS.txt)
+          SIGNER=$(cat dl/audit/signer.txt 2>/dev/null || echo unknown)
+          {
+            awk -v v="$VER" 'index($0, "## " v) == 1 {p=1; next} /^## / {p=0} p' docs/CHANGELOG.md
+          } > notes.md
+          [ -s notes.md ] || echo "Подробности — в docs/CHANGELOG.md." > notes.md
+          {
+            echo
+            echo "---"
+            echo "Приложение бесплатное и работает без интернета (в APK нет разрешения INTERNET). Установка: docs/USER_GUIDE.md."
+            echo "SHA-256 файла — в SHA256SUMS.txt. Аудит APK и тесты этого выпуска — в запуске: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          } >> notes.md
+          FLAGS=""
+          if [ "$SIGNER" != "release" ]; then
+            FLAGS="--prerelease"
+            {
+              echo
+              echo "**⚠️ Этот APK подписан публичным ключом прототипа, а не релизным.** Он годится для проверки, но не для распространения: "
+              echo "ключ прототипа есть в репозитории. Как подписать релизным ключом — docs/RELEASE.md."
+            } >> notes.md
+          fi
+          EXTRA=""
+          for f in dl/audit/audit.md dl/audit/dependencies.txt dl/audit/LICENSES.md; do [ -f "$f" ] && cp "$f" out/ && EXTRA="$EXTRA out/$(basename "$f")"; done
+          gh release create "$TAG" --draft --verify-tag $FLAGS --title "Code Academy $VER" --notes-file notes.md "out/code-academy-$VER.apk" out/SHA256SUMS.txt $EXTRA
+          echo "### Черновик релиза $TAG создан (не опубликован)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Подпись: $SIGNER" >> "$GITHUB_STEP_SUMMARY"

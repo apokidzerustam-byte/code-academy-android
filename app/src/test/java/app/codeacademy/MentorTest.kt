@@ -17,6 +17,8 @@ import app.codeacademy.mentor.Mentor
 import app.codeacademy.mentor.MentorContent
 import app.codeacademy.mentor.MentorContext
 import app.codeacademy.mentor.MentorReply
+import app.codeacademy.mentor.PerfMode
+import app.codeacademy.mentor.PerfPolicy
 import app.codeacademy.mentor.PromptBuilder
 import app.codeacademy.mentor.SolutionGuard
 import app.codeacademy.mentor.Source
@@ -445,6 +447,24 @@ class MentorTest {
         assertEquals(Source.LLM, m.answer("Проверь мой код", MentorContext(code = "x = 1"), Intent.REVIEW).source)
         assertEquals(Source.LLM, m.answer("Почему ошибка?", MentorContext(error = "NameError: name 'x' is not defined"), Intent.EXPLAIN_ERROR).source)
         assertEquals(4, calls)
+    }
+
+    @Test fun answerLengthFollowsPerformanceMode() = runBlocking<Unit> {
+        val limits = mutableListOf<Int>()
+        val engine = object : LlmEngine {
+            override suspend fun generate(prompt: String, maxTokens: Int, onPiece: (String) -> Boolean): String {
+                limits += maxTokens
+                return "Подумайте, что делает функция input(): она читает строку с клавиатуры."
+            }
+        }
+        val ctx = item("a1-greet").context()
+        for (mode in PerfMode.values()) Mentor(Corpus.kb, engine, PerfPolicy.of(mode)).answer("Объясни тему", ctx, Intent.EXPLAIN_TOPIC)
+        // Стандартный — прежний предел (260), экономичный короче, расширенный длиннее.
+        assertEquals(listOf(182, 260, 338), limits)
+        // Явно заданный предел (тесты, диагностика) режимом не меняется.
+        limits.clear()
+        Mentor(Corpus.kb, engine, PerfPolicy.of(PerfMode.ECONOMY)).answer("Объясни тему", ctx, Intent.EXPLAIN_TOPIC, maxTokens = 60)
+        assertEquals(listOf(60), limits)
     }
 
     @Test fun promptStartsWithTheWarmedUpPrefix() {

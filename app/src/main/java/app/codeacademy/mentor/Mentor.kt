@@ -14,7 +14,12 @@ interface LlmEngine {
  * Просьбы о решении и упражнения нейросеть не получает. Ответ модели показывается
  * только после проверки SolutionGuard и языка; иначе заменяется ответом лёгкого режима.
  */
-class Mentor(private val kb: KnowledgeBase, private val engine: LlmEngine?) {
+class Mentor(
+    private val kb: KnowledgeBase,
+    private val engine: LlmEngine?,
+    /** Длина ответа модели в процентах от обычной (режим производительности). */
+    private val policy: PerfPolicy = PerfPolicy.of(PerfMode.STANDARD),
+) {
     val lite = LiteMentor(kb)
 
     /**
@@ -45,7 +50,7 @@ class Mentor(private val kb: KnowledgeBase, private val engine: LlmEngine?) {
         val shown = StringBuilder()
         var blocked = false
         val raw = try {
-            engine.generate(prompt, maxTokens ?: PromptBuilder.maxTokens(intent)) { piece ->
+            engine.generate(prompt, maxTokens ?: policy.maxTokens(PromptBuilder.maxTokens(intent))) { piece ->
                 // После блокировки остановка модели асинхронна: оставшиеся куски не обрабатываются и не показываются.
                 if (blocked) return@generate false
                 shown.append(piece)

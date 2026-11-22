@@ -1,0 +1,40 @@
+name: Выпуск (тег и черновик релиза)
+
+# Запуск с телефона: Actions → «Выпуск (тег и черновик релиза)» → Run workflow → версия (например 0.10.0).
+# Создаётся тег v<версия> на текущем коммите ветки и запускается полная сборка с тестами (android.yml на теге);
+# после зелёных тестов появляется ЧЕРНОВИК релиза. Опубликовать его может только владелец (docs/RELEASE.md).
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Версия без буквы v, например 0.10.0 или 0.10.0-rc1"
+        required: true
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  tag:
+    name: Создать тег и запустить сборку
+    runs-on: ubuntu-latest
+    steps:
+      - name: Тег и запуск
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -e
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
+            echo "::error::Версия должна быть вида 1.2.3 или 1.2.3-rc1, получено: $VERSION"; exit 1
+          fi
+          TAG="v$VERSION"
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG" >/dev/null 2>&1; then
+            echo "::error::Тег $TAG уже существует"; exit 1
+          fi
+          gh api "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/$TAG" -f sha="$GITHUB_SHA" >/dev/null
+          gh workflow run android.yml --ref "$TAG"
+          {
+            echo "### Тег $TAG создан на коммите ${GITHUB_SHA::7}"
+            echo "Запущена полная сборка с тестами (workflow «Android», ветка/тег $TAG). После её успеха в разделе Releases появится черновик."
+          } >> "$GITHUB_STEP_SUMMARY"
