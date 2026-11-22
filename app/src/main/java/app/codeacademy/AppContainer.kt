@@ -7,7 +7,9 @@ import app.codeacademy.content.ContentRepository
 import app.codeacademy.data.AppDatabase
 import app.codeacademy.data.BackupManager
 import app.codeacademy.data.ProgressRepository
+import app.codeacademy.content.LessonRef
 import app.codeacademy.data.ProjectRepository
+import app.codeacademy.settings.Settings
 import app.codeacademy.mentor.KnowledgeBase
 import app.codeacademy.mentor.Mentor
 import app.codeacademy.mentor.MentorClient
@@ -64,21 +66,21 @@ class AppContainer(context: Context) {
     /** База знаний наставника: конспекты и частые ошибки всех уроков (строится один раз). */
     suspend fun knowledgeBase(): KnowledgeBase = kb ?: run {
         val docs = content.allLessons().map { (pack, lesson) ->
-            val ref = app.codeacademy.content.LessonRef(pack.id, lesson.id)
+            val ref = LessonRef(pack.id, lesson.id)
             MentorContent.lessonDoc(pack.id, lesson, content.notes(ref), content.assignments(ref))
         }
         KnowledgeBase(docs).also { kb = it }
     }
 
     /** Модель, которой сейчас отвечает наставник, или null (лёгкий режим). */
-    fun activeModel(s: app.codeacademy.settings.Settings): ModelInfo? {
+    fun activeModel(s: Settings): ModelInfo? {
         if (!s.mentorNeural) return null
         val m = ModelCatalog.byId(s.mentorModel) ?: models.installed().firstOrNull() ?: return null
         return m.takeIf { it in models.installed() && models.blocker(it) == null }
     }
 
     /** Наставник с учётом настроек: нейросеть, если включена и модель установлена. */
-    suspend fun mentor(s: app.codeacademy.settings.Settings): Mentor {
+    suspend fun mentor(s: Settings): Mentor {
         val m = activeModel(s)
         mentorModelPath = m?.let { models.file(it).path }
         return Mentor(knowledgeBase(), if (m != null) mentorClient else null)

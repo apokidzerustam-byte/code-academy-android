@@ -12,7 +12,7 @@ cmake --build "$ROOT/build/mentor-cli" --target mentor_cli -j "$(nproc)" | tail 
 CLI="$ROOT/build/mentor-cli/mentor_cli"
 
 HASHES="$ROOT/app/src/main/java/app/codeacademy/mentor/ModelHashes.kt"
-const() { grep -oE "$1 = \"?[0-9a-f]*L?\"?" "$HASHES" | sed -E 's/.*= "?([0-9a-f]*)L?"?/\1/'; }
+const() { grep -oE "$1 = \"?[0-9a-f_]*L?\"?" "$HASHES" | sed -E 's/.*= "?([0-9a-f_]*)L?"?/\1/' | tr -d '_'; }
 check() { # имя_файла url SIZE_CONST SHA_CONST
   local f="$MODELS/$1"
   if [ ! -s "$f" ]; then

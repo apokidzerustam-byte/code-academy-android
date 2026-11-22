@@ -95,7 +95,7 @@ class ModelManager(private val context: Context) {
         val cr = context.contentResolver
         val size = cr.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { c ->
             if (c.moveToFirst() && !c.isNull(0)) c.getLong(0) else -1L
-        } ?: -1L
+        } ?: uri.path?.takeIf { uri.scheme == "file" }?.let { File(it).length() } ?: -1L
         val candidates = ModelCatalog.models.filter { size < 0 || it.sizeBytes == size }
         if (candidates.isEmpty()) {
             return@withContext ImportResult.Failed("Размер файла (${size / 1_000_000} МБ) не совпадает ни с одной моделью каталога. Скачайте файл по ссылке из инструкции.")

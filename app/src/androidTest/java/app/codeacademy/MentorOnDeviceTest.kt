@@ -112,9 +112,24 @@ class MentorOnDeviceTest {
         val name = args.getString("mentorModel")
         assumeTrue("модель не передана (-e mentorModel)", !name.isNullOrBlank())
         val ctx = InstrumentationRegistry.getInstrumentation().targetContext
-        val file = File(ctx.filesDir, "models/$name")
-        assertTrue("нет файла $file", file.isFile)
+        val pushed = File(ctx.filesDir, "models/$name")
+        assertTrue("нет файла $pushed", pushed.isFile)
         val c = app.container
+        // Путь ученика: файл из «Загрузок» → проверка SHA-256 → копия в files/models.
+        val download = File(ctx.cacheDir, name)
+        pushed.renameTo(download)
+        val t00 = System.currentTimeMillis()
+        val imported = c.models.import(android.net.Uri.fromFile(download)) { }
+        Log.i("CAPROBE", "mentor: импорт модели с проверкой SHA-256 за ${System.currentTimeMillis() - t00} мс → $imported")
+        assertTrue("импорт не прошёл: $imported", imported is app.codeacademy.mentor.ModelManager.ImportResult.Ok)
+        download.delete()
+        val model = (imported as app.codeacademy.mentor.ModelManager.ImportResult.Ok).model
+        assertTrue(model in c.models.installed())
+        val file = c.models.file(model)
+        // Чужой файл не принимается.
+        val fake = File(ctx.cacheDir, "fake.gguf").apply { writeBytes("GGUF".toByteArray() + ByteArray(1000)) }
+        assertTrue(c.models.import(android.net.Uri.fromFile(fake)) { } is app.codeacademy.mentor.ModelManager.ImportResult.Failed)
+        fake.delete()
         val client = MentorClient(ctx) { file.path }
         val mentor = Mentor(c.knowledgeBase(), client)
         val ref = LessonRef("python-basics", "py-03-input")

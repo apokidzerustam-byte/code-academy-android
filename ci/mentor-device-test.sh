@@ -21,5 +21,5 @@ out=$(adb shell am instrument -w -e mentorModel "$NAME" -e class app.codeacademy
 echo "$out"
 echo "$out" | grep -q "^OK (1 test)" || { echo "тест с моделью не прошёл"; exit 1; }
 [ "$(adb shell "run-as $APP cat files/ci-mentor.ok" 2>/dev/null | tr -d '\r')" = "ok" ] || { echo "тест с моделью не выполнился (нет отметки)"; exit 1; }
-adb shell "run-as $APP rm -f files/models/$NAME files/ci-mentor.ok"
+adb shell "run-as $APP sh -c 'rm -f files/models/* files/ci-mentor.ok cache/*.gguf'"
 echo "Модель на устройстве: ответы получены, решение не выдано, сеть не использовалась"
