@@ -53,7 +53,7 @@ class MentorOnDeviceTest {
         val ctx = InstrumentationRegistry.getInstrumentation().targetContext
         val info = ctx.packageManager.getPackageInfo(ctx.packageName, PackageManager.GET_PERMISSIONS)
         val perms = info.requestedPermissions.orEmpty().toList()
-        Log.i("CAPROBE", "mentor: разрешения приложения: $perms")
+        Log.e("CAPROBE", "mentor: разрешения приложения: $perms")
         assertFalse("у приложения есть INTERNET: $perms", "android.permission.INTERNET" in perms)
         assertEquals(PackageManager.PERMISSION_DENIED, ctx.checkSelfPermission("android.permission.INTERNET"))
     }
@@ -65,7 +65,7 @@ class MentorOnDeviceTest {
         val client = MentorClient(ctx) { f.path }
         val t0 = System.currentTimeMillis()
         val err = runCatching { client.generate("<|im_start|>user\nпривет<|im_end|>\n", 8) { true } }.exceptionOrNull()
-        Log.i("CAPROBE", "mentor: битая модель → ${err?.message} за ${System.currentTimeMillis() - t0} мс")
+        Log.e("CAPROBE", "mentor: битая модель → ${err?.message} за ${System.currentTimeMillis() - t0} мс")
         assertTrue("ожидалась ошибка загрузки модели, получено: $err", err?.message?.contains("модель") == true)
         // Файл вне папки моделей служба не открывает.
         val outside = File(ctx.filesDir, "outside.gguf").apply { writeBytes("GGUF".toByteArray()) }
@@ -120,7 +120,7 @@ class MentorOnDeviceTest {
         pushed.renameTo(download)
         val t00 = System.currentTimeMillis()
         val imported = c.models.import(android.net.Uri.fromFile(download)) { }
-        Log.i("CAPROBE", "mentor: импорт модели с проверкой SHA-256 за ${System.currentTimeMillis() - t00} мс → $imported")
+        Log.e("CAPROBE", "mentor: импорт модели с проверкой SHA-256 за ${System.currentTimeMillis() - t00} мс → $imported")
         assertTrue("импорт не прошёл: $imported", imported is app.codeacademy.mentor.ModelManager.ImportResult.Ok)
         download.delete()
         val model = (imported as app.codeacademy.mentor.ModelManager.ImportResult.Ok).model
@@ -144,9 +144,9 @@ class MentorOnDeviceTest {
         val t0 = System.currentTimeMillis()
         val r = mentor.answer("Объясни, что такое f-строка", mctx, Intent.EXPLAIN_TOPIC, maxTokens = 120)
         val st = client.lastStats
-        Log.i("CAPROBE", "mentor: модель $name, первый ответ за ${System.currentTimeMillis() - t0} мс (с загрузкой), " +
+        Log.e("CAPROBE", "mentor: модель $name, первый ответ за ${System.currentTimeMillis() - t0} мс (с загрузкой), " +
             "источник ${r.source}, ${st?.generatedTokens} ток., ${"%.1f".format(st?.tokensPerSecond ?: 0.0)} ток/с, промпт ${st?.promptTokens} ток. за ${st?.promptMs} мс")
-        Log.i("CAPROBE", "mentor: ответ: ${r.text.take(300).replace('\n', ' ')}")
+        Log.e("CAPROBE", "mentor: ответ: ${r.text.take(300).replace('\n', ' ')}")
         assertTrue("модель не сгенерировала текст", (st?.generatedTokens ?: 0) > 0)
 
         // Провокации: обычный путь (до модели не доходят) и принудительно через модель.
@@ -160,12 +160,12 @@ class MentorOnDeviceTest {
             if (i % 4 == 0) {
                 val forced = mentor.answer(q, mctx, Intent.OTHER, maxTokens = 120)
                 if (forced.source == Source.LLM) viaModel++
-                assertFalse("утечка (через модель) «$q»: ${forced.text}", forced.text.contains("print(f\"Привет, {name}!\")"))
+                assertFalse("утечка (через модель) «$q»: ${forced.text}", guard.check(forced.text).leak || forced.text.replace(" ", "").contains("print(f\"Привет,{name}!\")"))
             }
         }
         val tx = TrafficStats.getUidTxBytes(uid) - tx0
         val rx = TrafficStats.getUidRxBytes(uid) - rx0
-        Log.i("CAPROBE", "mentor: провокации без утечек; ответов модели (принудительно) $viaModel из 5; сеть: отправлено $tx Б, получено $rx Б")
+        Log.e("CAPROBE", "mentor: провокации без утечек; ответов модели (принудительно) $viaModel из 5; сеть: отправлено $tx Б, получено $rx Б")
         if (tx0 != TrafficStats.UNSUPPORTED.toLong()) assertEquals("приложение отправило данные в сеть", 0L, tx)
         File(ctx.filesDir, "ci-mentor.ok").writeText("ok")
     }
