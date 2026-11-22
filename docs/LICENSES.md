@@ -17,6 +17,6 @@
 | Chatterbox Multilingual | MIT | нет (конвейер контента); аудио содержит водяной знак Perth |
 | Голоса Piper ru_RU-denis, ru_RU-dmitri | датасет CC0 | аудио уроков |
 | llama.cpp / ggml (b12628, коммит 8a97fa9) | MIT | да (libmentor, libllama, libggml*) |
-| Qwen2.5-Coder-0.5B/1.5B-Instruct GGUF | Apache-2.0 | нет: ученик скачивает файл сам, приложение проверяет SHA-256 |
+| Qwen3-4B-Instruct-2507, Qwen3-1.7B (GGUF, квантование unsloth), Qwen2.5-Coder-0.5B/1.5B-Instruct GGUF | Apache-2.0 | нет: ученик скачивает файл сам, приложение проверяет SHA-256 |
 
 Полный реестр с версиями будет генерироваться автоматически в CI (этап 11).

@@ -60,7 +60,8 @@ class AppContainer(context: Context) {
     val models by lazy { ModelManager(app) }
     /** Путь к выбранной модели для процесса :mentor. */
     @Volatile var mentorModelPath: String? = null
-    val mentorClient by lazy { MentorClient(app) { mentorModelPath } }
+    @Volatile var mentorPromptSuffix: String = ""
+    val mentorClient by lazy { MentorClient(app, promptSuffix = { mentorPromptSuffix }) { mentorModelPath } }
     @Volatile private var kb: KnowledgeBase? = null
 
     /** База знаний наставника: конспекты и частые ошибки всех уроков (строится один раз). */
@@ -83,6 +84,7 @@ class AppContainer(context: Context) {
     suspend fun mentor(s: Settings): Mentor {
         val m = activeModel(s)
         mentorModelPath = m?.let { models.file(it).path }
+        mentorPromptSuffix = m?.promptSuffix.orEmpty()
         return Mentor(knowledgeBase(), if (m != null) mentorClient else null)
     }
 

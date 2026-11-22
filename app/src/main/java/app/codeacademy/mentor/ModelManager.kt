@@ -25,31 +25,59 @@ data class ModelInfo(
     val minRamMb: Int,
     val recommendedRamMb: Int,
     val license: String,
-)
+    /**
+     * Qwen3 по умолчанию «размышляет» перед ответом (долго и лишний текст): к запросу добавляется пустой блок
+     * размышлений, и модель сразу отвечает. Для Qwen2.5 и Qwen3-Instruct-2507 не нужно.
+     */
+    val noThink: Boolean = false,
+) {
+    /** Что дописывается к запросу после метки роли ассистента. */
+    val promptSuffix: String get() = if (noThink) "<think>\n\n</think>\n\n" else ""
+}
 
 object ModelCatalog {
     /**
-     * Qwen2.5-Coder Instruct (Apache 2.0), квантование Q4_K_M — официальные GGUF-файлы Qwen на Hugging Face.
-     * Размеры и SHA-256 измерены CI по скачанным файлам (ci/mentor-model-test.sh).
+     * Qwen (Apache 2.0), квантование Q4_K_M. Размеры и SHA-256 измерены CI по скачанным файлам
+     * (ci/mentor-model-test.sh сверяет их при каждой сборке). Порядок — по качеству ответов в сравнении моделей (TEST_REPORT).
+     * Ссылки закреплены на ревизии репозитория: файл в ветке main могут заменить, и контрольная сумма перестала бы совпадать.
      */
     val models = listOf(
         ModelInfo(
-            id = "qwen2.5-coder-0.5b-q4km",
-            title = "Qwen2.5-Coder 0.5B (быстрая, ~0,5 ГБ)",
-            fileName = "qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
-            url = "https://huggingface.co/Qwen/Qwen2.5-Coder-0.5B-Instruct-GGUF/resolve/main/qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
-            sizeBytes = SIZE_05B,
-            sha256 = SHA_05B,
-            minRamMb = 4_000, recommendedRamMb = 6_000, license = "Apache-2.0",
+            id = "qwen3-4b-instruct-2507-q4km",
+            title = "Qwen3 4B Instruct 2507 (лучшие ответы, ~2,5 ГБ)",
+            fileName = "Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+            url = "https://huggingface.co/unsloth/Qwen3-4B-Instruct-2507-GGUF/resolve/a06e946bb6b655725eafa393f4a9745d460374c9/Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+            sizeBytes = SIZE_4B,
+            sha256 = SHA_4B,
+            minRamMb = 7_500, recommendedRamMb = 11_000, license = "Apache-2.0",
+        ),
+        ModelInfo(
+            id = "qwen3-1.7b-q4km",
+            title = "Qwen3 1.7B (быстрее, ~1,1 ГБ)",
+            fileName = "Qwen3-1.7B-Q4_K_M.gguf",
+            url = "https://huggingface.co/unsloth/Qwen3-1.7B-GGUF/resolve/d7f544eead698dbd1f15126ef60b45a1e1933222/Qwen3-1.7B-Q4_K_M.gguf",
+            sizeBytes = SIZE_17B,
+            sha256 = SHA_17B,
+            minRamMb = 5_500, recommendedRamMb = 8_000, license = "Apache-2.0",
+            noThink = true,
         ),
         ModelInfo(
             id = "qwen2.5-coder-1.5b-q4km",
-            title = "Qwen2.5-Coder 1.5B (точнее, ~1,1 ГБ)",
+            title = "Qwen2.5-Coder 1.5B (~1,1 ГБ)",
             fileName = "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
-            url = "https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF/resolve/main/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
+            url = "https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF/resolve/f86cb2c1fa58255f8052cc32aeede1b7482d4361/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
             sizeBytes = SIZE_15B,
             sha256 = SHA_15B,
             minRamMb = 6_000, recommendedRamMb = 8_000, license = "Apache-2.0",
+        ),
+        ModelInfo(
+            id = "qwen2.5-coder-0.5b-q4km",
+            title = "Qwen2.5-Coder 0.5B (для слабых телефонов, ~0,5 ГБ; ответы простые)",
+            fileName = "qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
+            url = "https://huggingface.co/Qwen/Qwen2.5-Coder-0.5B-Instruct-GGUF/resolve/ebb2015119c907b064c512bf053e945850b5875f/qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
+            sizeBytes = SIZE_05B,
+            sha256 = SHA_05B,
+            minRamMb = 4_000, recommendedRamMb = 6_000, license = "Apache-2.0",
         ),
     )
 

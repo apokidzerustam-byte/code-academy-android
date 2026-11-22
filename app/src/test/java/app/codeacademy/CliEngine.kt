@@ -74,5 +74,8 @@ class CliEngine(
 
     companion object {
         const val GENERATION_TIMEOUT_S = 600L
+
+        /** `nothink` — пустой блок размышлений для Qwen3 (как ModelInfo.promptSuffix в приложении). */
+        fun suffix(name: String?) = if (name == "nothink") "<think>\n\n</think>\n\n" else ""
     }
 }

@@ -30,7 +30,12 @@ data class GenStats(
 }
 
 /** Клиент процесса :mentor: LlmEngine для наставника. Запросы выполняются по одному. */
-class MentorClient(private val context: Context, private val modelPath: () -> String?) : LlmEngine {
+class MentorClient(
+    private val context: Context,
+    /** Что дописать к запросу после метки ассистента (зависит от модели). */
+    private val promptSuffix: () -> String = { "" },
+    private val modelPath: () -> String?,
+) : LlmEngine {
     private val ids = AtomicLong(0)
     private val thread = HandlerThread("mentor-client").apply { start() }
     @Volatile private var service: Messenger? = null
@@ -94,7 +99,7 @@ class MentorClient(private val context: Context, private val modelPath: () -> St
             val b = Bundle().apply {
                 putLong(MentorProtocol.KEY_ID, id)
                 putString(MentorProtocol.KEY_MODEL, path)
-                putString(MentorProtocol.KEY_PROMPT, prompt)
+                putString(MentorProtocol.KEY_PROMPT, prompt + promptSuffix())
                 putInt(MentorProtocol.KEY_MAX_TOKENS, maxTokens)
             }
             try {

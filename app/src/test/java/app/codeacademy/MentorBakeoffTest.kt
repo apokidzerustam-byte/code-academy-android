@@ -27,7 +27,7 @@ class MentorBakeoffTest {
 
     private fun entries() = spec.orEmpty().split(";").filter { it.isNotBlank() }.map {
         val (n, p, s) = it.split("|").let { l -> Triple(l[0], l[1], l.getOrElse(2) { "-" }) }
-        Entry(n, p, if (s == "nothink") "<think>\n\n</think>\n\n" else "")
+        Entry(n, p, CliEngine.suffix(s))
     }
 
     private fun cyrillicShare(t: String): Double {

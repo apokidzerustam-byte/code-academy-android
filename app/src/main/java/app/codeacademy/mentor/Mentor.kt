@@ -26,7 +26,7 @@ class Mentor(private val kb: KnowledgeBase, private val engine: LlmEngine?) {
         question: String,
         ctx: MentorContext,
         intent: Intent = IntentClassifier.classify(question, ctx.task?.isAnswerTask == true),
-        maxTokens: Int = 320,
+        maxTokens: Int? = null,
         onPartial: ((String) -> Unit)? = null,
         onLite: ((MentorReply) -> Unit)? = null,
     ): MentorReply {
@@ -43,7 +43,7 @@ class Mentor(private val kb: KnowledgeBase, private val engine: LlmEngine?) {
         val shown = StringBuilder()
         var blocked = false
         val raw = try {
-            engine.generate(prompt, maxTokens) { piece ->
+            engine.generate(prompt, maxTokens ?: PromptBuilder.maxTokens(intent)) { piece ->
                 shown.append(piece)
                 val text = shown.toString()
                 if (guard != null && guard.check(text).leak) { blocked = true; return@generate false }
@@ -59,7 +59,7 @@ class Mentor(private val kb: KnowledgeBase, private val engine: LlmEngine?) {
         } catch (e: Exception) {
             return liteReply.copy(note = "Нейросеть недоступна: ${e.message ?: e.javaClass.simpleName}. Ответ лёгкого режима.")
         }
-        val text = PromptBuilder.clean(raw)
+        val text = PromptBuilder.trimIncomplete(PromptBuilder.clean(raw))
         val verdict = guard?.check(text)
         if (blocked || verdict?.leak == true || PromptBuilder.drifted(text) || text.length < 15) {
             return liteReply.copy(replaced = true, note = "Ответ нейросети заменён ответом по материалам курса" +
@@ -139,6 +139,25 @@ object PromptBuilder {
         val head = text.substring(0, upto.coerceAtLeast(0))
         // Внутри незакрытого блока кода ничего не показываем.
         return if (Regex("```").findAll(head).count() % 2 == 1) 0 else upto
+    }
+
+    /** Предел длины ответа: подсказка и разбор ошибки короткие, объяснение темы — подлиннее (каждый токен — время ожидания). */
+    fun maxTokens(intent: Intent): Int = when (intent) {
+        Intent.HINT -> 140
+        Intent.EXPLAIN_ERROR -> 200
+        else -> 260
+    }
+
+    /**
+     * Ответ оборвался по лимиту на полуслове — остаётся текст до последнего законченного предложения
+     * (если он составляет не меньше 40 % ответа, иначе ответ не трогается).
+     */
+    fun trimIncomplete(text: String): String {
+        val t = text.trimEnd()
+        if (t.isEmpty() || t.last() in ".!?…»)`:;" || t.endsWith("```")) return t
+        val cut = Regex("[.!?…](?=\\s)|\\n").findAll(t).lastOrNull() ?: return t
+        val end = if (t[cut.range.first] == '\n') cut.range.first else cut.range.last + 1
+        return if (end >= t.length * 0.4) t.substring(0, end).trimEnd() else t
     }
 
     /** Текст ученика не может закрыть раздел или открыть роль: служебные метки ломаются. */

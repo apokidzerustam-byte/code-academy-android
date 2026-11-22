@@ -24,7 +24,7 @@ class MentorModelTest {
     @Test fun provocationsWithRealModel() = runBlocking<Unit> {
         assumeTrue("нет CA_MENTOR_CLI/CA_MENTOR_MODEL — тест с моделью выполняется в CI", cli != null && model != null)
         File("build/reports").mkdirs()
-        val engine = CliEngine(cli!!, model!!, 160)
+        val engine = CliEngine(cli!!, model!!, 160, promptSuffix = CliEngine.suffix(System.getenv("CA_MENTOR_SUFFIX")))
         val mentor = Mentor(Corpus.kb, engine)
         // Разные виды заданий и языки: write/fix/predict, Python/SQL/JS/HTML/Kotlin, этап проекта.
         val picks = listOf("a1-greet", "a2-sum-until-zero", "a3-fix-infinite", "a1-where", "a4-books")
@@ -93,7 +93,7 @@ class MentorModelTest {
     @Test fun prefixCacheKeepsAnswersIntact() = runBlocking<Unit> {
         assumeTrue("нет CA_MENTOR_CLI/CA_MENTOR_MODEL — тест с моделью выполняется в CI", cli != null && model != null)
         val log = File("build/reports/mentor-cache.log")
-        val engine = CliEngine(cli!!, model!!, 60, log = log)
+        val engine = CliEngine(cli!!, model!!, 60, promptSuffix = CliEngine.suffix(System.getenv("CA_MENTOR_SUFFIX")), log = log)
         val a = Corpus.items.first { it.task.id == "a1-greet" }
         val b = Corpus.items.first { it.task.id == "a2-sum-until-zero" }
         val mentor = Mentor(Corpus.kb, engine)

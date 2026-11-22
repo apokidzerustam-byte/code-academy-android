@@ -131,9 +131,22 @@ jobs:
           git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" apk
 
   mentor-model:
-    name: Наставник с моделью (llama.cpp + Qwen2.5-Coder, 20 провокаций)
+    name: Наставник с моделью (${{ matrix.title }}, 20 провокаций)
     runs-on: ubuntu-latest
-    timeout-minutes: 75
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Первая модель: заодно проверяются размеры и SHA-256 всех моделей каталога.
+          - title: Qwen2.5-Coder 0.5B
+            provoke: qwen2.5-coder-0.5b-instruct-q4_k_m.gguf
+            suffix: ""
+            check: ""
+          - title: Qwen3 1.7B
+            provoke: Qwen3-1.7B-Q4_K_M.gguf
+            suffix: nothink
+            check: Qwen3-1.7B-Q4_K_M.gguf
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -161,19 +174,24 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ~/models
-          key: qwen2.5-coder-gguf-v1
+          key: mentor-gguf-v2-${{ matrix.provoke }}
       - name: Модель, контрольные суммы, 20 провокаций
+        env:
+          MENTOR_PROVOKE: ${{ matrix.provoke }}
+          MENTOR_SUFFIX: ${{ matrix.suffix }}
+          MENTOR_CHECK: ${{ matrix.check }}
         run: bash ci/mentor-model-test.sh
       - name: Отчёт
         if: always()
         run: |
           cat app/build/reports/mentor-hashes.md >> "$GITHUB_STEP_SUMMARY" || true
           cat app/build/reports/mentor-model.md >> "$GITHUB_STEP_SUMMARY" || true
+          cat app/build/reports/mentor-cache.md >> "$GITHUB_STEP_SUMMARY" || true
           tail -n 30 app/build/reports/mentor-cli.log || true
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: mentor-model-report
+          name: mentor-model-report-${{ matrix.provoke }}
           path: |
             app/build/reports/mentor-*.md
             app/build/reports/mentor-cli.log

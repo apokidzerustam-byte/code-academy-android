@@ -368,6 +368,15 @@ class MentorTest {
         assertFalse(g.check("Нужна функция `greet(name)`: что она должна вернуть?").leak)
     }
 
+    @Test fun truncatedAnswerEndsOnASentence() {
+        assertEquals("Цикл повторяет код. Пока условие истинно.", PromptBuilder.trimIncomplete("Цикл повторяет код. Пока условие истинно. Если условие лож"))
+        assertEquals("Готово.", PromptBuilder.trimIncomplete("Готово."))
+        assertEquals("Строка 1\nСтрока 2", PromptBuilder.trimIncomplete("Строка 1\nСтрока 2\nСтрока 3 обор"))
+        // Коротко до последней точки — ответ не трогается.
+        assertEquals("Да. А что дальше нужно сде", PromptBuilder.trimIncomplete("Да. А что дальше нужно сде"))
+        assertTrue(PromptBuilder.maxTokens(Intent.HINT) < PromptBuilder.maxTokens(Intent.EXPLAIN_TOPIC))
+    }
+
     @Test fun thinkingBlocksAreStripped() {
         assertEquals("Переменная хранит значение.", PromptBuilder.clean("<think>\n\n</think>\n\nПеременная хранит значение."))
         assertEquals("Ответ.", PromptBuilder.clean("<think>сначала подумаю…</think>Ответ.<|im_end|>"))
