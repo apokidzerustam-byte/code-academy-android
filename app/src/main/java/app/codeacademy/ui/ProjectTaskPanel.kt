@@ -176,6 +176,17 @@ fun ProjectTaskPanel(
                         CodeBlock(text)
                     }
                 }
+                MentorPanel(
+                    context = {
+                        app.codeacademy.mentor.MentorContext(
+                            task = app.codeacademy.mentor.MentorContent.task(p, idx),
+                            code = files().entries.joinToString("\n") { (path, text) -> "# файл: $path\n$text" }.take(20_000),
+                            error = mentorError(verdict, null), attempts = if (verdict != null) 1 else 0,
+                            hintsShown = if (solution) m.hints.size else hints,
+                        )
+                    },
+                    onHintRevealed = { level -> if (level > hints) hints = level.coerceAtMost(m.hints.size) },
+                )
             }
         }
     }

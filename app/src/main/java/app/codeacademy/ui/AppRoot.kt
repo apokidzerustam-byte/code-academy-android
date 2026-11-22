@@ -39,6 +39,7 @@ object Routes {
     const val MAP = "map"
     const val REVIEW = "review"
     const val PLAN = "plan"
+    const val MENTOR = "mentor"
     const val IDE = "ide/{id}"
     fun ide(id: String) = "ide/$id"
     fun lesson(r: LessonRef) = "lesson/${r.packId}/${r.lessonId}"
@@ -80,6 +81,7 @@ private fun AppNav(settings: Settings) {
                 openReview = { nav.navigate(Routes.REVIEW) },
                 openMap = { nav.navigate(Routes.MAP) },
                 openPlan = { nav.navigate(Routes.PLAN) },
+                openMentor = { nav.navigate(Routes.MENTOR) },
             )
         }
         composable(Routes.PROGRAM) { ProgramScreen(back) { nav.navigate(Routes.lesson(it)) } }
@@ -99,9 +101,12 @@ private fun AppNav(settings: Settings) {
             ),
         ) { e ->
             val ref = LessonRef(e.arguments!!.getString("pack")!!, e.arguments!!.getString("lesson")!!)
-            AssignmentScreen(ref, e.arguments!!.getInt("index"), settings, back) { r, i -> nav.navigate(Routes.assignment(r, i)) }
+            AssignmentScreen(ref, e.arguments!!.getInt("index"), settings, back, { r, i -> nav.navigate(Routes.assignment(r, i)) }) {
+                nav.navigate(Routes.lesson(it))
+            }
         }
         composable(Routes.STATS) { StatsScreen(back) }
+        composable(Routes.MENTOR) { MentorScreen(back) { nav.navigate(Routes.lesson(LessonRef(it.packId, it.lessonId))) } }
         composable(Routes.DIAGNOSTIC) { DiagnosticScreen(back) { nav.popBackStack(Routes.HOME, inclusive = false) } }
         composable(Routes.MAP) { KnowledgeMapScreen(back) { nav.navigate(Routes.lesson(it)) } }
         composable(Routes.REVIEW) { ReviewScreen(back) { r, i -> nav.navigate(Routes.assignment(r, i)) } }

@@ -32,6 +32,10 @@ data class Settings(
     /** Длительность занятия, мин: 30, 60 (рекомендуется) или 90. */
     val sessionMinutes: Int = 60,
     val daysPerWeek: Int = 5,
+    /** Нейросетевой режим наставника (если модель установлена). Лёгкий режим работает всегда. */
+    val mentorNeural: Boolean = false,
+    /** Id модели из ModelCatalog. */
+    val mentorModel: String? = null,
 )
 
 class SettingsRepository(private val context: Context) {
@@ -42,6 +46,8 @@ class SettingsRepository(private val context: Context) {
     private val onboarding = booleanPreferencesKey("onboarding_done")
     private val session = intPreferencesKey("session_minutes")
     private val days = intPreferencesKey("days_per_week")
+    private val mentorNeural = booleanPreferencesKey("mentor_neural")
+    private val mentorModel = stringPreferencesKey("mentor_model")
 
     val settings: Flow<Settings> = context.dataStore.data.map { p ->
         Settings(
@@ -52,6 +58,8 @@ class SettingsRepository(private val context: Context) {
             onboardingDone = p[onboarding] ?: false,
             sessionMinutes = (p[session] ?: 60).let { if (it in listOf(30, 60, 90)) it else 60 },
             daysPerWeek = (p[days] ?: 5).coerceIn(1, 7),
+            mentorNeural = p[mentorNeural] ?: false,
+            mentorModel = p[mentorModel],
         )
     }
 
@@ -62,6 +70,8 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setOnboardingDone(v: Boolean) = context.dataStore.edit { it[onboarding] = v }
     suspend fun setSessionMinutes(v: Int) = context.dataStore.edit { it[session] = v }
+    suspend fun setMentorNeural(v: Boolean) = context.dataStore.edit { it[mentorNeural] = v }
+    suspend fun setMentorModel(id: String?) = context.dataStore.edit { if (id == null) it.remove(mentorModel) else it[mentorModel] = id }
     suspend fun setDaysPerWeek(v: Int) = context.dataStore.edit { it[days] = v.coerceIn(1, 7) }
 
     /** Все сохранённые настройки как есть (для резервной копии): имя → значение. */

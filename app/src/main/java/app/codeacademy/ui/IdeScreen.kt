@@ -315,6 +315,11 @@ fun IdeScreen(projectId: String, settings: Settings, onBack: () -> Unit) {
                     WebPreview(preview, height = 320.dp)
                 }
                 CodeBlock(console.ifEmpty { "Здесь появится вывод программы." }, Modifier.testTag("ide-output"))
+                // Наставник видит открытый файл и вывод последнего запуска (в учебном проекте — ещё и этап, в его панели).
+                MentorPanel(context = {
+                    val lang = when (languageOf(current)) { "javascript" -> "js"; "css" -> "html"; else -> languageOf(current) }
+                    app.codeacademy.mentor.MentorContext(code = files[current].orEmpty().take(20_000), error = mentorError(null, console), language = lang)
+                })
             } else {
                 CodeBlock(term.ifEmpty { "Учебный терминал. Введите help." }, Modifier.testTag("term-output"))
                 OutlinedTextField(

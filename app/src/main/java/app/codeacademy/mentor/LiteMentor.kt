@@ -68,7 +68,7 @@ class LiteMentor(private val kb: KnowledgeBase) {
     }
 
     private fun error(ctx: MentorContext, guard: SolutionGuard?): MentorReply {
-        val language = ctx.task?.language ?: "python"
+        val language = ctx.codeLanguage
         val err = ctx.error?.takeIf { it.isNotBlank() }
         if (err == null) {
             val lint = StaticChecks.run(ctx.code, language)
@@ -129,7 +129,7 @@ class LiteMentor(private val kb: KnowledgeBase) {
 
     private fun review(ctx: MentorContext, guard: SolutionGuard?): MentorReply {
         if (ctx.code.isBlank()) return MentorReply("Пока нечего проверять: напишите код или ответ, и я посмотрю.", Intent.REVIEW, Source.LITE)
-        val language = ctx.task?.language ?: "python"
+        val language = ctx.codeLanguage
         val lint = StaticChecks.run(ctx.code, language)
         val sb = StringBuilder()
         if (lint.isEmpty()) sb.append("Явных ошибок оформления я не вижу.")
@@ -141,8 +141,8 @@ class LiteMentor(private val kb: KnowledgeBase) {
     }
 
     private fun exercise(ctx: MentorContext): MentorReply {
-        val lang = ctx.task?.language
-        val err = ctx.error?.let { ErrorExplainer.analyze(it, ctx.code, lang ?: "python") }
+        val lang = ctx.codeLanguage
+        val err = ctx.error?.let { ErrorExplainer.analyze(it, ctx.code, lang) }
         val target = err?.skill?.let { kb.lessonOfSkill(it) } ?: ctx.lesson?.let { kb.lesson(it.key) }
         if (target == null) {
             return MentorReply("Откройте урок — я предложу упражнения из него. Повторение по навыкам есть на главном экране («Повторение»).",
@@ -158,7 +158,7 @@ class LiteMentor(private val kb: KnowledgeBase) {
     }
 
     private fun architecture(ctx: MentorContext): MentorReply {
-        val text = when (ctx.task?.language) {
+        val text = when (ctx.codeLanguage) {
             "html", "js" -> "Для веб-страницы удобно разделить три слоя: разметка (HTML) — что есть на странице, стили (CSS) — как это выглядит, " +
                 "поведение (JS) — что происходит при действиях. Держите их в отдельных файлах, давайте элементам понятные id и классы, " +
                 "а в JS сначала находите элементы, потом вешайте обработчики, а вычисления выносите в отдельные функции."

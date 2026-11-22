@@ -48,6 +48,7 @@ fun HomeScreen(
     openReview: () -> Unit = {},
     openMap: () -> Unit = {},
     openPlan: () -> Unit = {},
+    openMentor: () -> Unit = {},
 ) {
     val c = LocalContainer.current
     var lessons by remember { mutableStateOf<List<Pair<PackManifest, Lesson>>>(emptyList()) }
@@ -132,6 +133,7 @@ fun HomeScreen(
                 OutlinedButton(onClick = openReview, modifier = Modifier.testTag("open-review")) { Text("Повторение (${due.size})") }
                 OutlinedButton(onClick = openMap, modifier = Modifier.testTag("open-map")) { Text("Карта знаний") }
                 OutlinedButton(onClick = openPlan, modifier = Modifier.testTag("open-plan")) { Text("План") }
+                OutlinedButton(onClick = openMentor, modifier = Modifier.testTag("open-mentor")) { Text("Наставник") }
             }
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = openProgram, modifier = Modifier.testTag("open-program")) { Text("Программа") }

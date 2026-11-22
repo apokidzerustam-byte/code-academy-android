@@ -12,6 +12,8 @@ plugins {
 android {
     namespace = "app.codeacademy"
     compileSdk = 35
+    // NDK и CMake — как в официальном примере llama.cpp для Android (llama.android).
+    ndkVersion = "29.0.13113456"
 
     defaultConfig {
         applicationId = "app.codeacademy"
@@ -20,11 +22,33 @@ android {
         // Номер сборки CI: каждая новая версия ставится поверх предыдущей.
         val run = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
         versionCode = run
-        versionName = "0.0.8-proto.$run"
+        versionName = "0.0.9-proto.$run"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             // arm64 — телефоны, x86_64 — эмулятор в CI.
-            abiFilters += listOf("arm64-v8a", "x86_64")
+            // caAbi=x86_64 (ORG_GRADLE_PROJECT_caAbi) — только для эмулятора в CI (вдвое быстрее сборка llama.cpp).
+            abiFilters += (providers.gradleProperty("caAbi").orNull?.let { listOf(it) } ?: listOf("arm64-v8a", "x86_64"))
+        }
+        // ИИ-наставник: llama.cpp (исходники — tools/fetch-llama.sh, фиксированный коммит).
+        externalNativeBuild {
+            cmake {
+                arguments += listOf("-DCMAKE_BUILD_TYPE=Release")
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.31.6"
+        }
+    }
+
+    packaging {
+        jniLibs {
+            // Варианты CPU-бэкенда ggml загружаются через dlopen из папки библиотек приложения:
+            // библиотеки должны быть распакованы при установке (как в примере llama.android).
+            useLegacyPackaging = true
         }
     }
 

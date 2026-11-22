@@ -8,6 +8,13 @@ import app.codeacademy.data.AppDatabase
 import app.codeacademy.data.BackupManager
 import app.codeacademy.data.ProgressRepository
 import app.codeacademy.data.ProjectRepository
+import app.codeacademy.mentor.KnowledgeBase
+import app.codeacademy.mentor.Mentor
+import app.codeacademy.mentor.MentorClient
+import app.codeacademy.mentor.MentorContent
+import app.codeacademy.mentor.ModelCatalog
+import app.codeacademy.mentor.ModelInfo
+import app.codeacademy.mentor.ModelManager
 import app.codeacademy.runner.CodeRunner
 import app.codeacademy.runner.ProjectFiles
 import app.codeacademy.runner.PyodideRunner
@@ -45,6 +52,36 @@ class AppContainer(context: Context) {
             appVersion = BuildConfig.VERSION_NAME,
             wipeFiles = { java.io.File(app.filesDir, "projects").let { if (it.exists()) ProjectFiles.wipe(it) } },
         )
+    }
+
+    /** Модели нейросетевого наставника (файлы в filesDir/models). */
+    val models by lazy { ModelManager(app) }
+    /** Путь к выбранной модели для процесса :mentor. */
+    @Volatile var mentorModelPath: String? = null
+    val mentorClient by lazy { MentorClient(app) { mentorModelPath } }
+    @Volatile private var kb: KnowledgeBase? = null
+
+    /** База знаний наставника: конспекты и частые ошибки всех уроков (строится один раз). */
+    suspend fun knowledgeBase(): KnowledgeBase = kb ?: run {
+        val docs = content.allLessons().map { (pack, lesson) ->
+            val ref = app.codeacademy.content.LessonRef(pack.id, lesson.id)
+            MentorContent.lessonDoc(pack.id, lesson, content.notes(ref), content.assignments(ref))
+        }
+        KnowledgeBase(docs).also { kb = it }
+    }
+
+    /** Модель, которой сейчас отвечает наставник, или null (лёгкий режим). */
+    fun activeModel(s: app.codeacademy.settings.Settings): ModelInfo? {
+        if (!s.mentorNeural) return null
+        val m = ModelCatalog.byId(s.mentorModel) ?: models.installed().firstOrNull() ?: return null
+        return m.takeIf { it in models.installed() && models.blocker(it) == null }
+    }
+
+    /** Наставник с учётом настроек: нейросеть, если включена и модель установлена. */
+    suspend fun mentor(s: app.codeacademy.settings.Settings): Mentor {
+        val m = activeModel(s)
+        mentorModelPath = m?.let { models.file(it).path }
+        return Mentor(knowledgeBase(), if (m != null) mentorClient else null)
     }
 
     /** Область приложения: записи, которые должны завершиться даже после закрытия экрана. */

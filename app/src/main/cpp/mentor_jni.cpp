@@ -44,7 +44,7 @@ mentor::Engine * engine(jlong h) { return reinterpret_cast<mentor::Engine *>(h);
 } // namespace
 
 extern "C" JNIEXPORT void JNICALL
-Java_app_codeacademy_mentor_NativeLlm_nativeInit(JNIEnv * env, jobject, jstring libDir) {
+Java_app_codeacademy_mentor_NativeLlm_00024Init_nativeInit(JNIEnv * env, jclass, jstring libDir) {
     llama_log_set(log_cb, nullptr);
     const std::string dir = to_utf8(env, libDir);
     // Варианты CPU-бэкенда (с dotprod/i8mm и без) лежат рядом с библиотекой; ggml выбирает подходящий процессору.
@@ -53,7 +53,7 @@ Java_app_codeacademy_mentor_NativeLlm_nativeInit(JNIEnv * env, jobject, jstring 
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_app_codeacademy_mentor_NativeLlm_nativeLoad(JNIEnv * env, jobject, jstring path, jint nCtx, jint nThreads) {
+Java_app_codeacademy_mentor_NativeLlm_00024Init_nativeLoad(JNIEnv * env, jclass, jstring path, jint nCtx, jint nThreads) {
     auto e = std::make_unique<mentor::Engine>();
     const std::string err = e->load(to_utf8(env, path), nCtx, nThreads);
     if (!err.empty()) {

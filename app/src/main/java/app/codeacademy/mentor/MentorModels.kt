@@ -50,7 +50,11 @@ data class MentorContext(
     val attempts: Int = 0,
     /** Сколько подсказок уже открыто (0..hints.size). */
     val hintsShown: Int = 0,
-)
+    /** Язык кода, если задания нет (IDE, общий экран): python | js | html | sql | kotlin. */
+    val language: String? = null,
+) {
+    val codeLanguage: String get() = task?.language ?: language ?: "python"
+}
 
 /** Ответ наставника. */
 data class MentorReply(

@@ -12,6 +12,11 @@ if [ "$rc" = 0 ]; then
   bash ci/backup-clear-test.sh 2>&1 | tee build/ci/backup-clear.log
   rc=${PIPESTATUS[0]}
 fi
+# Этап 9: настоящая модель наставника на устройстве (если CI её скачал).
+if [ "$rc" = 0 ] && [ -n "${CA_MENTOR_MODEL:-}" ]; then
+  bash ci/mentor-device-test.sh 2>&1 | tee build/ci/mentor-device.log
+  rc=${PIPESTATUS[0]}
+fi
 adb logcat -d -s CAPROBE:I CAPROBE:E CAPLAYER:I CAPLAYER:W > build/ci/probe.log || true
 adb logcat -d '*:E' | tail -n 400 > build/ci/errors.log || true
 echo "exit code: $rc" >> build/ci/probe.log

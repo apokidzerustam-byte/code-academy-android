@@ -72,12 +72,14 @@ fun SettingsScreen(onBack: () -> Unit, openLab: () -> Unit) {
             Choice("Простое поле ввода (для слабых устройств)", s.plainEditor, "editor-plain") { scope.launch { c.settings.setPlainEditor(true) } }
             OutlinedButton(onClick = openLab) { Text("Лаборатория выполнения кода") }
             HorizontalDivider()
+            MentorSettingsSection()
+            HorizontalDivider()
             BackupSection()
             HorizontalDivider()
             Text("О приложении", style = MaterialTheme.typography.titleMedium)
             Text(
                 "Code Academy ${app.codeacademy.BuildConfig.VERSION_NAME} · бесплатно и офлайн. Python 3.13: Pyodide 0.29.5 (MPL-2.0), Chaquopy 17 (MIT). " +
-                    "Редактор CodeMirror 6 (MIT). Озвучка уроков: Chatterbox (MIT), аудио содержит водяной знак Perth.",
+                    "Редактор CodeMirror 6 (MIT). Озвучка уроков: Chatterbox (MIT), аудио содержит водяной знак Perth. Наставник: llama.cpp (MIT), модели Qwen2.5-Coder (Apache-2.0, скачиваются отдельно).",
                 style = MaterialTheme.typography.bodySmall,
             )
         }

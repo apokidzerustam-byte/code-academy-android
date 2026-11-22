@@ -128,6 +128,7 @@ fun AssignmentScreen(
     settings: Settings,
     onBack: () -> Unit,
     openAssignment: (LessonRef, Int) -> Unit = { _, _ -> },
+    openLesson: (LessonRef) -> Unit = {},
 ) {
     val course = rememberCourse()
     val c = LocalContainer.current
@@ -307,6 +308,21 @@ fun AssignmentScreen(
                 CodeBlock(asg.solution)
                 Text(asg.explanation, style = MaterialTheme.typography.bodyMedium)
             }
+            val l = lesson!!
+            MentorPanel(
+                context = {
+                    app.codeacademy.mentor.MentorContext(
+                        lesson = app.codeacademy.mentor.LessonLink(ref.packId, ref.lessonId, l.title),
+                        lessonSkills = l.skills, commonMistakes = l.commonMistakes,
+                        task = app.codeacademy.mentor.MentorContent.task(asg, assignmentRunner(asg, l.runner)),
+                        code = code, error = mentorError(verdict, output), attempts = attempts,
+                        hintsShown = if (solutionShown) asg.hints.size else hintsShown,
+                    )
+                },
+                // Подсказка от наставника — та же ступень лестницы: учитывается в статистике.
+                onHintRevealed = { level -> if (level > hintsShown) hintsShown = level.coerceAtMost(asg.hints.size) },
+                openLesson = { openLesson(LessonRef(it.packId, it.lessonId)) },
+            )
         }
     }
 
