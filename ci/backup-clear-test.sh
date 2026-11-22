@@ -22,7 +22,7 @@ echo "== Фаза 1: данные и копия"
 phase 1
 adb exec-out run-as $APP cat files/ci-backup.zip > "$TMP/backup.zip"
 adb exec-out run-as $APP cat files/ci-dump.bin > "$TMP/dump.bin"
-ls -l "$TMP"
+ls -l "$TMP"/backup.zip "$TMP"/dump.bin
 test -s "$TMP/backup.zip" && test -s "$TMP/dump.bin"
 unzip -l "$TMP/backup.zip"
 echo "== pm clear: Android удаляет все данные приложения"
@@ -31,8 +31,16 @@ left=$(adb shell run-as $APP ls -A 2>/dev/null | tr -d '\r' | grep -vE '^(cache|
 echo "после очистки в папке приложения: [${left}]"
 [ -z "$left" ] || { echo "Данные не удалены"; exit 1; }
 echo "== Возвращаем файл копии (как если бы ученик выбрал его в «Загрузках»)"
-adb exec-in run-as $APP sh -c 'mkdir -p files && cat > files/ci-backup.zip' < "$TMP/backup.zip"
-adb exec-in run-as $APP sh -c 'cat > files/ci-dump.bin' < "$TMP/dump.bin"
+# adb склеивает аргументы через пробел: команду устройства передаём одной строкой с кавычками внутри.
+adb shell "run-as $APP mkdir -p files"
+adb exec-in "run-as $APP sh -c 'cat > files/ci-backup.zip'" < "$TMP/backup.zip"
+adb exec-in "run-as $APP sh -c 'cat > files/ci-dump.bin'" < "$TMP/dump.bin"
+for f in ci-backup.zip ci-dump.bin; do
+  n=$(adb exec-out run-as $APP cat "files/$f" | wc -c)
+  echo "на устройстве files/$f: $n байт"
+  [ "$n" -gt 0 ] || { echo "файл $f не скопирован"; exit 1; }
+done
+cmp <(adb exec-out run-as $APP cat files/ci-backup.zip) "$TMP/backup.zip"
 echo "== Фаза 2: данных нет → восстановление → сравнение байт в байт"
 phase 2
 echo "Резервная копия: экспорт → pm clear → импорт — данные совпали байт в байт"
