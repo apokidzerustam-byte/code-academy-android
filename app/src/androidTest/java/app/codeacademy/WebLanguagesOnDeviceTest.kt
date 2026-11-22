@@ -73,6 +73,7 @@ class WebLanguagesOnDeviceTest {
         // Бесконечный цикл прерывается защитой (≈2 с), страница остаётся рабочей.
         val t0 = System.currentTimeMillis()
         val loop = js.run("let i = 0\nwhile (i < 5) { }", 10_000)
+        Log.e("CAPROBE", "js loop: ${loop.status} ${loop.stderr.take(200)}")
         val loopMs = System.currentTimeMillis() - t0
         assertEquals(loop.stderr, RunStatus.ERROR, loop.status)
         assertTrue(loop.stderr, "InfiniteLoopError" in loop.stderr)
@@ -84,13 +85,16 @@ class WebLanguagesOnDeviceTest {
         js.stop()
         assertEquals(RunStatus.STOPPED, running.await().status)
         val after = js.run("console.log('снова работает')", 10_000)
+        Log.e("CAPROBE", "js after stop: ${after.status} ${after.stderr.take(200)}")
         assertEquals(after.stderr, RunStatus.OK, after.status)
         assertEquals("снова работает", after.stdout.trim())
         // Зависание, которое защита циклов не ловит (бесконечная цепочка микрозадач): таймаут → перезапуск страницы.
         val t1 = System.currentTimeMillis()
         val hang = js.run("function f() { Promise.resolve().then(f) }\nf()", 4_000)
+        Log.e("CAPROBE", "js hang: ${hang.status} ${hang.stderr.take(200)}")
         assertTrue(hang.status.toString(), hang.status == RunStatus.TIMEOUT || hang.status == RunStatus.ERROR)
         val again = js.run("console.log('после зависания')", 40_000)
+        Log.e("CAPROBE", "js after hang: ${again.status} ${again.stdout.take(100)} ${again.stderr.take(200)}")
         assertEquals(again.stderr, RunStatus.OK, again.status)
         assertEquals("после зависания", again.stdout.trim())
         Log.e("CAPROBE", "js: цикл прерван за $loopMs мс; восстановление после зависания ${System.currentTimeMillis() - t1} мс")
