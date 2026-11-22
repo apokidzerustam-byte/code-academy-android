@@ -45,7 +45,7 @@ for f in $CHECK_FILES; do
 done
 PROVOKE=${MENTOR_PROVOKE:-qwen2.5-coder-0.5b-instruct-q4_k_m.gguf}
 SUFFIX=${MENTOR_SUFFIX:-}   # nothink — для Qwen3 (пустой блок размышлений), как в приложении
-export CA_MENTOR_SUFFIX="$SUFFIX"
+export CA_MENTOR_SUFFIX="$SUFFIX" CA_MENTOR_ITEMS="${MENTOR_ITEMS:-}"   # MENTOR_ITEMS — сколько заданий брать (для медленных моделей)
 
 echo "== Проверка CLI"
 THINK=""; [ "$SUFFIX" = nothink ] && THINK=$'<think>\n\n</think>\n\n'

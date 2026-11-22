@@ -28,11 +28,13 @@ class MentorModelTest {
         val mentor = Mentor(Corpus.kb, engine)
         // Разные виды заданий и языки: write/fix/predict, Python/SQL/JS/HTML/Kotlin, этап проекта.
         val picks = listOf("a1-greet", "a2-sum-until-zero", "a3-fix-infinite", "a1-where", "a4-books")
-        val items = picks.mapNotNull { id -> Corpus.items.firstOrNull { it.task.id == id } } +
+        val all = picks.mapNotNull { id -> Corpus.items.firstOrNull { it.task.id == id } } +
             listOfNotNull(Corpus.items.firstOrNull { it.task.type == "predict" && it.task.language == "python" },
                 Corpus.items.firstOrNull { it.task.language == "js" },
                 Corpus.items.firstOrNull { it.task.type == "milestone" && it.task.language == "python" })
-        assertTrue("мало заданий для теста: ${items.map { it.task.id }}", items.size >= 7)
+        assertTrue("мало заданий для теста: ${all.map { it.task.id }}", all.size >= 7)
+        // Для медленных моделей (CA_MENTOR_ITEMS) берутся первые n заданий: write, write и fix на Python — самые частые виды.
+        val items = System.getenv("CA_MENTOR_ITEMS")?.toIntOrNull()?.let { all.take(it.coerceIn(1, all.size)) } ?: all
         val report = StringBuilder("# Наставник с моделью: 20 провокаций\n\nМодель: `${File(model).name}`\n\n")
         var guardedLeaks = 0
         var rawLeaks = 0
@@ -111,6 +113,7 @@ class MentorModelTest {
         File("build/reports").mkdirs()
         File("build/reports/mentor-cache.md").writeText("# Кэш начала запроса\n\n$report\n")
         println(report)
+        assertTrue("модель вернула пустой или слишком короткий ответ: «${raw[0]}»", raw.size == 4 && raw.all { it.length >= 20 })
         assertTrue("кэш ни разу не сработал: $stats", stats.size == 4 && stats.drop(1).any { it.cached > 0 })
         assertTrue("после кэша ответ расходится с первых слов ($common симв.):\n${raw[0]}\n---\n${raw[2]}", common >= minOf(20, raw[0].length))
         assertTrue("повторный запрос подряд дал другой ответ:\n${raw[2]}\n---\n${raw[3]}", raw[2].commonPrefixWith(raw[3]).length >= minOf(20, raw[2].length))

@@ -82,11 +82,12 @@ class MentorService : Service() {
      */
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
-        // 10 — RUNNING_LOW, 15 — RUNNING_CRITICAL, 40 и выше — процесс в кэше. Уровень 20 (интерфейс скрыт) не учитывается:
-        // ученик часто ненадолго переключается в другое приложение.
-        if (level == 10 || level == 15 || level >= 40) {
+        // 10 — RUNNING_LOW, 15 — RUNNING_CRITICAL (на новых версиях Android не приходят), 60 и выше — система уже вытесняет
+        // процессы из кэша. Уровень 40 (процесс просто ушёл в кэш, когда ученик переключился в другое приложение) не учитывается:
+        // иначе модель выгружалась бы при каждом коротком переходе, а загрузка занимает секунды.
+        if (level == 10 || level == 15 || level >= 60) {
             control.removeCallbacks(unloadIdle)
-            worker.execute { unload() }
+            runCatching { worker.execute { unload() } }
         }
     }
 
@@ -118,7 +119,7 @@ class MentorService : Service() {
                 activeId.set(0)
                 llm?.stop()
             }
-            P.MSG_UNLOAD -> { llm?.stop(); worker.execute { unload() } }
+            P.MSG_UNLOAD -> { llm?.stop(); runCatching { worker.execute { unload() } } }
         }
     }
 

@@ -36,10 +36,17 @@ class SolutionGuard(
 
     /**
      * Слова строк эталона без знаков препинания и вида кавычек: ловит ту же строку, записанную иначе
-     * (`return "Привет, " + name + "!"` вместо шаблона в обратных кавычках). Только строки из трёх и более разных слов.
+     * (`return "Привет, " + name + "!"` вместо шаблона в обратных кавычках). Берутся строки из трёх и более разных слов,
+     * среди которых не меньше двух «смысловых» (не ключевое слово, не одна буква, не число): иначе совпали бы
+     * `if n == 0` и пример на других данных `if n % 2 == 0`. Строки, слова которых уже есть в заготовке, условии или коде ученика
+     * (исправлен только знак: `=` → `==`), не считаются: цитата своей строки ученика — разрешённая подсказка.
      */
-    private val novelBags: List<Set<String>> =
-        solutionLines.filter { it !in baseLines && meaningful(it) }.map(::words).filter { it.size >= 3 }.distinct()
+    private val novelBags: List<Set<String>> = run {
+        val baseBags = baseText.lines().map(::words).filter { it.isNotEmpty() }
+        solutionText.lines().filter { l -> codeLines(l).firstOrNull()?.let { it !in baseLines && meaningful(it) } == true }
+            .map(::words).filter { it.size >= 3 && it.count(::isContentWord) >= 2 }
+            .filter { bag -> baseBags.none { it.containsAll(bag) } }.distinct()
+    }
 
     /** Длинные строки эталона с обезличенными именами: ловят переименование переменных. */
     private val novelAnonLines: List<String> = solutionLines.map(::anon).filter { it !in baseAnon && it.split(' ').size >= 6 }
@@ -210,7 +217,9 @@ class SolutionGuard(
 
         /** Фрагменты кода в ответе: `код` в тексте и строки кода (блоки ``` и строки, похожие на код). */
         fun codeSpans(text: String): List<String> =
-            Regex("`([^`\\n]+)`").findAll(text).map { it.groupValues[1] }.toList() + codeOnly(text).lines().filter { it.isNotBlank() }
+            text.lines().filter { it.count { c -> c == '`' } % 2 == 0 && !it.trimStart().startsWith("```") }
+                .flatMap { line -> Regex("`([^`]+)`").findAll(line).map { it.groupValues[1] }.toList() } +
+                codeOnly(text).lines().filter { it.isNotBlank() }
 
         /** Код ответа: блоки ``` и строки, похожие на код. */
         fun codeOnly(text: String): String {
@@ -236,6 +245,9 @@ class SolutionGuard(
             if (cyr > line.length / 3) return false
             return Regex("[=;{}]|\\w\\(.*\\)|:\\s*$").containsMatchIn(line)
         }
+
+        /** Слово несёт смысл: не ключевое слово, длиннее одной буквы, не число. */
+        private fun isContentWord(w: String) = w.length >= 2 && w !in KEYWORDS && !w.all { it.isDigit() }
 
         private fun isName(t: String) = t.isNotEmpty() && (t[0].isLetter() || t[0] == '_' || t[0] == '"' || t[0].isDigit())
         private fun stripDecor(s: String) = s.trim().trim('`', '«', '»', '"', '\'', '*', '-', '•', '>', ' ', '.')

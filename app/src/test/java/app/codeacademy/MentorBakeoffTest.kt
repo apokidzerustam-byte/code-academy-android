@@ -37,7 +37,7 @@ class MentorBakeoffTest {
     }
 
     /** Модель повторила служебный текст запроса вместо ответа. */
-    private fun echoes(t: String) = listOf("Задача наставника", "Код ученика", "Вопрос ученика", "<|im_", "Ты — наставник").any { it in t } ||
+    private fun echoes(t: String) = listOf("Твоя задача", "Задача наставника", "Код ученика", "Вопрос ученика", "<|im_", "Ты — добрый наставник", "Ты — наставник").any { it in t } ||
         t.trim().length < 15
 
     @Test fun compareModels() = runBlocking<Unit> {

@@ -44,13 +44,20 @@ class Mentor(private val kb: KnowledgeBase, private val engine: LlmEngine?) {
         var blocked = false
         val raw = try {
             engine.generate(prompt, maxTokens ?: PromptBuilder.maxTokens(intent)) { piece ->
+                // После блокировки остановка модели асинхронна: оставшиеся куски не обрабатываются и не показываются.
+                if (blocked) return@generate false
                 shown.append(piece)
                 val text = shown.toString()
                 if (guard != null && guard.check(text).leak) { blocked = true; return@generate false }
                 if (PromptBuilder.drifted(text)) { blocked = true; return@generate false }
                 if (stream != null) {
                     val upto = PromptBuilder.safeStreamEnd(text)
-                    if (upto > 0) stream(PromptBuilder.clean(text.substring(0, upto)))
+                    if (upto > 0) {
+                        // Показывается ровно то, что проверено: защита смотрит на показываемую часть отдельно (код-ли строка, зависит от целой строки).
+                        val visible = PromptBuilder.clean(text.substring(0, upto))
+                        if (guard != null && guard.check(visible).leak) { blocked = true; return@generate false }
+                        stream(visible)
+                    }
                 }
                 true
             }
@@ -155,9 +162,12 @@ object PromptBuilder {
     fun trimIncomplete(text: String): String {
         val t = text.trimEnd()
         if (t.isEmpty() || t.last() in ".!?…»)`:;" || t.endsWith("```")) return t
-        val cut = Regex("[.!?…](?=\\s)|\\n").findAll(t).lastOrNull() ?: return t
+        val cut = Regex("[.!?…](?=\\s)|```(?=\\s)|\\n").findAll(t).lastOrNull() ?: return t
         val end = if (t[cut.range.first] == '\n') cut.range.first else cut.range.last + 1
-        return if (end >= t.length * 0.4) t.substring(0, end).trimEnd() else t
+        if (end < t.length * 0.4) return t
+        val head = t.substring(0, end).trimEnd()
+        // Обрезка не должна оставить блок кода незакрытым.
+        return if (Regex("```").findAll(head).count() % 2 == 1) head.substring(0, head.lastIndexOf("```")).trimEnd() else head
     }
 
     /** Текст ученика не может закрыть раздел или открыть роль: служебные метки ломаются. */

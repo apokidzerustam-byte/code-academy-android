@@ -1,6 +1,7 @@
 // CLI на том же ядре, что и приложение: для проверки наставника с настоящей моделью в CI (без Android).
 // Использование: mentor_cli <model.gguf> [n_ctx] [max_tokens] < запросы
 // Запросы разделяются строкой "<<<END>>>"; каждый ответ печатается и завершается строкой "<<<END>>>".
+// Первая строка запроса может быть "<<<MAX:n>>>" — лимит токенов ответа для этого запроса (иначе берётся третий аргумент).
 // Статистика — в stderr. Сеть не используется.
 #include "llama.h"
 #include "mentor_core.h"
@@ -37,7 +38,12 @@ int main(int argc, char ** argv) {
     fprintf(stderr, "model: %s, threads %d\n%s\n", e.description().c_str(), threads, mentor::Engine::system_info().c_str());
     std::string line, prompt;
     int n = 0;
+    int request_max = max_tokens;
     while (std::getline(std::cin, line)) {
+        if (prompt.empty() && line.rfind("<<<MAX:", 0) == 0 && line.size() > 10 && line.compare(line.size() - 3, 3, ">>>") == 0) {
+            try { request_max = std::max(1, std::stoi(line.substr(7, line.size() - 10))); } catch (...) { request_max = max_tokens; }
+            continue;
+        }
         if (line != SEP) {
             prompt += line;
             prompt += '\n';
@@ -45,7 +51,7 @@ int main(int argc, char ** argv) {
         }
         if (!prompt.empty() && prompt.back() == '\n') prompt.pop_back();
         mentor::GenParams p;
-        p.max_tokens = max_tokens;
+        p.max_tokens = request_max;
         const mentor::GenStats st = e.generate(prompt, p, [](const std::string & piece) {
             fwrite(piece.data(), 1, piece.size(), stdout);
             return true;
@@ -56,6 +62,7 @@ int main(int argc, char ** argv) {
                 st.prompt_cached, st.generated_tokens, st.prompt_ms, st.gen_ms,
                 st.gen_ms > 0 ? st.generated_tokens * 1000.0 / st.gen_ms : 0.0, st.error.c_str());
         prompt.clear();
+        request_max = max_tokens;
     }
     llama_backend_free();
     return 0;

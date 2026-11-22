@@ -35,6 +35,8 @@ class CliEngine(
 
     override suspend fun generate(prompt: String, maxTokens: Int, onPiece: (String) -> Boolean): String {
         val t0 = System.currentTimeMillis()
+        // Лимит токенов этого запроса (как у приложения: подсказка короче, объяснение длиннее).
+        input.write("<<<MAX:${maxTokens.coerceAtLeast(1)}>>>\n")
         input.write((prompt + promptSuffix).replace("\n<<<END>>>", "\n<<<END >>>"))
         input.write("\n<<<END>>>\n")
         input.flush()

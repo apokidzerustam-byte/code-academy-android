@@ -138,15 +138,23 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Первая модель: заодно проверяются размеры и SHA-256 всех моделей каталога.
+          # В каждом проходе проверяются размер и SHA-256 моделей, которые он скачивает (вместе — весь каталог приложения).
           - title: Qwen2.5-Coder 0.5B
             provoke: qwen2.5-coder-0.5b-instruct-q4_k_m.gguf
             suffix: ""
-            check: ""
+            check: "qwen2.5-coder-0.5b-instruct-q4_k_m.gguf qwen2.5-coder-1.5b-instruct-q4_k_m.gguf"
+            items: ""
           - title: Qwen3 1.7B
             provoke: Qwen3-1.7B-Q4_K_M.gguf
             suffix: nothink
             check: Qwen3-1.7B-Q4_K_M.gguf
+            items: ""
+          # Самая сильная модель каталога: медленная на 4 ядрах CI, поэтому три задания вместо семи.
+          - title: Qwen3 4B, 3 задания
+            provoke: Qwen3-4B-Instruct-2507-Q4_K_M.gguf
+            suffix: ""
+            check: Qwen3-4B-Instruct-2507-Q4_K_M.gguf
+            items: "3"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -180,6 +188,7 @@ jobs:
           MENTOR_PROVOKE: ${{ matrix.provoke }}
           MENTOR_SUFFIX: ${{ matrix.suffix }}
           MENTOR_CHECK: ${{ matrix.check }}
+          MENTOR_ITEMS: ${{ matrix.items }}
         run: bash ci/mentor-model-test.sh
       - name: Отчёт
         if: always()

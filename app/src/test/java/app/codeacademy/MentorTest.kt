@@ -368,6 +368,18 @@ class MentorTest {
         assertFalse(g.check("Нужна функция `greet(name)`: что она должна вернуть?").leak)
     }
 
+    @Test fun quotingOwnWrongLineIsNotALeak() {
+        // fix-задания: исправляется один знак, набор слов строки не меняется — цитировать строку ученика можно.
+        val indent = item("a3-fix-indent")
+        val g = guardOf(indent)
+        assertFalse(g.check("Посмотри на строку `if p = \"python123\":` — что делает один знак `=`?").leak)
+        assertFalse(g.check("В строке `if p = \"python123\":` сравнение записано неверно.").leak)
+        // Нечётное число обратных кавычек: проза между ними не считается фрагментом кода.
+        assertFalse(g.check("Условие `if p = \"python123\": это сравнение пароля с `python123` пишется иначе.").leak)
+        // Пример на других данных с общими словами: не решение.
+        assertFalse(guardOf(item("a1-greet", lang = "js")).check("Например: `if (n % 2 == 0) return n`.").leak)
+    }
+
     @Test fun truncatedAnswerEndsOnASentence() {
         assertEquals("Цикл повторяет код. Пока условие истинно.", PromptBuilder.trimIncomplete("Цикл повторяет код. Пока условие истинно. Если условие лож"))
         assertEquals("Готово.", PromptBuilder.trimIncomplete("Готово."))
@@ -375,6 +387,10 @@ class MentorTest {
         // Коротко до последней точки — ответ не трогается.
         assertEquals("Да. А что дальше нужно сде", PromptBuilder.trimIncomplete("Да. А что дальше нужно сде"))
         assertTrue(PromptBuilder.maxTokens(Intent.HINT) < PromptBuilder.maxTokens(Intent.EXPLAIN_TOPIC))
+        // Обрезка не оставляет незакрытый блок кода.
+        val f = "`" + "`" + "`"
+        assertEquals("Смотри:\n${f}\nx\n${f}", PromptBuilder.trimIncomplete("Смотри:\n${f}\nx\n${f} и ещё"))
+        assertEquals("Смотри:", PromptBuilder.trimIncomplete("Смотри:\n${f}\nx = 1\ny = 2 и пр"))
     }
 
     @Test fun thinkingBlocksAreStripped() {
