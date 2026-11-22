@@ -69,7 +69,7 @@ class WebPreviewController {
         // Зависшая страница не выполнит caStop(): если ответа нет, останавливаем рендер-процесс (страница пересоздастся).
         var answered = false
         wv.evaluateJavascript("caStop();1") { answered = true }
-        wv.postDelayed({ if (!answered && webView === wv) WebSandbox.terminateRenderer(wv) }, 1_500)
+        wv.postDelayed({ if (!answered && webView === wv) WebSandbox.terminateRenderer(wv) }, 3_500)
     }
 
     internal fun onMessage(data: String) {

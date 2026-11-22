@@ -168,6 +168,12 @@ class WebRunnerHost(context: Context) {
     }
 
     suspend fun request(msg: JSONObject, timeoutMs: Long): RunResult {
+        val r = requestOnce(msg, timeoutMs)
+        // Запрос попал на страницу, которую пришлось перезапустить из-за чужого зависания, — повторяем на новой.
+        return if (r.status == RunStatus.CRASHED && r.stderr == RESTARTED) requestOnce(msg, timeoutMs) else r
+    }
+
+    private suspend fun requestOnce(msg: JSONObject, timeoutMs: Long): RunResult {
         if (!prepare()) {
             return RunResult(RunStatus.UNAVAILABLE, stderr = "Песочница браузера недоступна — обновите «Android System WebView»")
         }
@@ -190,7 +196,8 @@ class WebRunnerHost(context: Context) {
             // Зависшая страница не выполнит caStop() — тогда останавливаем её принудительно.
             var answered = false
             wv.evaluateJavascript("caStop();1") { answered = true }
-            main.postDelayed({ if (!answered && webView === wv) killPage(wv) }, 1_500)
+            // Дольше, чем защита циклов (2 с): обычный бесконечный цикл остановится сам, страница останется живой.
+            main.postDelayed({ if (!answered && webView === wv) killPage(wv) }, KILL_AFTER_MS)
         }
     }
 
@@ -200,7 +207,7 @@ class WebRunnerHost(context: Context) {
             webView = null
             ready = CompletableDeferred()
         }
-        failAll(RunResult(RunStatus.CRASHED, stderr = "Страница перезапущена: она перестала отвечать"))
+        failAll(RunResult(RunStatus.CRASHED, stderr = RESTARTED))
         if (!WebSandbox.terminateRenderer(wv)) wv.destroy()
     }
 
@@ -249,6 +256,8 @@ class WebRunnerHost(context: Context) {
 
     companion object {
         private const val START_TIMEOUT_MS = 30_000L
+        private const val KILL_AFTER_MS = 3_500L
+        private const val RESTARTED = "Страница перезапущена: она перестала отвечать"
     }
 }
 
