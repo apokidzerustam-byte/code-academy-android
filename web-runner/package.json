@@ -7,7 +7,7 @@
   "type": "module",
   "scripts": {
     "build": "node build.mjs",
-    "test": "node --experimental-sqlite --no-warnings test/sql.test.mjs && node test/web.test.mjs"
+    "test": "node scripts/gen-harness.mjs && node --experimental-sqlite --no-warnings test/sql.test.mjs && node test/web.test.mjs"
   },
   "dependencies": {
     "acorn": "8.14.1",

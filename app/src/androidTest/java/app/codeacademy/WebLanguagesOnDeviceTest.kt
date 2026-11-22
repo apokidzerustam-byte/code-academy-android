@@ -149,7 +149,8 @@ class WebLanguagesOnDeviceTest {
                     val t0 = System.currentTimeMillis()
                     val good = service.evaluate(runner, a, a.solution)
                     if (!good.passed) problems += "${lesson.id}/${a.id} [$lang]: эталон не прошёл (${good.failure ?: good.errorType}: " +
-                        "${good.failureText.take(200)} ${good.report?.loadError ?: good.report?.compileError ?: ""})"
+                        "${good.failureText.take(200)} ${good.report?.loadError ?: good.report?.compileError ?: ""} " +
+                        "${good.report?.cases?.firstOrNull { !it.passed }?.let { "[${it.id}] ${it.error ?: it.hint} actual=${it.actual}" }?.take(1500) ?: ""})"
                     for (w in a.wrongSolutions) {
                         val bad = service.evaluate(runner, a, w.answer ?: w.code)
                         if (bad.passed) problems += "${lesson.id}/${a.id} [$lang]: прошло неверное решение «${w.why}»"
