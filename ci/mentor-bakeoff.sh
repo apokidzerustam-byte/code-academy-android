@@ -17,7 +17,13 @@ FILE="$MODELS/$BAKE_NAME.gguf"
 if [ ! -s "$FILE" ]; then
   for url in $BAKE_URLS; do
     echo "== Загрузка $url"
-    if curl -fL --retry 3 -o "$FILE.part" "$url"; then mv "$FILE.part" "$FILE"; break; fi
+    if curl -fL --retry 3 -o "$FILE.part" "$url"; then
+      mv "$FILE.part" "$FILE"
+      # Ревизия репозитория: по ней в приложении фиксируется адрес (файлы в main могут обновить, и контрольная сумма разойдётся).
+      echo "РЕВИЗИЯ $(echo "$url" | sed -E 's#https://huggingface.co/([^/]+/[^/]+)/resolve/.*#\1#') $(curl -sIL "$url" | tr -d '\r' | grep -i '^x-repo-commit' | head -n1)"
+      echo "URL_ОК $url"
+      break
+    fi
     repo=$(echo "$url" | sed -E 's#https://huggingface.co/([^/]+/[^/]+)/resolve/.*#\1#')
     echo "не скачалось; файлы в репозитории $repo:"
     curl -fsSL "https://huggingface.co/api/models/$repo" | python3 -c "import sys,json; print('\n'.join(s['rfilename'] for s in json.load(sys.stdin).get('siblings',[])))" || true
