@@ -64,7 +64,7 @@ def test_latin_parts_inside_words():
     pron = narrate.load_pronunciation()
     assert narrate.spoken_form("f-строка и user_name", pron) == "эф-строка и ю́зер нэйм"
     # Слова без записи в словаре не меняются.
-    assert narrate.spoken_form("Kotlin", pron) == "Kotlin"
+    assert narrate.spoken_form("Haskell", pron) == "Haskell"
 
 
 def test_numbers_in_recognition_are_not_errors():
