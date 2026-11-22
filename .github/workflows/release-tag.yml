@@ -33,7 +33,8 @@ jobs:
             echo "::error::Тег $TAG уже существует"; exit 1
           fi
           gh api "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/$TAG" -f sha="$GITHUB_SHA" >/dev/null
-          gh workflow run android.yml --ref "$TAG"
+          # Запуск через REST: в этом задании нет клона репозитория (gh workflow run требует git).
+          gh api -X POST "repos/$GITHUB_REPOSITORY/actions/workflows/android.yml/dispatches" -f ref="$TAG" >/dev/null
           {
             echo "### Тег $TAG создан на коммите ${GITHUB_SHA::7}"
             echo "Запущена полная сборка с тестами (workflow «Android», ветка/тег $TAG). После её успеха в разделе Releases появится черновик."
