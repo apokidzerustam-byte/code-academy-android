@@ -16,6 +16,8 @@ echo "===== ERRORS (runner/binder) ====="
 grep -iE "codeacademy|binder|Transaction|FATAL|signal" build/ci/errors.log | tail -60
 echo "===== TEST FAILURES (TestRunner, первые строки стека) ====="
 adb logcat -d -s TestRunner:E | grep -vE "^\s*$" | grep -vE "\sat (androidx|java|kotlin|org\.junit|android)\." | head -n 150 || true
+echo "===== CRASHES (AndroidRuntime / WebView) ====="
+adb logcat -d -s AndroidRuntime:E cr_AwContents:W cr_AwRenderProcessGoneDetail:W chromium:E | grep -vE "^\s*$" | tail -n 60 || true
 echo "===== FAILED TESTS ====="
 grep -rhoE '<testcase [^>]*name="[^"]*"[^>]*>[[:space:]]*<failure message="[^"]{0,400}' */build/outputs/androidTest-results 2>/dev/null | head -40
 exit $rc

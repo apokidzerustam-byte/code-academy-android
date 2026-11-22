@@ -47,6 +47,14 @@ class EditorActivity : ComponentActivity() {
                     // Всё, что не из локальных assets, блокируется: редактор работает офлайн.
                     loader.shouldInterceptRequest(request.url)
                         ?: WebResourceResponse("text/plain", "utf-8", 403, "Blocked", emptyMap(), ByteArrayInputStream(ByteArray(0)))
+
+                // Рендер-процесс общий для всех WebView приложения: его остановка (зависшая страница ученика)
+                // не должна ронять приложение — закрываем экран прототипа.
+                override fun onRenderProcessGone(view: WebView, detail: android.webkit.RenderProcessGoneDetail): Boolean {
+                    view.destroy()
+                    finish()
+                    return true
+                }
             }
             loadUrl("https://appassets.androidplatform.net/assets/editor/index.html")
         }
