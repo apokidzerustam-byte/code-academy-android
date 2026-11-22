@@ -37,3 +37,12 @@
                                     ├─► :runner (Binder)                   ─► Chaquopy + ca_runner (+FastAPI) [A]
                                     └─► WebView renderer: хост webrunner   ─► iframe (HTML/CSS/JS) | Worker sql.js | Worker tree-sitter
 ```
+
+## Учебные проекты и резервная копия (этап 8)
+- Контент: `content/packs/<pack>/projects/<id>/project.json` (схема `project.schema.json`): этапы с условием, файлами этапа,
+  тестами всего проекта, эталоном и типовыми ошибками. Python — `ca_runner.check(kind=project)`, HTML — веб-раннер с файлами проекта.
+- Приложение: `ProjectRepository.startCourse/addMissingFiles` (связь через `.course`), `AssessmentService.evaluateProject`,
+  `ui/ProjectTaskPanel` в IDE, `ProgressRepository.recordMilestone`.
+- `data/Backup.kt`: `BackupFormat` (формат, ZIP, проверки) и `BackupManager` (дамп всех таблиц через SupportSQLite, восстановление
+  одной транзакцией, удаление данных). Наблюдатели Room узнают об изменениях по завершении транзакции.
+- CI: `ci/backup-clear-test.sh` — фаза 1 (данные + копия) → `pm clear` → фаза 2 (данных нет → восстановление → сравнение).
