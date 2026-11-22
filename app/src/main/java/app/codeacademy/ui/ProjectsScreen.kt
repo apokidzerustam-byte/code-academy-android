@@ -30,7 +30,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.runtime.LaunchedEffect
+import app.codeacademy.content.CourseProject
+import app.codeacademy.content.ProjectRef
 import app.codeacademy.data.ProjectInfo
+import app.codeacademy.data.ProjectZip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -45,23 +51,97 @@ fun ProjectsScreen(onBack: () -> Unit, openProject: (String) -> Unit) {
     val projects by c.projects.projects.collectAsStateWithLifecycle(emptyList())
     var creating by remember { mutableStateOf(false) }
     var deleting by remember { mutableStateOf<ProjectInfo?>(null) }
+    var message by remember { mutableStateOf<String?>(null) }
+    var course by remember { mutableStateOf<List<Pair<ProjectRef, CourseProject>>>(emptyList()) }
+    LaunchedEffect(Unit) { course = runCatching { c.content.allProjects() }.getOrDefault(emptyList()) }
+    val attempts by c.progress.attempts.collectAsStateWithLifecycle(emptyList())
+    val passed = remember(attempts) {
+        attempts.filter { it.passed && it.lessonKey.startsWith("project:") }
+            .groupBy({ it.lessonKey.removePrefix("project:") }, { it.assignmentId }).mapValues { it.value.toSet() }
+    }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    // Импорт проекта из ZIP (например, экспортированного раньше или скачанного с GitHub).
+    val importZip = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        if (uri != null) scope.launch {
+            val name = runCatching {
+                context.contentResolver.query(uri, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)
+                    ?.use { if (it.moveToFirst()) it.getString(0) else null }
+            }.getOrNull()?.removeSuffix(".zip")?.ifBlank { null } ?: "Импортированный проект"
+            val res = withContext(Dispatchers.IO) {
+                runCatching {
+                    val files = context.contentResolver.openInputStream(uri)?.use { ProjectZip.read(it) }
+                        ?: throw java.io.IOException("не удалось открыть файл")
+                    c.projects.importFiles(name, files) to files.size
+                }
+            }
+            val ok = res.getOrNull()
+            if (ok != null) {
+                message = "Проект «$name» импортирован: файлов ${ok.second}."
+                withContext(Dispatchers.Main.immediate) { openProject(ok.first) }
+            } else {
+                message = "Импорт не удался: ${res.exceptionOrNull()?.message}"
+            }
+        }
+    }
 
-    Screen("Мои проекты", onBack) { padding ->
+    Screen("Проекты", onBack) { padding ->
         LazyColumn(
-            Modifier.padding(padding), contentPadding = PaddingValues(16.dp),
+            Modifier.padding(padding).testTag("projects-list"), contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
-                Button(onClick = { creating = true }, modifier = Modifier.testTag("new-project")) { Text("Новый проект") }
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = { creating = true }, modifier = Modifier.testTag("new-project")) { Text("Новый проект") }
+                    OutlinedButton(onClick = { importZip.launch(arrayOf("application/zip", "application/x-zip-compressed", "application/octet-stream")) },
+                        modifier = Modifier.testTag("import-project")) { Text("Импорт ZIP") }
+                }
             }
-            if (projects.isEmpty()) item { Text("Проектов пока нет. Создайте первый — например, «Калькулятор».") }
-            items(projects, key = { it.id }) { p ->
+            message?.let { m -> item { Text(m, modifier = Modifier.testTag("projects-message")) } }
+            if (course.isNotEmpty()) {
+                item { Text("Учебные проекты", style = MaterialTheme.typography.titleLarge) }
+                items(course, key = { it.first.key }) { (ref, cp) ->
+                    val done = passed[ref.key].orEmpty().count { id -> cp.milestones.any { it.id == id } }
+                    val started = projects.firstOrNull { it.course == ref.key }
+                    Card(Modifier.fillMaxWidth().testTag("course-${ref.projectId}")) {
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text(cp.title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                                AssistChip(onClick = {}, label = { Text(if (cp.isThrough) "Сквозной" else "Мини-проект") })
+                            }
+                            Text(cp.summary, style = MaterialTheme.typography.bodyMedium)
+                            Text(
+                                if (done == cp.milestones.size) "Все этапы пройдены ✓ (${cp.milestones.size})"
+                                else "Этапов: ${cp.milestones.size}, пройдено: $done",
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                            Button(onClick = {
+                                scope.launch {
+                                    // Новый проект — с файлами всех этапов до текущего (этапы могли быть пройдены раньше).
+                                    val upTo = currentMilestone(cp, passed[ref.key].orEmpty()) ?: (cp.milestones.size - 1)
+                                    val starter = cp.milestones.take(upTo + 1).fold(emptyMap<String, String>()) { acc, m ->
+                                        acc + m.starterFiles.filterKeys { it !in acc }
+                                    }
+                                    val id = started?.id ?: c.projects.startCourse(ref.key, cp.title, starter)
+                                    withContext(Dispatchers.Main.immediate) { openProject(id) }
+                                }
+                            }, modifier = Modifier.testTag("start-${ref.projectId}")) { Text(if (started != null) "Продолжить" else "Начать") }
+                        }
+                    }
+                }
+            }
+            item { Text("Мои проекты", style = MaterialTheme.typography.titleLarge) }
+            val own = projects
+            if (own.isEmpty()) item { Text("Проектов пока нет. Создайте свой или начните учебный проект выше.") }
+            items(own, key = { it.id }) { p ->
                 Card(Modifier.fillMaxWidth().clickable { openProject(p.id) }.testTag("project-${p.title}")) {
                     Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {
                             Text(p.title, style = MaterialTheme.typography.titleMedium)
                             Text(
-                                "Файлов: ${p.fileCount} · изменён ${DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(p.updatedAt))}",
+                                (if (p.course != null) "Учебный проект · " else "") +
+                                    "Файлов: ${p.fileCount} · изменён ${DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(p.updatedAt))}",
                                 style = MaterialTheme.typography.bodySmall,
                             )
                         }
@@ -108,7 +188,8 @@ fun ProjectsScreen(onBack: () -> Unit, openProject: (String) -> Unit) {
         AlertDialog(
             onDismissRequest = { deleting = null },
             title = { Text("Удалить «${p.title}»?") },
-            text = { Text("Все файлы проекта будут удалены без возможности восстановления.") },
+            text = { Text("Все файлы проекта будут удалены без возможности восстановления." +
+                (if (p.course != null) " Пройденные этапы учебного проекта сохранятся, но код придётся начать заново." else "")) },
             confirmButton = {
                 TextButton(onClick = { deleting = null; scope.launch { c.projects.delete(p.id) } }) { Text("Удалить") }
             },

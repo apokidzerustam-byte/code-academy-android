@@ -5,7 +5,11 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.doublePreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
+import kotlinx.coroutines.flow.first
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -59,4 +63,28 @@ class SettingsRepository(private val context: Context) {
     suspend fun setOnboardingDone(v: Boolean) = context.dataStore.edit { it[onboarding] = v }
     suspend fun setSessionMinutes(v: Int) = context.dataStore.edit { it[session] = v }
     suspend fun setDaysPerWeek(v: Int) = context.dataStore.edit { it[days] = v.coerceIn(1, 7) }
+
+    /** Все сохранённые настройки как есть (для резервной копии): имя → значение. */
+    suspend fun snapshot(): Map<String, Any> = context.dataStore.data.first().asMap().mapKeys { it.key.name }
+
+    /** Заменяет все настройки (восстановление из копии). Поддерживаются все типы DataStore Preferences. */
+    suspend fun replaceAll(values: Map<String, Any>) {
+        context.dataStore.edit { p ->
+            p.clear()
+            for ((k, v) in values) when (v) {
+                is Boolean -> p[booleanPreferencesKey(k)] = v
+                is Int -> p[intPreferencesKey(k)] = v
+                is Long -> p[longPreferencesKey(k)] = v
+                is Float -> p[floatPreferencesKey(k)] = v
+                is Double -> p[doublePreferencesKey(k)] = v
+                is String -> p[stringPreferencesKey(k)] = v
+                is Set<*> -> p[stringSetPreferencesKey(k)] = v.map { it as String }.toSet()
+                else -> throw IllegalArgumentException("Неизвестный тип настройки $k")
+            }
+        }
+    }
+
+    suspend fun clearAll() {
+        context.dataStore.edit { it.clear() }
+    }
 }

@@ -21,6 +21,7 @@ def pack(tmp_path):
     pj = dst / "pack.json"
     data = json.loads(pj.read_text(encoding="utf-8"))
     data["lessons"] = [LESSON.split("/")[-1]]
+    data["projects"] = []  # проекты ссылаются на другие уроки — их проверяют тесты ниже
     pj.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
     return dst
 
@@ -122,3 +123,53 @@ def test_stale_and_missing_audio(pack):
     vc.validate_pack(pack, rep)
     assert any("нет файла run.m4a" in e for e in rep.errors)
     assert any("изменился после озвучки" in w for w in rep.warnings)
+
+
+# --- Учебные проекты ----------------------------------------------------------------------------
+
+@pytest.fixture
+def proj(tmp_path):
+    dst = tmp_path / "python-basics"
+    shutil.copytree(ROOT / "content" / "packs" / "python-basics", dst)
+    return dst
+
+
+def project_errors(pack_dir, pid="thermometer"):
+    rep = vc.Report()
+    pack = json.loads((pack_dir / "pack.json").read_text(encoding="utf-8"))
+    vc.validate_project(pack_dir, pack, pid, rep, {})
+    return rep.errors
+
+
+def test_project_original_is_valid(proj):
+    assert project_errors(proj) == []
+    assert project_errors(proj, "finance") == []
+
+
+def test_project_broken_solution_detected(proj):
+    edit_json(proj / "projects/thermometer/project.json",
+              lambda d: d["milestones"][0]["solutionFiles"].update({"main.py": "print('Мороз')\n"}))
+    assert any("эталон не проходит" in e for e in project_errors(proj))
+
+
+def test_project_weak_tests_detected(proj):
+    def weaken(d):
+        m = d["milestones"][0]
+        m["wrongSolutions"][0]["files"] = m["solutionFiles"]
+    edit_json(proj / "projects/thermometer/project.json", weaken)
+    assert any("тесты его не ловят" in e for e in project_errors(proj))
+
+
+def test_project_needs_hidden_tests(proj):
+    edit_json(proj / "projects/thermometer/project.json",
+              lambda d: [c.pop("hidden", None) for c in d["milestones"][0]["tests"]["cases"]])
+    assert any("нет скрытых тестов" in e for e in project_errors(proj))
+
+
+def test_project_unknown_lesson_and_skill(proj):
+    def bad(d):
+        d["afterLesson"] = "py-99-nope"
+        d["skills"] = ["python.nope"]
+    edit_json(proj / "projects/thermometer/project.json", bad)
+    errs = project_errors(proj)
+    assert any("py-99-nope" in e for e in errs) and any("python.nope" in e for e in errs)

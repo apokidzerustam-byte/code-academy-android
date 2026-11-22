@@ -1,0 +1,164 @@
+{
+  "id": "shopping",
+  "kind": "mini",
+  "title": "Список покупок",
+  "summary": "Список покупок с нумерацией, а потом — без повторов.",
+  "language": "python",
+  "afterLesson": "py-10-lists",
+  "skills": [
+    "python.lists",
+    "python.loops.while",
+    "python.loops.for"
+  ],
+  "milestones": [
+    {
+      "id": "collect",
+      "title": "Этап 1. Собрать список",
+      "statement": "Программа спрашивает `Товар (пусто — конец): `, пока не введут пустую строку. Потом печатает `В списке: N` и товары с номерами:\n\n```\nВ списке: 2\n1. хлеб\n2. кефир\n```",
+      "goal": "Список, цикл while с break, обход списка for.",
+      "starterFiles": {
+        "main.py": "items = []\n# Спрашивайте «Товар (пусто — конец): », пока не введут пустую строку\n"
+      },
+      "hints": [
+        "Начните с пустого списка: items = [].",
+        "while True: … и break, когда товар — пустая строка.",
+        "Добавление: items.append(item).",
+        "Номер — отдельная переменная n, которая растёт в цикле for.",
+        "print(str(n) + \".\", item) печатает «1. хлеб»."
+      ],
+      "tests": {
+        "kind": "project",
+        "cases": [
+          {
+            "id": "three",
+            "file": "main.py",
+            "stdin": "хлеб\nкефир\nсыр\n\n",
+            "expected_stdout": "Товар (пусто — конец): Товар (пусто — конец): Товар (пусто — конец): Товар (пусто — конец): В списке: 3\n1. хлеб\n2. кефир\n3. сыр\n"
+          },
+          {
+            "id": "one",
+            "file": "main.py",
+            "stdin": "чай\n\n",
+            "expected_stdout": "Товар (пусто — конец): Товар (пусто — конец): В списке: 1\n1. чай\n"
+          },
+          {
+            "id": "many",
+            "file": "main.py",
+            "stdin": "a\nb\nc\nd\ne\n\n",
+            "expected_stdout": "Товар (пусто — конец): Товар (пусто — конец): Товар (пусто — конец): Товар (пусто — конец): Товар (пусто — конец): Товар (пусто — конец): В списке: 5\n1. a\n2. b\n3. c\n4. d\n5. e\n",
+            "hidden": true,
+            "hint": "Номера идут подряд: 1., 2., 3., …"
+          }
+        ]
+      },
+      "solutionFiles": {
+        "main.py": "items = []\nwhile True:\n    item = input(\"Товар (пусто — конец): \")\n    if item == \"\":\n        break\n    items.append(item)\nprint(\"В списке:\", len(items))\nn = 1\nfor item in items:\n    print(str(n) + \".\", item)\n    n = n + 1\n"
+      },
+      "explanation": "while собирает товары до пустой строки, for печатает их с номером; str(n) + \".\" склеивает номер с точкой без пробела.",
+      "criteria": [
+        "Количество верное.",
+        "Нумерация с 1, формат «1. товар»."
+      ],
+      "wrongSolutions": [
+        {
+          "files": {
+            "main.py": "items = []\nwhile True:\n    item = input(\"Товар (пусто — конец): \")\n    if item == \"\":\n        break\n    items.append(item)\nprint(\"В списке:\", len(items))\nn = 0\nfor item in items:\n    print(str(n) + \".\", item)\n    n = n + 1\n"
+          },
+          "why": "Нумерация начинается с 0."
+        },
+        {
+          "files": {
+            "main.py": "items = []\nwhile True:\n    item = input(\"Товар (пусто — конец): \")\n    if item == \"\":\n        break\n    items.append(item)\nprint(\"В списке:\", len(items))\nn = 1\nfor item in items:\n    print(n, \".\", item)\n    n = n + 1\n"
+          },
+          "why": "Лишний пробел: «1 . хлеб»."
+        },
+        {
+          "files": {
+            "main.py": "items = []\nwhile True:\n    item = input(\"Товар (пусто — конец): \")\n    if item == \"\":\n        break\n    items.append(item)\nprint(\"В списке:\", n)\nn = 1\nfor item in items:\n    print(str(n) + \".\", item)\n    n = n + 1\n"
+          },
+          "why": "Количество печатается неверно."
+        }
+      ]
+    },
+    {
+      "id": "unique",
+      "title": "Этап 2. Без повторов",
+      "afterLesson": "py-10-lists",
+      "statement": "Улучшим список:\n\n- товар приводится к виду без пробелов по краям и маленькими буквами (`strip().lower()`);\n- если такой товар уже есть — печатается `Уже есть: <товар>`, и он не добавляется;\n- если список пуст — вместо итогов печатается `Список пуст`.",
+      "goal": "Проверка «есть ли в списке» (in), методы строк, особый случай пустого списка.",
+      "hints": [
+        "Приведите товар сразу после input: input(…).strip().lower().",
+        "Проверка повтора: if item in items:.",
+        "Добавляйте товар только в ветке else.",
+        "Пустой список: if len(items) == 0: print(\"Список пуст\").",
+        "Итоги (количество и нумерация) — в ветке else после проверки пустого списка."
+      ],
+      "tests": {
+        "kind": "project",
+        "cases": [
+          {
+            "id": "dup",
+            "file": "main.py",
+            "stdin": "хлеб\nкефир\nхлеб\n\n",
+            "expected_stdout": "Товар (пусто — конец): Товар (пусто — конец): Товар (пусто — конец): Уже есть: хлеб\nТовар (пусто — конец): В списке: 2\n1. хлеб\n2. кефир\n"
+          },
+          {
+            "id": "case",
+            "file": "main.py",
+            "stdin": "Сыр\n сыр \nчай\n\n",
+            "expected_stdout": "Товар (пусто — конец): Товар (пусто — конец): Уже есть: сыр\nТовар (пусто — конец): Товар (пусто — конец): В списке: 2\n1. сыр\n2. чай\n",
+            "hint": "«Сыр» и « сыр » — один товар: strip() и lower()"
+          },
+          {
+            "id": "empty",
+            "file": "main.py",
+            "stdin": "\n",
+            "expected_stdout": "Товар (пусто — конец): Список пуст\n"
+          },
+          {
+            "id": "same",
+            "file": "main.py",
+            "stdin": "чай\nчай\nчай\n\n",
+            "expected_stdout": "Товар (пусто — конец): Товар (пусто — конец): Уже есть: чай\nТовар (пусто — конец): Уже есть: чай\nТовар (пусто — конец): В списке: 1\n1. чай\n",
+            "hidden": true
+          },
+          {
+            "id": "plain",
+            "file": "main.py",
+            "stdin": "яблоки\nгруши\n\n",
+            "expected_stdout": "Товар (пусто — конец): Товар (пусто — конец): Товар (пусто — конец): В списке: 2\n1. яблоки\n2. груши\n",
+            "hidden": true
+          }
+        ]
+      },
+      "solutionFiles": {
+        "main.py": "items = []\nwhile True:\n    item = input(\"Товар (пусто — конец): \").strip().lower()\n    if item == \"\":\n        break\n    if item in items:\n        print(\"Уже есть:\", item)\n    else:\n        items.append(item)\nif len(items) == 0:\n    print(\"Список пуст\")\nelse:\n    print(\"В списке:\", len(items))\n    n = 1\n    for item in items:\n        print(str(n) + \".\", item)\n        n = n + 1\n"
+      },
+      "explanation": "in проверяет, есть ли значение в списке; благодаря strip().lower() «Сыр» и « сыр » считаются одним товаром.",
+      "criteria": [
+        "Повторы не добавляются и называются.",
+        "Пустой список — «Список пуст»."
+      ],
+      "wrongSolutions": [
+        {
+          "files": {
+            "main.py": "items = []\nwhile True:\n    item = input(\"Товар (пусто — конец): \")\n    if item == \"\":\n        break\n    if item in items:\n        print(\"Уже есть:\", item)\n    else:\n        items.append(item)\nif len(items) == 0:\n    print(\"Список пуст\")\nelse:\n    print(\"В списке:\", len(items))\n    n = 1\n    for item in items:\n        print(str(n) + \".\", item)\n        n = n + 1\n"
+          },
+          "why": "«Сыр» и «сыр» считаются разными товарами."
+        },
+        {
+          "files": {
+            "main.py": "items = []\nwhile True:\n    item = input(\"Товар (пусто — конец): \").strip().lower()\n    if item == \"\":\n        break\n    if item in items:\n        print(\"Уже есть:\", item)\n    else:\n        items.append(item)\nif True:\n    print(\"В списке:\", len(items))\n    n = 1\n    for item in items:\n        print(str(n) + \".\", item)\n        n = n + 1\n"
+          },
+          "why": "Для пустого списка печатается «В списке: 0»."
+        },
+        {
+          "files": {
+            "main.py": "items = []\nwhile True:\n    item = input(\"Товар (пусто — конец): \").strip().lower()\n    if item == \"\":\n        break\n    if item in items:\n        pass\n    else:\n        items.append(item)\nif len(items) == 0:\n    print(\"Список пуст\")\nelse:\n    print(\"В списке:\", len(items))\n    n = 1\n    for item in items:\n        print(str(n) + \".\", item)\n        n = n + 1\n"
+          },
+          "why": "Повтор не называется."
+        }
+      ]
+    }
+  ]
+}

@@ -20,5 +20,8 @@
     "js.functions": "Функции JavaScript",
     "js.dom": "Работа со страницей (DOM)",
     "js.events": "События: нажатие кнопки"
-  }
+  },
+  "projects": [
+    "card"
+  ]
 }

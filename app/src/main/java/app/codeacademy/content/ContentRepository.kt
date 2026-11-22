@@ -71,6 +71,16 @@ class ContentRepository(private val assets: AssetManager) {
     }
 
     /** Все уроки всех пакетов по порядку программы. */
+    suspend fun project(ref: ProjectRef): CourseProject = withContext(Dispatchers.IO) {
+        cached("project:${ref.key}") {
+            json.decodeFromString(CourseProject.serializer(), read("$ROOT/${ref.packId}/projects/${ref.projectId}/project.json"))
+        }
+    }
+
+    /** Все учебные проекты по порядку этапов. */
+    suspend fun allProjects(): List<Pair<ProjectRef, CourseProject>> =
+        packs().flatMap { p -> p.projects.map { id -> ProjectRef(p.id, id).let { it to project(it) } } }
+
     suspend fun allLessons(): List<Pair<PackManifest, Lesson>> =
         packs().flatMap { p -> p.lessons.map { p to lesson(LessonRef(p.id, it)) } }
 

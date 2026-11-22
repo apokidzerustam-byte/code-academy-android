@@ -82,6 +82,9 @@ def write_pack(pack_id, stage, title, description, language, lessons, skills, ve
     d.mkdir(parents=True, exist_ok=True)
     data = {"id": pack_id, "version": version, "stage": stage, "title": title, "description": description,
             "language": language, "minAppVersion": 1, "lessons": lessons, "skills": skills}
+    old = d / "pack.json"
+    if old.exists() and "projects" in json.loads(old.read_text("utf-8")):
+        data["projects"] = json.loads(old.read_text("utf-8"))["projects"]  # проекты пишет projects.py
     (d / "pack.json").write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", "utf-8")
 
 

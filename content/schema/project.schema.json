@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codeacademy.app/schema/project.schema.json",
+  "title": "Учебный проект: мини-проект или этап сквозного проекта",
+  "type": "object",
+  "required": [
+    "id",
+    "kind",
+    "title",
+    "summary",
+    "language",
+    "milestones"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "kind": {
+      "enum": [
+        "mini",
+        "through"
+      ],
+      "description": "mini — мини-проект; through — сквозной проект курса (развивается по этапам)"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 10
+    },
+    "language": {
+      "enum": [
+        "python",
+        "html"
+      ]
+    },
+    "afterLesson": {
+      "type": "string",
+      "description": "Урок пакета, после которого проект рекомендуется (не блокирует)"
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "milestones": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "statement",
+          "goal",
+          "hints",
+          "tests",
+          "solutionFiles",
+          "explanation",
+          "criteria",
+          "wrongSolutions"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 3
+          },
+          "afterLesson": {
+            "type": "string"
+          },
+          "statement": {
+            "type": "string",
+            "minLength": 20,
+            "description": "Markdown"
+          },
+          "goal": {
+            "type": "string"
+          },
+          "starterFiles": {
+            "type": "object",
+            "propertyNames": {
+              "pattern": "^[A-Za-z0-9_][A-Za-z0-9_./-]*$"
+            },
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Добавляются в проект в начале этапа; существующие файлы не перезаписываются"
+          },
+          "hints": {
+            "type": "array",
+            "minItems": 5,
+            "maxItems": 5,
+            "items": {
+              "type": "string"
+            }
+          },
+          "tests": {
+            "type": "object",
+            "required": [
+              "kind",
+              "cases"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "project",
+                  "web"
+                ]
+              },
+              "entry": {
+                "type": "string"
+              },
+              "requiredFiles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "cases": {
+                "type": "array",
+                "minItems": 3
+              }
+            }
+          },
+          "solutionFiles": {
+            "type": "object",
+            "propertyNames": {
+              "pattern": "^[A-Za-z0-9_][A-Za-z0-9_./-]*$"
+            },
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Эталон: все файлы проекта после этапа"
+          },
+          "explanation": {
+            "type": "string"
+          },
+          "criteria": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "wrongSolutions": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "object",
+              "required": [
+                "files",
+                "why"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "files": {
+                  "type": "object",
+                  "propertyNames": {
+                    "pattern": "^[A-Za-z0-9_][A-Za-z0-9_./-]*$"
+                  },
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "why": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

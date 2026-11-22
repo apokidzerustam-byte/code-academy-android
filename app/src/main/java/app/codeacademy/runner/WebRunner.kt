@@ -294,8 +294,12 @@ class WebRunner(private val host: WebRunnerHost, val lang: String) : CodeRunner 
         return host.request(msg, timeoutMs)
     }
 
-    override suspend fun check(code: String, testsJson: String, timeoutMs: Long, project: String): RunResult {
+    override suspend fun check(code: String, testsJson: String, timeoutMs: Long, project: String, files: Map<String, String>?): RunResult {
         val msg = JSONObject().put("lang", lang).put("mode", "check").put("code", code).put("tests", testsJson)
+        if (files != null) {
+            msg.put("files", JSONObject(files as Map<*, *>))
+            msg.put("entry", runCatching { JSONObject(testsJson).optString("entry") }.getOrNull()?.ifBlank { null } ?: "index.html")
+        }
         return host.request(msg, timeoutMs)
     }
 

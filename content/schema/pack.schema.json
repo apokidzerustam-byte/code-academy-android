@@ -73,6 +73,15 @@
         "type": "string",
         "minLength": 2
       }
+    },
+    "projects": {
+      "type": "array",
+      "description": "Учебные проекты пакета: projects/<id>/project.json",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9-]*$"
+      },
+      "uniqueItems": true
     }
   }
 }

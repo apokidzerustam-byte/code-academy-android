@@ -19,6 +19,7 @@ class ContentParsingTest {
     @Test fun allPacksParse() {
         val packs = packsDir.listFiles { f -> File(f, "pack.json").exists() }.orEmpty()
         assertTrue("нет пакетов в ${packsDir.absolutePath}", packs.isNotEmpty())
+        var projects = 0
         for (p in packs) {
             val pack = json.decodeFromString(PackManifest.serializer(), File(p, "pack.json").readText())
             for (lid in pack.lessons) {
@@ -36,6 +37,20 @@ class ContentParsingTest {
                     assertEquals(kind == "answer", a.isAnswerTask)
                 }
             }
+            for (pid in pack.projects) {
+                val proj = json.decodeFromString(app.codeacademy.content.CourseProject.serializer(),
+                    File(p, "projects/$pid/project.json").readText())
+                assertEquals(pid, proj.id)
+                assertTrue(proj.kind in setOf("mini", "through"))
+                proj.milestones.forEach { m ->
+                    assertEquals(5, m.hints.size)
+                    assertTrue(m.solutionFiles.isNotEmpty())
+                    assertTrue(m.wrongSolutions.size >= 2)
+                }
+                projects++
+            }
         }
+        // Этап 8: сквозной проект и мини-проекты (Python и веб).
+        assertTrue("учебных проектов: $projects", projects >= 5)
     }
 }

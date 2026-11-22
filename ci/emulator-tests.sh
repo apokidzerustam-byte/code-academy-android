@@ -7,9 +7,14 @@ adb logcat -G 16M || true
 adb logcat -c || true
 gradle --no-daemon "$@"
 rc=$?
+# Этап 8: резервная копия переживает настоящее «Очистить данные» (pm clear).
+if [ "$rc" = 0 ]; then
+  bash ci/backup-clear-test.sh 2>&1 | tee build/ci/backup-clear.log
+  rc=${PIPESTATUS[0]}
+fi
 adb logcat -d -s CAPROBE:I CAPROBE:E CAPLAYER:I CAPLAYER:W > build/ci/probe.log || true
 adb logcat -d '*:E' | tail -n 400 > build/ci/errors.log || true
-echo "gradle exit code: $rc" >> build/ci/probe.log
+echo "exit code: $rc" >> build/ci/probe.log
 echo "===== CAPROBE ====="
 cat build/ci/probe.log
 echo "===== ERRORS (runner/binder) ====="

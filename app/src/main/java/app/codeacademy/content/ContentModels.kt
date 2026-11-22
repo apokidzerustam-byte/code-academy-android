@@ -18,7 +18,59 @@ data class PackManifest(
     val lessons: List<String>,
     /** Названия навыков для карты знаний. */
     val skills: Map<String, String> = emptyMap(),
+    /** Учебные проекты пакета: projects/<id>/project.json. */
+    val projects: List<String> = emptyList(),
 )
+
+/** Неверное решение этапа проекта (для валидатора и тестов на устройстве). */
+@Serializable
+data class WrongProjectSolution(val files: Map<String, String>, val why: String)
+
+/** Этап учебного проекта: условие, новые файлы, тесты всего проекта. */
+@Serializable
+data class Milestone(
+    val id: String,
+    val title: String,
+    val afterLesson: String? = null,
+    val statement: String,
+    val goal: String,
+    /** Добавляются в начале этапа; файлы ученика не перезаписываются. */
+    val starterFiles: Map<String, String> = emptyMap(),
+    val hints: List<String>,
+    val tests: kotlinx.serialization.json.JsonObject,
+    val solutionFiles: Map<String, String>,
+    val explanation: String,
+    val criteria: List<String>,
+    val wrongSolutions: List<WrongProjectSolution> = emptyList(),
+)
+
+/** Учебный проект: мини-проект (mini) или сквозной проект курса (through). */
+@Serializable
+data class CourseProject(
+    val id: String,
+    val kind: String,
+    val title: String,
+    val summary: String,
+    /** python или html. */
+    val language: String,
+    val afterLesson: String? = null,
+    val skills: List<String> = emptyList(),
+    val milestones: List<Milestone>,
+) {
+    val isThrough: Boolean get() = kind == "through"
+}
+
+/** Ссылка на учебный проект: "packId/projectId". */
+data class ProjectRef(val packId: String, val projectId: String) {
+    val key: String get() = "$packId/$projectId"
+    /** Ключ попыток в таблице attempt (этапы — как задания). */
+    val attemptKey: String get() = "project:$key"
+
+    companion object {
+        fun parse(key: String): ProjectRef? =
+            key.trim().split('/').takeIf { it.size == 2 && it.all(String::isNotBlank) }?.let { ProjectRef(it[0], it[1]) }
+    }
+}
 
 @Serializable
 data class Lesson(

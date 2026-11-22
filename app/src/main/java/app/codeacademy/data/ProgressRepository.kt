@@ -113,21 +113,7 @@ class ProgressRepository(private val db: AppDatabase, private val clock: () -> L
                 hintsUsed = hintsUsed, errorType = verdict.errorType, runner = runner,
             )
         )
-        for (skill in lesson.skills) {
-            val review = db.reviews().get(skill)
-            val result = PracticeResult(verdict.passed, hintsUsed, day, isReview = ReviewScheduler.isDue(review, day))
-            val s = db.skills().get(skill) ?: SkillStateEntity(skill)
-            db.skills().upsert(SkillRules.apply(s, result, now))
-            ReviewScheduler.onPractice(review, skill, result)?.let { db.reviews().upsert(it) }
-            if (result.isReview) {
-                val a = db.activity().get(day) ?: DailyActivityEntity(day)
-                db.activity().upsert(a.copy(reviewsDone = a.reviewsDone + 1))
-            }
-        }
-        if (verdict.passed) {
-            val a = db.activity().get(day) ?: DailyActivityEntity(day)
-            db.activity().upsert(a.copy(tasksSolved = a.tasksSolved + 1))
-        }
+        practiceSkills(lesson.skills, verdict.passed, hintsUsed, now, day)
         val passed = db.attempts().passedAssignments(ref.key).size
         if (passed >= lesson.passCriteria.minAssignmentsPassed) {
             val cur = db.progress().get(ref.key) ?: LessonProgressEntity(ref.key)
@@ -140,4 +126,49 @@ class ProgressRepository(private val db: AppDatabase, private val clock: () -> L
     }
 
     suspend fun passedAssignments(ref: LessonRef): List<String> = db.attempts().passedAssignments(ref.key)
+
+    /** Навыки, повторения и активность дня после практики (задание урока или этап проекта). */
+    private suspend fun practiceSkills(skills: List<String>, passed: Boolean, hintsUsed: Int, now: Long, day: Long) {
+        for (skill in skills) {
+            val review = db.reviews().get(skill)
+            val result = PracticeResult(passed, hintsUsed, day, isReview = ReviewScheduler.isDue(review, day))
+            val s = db.skills().get(skill) ?: SkillStateEntity(skill)
+            db.skills().upsert(SkillRules.apply(s, result, now))
+            ReviewScheduler.onPractice(review, skill, result)?.let { db.reviews().upsert(it) }
+            if (result.isReview) {
+                val a = db.activity().get(day) ?: DailyActivityEntity(day)
+                db.activity().upsert(a.copy(reviewsDone = a.reviewsDone + 1))
+            }
+        }
+        if (passed) {
+            val a = db.activity().get(day) ?: DailyActivityEntity(day)
+            db.activity().upsert(a.copy(tasksSolved = a.tasksSolved + 1))
+        }
+    }
+
+    /** Попытка этапа учебного проекта: хранится как попытка задания с ключом "project:packId/projectId". */
+    suspend fun recordMilestone(
+        ref: app.codeacademy.content.ProjectRef,
+        skills: List<String>,
+        milestoneId: String,
+        filesJson: String,
+        verdict: Verdict,
+        hintsUsed: Int,
+        startedAt: Long,
+        runner: String,
+    ) = db.withTransaction {
+        val now = clock()
+        db.attempts().insert(
+            AttemptEntity(
+                lessonKey = ref.attemptKey, assignmentId = milestoneId, startedAt = startedAt,
+                durationMs = now - startedAt, code = filesJson, passed = verdict.passed,
+                testsPassed = verdict.report?.passed ?: 0, testsTotal = verdict.report?.total ?: 0,
+                hintsUsed = hintsUsed, errorType = verdict.errorType, runner = runner,
+            )
+        )
+        practiceSkills(skills, verdict.passed, hintsUsed, now, today())
+    }
+
+    suspend fun passedMilestones(ref: app.codeacademy.content.ProjectRef): Set<String> =
+        db.attempts().passedAssignments(ref.attemptKey).toSet()
 }

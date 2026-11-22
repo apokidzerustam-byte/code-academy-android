@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -71,6 +72,8 @@ fun SettingsScreen(onBack: () -> Unit, openLab: () -> Unit) {
             Choice("Простое поле ввода (для слабых устройств)", s.plainEditor, "editor-plain") { scope.launch { c.settings.setPlainEditor(true) } }
             OutlinedButton(onClick = openLab) { Text("Лаборатория выполнения кода") }
             HorizontalDivider()
+            BackupSection()
+            HorizontalDivider()
             Text("О приложении", style = MaterialTheme.typography.titleMedium)
             Text(
                 "Code Academy ${app.codeacademy.BuildConfig.VERSION_NAME} · бесплатно и офлайн. Python 3.13: Pyodide 0.29.5 (MPL-2.0), Chaquopy 17 (MIT). " +
@@ -89,5 +92,112 @@ private fun Choice(label: String, selected: Boolean, tag: String, onClick: () ->
     ) {
         RadioButton(selected = selected, onClick = null)
         Text(label, Modifier.padding(start = 8.dp))
+    }
+}
+
+/** Имя файла копии: code-academy-backup-2026-11-22.zip */
+fun backupFileName(now: java.time.LocalDate = java.time.LocalDate.now()) = "code-academy-backup-$now.zip"
+
+/** Резервная копия, восстановление и удаление всех данных (раздел 14 ТЗ). Аккаунт и облако не нужны. */
+@Composable
+private fun BackupSection() {
+    val c = LocalContainer.current
+    val scope = rememberCoroutineScope()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    var status by remember { mutableStateOf<String?>(null) }
+    var busy by remember { mutableStateOf(false) }
+    var pending by remember { mutableStateOf<Pair<android.net.Uri, app.codeacademy.data.BackupSummary>?>(null) }
+    var wipeStep by remember { mutableStateOf(0) }
+
+    fun describe(s: app.codeacademy.data.BackupSummary) =
+        "уроков с прогрессом: ${s.lessons}, попыток: ${s.attempts}, проектов: ${s.projects}, настроек: ${s.settings}"
+
+    val save = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/zip"),
+    ) { uri ->
+        if (uri != null) scope.launch {
+            busy = true
+            status = runCatching {
+                val out = context.contentResolver.openOutputStream(uri) ?: throw java.io.IOException("не удалось открыть файл")
+                out.use { c.backup.export(it) }
+            }.fold({ "Копия сохранена: ${describe(it)}." }, { "Не удалось сохранить копию: ${it.message}" })
+            busy = false
+        }
+    }
+    val open = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        if (uri != null) scope.launch {
+            busy = true
+            runCatching {
+                (context.contentResolver.openInputStream(uri) ?: throw java.io.IOException("не удалось открыть файл")).use { c.backup.inspect(it) }
+            }.onSuccess { pending = uri to it }.onFailure { status = "Эту копию нельзя восстановить: ${it.message}" }
+            busy = false
+        }
+    }
+
+    Text("Данные и резервная копия", style = MaterialTheme.typography.titleMedium)
+    Text(
+        "Всё хранится только на этом устройстве. Копия — один ZIP-файл: прогресс, попытки, повторения, черновики, " +
+            "проекты и настройки. Сохраните его, например, в «Загрузки» или на диск, чтобы перенести обучение на другой телефон.",
+        style = MaterialTheme.typography.bodySmall,
+    )
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        androidx.compose.material3.Button(enabled = !busy, onClick = { save.launch(backupFileName()) },
+            modifier = Modifier.testTag("backup-save")) { Text("Сохранить копию") }
+        OutlinedButton(enabled = !busy, onClick = { open.launch(arrayOf("application/zip", "application/x-zip-compressed", "application/octet-stream")) },
+            modifier = Modifier.testTag("backup-restore")) { Text("Восстановить") }
+    }
+    OutlinedButton(enabled = !busy, onClick = { wipeStep = 1 }, modifier = Modifier.testTag("wipe-data")) { Text("Удалить все данные") }
+    if (busy) androidx.compose.material3.CircularProgressIndicator(Modifier.padding(4.dp))
+    status?.let { Text(it, modifier = Modifier.testTag("backup-status")) }
+
+    pending?.let { (uri, sum) ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { pending = null },
+            title = { Text("Восстановить из копии?") },
+            text = {
+                Text("Копия от ${java.text.DateFormat.getDateTimeInstance().format(java.util.Date(sum.createdAt))} " +
+                    "(версия ${sum.appVersion}): ${describe(sum)}.\n\nВсе текущие данные на устройстве будут заменены. " +
+                    "Если они нужны — сначала сохраните отдельную копию.")
+            },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    pending = null
+                    scope.launch {
+                        busy = true
+                        status = runCatching {
+                            (context.contentResolver.openInputStream(uri) ?: throw java.io.IOException("не удалось открыть файл"))
+                                .use { c.backup.restore(it) }
+                        }.fold({ "Восстановлено: ${describe(it)}." }, { "Восстановление не удалось: ${it.message}" })
+                        busy = false
+                    }
+                }, modifier = Modifier.testTag("backup-restore-confirm")) { Text("Восстановить") }
+            },
+            dismissButton = { androidx.compose.material3.TextButton(onClick = { pending = null }) { Text("Отмена") } },
+        )
+    }
+    if (wipeStep > 0) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { wipeStep = 0 },
+            title = { Text(if (wipeStep == 1) "Удалить все данные?" else "Точно удалить?") },
+            text = {
+                Text(if (wipeStep == 1) "Будут удалены прогресс, попытки, повторения, черновики, все проекты и настройки. " +
+                    "Контент курса останется. Сначала можно сохранить копию."
+                else "Это нельзя отменить без резервной копии.")
+            },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    if (wipeStep == 1) { wipeStep = 2; return@TextButton }
+                    wipeStep = 0
+                    scope.launch {
+                        busy = true
+                        status = runCatching { c.backup.wipe() }.fold({ "Все данные удалены." }, { "Не удалось удалить: ${it.message}" })
+                        busy = false
+                    }
+                }, modifier = Modifier.testTag("wipe-confirm")) { Text(if (wipeStep == 1) "Далее" else "Удалить") }
+            },
+            dismissButton = { androidx.compose.material3.TextButton(onClick = { wipeStep = 0 }) { Text("Отмена") } },
+        )
     }
 }

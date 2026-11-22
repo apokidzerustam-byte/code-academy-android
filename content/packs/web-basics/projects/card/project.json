@@ -1,0 +1,118 @@
+{
+  "id": "card",
+  "kind": "mini",
+  "title": "Визитка",
+  "summary": "Страница о себе из трёх файлов: разметка, оформление и кнопка, которая показывает контакты.",
+  "language": "html",
+  "afterLesson": "web-02-js",
+  "skills": [
+    "web.html",
+    "web.css",
+    "js.dom",
+    "js.events"
+  ],
+  "milestones": [
+    {
+      "id": "main",
+      "title": "Визитка",
+      "statement": "Сделайте страницу о себе из трёх файлов проекта:\n\n- `index.html`: заголовок `h1` с вашим именем, список увлечений `<ul id=\"hobbies\">` (не меньше 3 пунктов), кнопка `<button id=\"show\">` и абзац `<p id=\"contacts\">` с адресом почты;\n- `style.css`: цвет заголовка (не чёрный) и скрытый абзац контактов (`display: none`);\n- `script.js`: нажатие кнопки показывает контакты, следующее — снова прячет.\n\nФайлы `style.css` и `script.js` уже подключены в `index.html`.",
+      "goal": "Проект из нескольких файлов: HTML, CSS и JavaScript вместе.",
+      "starterFiles": {
+        "index.html": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Визитка</title>\n  <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body>\n  <!-- Имя, пара слов о себе, список увлечений, кнопка и контакты -->\n  <script src=\"script.js\"></script>\n</body>\n</html>\n",
+        "style.css": "/* Оформление */\n",
+        "script.js": "// Кнопка «Контакты»\n"
+      },
+      "hints": [
+        "Список: <ul id=\"hobbies\"> и три <li>.",
+        "Удобно прятать через класс: .hidden { display: none; } и <p id=\"contacts\" class=\"hidden\">.",
+        "В script.js найдите кнопку и абзац через document.getElementById.",
+        "classList.toggle(\"hidden\") добавляет класс, если его нет, и убирает, если есть.",
+        "button.addEventListener(\"click\", () => { contacts.classList.toggle(\"hidden\"); });"
+      ],
+      "tests": {
+        "kind": "web",
+        "lang": "html",
+        "entry": "index.html",
+        "cases": [
+          {
+            "id": "name",
+            "expr": "((document.querySelector('h1') || {}).textContent || '').trim().length > 0",
+            "expected": true
+          },
+          {
+            "id": "hobbies",
+            "expr": "document.querySelectorAll('#hobbies li').length >= 3",
+            "expected": true
+          },
+          {
+            "id": "color",
+            "expr": "getComputedStyle(document.querySelector('h1')).color !== 'rgb(0, 0, 0)'",
+            "expected": true
+          },
+          {
+            "id": "hidden",
+            "expr": "!!document.getElementById('contacts') && getComputedStyle(document.getElementById('contacts')).display === 'none'",
+            "expected": true
+          },
+          {
+            "id": "show",
+            "before": "document.getElementById('show').click();",
+            "expr": "getComputedStyle(document.getElementById('contacts')).display !== 'none'",
+            "expected": true
+          },
+          {
+            "id": "toggle",
+            "hidden": true,
+            "before": "document.getElementById('show').click();document.getElementById('show').click();",
+            "expr": "getComputedStyle(document.getElementById('contacts')).display",
+            "expected": "none",
+            "hint": "Второе нажатие снова прячет контакты"
+          },
+          {
+            "id": "email",
+            "hidden": true,
+            "expr": "(document.getElementById('contacts') || {}).textContent.includes('@')",
+            "expected": true,
+            "hint": "В контактах должен быть адрес почты с @"
+          }
+        ]
+      },
+      "solutionFiles": {
+        "index.html": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Визитка</title>\n  <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body>\n  <h1>Анна Смирнова</h1>\n  <p>Учусь программировать.</p>\n  <ul id=\"hobbies\">\n    <li>Python</li>\n    <li>Велосипед</li>\n    <li>Фотография</li>\n  </ul>\n  <button id=\"show\">Контакты</button>\n  <p id=\"contacts\" class=\"hidden\">anna@example.com</p>\n  <script src=\"script.js\"></script>\n</body>\n</html>\n",
+        "style.css": "body {\n  font-family: sans-serif;\n  margin: 16px;\n}\n\nh1 {\n  color: teal;\n}\n\n.hidden {\n  display: none;\n}\n",
+        "script.js": "const button = document.getElementById(\"show\");\nconst contacts = document.getElementById(\"contacts\");\nbutton.addEventListener(\"click\", () => {\n  contacts.classList.toggle(\"hidden\");\n});\n"
+      },
+      "explanation": "Класс hidden прячет абзац правилом CSS, а toggle по нажатию то добавляет, то убирает его — так кнопка работает как переключатель.",
+      "criteria": [
+        "Имя, 3+ увлечения, цвет заголовка.",
+        "Контакты скрыты и открываются кнопкой, второе нажатие прячет."
+      ],
+      "wrongSolutions": [
+        {
+          "files": {
+            "index.html": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Визитка</title>\n  <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body>\n  <h1>Анна Смирнова</h1>\n  <p>Учусь программировать.</p>\n  <ul id=\"hobbies\">\n    <li>Python</li>\n    <li>Велосипед</li>\n    <li>Фотография</li>\n  </ul>\n  <button id=\"show\">Контакты</button>\n  <p id=\"contacts\" class=\"hidden\">anna@example.com</p>\n  <script src=\"script.js\"></script>\n</body>\n</html>\n",
+            "style.css": "body {\n  font-family: sans-serif;\n  margin: 16px;\n}\n\nh1 {\n  color: teal;\n}\n\n",
+            "script.js": "const button = document.getElementById(\"show\");\nconst contacts = document.getElementById(\"contacts\");\nbutton.addEventListener(\"click\", () => {\n  contacts.classList.toggle(\"hidden\");\n});\n"
+          },
+          "why": "Контакты видны сразу: нет правила display: none."
+        },
+        {
+          "files": {
+            "index.html": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Визитка</title>\n  <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body>\n  <h1>Анна Смирнова</h1>\n  <p>Учусь программировать.</p>\n  <ul id=\"hobbies\">\n    <li>Python</li>\n    <li>Велосипед</li>\n    <li>Фотография</li>\n  </ul>\n  <button id=\"show\">Контакты</button>\n  <p id=\"contacts\" class=\"hidden\">anna@example.com</p>\n  <script src=\"script.js\"></script>\n</body>\n</html>\n",
+            "style.css": "body {\n  font-family: sans-serif;\n  margin: 16px;\n}\n\nh1 {\n  color: teal;\n}\n\n.hidden {\n  display: none;\n}\n",
+            "script.js": "const button = document.getElementById(\"show\");\nconst contacts = document.getElementById(\"contacts\");\nbutton.addEventListener(\"click\", () => {\n  contacts.classList.remove(\"hidden\");\n});\n"
+          },
+          "why": "Кнопка только показывает — второе нажатие не прячет."
+        },
+        {
+          "files": {
+            "index.html": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Визитка</title>\n  <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body>\n  <h1>Анна Смирнова</h1>\n  <p>Учусь программировать.</p>\n  <ul id=\"hobbies\">\n    <li>Python</li>\n    <li>Велосипед</li>\n  </ul>\n  <button id=\"show\">Контакты</button>\n  <p id=\"contacts\" class=\"hidden\">anna@example.com</p>\n  <script src=\"script.js\"></script>\n</body>\n</html>\n",
+            "style.css": "body {\n  font-family: sans-serif;\n  margin: 16px;\n}\n\nh1 {\n  color: teal;\n}\n\n.hidden {\n  display: none;\n}\n",
+            "script.js": "const button = document.getElementById(\"show\");\nconst contacts = document.getElementById(\"contacts\");\nbutton.addEventListener(\"click\", () => {\n  contacts.classList.toggle(\"hidden\");\n});\n"
+          },
+          "why": "В списке только 2 увлечения."
+        }
+      ]
+    }
+  ]
+}

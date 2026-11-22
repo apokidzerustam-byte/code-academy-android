@@ -11,6 +11,8 @@ import kotlinx.serialization.json.JsonElement
 @Serializable
 data class CaseReport(
     val id: String? = null,
+    /** Файл проекта, который проверял тест (учебные проекты). */
+    val file: String? = null,
     /** Номер строки ответа (задания «предскажи результат»). */
     val line: Int? = null,
     val hidden: Boolean = false,
@@ -76,6 +78,32 @@ class AssessmentService(private val json: Json = Json { ignoreUnknownKeys = true
             else -> 10_000L
         }
         val r = runner.check(code, testsJson(a), timeoutMs = timeout, project = "check-${a.id}")
+        if (r.status != RunStatus.OK) return Verdict(null, r.status, r.stderr)
+        val report = runCatching { json.decodeFromString(CheckReport.serializer(), r.stdout) }.getOrNull()
+            ?: return Verdict(null, RunStatus.ERROR, "Некорректный отчёт проверки: ${r.stdout.take(200)}")
+        return Verdict(report)
+    }
+
+    /**
+     * Проверка этапа учебного проекта. Python: все файлы проекта передаются песочнице (kind=project),
+     * HTML: страница-вход проверяется вместе с остальными файлами проекта.
+     */
+    suspend fun evaluateProject(
+        runner: CodeRunner,
+        language: String,
+        tests: kotlinx.serialization.json.JsonObject,
+        files: Map<String, String>,
+        project: String,
+    ): Verdict {
+        val cases = (tests["cases"] as? kotlinx.serialization.json.JsonArray)?.size ?: 1
+        val r = if (language == "python") {
+            val code = kotlinx.serialization.json.JsonObject(files.mapValues { kotlinx.serialization.json.JsonPrimitive(it.value) }).toString()
+            runner.check(code, tests.toString(), timeoutMs = 10_000L + 3_000L * cases, project = project)
+        } else {
+            val entry = (tests["entry"] as? kotlinx.serialization.json.JsonPrimitive)?.content ?: "index.html"
+            val page = files[entry] ?: return Verdict(CheckReport(loadError = "В проекте нет файла $entry"))
+            runner.check(page, tests.toString(), timeoutMs = 15_000L + 3_000L * cases, project = project, files = files)
+        }
         if (r.status != RunStatus.OK) return Verdict(null, r.status, r.stderr)
         val report = runCatching { json.decodeFromString(CheckReport.serializer(), r.stdout) }.getOrNull()
             ?: return Verdict(null, RunStatus.ERROR, "Некорректный отчёт проверки: ${r.stdout.take(200)}")

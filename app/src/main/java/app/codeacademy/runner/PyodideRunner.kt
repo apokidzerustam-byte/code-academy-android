@@ -62,7 +62,7 @@ class PyodideRunner(context: Context) : CodeRunner {
         files: Map<String, String>?,
     ): RunResult = send(code, timeoutMs, stdin, project, null, files)
 
-    override suspend fun check(code: String, testsJson: String, timeoutMs: Long, project: String): RunResult =
+    override suspend fun check(code: String, testsJson: String, timeoutMs: Long, project: String, files: Map<String, String>?): RunResult =
         send(code, timeoutMs, "", project, testsJson, null)
 
     private suspend fun send(

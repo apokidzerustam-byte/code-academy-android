@@ -55,7 +55,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-private val HINT_TITLES = listOf("Намёк", "Направление", "Концепция", "Где искать", "Алгоритм")
+internal val HINT_TITLES = listOf("Намёк", "Направление", "Концепция", "Где искать", "Алгоритм")
 
 /**
  * W по умолчанию; в режиме AUTO при недоступном W — переход на A. Задания «предскажи результат»
@@ -333,7 +333,11 @@ private fun statusText(s: RunStatus) = when (s) {
 }
 
 @Composable
-private fun VerdictView(v: Verdict, asg: Assignment) {
+private fun VerdictView(v: Verdict, asg: Assignment) = VerdictView(v, asg.explanation)
+
+/** Результат проверки: задания и этапы учебных проектов. */
+@Composable
+internal fun VerdictView(v: Verdict, explanation: String) {
     val ok = v.passed
     Card(
         Modifier.fillMaxWidth().testTag("verdict"),
@@ -369,7 +373,7 @@ private fun VerdictView(v: Verdict, asg: Assignment) {
                         }
                         cs.hint?.let { Text("→ $it") }
                     }
-                    if (ok) Text(asg.explanation)
+                    if (ok) Text(explanation)
                 }
                 else -> {
                     Text(
@@ -380,6 +384,7 @@ private fun VerdictView(v: Verdict, asg: Assignment) {
                         if (cs.hidden) {
                             Text("Скрытый тест не пройден." + (cs.hint?.let { " Подсказка: $it" } ?: ""))
                         } else {
+                            cs.file?.let { Text("Файл: $it", style = MaterialTheme.typography.labelLarge) }
                             if (cs.input != null && cs.input.show().isNotBlank()) Text("Входные данные: ${cs.input.show()}")
                             if (cs.expected != null) {
                                 Text("Ожидалось:")
@@ -393,7 +398,7 @@ private fun VerdictView(v: Verdict, asg: Assignment) {
                         }
                         cs.error?.let { CodeBlock(it) }
                     }
-                    if (ok) Text(asg.explanation)
+                    if (ok) Text(explanation)
                 }
             }
             if (r != null && r.warnings.isNotEmpty()) {

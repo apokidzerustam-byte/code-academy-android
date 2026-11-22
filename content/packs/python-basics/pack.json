@@ -53,5 +53,11 @@
     "python.lists.append": "append",
     "python.lists.iterate": "Перебор списка",
     "python.builtins.aggregate": "sum, min, max"
-  }
+  },
+  "projects": [
+    "finance",
+    "thermometer",
+    "quiz",
+    "shopping"
+  ]
 }

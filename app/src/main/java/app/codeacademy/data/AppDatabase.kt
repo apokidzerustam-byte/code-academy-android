@@ -23,8 +23,10 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun projects(): ProjectDao
 
     companion object {
-        fun create(context: Context): AppDatabase =
-            Room.databaseBuilder(context, AppDatabase::class.java, "code_academy.db").build()
+        const val NAME = "code_academy.db"
+
+        fun create(context: Context, name: String = NAME): AppDatabase =
+            Room.databaseBuilder(context, AppDatabase::class.java, name).build()
 
         fun inMemory(context: Context): AppDatabase =
             Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).build()

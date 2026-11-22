@@ -231,10 +231,9 @@ def _forget_user_modules(root):
             del sys.modules[name]
 
 
-def run(code, sandbox_dir=None, stdin_text="", max_output=16384):
-    """Выполняет код ученика. Возвращает JSON-строку с результатом."""
+def run(code, sandbox_dir=None, stdin_text="", max_output=16384, filename="main.py"):
+    """Выполняет код ученика. Возвращает JSON-строку с результатом. filename — имя файла в сообщениях об ошибках."""
     global _ACTIVE, _SANDBOX
-    filename = "main.py"
     out, err = _CappedIO(max_output), _CappedIO(max_output)
     status = "OK"
     started = time.monotonic()
@@ -388,11 +387,11 @@ def _case_report(case, passed, expected=None, actual=None, error=None):
     return rep
 
 
-def _check_stdout(code, spec, sandbox_dir, max_output):
+def _check_stdout(code, spec, sandbox_dir, max_output, filename="main.py"):
     mode = spec.get("match", "strip")
     reports = []
     for case in spec["cases"]:
-        r = json.loads(run(code, sandbox_dir, case.get("stdin", ""), max_output))
+        r = json.loads(run(code, sandbox_dir, case.get("stdin", ""), max_output, filename))
         exp = _normalize(case["expected_stdout"], mode)
         act = _normalize(r["stdout"], mode)
         if r["status"] == "SYNTAX_ERROR":
@@ -404,11 +403,10 @@ def _check_stdout(code, spec, sandbox_dir, max_output):
     return {"cases": reports}
 
 
-def _check_function(code, spec, sandbox_dir, max_output):
+def _check_function(code, spec, sandbox_dir, max_output, filename="main.py"):
     global _ACTIVE, _SANDBOX
     fname = spec["function"]
     tol = float(spec.get("tolerance", 1e-9))
-    filename = "main.py"
     out, err = _CappedIO(max_output), _CappedIO(max_output)
     old_streams = sys.stdout, sys.stderr, sys.stdin
     old_cwd = os.getcwd()
@@ -496,6 +494,66 @@ def _line_hint(mine, right):
     if mine.strip().lower() == right.strip().lower():
         return "Проверьте большие и маленькие буквы."
     return "Проследите, что делает эта строка программы: выводит текст как есть или сначала вычисляет."
+
+
+def _read_text(path):
+    try:
+        with open(path, encoding="utf-8") as f:
+            return f.read()
+    except (OSError, UnicodeDecodeError):
+        return None
+
+
+def _check_project(files_json, spec, sandbox_dir, max_output):
+    """Проверка многофайлового проекта. Каждый тест указывает файл ("file", по умолчанию main.py) и одно из:
+    - stdin / expected_stdout (+ expected_files: какие файлы программа должна создать и с каким текстом);
+    - function / args / expected (функция из этого файла).
+    Перед каждым тестом файлы проекта записываются заново: тесты не влияют друг на друга."""
+    try:
+        files = json.loads(files_json)
+        if not isinstance(files, dict) or not all(isinstance(k, str) and isinstance(v, str) for k, v in files.items()):
+            raise ValueError
+    except ValueError:
+        return {"loadError": "Не удалось прочитать файлы проекта"}
+    if not sandbox_dir:
+        return {"loadError": "Проекты проверяются в режимах W или A (в изолированном режиме B нет папки проекта)."}
+    for req in spec.get("requiredFiles", []):
+        if req not in files:
+            return {"loadError": f"В проекте нет файла {req}. Создайте его кнопкой «+ файл»."}
+    mode = spec.get("match", "strip")
+    tol = spec.get("tolerance", 1e-9)
+    reports = []
+    for case in spec["cases"]:
+        fname = case.get("file", spec.get("entry", "main.py"))
+        if fname not in files:
+            return {"loadError": f"В проекте нет файла {fname}. Создайте его кнопкой «+ файл»."}
+        try:
+            write_files(sandbox_dir, json.dumps(files))
+        except ValueError as e:
+            return {"loadError": str(e)}
+        code = files[fname]
+        if "function" in case:
+            r = _check_function(code, {"function": case["function"], "tolerance": tol, "cases": [case]},
+                                sandbox_dir, max_output, fname)
+        else:
+            r = _check_stdout(code, {"match": mode, "cases": [case]}, sandbox_dir, max_output, fname)
+        if "compileError" in r or "loadError" in r:
+            return r
+        rep = r["cases"][0]
+        if rep["passed"] and case.get("expected_files"):
+            for path, want in case["expected_files"].items():
+                got = _read_text(os.path.join(sandbox_dir, _safe_rel(path)))
+                if got is None or _normalize(got, mode) != _normalize(want, mode):
+                    rep = _case_report(case, False, want, got,
+                                       None if got is not None else f"Файл {path} не создан")
+                    rep["hint"] = case.get("hint") or (f"Проверьте содержимое файла {path}" if got is not None
+                                                       else f"Программа должна создать файл {path}")
+                    if not rep["hidden"]:
+                        rep["input"] = _clip(case.get("stdin"))
+                    break
+        rep["file"] = fname
+        reports.append(rep)
+    return {"cases": reports}
 
 
 def _check_answer(answer, spec):
@@ -637,6 +695,9 @@ def check(code, tests_json, sandbox_dir=None, max_output=4096):
         res = _check_function(code, spec, sandbox_dir, max_output)
     elif spec["kind"] == "fastapi":
         res = _check_fastapi(code, spec, sandbox_dir, max_output)
+    elif spec["kind"] == "project":
+        # Учебный проект: code — JSON {путь: текст} всех файлов проекта.
+        res = _check_project(code, spec, sandbox_dir, max_output)
     elif spec["kind"] == "answer":
         # «Предскажи результат»: code — ответ ученика текстом, код не выполняется.
         res = _check_answer(code, spec)

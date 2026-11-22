@@ -173,7 +173,7 @@ class RunnerClient(context: Context, val isolated: Boolean) : CodeRunner {
         return if (files != null && dir != null) r.copy(files = withContext(Dispatchers.IO) { ProjectFiles.read(dir) }) else r
     }
 
-    override suspend fun check(code: String, testsJson: String, timeoutMs: Long, project: String): RunResult =
+    override suspend fun check(code: String, testsJson: String, timeoutMs: Long, project: String, files: Map<String, String>?): RunResult =
         send(code, timeoutMs, "", project, mode = "check", tests = testsJson)
 
     private suspend fun send(

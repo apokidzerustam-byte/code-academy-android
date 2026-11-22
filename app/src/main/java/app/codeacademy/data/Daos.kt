@@ -103,6 +103,9 @@ interface ProjectDao {
     @Query("SELECT * FROM project_file ORDER BY projectId, path")
     fun allFiles(): Flow<List<ProjectFileEntity>>
 
+    @Query("SELECT * FROM project_file ORDER BY projectId, path")
+    suspend fun allFilesOnce(): List<ProjectFileEntity>
+
     @Query("SELECT * FROM project_file WHERE projectId = :id ORDER BY path")
     suspend fun files(id: String): List<ProjectFileEntity>
 

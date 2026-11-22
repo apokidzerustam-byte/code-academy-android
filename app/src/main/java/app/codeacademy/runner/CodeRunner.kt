@@ -23,6 +23,8 @@ interface CodeRunner {
         testsJson: String,
         timeoutMs: Long = 10_000,
         project: String = "check",
+        /** Файлы веб-проекта (страница проверяется вместе с CSS и JS); Python-проект передаёт файлы в code. */
+        files: Map<String, String>? = null,
     ): RunResult
 
     fun stop()

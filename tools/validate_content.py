@@ -40,7 +40,7 @@ _spec.loader.exec_module(_narrate)
 split_phrases = _narrate.split_phrases
 
 SCHEMAS = {n: json.loads((ROOT / "content" / "schema" / f"{n}.schema.json").read_text(encoding="utf-8"))
-           for n in ("pack", "lesson", "scenario", "assignment")}
+           for n in ("pack", "lesson", "scenario", "assignment", "project")}
 WORDS_PER_MIN = 140  # замер: образцы озвучки ~150 слов/мин; берём с запасом
 MAX_MIN, WARN_MIN_LOW, WARN_MIN_HIGH = 10.0, 3.0, 8.0
 
@@ -531,6 +531,76 @@ def validate_pack(pack_dir, rep):
                 if not NO_RUN:
                     validate_assignment(p, a, rep, lesson_lang)
         pstats["lessons"][lid] = st
+    for pid in pack.get("projects", []):
+        validate_project(pack_dir, pack, pid, rep, pstats)
+
+
+def validate_project(pack_dir, pack, pid, rep, pstats):
+    """Учебный проект: эталон каждого этапа проходит; заготовка (эталон прошлого этапа + новые файлы)
+    и типовые ошибки — нет. Python — песочницей ca_runner, HTML — веб-раннером (как в приложении)."""
+    path = pack_dir / "projects" / pid / "project.json"
+    if not path.exists():
+        rep.err(str(path), "нет файла project.json")
+        return
+    proj = load_json(path, "project", rep)
+    if not proj:
+        return
+    where0 = str(path)
+    if proj["id"] != pid:
+        rep.err(where0, f"id проекта {proj['id']!r} не совпадает с папкой {pid!r}")
+    titles = pack.get("skills", {})
+    for sk in proj.get("skills", []):
+        if sk not in titles:
+            rep.err(where0, f"навык {sk!r} без названия в pack.json → skills")
+    lessons = set(pack["lessons"])
+    for ref in [proj.get("afterLesson")] + [m.get("afterLesson") for m in proj["milestones"]]:
+        if ref and ref not in lessons:
+            rep.err(where0, f"afterLesson {ref!r}: такого урока нет в пакете")
+    ids = [m["id"] for m in proj["milestones"]]
+    if len(set(ids)) != len(ids):
+        rep.err(where0, "повтор id этапа")
+    pstats.setdefault("projects", {})[pid] = {"kind": proj["kind"], "milestones": len(ids),
+                                              "tests": sum(len(m["tests"]["cases"]) for m in proj["milestones"])}
+    if NO_RUN:
+        return
+    prev = {}
+    for m in proj["milestones"]:
+        where = f"{where0} [{m['id']}]"
+        t = m["tests"]
+        hidden = [c for c in t["cases"] if c.get("hidden")]
+        if not hidden:
+            rep.err(where, "нет скрытых тестов")
+        start = dict(prev)
+        for fp, text in m.get("starterFiles", {}).items():
+            start.setdefault(fp, text)
+        checks = [(m["solutionFiles"], True, "эталон")]
+        if start:
+            checks.append((start, False, "заготовка"))
+        checks += [(w["files"], False, f"неверное решение «{w['why']}»") for w in m["wrongSolutions"]]
+        for files, must_pass, label in checks:
+            if proj["language"] == "python":
+                if t["kind"] != "project":
+                    rep.err(where, "для Python нужен tests.kind = project")
+                    break
+                res = check_code(json.dumps(files, ensure_ascii=False), t)
+                _project_verdict(rep, where, label, must_pass, res)
+            else:
+                entry = t.get("entry", "index.html")
+                if entry not in files:
+                    if must_pass:
+                        rep.err(where, f"{label}: нет файла {entry}")
+                    continue
+                job = {"lang": "html", "mode": "check", "code": files[entry], "files": files, "entry": entry, "tests": t}
+                JOBS.add(job, lambda res, w=where, l=label, mp=must_pass: _project_verdict(rep, w, l, mp, (res or {}).get("check") or res))
+        prev = m["solutionFiles"]
+
+
+def _project_verdict(rep, where, label, must_pass, res):
+    ok = bool(res and res.get("allPassed"))
+    if must_pass and not ok:
+        rep.err(where, f"{label} не проходит тесты: {json.dumps(res, ensure_ascii=False)[:600]}")
+    elif not must_pass and ok:
+        rep.err(where, f"{label} проходит все тесты — тесты его не ловят")
 
 
 def main():

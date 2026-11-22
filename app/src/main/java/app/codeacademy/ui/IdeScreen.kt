@@ -117,7 +117,7 @@ fun zipName(title: String): String {
 fun writeProjectZip(files: Map<String, String>, out: java.io.OutputStream) {
     java.util.zip.ZipOutputStream(out).use { zip ->
         for ((path, text) in files.toSortedMap()) {
-            if (path == ProjectRepository.META || path.endsWith("/.keep")) continue
+            if (path in ProjectRepository.META_FILES || path.endsWith("/.keep")) continue
             zip.putNextEntry(java.util.zip.ZipEntry(path))
             zip.write(text.toByteArray(Charsets.UTF_8))
             zip.closeEntry()
@@ -165,7 +165,9 @@ fun IdeScreen(projectId: String, settings: Settings, onBack: () -> Unit) {
         }
     }
 
+    var course by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(projectId) {
+        course = c.projects.courseOf(projectId)
         files.clear()
         files.putAll(c.projects.files(projectId))
         if (current !in files) current = files.keys.firstOrNull { it.endsWith(".py") } ?: files.keys.firstOrNull() ?: "main.py"
@@ -245,6 +247,18 @@ fun IdeScreen(projectId: String, settings: Settings, onBack: () -> Unit) {
         Column(Modifier.padding(padding).imePadding().verticalScroll(rememberScrollState()).padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)) {
             if (loaded) {
+            course?.let { key ->
+                ProjectTaskPanel(
+                    projectId = projectId, courseKey = key, settings = settings,
+                    files = { files.toMap() },
+                    save = { c.projects.replaceAll(projectId, it) },
+                    onFilesAdded = { added ->
+                        files.putAll(added)
+                        added.keys.firstOrNull()?.let { current = it }
+                    },
+                    enabled = !running,
+                )
+            }
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 files.keys.filter { !it.endsWith("/.keep") }.sorted().forEach { f ->
                     FilterChip(selected = f == current, enabled = !running, onClick = { current = f }, label = { Text(f) },
@@ -349,7 +363,7 @@ fun IdeScreen(projectId: String, settings: Settings, onBack: () -> Unit) {
                 TextButton(onClick = {
                     val rel = runCatching { ProjectFiles.safeRel(name.trim()) }.getOrNull()
                     error = when {
-                        rel == null || rel == ProjectRepository.META -> "Недопустимое имя файла"
+                        rel == null || rel in ProjectRepository.META_FILES -> "Недопустимое имя файла"
                         rel.substringAfterLast('/') == ".keep" -> "Недопустимое имя файла"
                         rel in files || files.keys.any { it.startsWith("$rel/") } -> "Такой файл или папка уже есть"
                         else -> ProjectFiles.conflict(files.keys.filter { !it.endsWith("/.keep") } + rel)

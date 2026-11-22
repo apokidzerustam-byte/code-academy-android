@@ -5,7 +5,14 @@ import app.codeacademy.runner.ProjectFiles
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-data class ProjectInfo(val id: String, val title: String, val updatedAt: Long, val fileCount: Int)
+data class ProjectInfo(
+    val id: String,
+    val title: String,
+    val updatedAt: Long,
+    val fileCount: Int,
+    /** Учебный проект, из которого создан ("packId/projectId"), или null — свой проект. */
+    val course: String? = null,
+)
 
 /**
  * Учебные проекты (ProjectManager). Хранятся в таблице project_file; название — в служебном файле
@@ -19,20 +26,59 @@ class ProjectRepository(private val db: AppDatabase, private val clock: () -> Lo
                 id = id,
                 title = files.firstOrNull { it.path == META }?.content?.ifBlank { null } ?: id,
                 updatedAt = files.maxOf { it.updatedAt },
-                fileCount = files.count { it.path != META && !it.path.endsWith("/.keep") },
+                fileCount = files.count { it.path !in META_FILES && !it.path.endsWith("/.keep") },
+                course = files.firstOrNull { it.path == COURSE }?.content?.trim()?.ifBlank { null },
             )
         }.sortedByDescending { it.updatedAt }
     }
 
     fun filesFlow(id: String): Flow<Map<String, String>> =
-        db.projects().filesFlow(id).map { rows -> rows.filter { it.path != META }.associate { it.path to it.content } }
+        db.projects().filesFlow(id).map { rows -> rows.filter { it.path !in META_FILES }.associate { it.path to it.content } }
 
     suspend fun files(id: String): Map<String, String> =
-        db.projects().files(id).filter { it.path != META }.associate { it.path to it.content }
+        db.projects().files(id).filter { it.path !in META_FILES }.associate { it.path to it.content }
+
+    /** Учебный проект, к которому привязан проект ученика ("packId/projectId"). */
+    suspend fun courseOf(id: String): String? =
+        db.projects().files(id).firstOrNull { it.path == COURSE }?.content?.trim()?.ifBlank { null }
+
+    /** Проект ученика для учебного проекта: уже начатый или новый (с файлами первого этапа). */
+    suspend fun startCourse(courseKey: String, title: String, starter: Map<String, String>): String = db.withTransaction {
+        val existing = db.projects().allFilesOnce().firstOrNull { it.path == COURSE && it.content.trim() == courseKey }
+        if (existing != null) return@withTransaction existing.projectId
+        val id = newId()
+        val now = clock()
+        db.projects().upsert(ProjectFileEntity(id, META, title.trim().ifBlank { "Проект" }, now))
+        db.projects().upsert(ProjectFileEntity(id, COURSE, courseKey, now))
+        for ((path, text) in starter) db.projects().upsert(ProjectFileEntity(id, ProjectFiles.safeRel(path), text, now))
+        id
+    }
+
+    /** Добавляет файлы нового этапа; то, что ученик уже написал, не трогается. Возвращает добавленные пути. */
+    suspend fun addMissingFiles(id: String, files: Map<String, String>): List<String> = db.withTransaction {
+        val have = db.projects().files(id).map { it.path }.toSet()
+        val now = clock()
+        files.filterKeys { ProjectFiles.safeRel(it) !in have }.map { (path, text) ->
+            ProjectFiles.safeRel(path).also { db.projects().upsert(ProjectFileEntity(id, it, text, now)) }
+        }
+    }
+
+    /** Новый проект из архива ZIP (файлы проверены и прочитаны заранее). */
+    suspend fun importFiles(title: String, files: Map<String, String>): String {
+        val id = newId()
+        val now = clock()
+        db.withTransaction {
+            db.projects().upsert(ProjectFileEntity(id, META, title.trim().ifBlank { "Проект" }, now))
+            for ((path, text) in files) db.projects().upsert(ProjectFileEntity(id, path, text, now))
+        }
+        return id
+    }
+
+    private fun newId() = "p" + clock().toString(36) + (1000..9999).random()
 
     /** Новый проект из шаблона: python, web, sql или kotlin. */
     suspend fun create(title: String, template: String = "python"): String {
-        val id = "p" + clock().toString(36) + (1000..9999).random()
+        val id = newId()
         val now = clock()
         val files = TEMPLATES[template] ?: TEMPLATES.getValue("python")
         db.withTransaction {
@@ -49,7 +95,7 @@ class ProjectRepository(private val db: AppDatabase, private val clock: () -> Lo
 
     suspend fun saveFile(id: String, path: String, content: String) {
         val rel = ProjectFiles.safeRel(path)
-        require(rel != META) { "Служебное имя" }
+        require(rel !in META_FILES) { "Служебное имя" }
         db.projects().upsert(ProjectFileEntity(id, rel, content, clock()))
     }
 
@@ -59,15 +105,18 @@ class ProjectRepository(private val db: AppDatabase, private val clock: () -> Lo
     suspend fun replaceAll(id: String, files: Map<String, String>) = db.withTransaction {
         val now = clock()
         val current = db.projects().files(id).associateBy { it.path }
-        for (path in current.keys) if (path != META && path !in files) db.projects().deleteFile(id, path)
+        for (path in current.keys) if (path !in META_FILES && path !in files) db.projects().deleteFile(id, path)
         for ((path, text) in files) {
-            if (path == META) continue
+            if (path in META_FILES) continue
             if (current[path]?.content != text) db.projects().upsert(ProjectFileEntity(id, path, text, now))
         }
     }
 
     companion object {
         const val META = ".project"
+        /** Связь с учебным проектом: "packId/projectId". */
+        const val COURSE = ".course"
+        val META_FILES = setOf(META, COURSE)
         const val TEMPLATE = "# Мой проект\nname = input(\"Как вас зовут? \")\nprint(\"Привет,\", name)\n"
 
         val KOTLIN_WORKFLOW = """name: Kotlin

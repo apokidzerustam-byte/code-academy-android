@@ -31,7 +31,7 @@ class TrainingShell(
     /** Почему по этому пути нельзя создать файл (null — можно). */
     private fun cannotCreate(p: String, arg: String): String? {
         if (p.isEmpty()) return "$arg: это корень проекта"
-        if (p.substringAfterLast('/') == ".keep" || p == app.codeacademy.data.ProjectRepository.META) return "$arg: служебное имя"
+        if (p.substringAfterLast('/') == ".keep" || p in app.codeacademy.data.ProjectRepository.META_FILES) return "$arg: служебное имя"
         if (isDir(p)) return "$arg: это папка"
         var i = p.indexOf('/')
         while (i > 0) {
