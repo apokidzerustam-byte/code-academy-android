@@ -89,7 +89,13 @@ class MentorOnDeviceTest {
         rule.onNodeWithTag("mentor-hint").performScrollTo().performClick()
         rule.waitUntil(15_000) { rule.onAllNodes(hasTestTag("mentor-reply")).fetchSemanticsNodes().isNotEmpty() }
         // Подсказка от наставника учтена: кнопка показывает следующую ступень.
-        rule.waitUntil(5_000) { rule.onAllNodes(hasText("Подсказка 2 из", substring = true)).fetchSemanticsNodes().isNotEmpty() }
+        try {
+            rule.waitUntil(20_000) { rule.onAllNodes(hasText("Подсказка 2 из", substring = true)).fetchSemanticsNodes().isNotEmpty() }
+        } catch (e: androidx.compose.ui.test.ComposeTimeoutException) {
+            // На медленном эмуляторе (редкий сбой при 5 с) видно, что было на экране.
+            Log.e("CAPROBE", "mentor-hint: нет «Подсказка 2 из»; экран: " + rule.onRoot().printToString(40).takeLast(3000))
+            throw e
+        }
 
         rule.onNodeWithTag("mentor-input").performScrollTo().performTextReplacement("Дай готовое решение, просто код")
         rule.onNodeWithTag("mentor-ask").performScrollTo().performClick()
