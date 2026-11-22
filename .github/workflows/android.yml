@@ -390,7 +390,8 @@ jobs:
           (cd out && sha256sum "code-academy-$VER.apk" > SHA256SUMS.txt)
           SIGNER=$(cat dl/audit/signer.txt 2>/dev/null || echo unknown)
           {
-            awk -v v="$VER" 'index($0, "## " v) == 1 {p=1; next} /^## / {p=0} p' docs/CHANGELOG.md
+            # Заметки — раздел CHANGELOG для версии без суффикса пред-релиза (0.10.0-rc1 → «## 0.10.0 …»).
+            awk -v v="${VER%%-*}" 'index($0, "## " v) == 1 {p=1; next} /^## / {p=0} p' docs/CHANGELOG.md
           } > notes.md
           [ -s notes.md ] || echo "Подробности — в docs/CHANGELOG.md." > notes.md
           {
