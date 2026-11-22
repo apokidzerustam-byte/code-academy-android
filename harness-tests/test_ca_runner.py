@@ -182,3 +182,13 @@ def test_common_native_modules_work_under_hook(box):
     r = run("import math, random, datetime, decimal, sqlite3, hashlib, statistics\nprint(math.isqrt(49))", box)
     assert r["status"] == "OK", r["stderr"]
     assert r["stdout"] == "7\n"
+
+
+def test_asyncio_current_task_in_fresh_process(tmp_path):
+    """Предзагрузка модулей не ломает asyncio.current_task (иначе anyio/FastAPI падают на set_name)."""
+    import subprocess
+    code = ("import sys, json; sys.path.insert(0, sys.argv[1]); import ca_runner; "
+            "print(ca_runner.run('import asyncio\\nasync def f(): return asyncio.current_task()\\nprint(asyncio.run(f()) is not None)', sys.argv[2], '', 4096))")
+    out = subprocess.run([sys.executable, "-I", "-c", code, os.path.join(os.path.dirname(__file__), "..", "app", "src", "main", "python"), str(tmp_path)],
+                         capture_output=True, text=True, timeout=60)
+    assert json.loads(out.stdout)["stdout"] == "True\n", out

@@ -131,46 +131,6 @@ class WebLanguagesOnDeviceTest {
         assertTrue(bad.stderr, "строка" in bad.stderr)
     }
 
-    /** Диагностика asyncio/FastAPI в песочнице уровня A (вывод — в лог CAPROBE). */
-    @Test fun fastapiDiagnostics() = runBlocking<Unit> {
-        val py = RunnerClient(ctx, isolated = false)
-        try {
-            val code = """
-import asyncio, sys, threading
-import asyncio.tasks as t
-print("py", sys.version.split()[0])
-print("Task", t.Task, t.Task.__module__, "current_task", t.current_task, getattr(t.current_task, "__module__", None))
-try:
-    import _asyncio
-    print("_asyncio", _asyncio.Task, _asyncio.current_task)
-except Exception as e:
-    print("_asyncio import failed:", repr(e))
-async def f():
-    return asyncio.current_task()
-print("main thread current_task:", asyncio.run(f()))
-res = []
-th = threading.Thread(target=lambda: res.append(asyncio.run(f())))
-th.start(); th.join()
-print("worker thread current_task:", res)
-import traceback
-try:
-    from fastapi import FastAPI
-    from fastapi.testclient import TestClient
-    app = FastAPI()
-    @app.get("/")
-    def root():
-        return {"ok": 1}
-    print(TestClient(app).get("/").json())
-except Exception:
-    traceback.print_exc(file=sys.stdout)
-""".trimIndent()
-            val r = py.run(code, 40_000)
-            (r.stdout + "\n" + r.stderr).lines().forEach { Log.i("CAPROBE", "diag: $it") }
-        } finally {
-            py.close()
-        }
-    }
-
     /** Все задания новых пакетов: исполнитель — как в приложении (веб-язык задания или Python A для FastAPI и ответов). */
     @Test fun newPacksAutocheck() = runBlocking<Unit> {
         val content = ContentRepository(ctx.assets)

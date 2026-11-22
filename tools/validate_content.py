@@ -421,6 +421,23 @@ def validate_assignment(path, a, rep, lang="python"):
             _check_answer_output(rep, where, tests, run_code(a["code"]))
         elif lang == "html":
             pass  # ответ — вид страницы, а не вывод; сверяется скриптом урока по настоящему рендеру
+        elif lang == "sql":
+            # Ответ — строки результата последнего запроса (столбцы через « | »): сверяем тем же ядром SQL.
+            def val(x):
+                for t in (int, float):
+                    try:
+                        return t(x)
+                    except ValueError:
+                        pass
+                return x
+            rows = [[val(v.strip()) for v in ln.split(" | ")] for ln in tests["expected_answer"].strip().splitlines()]
+            job = {"lang": "sql", "mode": "check", "code": a["code"],
+                   "tests": {"kind": "sql", "ordered": True, "cases": [{"id": "answer", "setup": "", "expected": {"rows": rows}}]}}
+            def cb(res, rows=rows):
+                rep_ = (res or {}).get("check") or {}
+                if not rep_.get("allPassed"):
+                    rep.err(where, f"expected_answer не совпадает с результатом запроса: {json.dumps(rep_, ensure_ascii=False)[:400]}")
+            JOBS.add(job, cb)
         else:
             r = start_run(rep, where, lang, a["code"], {}, None)
             if isinstance(r, Deferred):

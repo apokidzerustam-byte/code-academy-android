@@ -136,8 +136,10 @@ def _safe_builtins():
 
 # Нативные модули stdlib, которые Chaquopy распаковывает в файлы приложения при ПЕРВОМ
 # импорте. Под активным хуком эта запись была бы запрещена, поэтому импортируем их заранее.
+# Порядок важен: «asyncio» раньше «_asyncio» — если C-модуль загрузить первым, asyncio.current_task()
+# внутри задач возвращает None (Python 3.13), и anyio/FastAPI падают на task.set_name.
 _PRELOAD = (
-    "_asyncio", "asyncio", "select", "selectors", "_socket", "socket", "ssl",
+    "asyncio", "_asyncio", "select", "selectors", "_socket", "socket", "ssl",
     "math", "cmath", "_random", "random", "_datetime", "datetime", "_decimal", "decimal",
     "_bisect", "_heapq", "array", "_struct", "_contextvars", "_queue", "_json", "_csv",
     "_statistics", "statistics", "unicodedata", "_sqlite3", "sqlite3", "zlib", "_hashlib",
