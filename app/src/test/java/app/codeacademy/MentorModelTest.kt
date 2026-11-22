@@ -119,4 +119,26 @@ class MentorModelTest {
         assertTrue("после кэша ответ расходится с первых слов ($common симв.):\n${raw[0]}\n---\n${raw[2]}", common >= minOf(20, raw[0].length))
         assertTrue("повторный запрос подряд дал другой ответ:\n${raw[2]}\n---\n${raw[3]}", raw[2].commonPrefixWith(raw[3]).length >= minOf(20, raw[2].length))
     }
+
+    /**
+     * Предзагрузка в приложении прогревает общее начало запроса (правила наставника). Первый же вопрос ученика
+     * должен взять его из кэша контекста, а не считать заново.
+     */
+    @Test fun warmedUpPrefixIsReusedByTheFirstQuestion() = runBlocking<Unit> {
+        assumeTrue("нет CA_MENTOR_CLI/CA_MENTOR_MODEL — тест с моделью выполняется в CI", cli != null && model != null)
+        val engine = CliEngine(cli!!, model!!, 60, promptSuffix = CliEngine.suffix(System.getenv("CA_MENTOR_SUFFIX")), log = File("build/reports/mentor-warmup.log"))
+        engine.warmUp(PromptBuilder.PREFIX)
+        val a = Corpus.items.first { it.task.id == "a1-greet" }
+        Mentor(Corpus.kb, engine).answer("Объясни тему этого задания простыми словами", a.context(hintsShown = 1, attempts = 1), Intent.EXPLAIN_TOPIC, maxTokens = 60)
+        val stats = engine.stats()
+        val raw = engine.raw.toList()
+        engine.close()
+        val report = "Прогрев: токенов в прогреве ${stats.firstOrNull()?.promptTokens}, в первом вопросе ${stats.getOrNull(1)?.promptTokens}, из кэша ${stats.getOrNull(1)?.cached}."
+        File("build/reports").mkdirs()
+        File("build/reports/mentor-warmup.md").writeText("# Прогрев начала запроса\n\n$report\n")
+        println(report)
+        assertTrue("нет статистики прогрева и вопроса: $stats", stats.size == 2 && raw.size == 1 && raw[0].isNotBlank())
+        // Допускается расхождение на пару токенов на границе «user\n» + начало вопроса.
+        assertTrue("первый вопрос не использовал прогретое начало: $report", stats[1].cached >= stats[0].promptTokens - 3 && stats[1].cached > 50)
+    }
 }

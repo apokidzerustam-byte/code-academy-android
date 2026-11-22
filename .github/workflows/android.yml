@@ -196,6 +196,7 @@ jobs:
           cat app/build/reports/mentor-hashes.md >> "$GITHUB_STEP_SUMMARY" || true
           cat app/build/reports/mentor-model.md >> "$GITHUB_STEP_SUMMARY" || true
           cat app/build/reports/mentor-cache.md >> "$GITHUB_STEP_SUMMARY" || true
+          cat app/build/reports/mentor-warmup.md >> "$GITHUB_STEP_SUMMARY" || true
           tail -n 30 app/build/reports/mentor-cli.log || true
       - uses: actions/upload-artifact@v4
         if: always()

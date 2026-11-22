@@ -22,6 +22,8 @@ object MentorProtocol {
     const val MSG_GENERATE = 1
     const val MSG_STOP = 2
     const val MSG_UNLOAD = 3
+    /** Загрузить модель заранее и прогреть общее начало запроса (ученик открыл панель наставника, но ещё не спросил). */
+    const val MSG_LOAD = 4
     const val MSG_PIECE = 11
     const val MSG_DONE = 12
     const val MSG_ERROR = 13
@@ -120,6 +122,31 @@ class MentorService : Service() {
                 llm?.stop()
             }
             P.MSG_UNLOAD -> { llm?.stop(); runCatching { worker.execute { unload() } } }
+            P.MSG_LOAD -> {
+                val path = m.data.getString(P.KEY_MODEL)
+                val prefix = m.data.getString(P.KEY_PROMPT).orEmpty()
+                control.removeCallbacks(unloadIdle)
+                runCatching { worker.execute { preload(path, prefix) } }
+            }
+        }
+    }
+
+    /**
+     * Загрузка модели и прогрев общего начала запроса: пока ученик набирает вопрос, телефон успевает загрузить файл
+     * (секунды) и посчитать правила наставника, и первый ответ не тратит на это время. Ошибки не сообщаются:
+     * настоящий запрос повторит загрузку и покажет причину.
+     */
+    private fun preload(path: String?, prefix: String) {
+        try {
+            if (hot || path == null) return
+            val engine = ensureLoaded(path)
+            // Один токен: запрос разбирается, и его начало остаётся в кэше контекста для следующих вопросов.
+            if (prefix.isNotEmpty()) engine.generate(prefix, 1, temperature = 0.3f, seed = 42) { false }
+        } catch (t: Throwable) {
+            Log.w(TAG, "предзагрузка не удалась", t)
+        } finally {
+            control.removeCallbacks(unloadIdle)
+            control.postDelayed(unloadIdle, IDLE_UNLOAD_MS)
         }
     }
 

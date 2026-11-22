@@ -60,6 +60,20 @@ class CliEngine(
         return text
     }
 
+    /** Прогрев начала запроса, как предзагрузка в приложении: один токен, без суффикса, ответ не сохраняется. */
+    fun warmUp(prefix: String) {
+        input.write("<<<MAX:1>>>\n")
+        input.write(prefix)
+        input.write("\n<<<END>>>\n")
+        input.flush()
+        val killer = watchdog.schedule({ proc.destroyForcibly() }, GENERATION_TIMEOUT_S, TimeUnit.SECONDS)
+        try {
+            while (true) if ((out.readLine() ?: error("mentor_cli завершился во время прогрева")) == "<<<END>>>") break
+        } finally {
+            killer.cancel(false)
+        }
+    }
+
     /** Статистика всех генераций по порядку; журнал пишется процессом, поэтому читается заново. */
     fun stats(): List<Stat> = runCatching {
         val re = Regex("""#\d+ prompt=(\d+) cached=(\d+) gen=(\d+) prompt_ms=(\d+) gen_ms=(\d+)""")

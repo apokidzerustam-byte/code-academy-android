@@ -44,7 +44,7 @@ object ModelCatalog {
     val models = listOf(
         ModelInfo(
             id = "qwen3-4b-instruct-2507-q4km",
-            title = "Qwen3 4B Instruct 2507 (лучшие ответы, ~2,5 ГБ)",
+            title = "Qwen3 4B Instruct 2507 (лучшие ответы, но медленнее: около 15–20 с, ~2,5 ГБ)",
             fileName = "Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
             url = "https://huggingface.co/unsloth/Qwen3-4B-Instruct-2507-GGUF/resolve/a06e946bb6b655725eafa393f4a9745d460374c9/Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
             sizeBytes = SIZE_4B,

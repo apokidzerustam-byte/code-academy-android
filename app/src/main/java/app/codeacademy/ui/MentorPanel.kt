@@ -21,6 +21,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,6 +69,20 @@ fun MentorPanel(
     var job by remember { mutableStateOf<Job?>(null) }
     // Проверка файлов модели — один раз на смену настроек, а не на каждую перерисовку.
     val model = remember(settings) { c.activeModel(settings) }
+
+    // Панель открыта — ученик, скорее всего, сейчас спросит: модель загружается заранее, пока он набирает вопрос.
+    LaunchedEffect(open, model?.id) {
+        if (open && model != null) {
+            try {
+                c.mentor(settings)
+                c.mentorClient.warmUp()
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                // предзагрузка необязательна: настоящий вопрос сам загрузит модель и покажет причину сбоя
+            }
+        }
+    }
 
     fun ask(q: String, forced: Intent?) {
         job?.cancel()

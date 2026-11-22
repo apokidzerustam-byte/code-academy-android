@@ -69,10 +69,11 @@
     разбор запроса ≤ 6; разбор возможностей процессора (NEON, DOTPROD, MATMUL_INT8, SVE…) из `llama_print_system_info`.
 - Android: `MentorService` (процесс `:mentor`, фоновый поток, выгрузка через 10 мин простоя или сразу при нехватке памяти (onTrimMemory), остановка при перегреве
   PowerManager ≥ SEVERE, путь модели только внутри files/models), `MentorClient` (Messenger, отмена, гибель процесса →
-  лёгкий режим), `NativeLlm` (JNI), `ModelManager` (импорт файла из «Загрузок» с SHA-256, проверки памяти/места/ABI).
+  лёгкий режим; `warmUp()` → `MSG_LOAD`: модель загружается и общее начало запроса `PromptBuilder.PREFIX` прогревается, пока ученик набирает вопрос), `NativeLlm` (JNI), `ModelManager` (импорт файла из «Загрузок» с SHA-256, проверки памяти/места/ABI).
 - Нативная часть: `app/src/main/cpp` — `mentor_core` (llama.cpp: batch_ext + `llama_process`, сэмплер с штрафом
   повторов, abort-callback, только целые символы UTF-8; кэш начала запроса — общая часть промпта с предыдущим запросом
   не пересчитывается, KV-память обрезается `llama_memory_seq_rm`, при отказе — полный сброс), `mentor_jni`, `mentor_cli` (то же ядро для CI).
   llama.cpp b12628 подтягивается `tools/fetch-llama.sh` (фиксированный коммит), варианты CPU-бэкенда грузятся
   из папки библиотек (`GGML_BACKEND_DL`, `useLegacyPackaging`).
+- Модель запускается только при наличии предмета разговора (`PromptBuilder.hasSubject`: вопрос по теме, урок/задание, код или ошибка); иначе отвечает лёгкий режим.
 - UI: `MentorPanel` в задании, этапе проекта и IDE; экран «Наставник»; раздел настроек с установкой модели по шагам.

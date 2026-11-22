@@ -115,6 +115,17 @@ class MentorClient(
         runCatching { service?.send(Message.obtain(null, MentorProtocol.MSG_STOP)) }
     }
 
+    /** Заранее загрузить выбранную модель и прогреть начало запроса; результат не нужен, ошибки игнорируются. */
+    suspend fun warmUp() {
+        val path = modelPath() ?: return
+        val svc = runCatching { connect() }.getOrNull() ?: return
+        val b = Bundle().apply {
+            putString(MentorProtocol.KEY_MODEL, path)
+            putString(MentorProtocol.KEY_PROMPT, PromptBuilder.PREFIX)
+        }
+        runCatching { svc.send(Message.obtain(null, MentorProtocol.MSG_LOAD).apply { data = b }) }
+    }
+
     /** Выгрузить модель из памяти (например, после удаления файла). */
     fun unload() {
         runCatching { service?.send(Message.obtain(null, MentorProtocol.MSG_UNLOAD)) }

@@ -62,5 +62,6 @@ set -e
 grep -E "Заданий:|FAILED|PASSED|SKIPPED|AssertionError|утечки" build/mentor-gradle.log | head -40 || true
 [ "$rc" = 0 ] || { tail -n 80 build/mentor-gradle.log; exit "$rc"; }
 [ -s app/build/reports/mentor-cache.md ] && cat app/build/reports/mentor-cache.md
+[ -s app/build/reports/mentor-warmup.md ] && cat app/build/reports/mentor-warmup.md
 test -s app/build/reports/mentor-model.md || { echo "нет отчёта — тест не выполнился"; exit 1; }
 grep -q "Утечек решения после защиты: 0" app/build/reports/mentor-model.md || { echo "есть утечки"; exit 1; }

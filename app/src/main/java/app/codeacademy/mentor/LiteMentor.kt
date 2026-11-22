@@ -128,7 +128,15 @@ class LiteMentor(private val kb: KnowledgeBase) {
     }
 
     private fun topic(question: String, ctx: MentorContext, guard: SolutionGuard?, intent: Intent): MentorReply {
-        val query = question.ifBlank { ctx.task?.title.orEmpty() + " " + ctx.lesson?.title.orEmpty() }
+        val query = if (PromptBuilder.isGeneric(question)) ctx.task?.title.orEmpty() + " " + ctx.lesson?.title.orEmpty() else question
+        if (query.isBlank() && ctx.code.isBlank()) {
+            // «Объясни тему» без урока, задания и вопроса: объяснять нечего — подсказываем, что ввести.
+            return MentorReply(
+                "Какую тему объяснить? Напишите её в поле «Вопрос наставнику», например: «что такое переменная», «как работает цикл for» " +
+                    "или «чем список отличается от словаря». А если открыть урок или задание, я объясню его тему.",
+                intent, Source.LITE,
+            )
+        }
         val found = kb.search(query, k = 4, preferLesson = ctx.lesson?.key)
             .filter { p -> guard == null || !guard.check(p.text).leak }
         if (found.isEmpty()) {

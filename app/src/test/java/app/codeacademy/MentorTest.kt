@@ -418,6 +418,42 @@ class MentorTest {
         assertTrue("поток не дал текста", streamed.isNotEmpty() && streamed.last().endsWith("клавиатуры."))
     }
 
+    @Test fun modelIsNotAskedWithoutASubject() = runBlocking<Unit> {
+        // Реальный случай с телефона: «Объясни тему» на общем экране наставника (нет урока, задания, вопроса) —
+        // модель придумала тему сама (яблоки и сложение). Теперь отвечает лёгкий режим и подсказывает, что ввести.
+        var calls = 0
+        val engine = object : LlmEngine {
+            override suspend fun generate(prompt: String, maxTokens: Int, onPiece: (String) -> Boolean): String {
+                calls++
+                onPiece("Конечно! Покажу на простом примере. Представь, что у тебя есть коробка с яблоками.")
+                return "Конечно! Покажу на простом примере. Представь, что у тебя есть коробка с яблоками."
+            }
+        }
+        val m = Mentor(Corpus.kb, engine)
+        val empty = MentorContext()
+        val topic = m.answer("", empty, Intent.EXPLAIN_TOPIC)
+        assertEquals(Source.LITE, topic.source)
+        assertTrue("лёгкий режим не подсказал, что ввести: ${topic.text}", topic.text.contains("Вопрос наставнику"))
+        assertEquals(Source.LITE, m.answer("Объясни тему", empty, Intent.EXPLAIN_TOPIC).source)
+        assertEquals(Source.LITE, m.answer("Проверь мой код", empty, Intent.REVIEW).source)
+        assertEquals(Source.LITE, m.answer("Почему ошибка?", empty, Intent.EXPLAIN_ERROR).source)
+        assertEquals(Source.LITE, m.answer("Дай подсказку", empty, Intent.HINT).source)
+        assertEquals("модель не должна запускаться без предмета разговора", 0, calls)
+        // С предметом разговора модель отвечает: вопрос, урок или задание, код, ошибка.
+        assertEquals(Source.LLM, m.answer("что такое переменная", empty, Intent.EXPLAIN_TOPIC).source)
+        assertEquals(Source.LLM, m.answer("", item("a1-greet").context(), Intent.EXPLAIN_TOPIC).source)
+        assertEquals(Source.LLM, m.answer("Проверь мой код", MentorContext(code = "x = 1"), Intent.REVIEW).source)
+        assertEquals(Source.LLM, m.answer("Почему ошибка?", MentorContext(error = "NameError: name 'x' is not defined"), Intent.EXPLAIN_ERROR).source)
+        assertEquals(4, calls)
+    }
+
+    @Test fun promptStartsWithTheWarmedUpPrefix() {
+        val i = item("a1-greet")
+        val p = PromptBuilder.build("Объясни тему", i.context(), Intent.EXPLAIN_TOPIC, Corpus.kb, MentorReply("", Intent.EXPLAIN_TOPIC, Source.LITE))
+        assertTrue(p.startsWith(PromptBuilder.PREFIX))
+        assertTrue(PromptBuilder.PREFIX.endsWith("<|im_start|>user\n"))
+    }
+
     private fun assertNull(v: Any?) = assertEquals(null, v)
 
     private fun novelLine(t: TaskContext, text: String, extra: String = ""): String? {
