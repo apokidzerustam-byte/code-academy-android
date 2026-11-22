@@ -34,6 +34,13 @@ class SolutionGuard(
     /** Строки эталона, которых нет в заготовке: показать любую из них — значит раскрыть решение. */
     private val novelLines: List<String> = solutionLines.filter { it !in baseLines && it.split(' ').size >= 3 && meaningful(it) }
 
+    /**
+     * Слова строк эталона без знаков препинания и вида кавычек: ловит ту же строку, записанную иначе
+     * (`return "Привет, " + name + "!"` вместо шаблона в обратных кавычках). Только строки из трёх и более разных слов.
+     */
+    private val novelBags: List<Set<String>> =
+        solutionLines.filter { it !in baseLines && meaningful(it) }.map(::words).filter { it.size >= 3 }.distinct()
+
     /** Длинные строки эталона с обезличенными именами: ловят переименование переменных. */
     private val novelAnonLines: List<String> = solutionLines.map(::anon).filter { it !in baseAnon && it.split(' ').size >= 6 }
 
@@ -81,6 +88,12 @@ class SolutionGuard(
         val replyTokens = tokens(text)
         val joined = " " + replyTokens.joinToString(" ") + " "
         novelLines.firstOrNull { joined.contains(" $it ") }?.let { return Verdict(true, "строка решения: $it") }
+        if (novelBags.isNotEmpty()) {
+            for (span in codeSpans(text)) {
+                val w = words(span)
+                novelBags.firstOrNull { w.containsAll(it) }?.let { return Verdict(true, "строка решения, записанная иначе: ${it.joinToString(" ")}") }
+            }
+        }
         val anonTokens = replyTokens.map(::anonToken)
         val anonJoined = " " + anonTokens.joinToString(" ") + " "
         novelAnonLines.firstOrNull { anonJoined.contains(" $it ") }?.let { return Verdict(true, "строка решения с другими именами: $it") }
@@ -189,6 +202,15 @@ class SolutionGuard(
             if (line.startsWith("< /")) return false
             return line.split(' ').any { isName(it) }
         }
+
+        private val WORD = Regex("[\\p{L}\\d_]+")
+
+        /** Слова строки в нижнем регистре (имена, ключевые слова, числа и слова внутри строковых литералов). */
+        fun words(line: String): Set<String> = WORD.findAll(line.lowercase()).map { it.value }.toSet()
+
+        /** Фрагменты кода в ответе: `код` в тексте и строки кода (блоки ``` и строки, похожие на код). */
+        fun codeSpans(text: String): List<String> =
+            Regex("`([^`\\n]+)`").findAll(text).map { it.groupValues[1] }.toList() + codeOnly(text).lines().filter { it.isNotBlank() }
 
         /** Код ответа: блоки ``` и строки, похожие на код. */
         fun codeOnly(text: String): String {

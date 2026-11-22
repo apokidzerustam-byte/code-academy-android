@@ -63,7 +63,13 @@ class MentorBakeoffTest {
             val wall = mutableListOf<Double>()
             for (item in items) {
                 val ctx = item.context(hintsShown = 1, attempts = 1)
-                val ctxErr = item.context(hintsShown = 1, attempts = 2, error = "NameError: name 'nmae' is not defined")
+                val err = when (item.task.language) {
+                    "js" -> "ReferenceError: nmae is not defined"
+                    "sql" -> "Error: no such column: nmae"
+                    "kotlin" -> "error: unresolved reference: nmae"
+                    else -> "Traceback (most recent call last):\n  File \"main.py\", line 2, in <module>\nNameError: name 'nmae' is not defined"
+                }
+                val ctxErr = item.context(hintsShown = 1, attempts = 2, error = err)
                 val questions = listOf(
                     Triple("Объясни тему", Intent.EXPLAIN_TOPIC, ctx),
                     Triple("Дай подсказку", Intent.HINT, item.context(hintsShown = 0, attempts = 1)),

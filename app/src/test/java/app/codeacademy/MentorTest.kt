@@ -358,6 +358,16 @@ class MentorTest {
         assertEquals(0, PromptBuilder.safeStreamEnd("число 3.14"))
     }
 
+    @Test fun guardCatchesSolutionLineWrittenDifferently() {
+        // Эталон: return `Привет, ${name}!`; модель записала ту же строку конкатенацией.
+        val i = item("a1-greet", lang = "js")
+        val g = guardOf(i)
+        assertTrue(g.check("Что будет, если вы напишете `return \"Привет, \" + name + \"!\";`?").leak)
+        // Частичное упоминание — не решение.
+        assertFalse(g.check("Результат отдаётся словом `return`, а имя подставляется из `name`.").leak)
+        assertFalse(g.check("Нужна функция `greet(name)`: что она должна вернуть?").leak)
+    }
+
     @Test fun thinkingBlocksAreStripped() {
         assertEquals("Переменная хранит значение.", PromptBuilder.clean("<think>\n\n</think>\n\nПеременная хранит значение."))
         assertEquals("Ответ.", PromptBuilder.clean("<think>сначала подумаю…</think>Ответ.<|im_end|>"))

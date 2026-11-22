@@ -8,6 +8,8 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.printToString
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
@@ -99,8 +101,15 @@ class MentorOnDeviceTest {
         rule.onNodeWithTag("code").performScrollTo().performTextReplacement("name = \"Аня\"\nprint(nmae)\n")
         rule.onNodeWithTag("run").performScrollTo().performClick()
         rule.waitUntil(90_000) { rule.onAllNodes(hasText("NameError", substring = true)).fetchSemanticsNodes().isNotEmpty() }
+        rule.waitForIdle()
         rule.onNodeWithTag("mentor-error").performScrollTo().performClick()
-        rule.waitUntil(15_000) { rule.onAllNodes(hasText("похожее имя", substring = true)).fetchSemanticsNodes().isNotEmpty() }
+        try {
+            rule.waitUntil(30_000) { rule.onAllNodes(hasText("похожее имя", substring = true)).fetchSemanticsNodes().isNotEmpty() }
+        } catch (e: androidx.compose.ui.test.ComposeTimeoutException) {
+            // Что было на экране: без этого на медленном эмуляторе причину сбоя не узнать.
+            Log.e("CAPROBE", "mentor-error: нет «похожее имя»; экран: " + rule.onRoot().printToString(40).takeLast(3000))
+            throw e
+        }
     }
 
     /**

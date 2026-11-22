@@ -76,6 +76,20 @@ class MentorService : Service() {
 
     override fun onBind(intent: Intent?): IBinder = messenger.binder
 
+    /**
+     * Модель держится в памяти 10 минут, чтобы не загружаться заново на каждый вопрос, но при нехватке памяти
+     * в системе выгружается сразу (после текущей генерации): иначе Android завершил бы процесс вместе с моделью.
+     */
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        // 10 — RUNNING_LOW, 15 — RUNNING_CRITICAL, 40 и выше — процесс в кэше. Уровень 20 (интерфейс скрыт) не учитывается:
+        // ученик часто ненадолго переключается в другое приложение.
+        if (level == 10 || level == 15 || level >= 40) {
+            control.removeCallbacks(unloadIdle)
+            worker.execute { unload() }
+        }
+    }
+
     override fun onDestroy() {
         if (Build.VERSION.SDK_INT >= 29) {
             (thermalListener as? PowerManager.OnThermalStatusChangedListener)?.let {
@@ -178,7 +192,7 @@ class MentorService : Service() {
         private const val TAG = "CodeAcademyMentor"
         /** Контекст: промпт с конспектом и кодом на кириллице может занимать 1500–2500 токенов. */
         const val N_CTX = 4096
-        /** Модель выгружается из памяти через 3 минуты без запросов. */
-        const val IDLE_UNLOAD_MS = 180_000L
+        /** Модель выгружается из памяти через 10 минут без запросов (повторная загрузка занимает секунды). */
+        const val IDLE_UNLOAD_MS = 600_000L
     }
 }
