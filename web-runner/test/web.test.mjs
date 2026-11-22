@@ -1,6 +1,6 @@
 // Локальная проверка веб-раннера в настоящем Chromium (Playwright). Запуск: node test/web.test.mjs
 import { build } from "esbuild";
-import { chromium } from "playwright";
+import { chromium } from "playwright-core";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";

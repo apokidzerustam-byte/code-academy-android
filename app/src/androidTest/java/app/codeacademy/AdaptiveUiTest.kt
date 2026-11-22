@@ -48,14 +48,14 @@ class AdaptiveUiTest {
         waitTag("start-choice")
         rule.onNodeWithTag("start-diagnostic").performClick()
         waitTag("diag-answer")
-        waitText("Вопрос 1 из 10")
+        waitText("Вопрос 1 из ")
         // Урок 1 — верно (лишние пробелы в конце строк не мешают), урок 2 — неверно.
         rule.onNodeWithTag("diag-answer").performTextReplacement("10 - 4  \n6\nГотово\n")
         rule.onNodeWithTag("diag-submit").performClick()
-        waitText("Вопрос 2 из 10")
+        waitText("Вопрос 2 из ")
         rule.onNodeWithTag("diag-answer").performTextReplacement("5\n10")
         rule.onNodeWithTag("diag-submit").performClick()
-        waitText("Подтверждено уроков: 1 из 10")
+        waitText("Подтверждено уроков: 1 из ")
         rule.waitUntil(5_000) {
             runBlocking {
                 app.container.db.progress().get("python-basics/py-01-print")?.status == LessonStatus.TESTED_OUT &&

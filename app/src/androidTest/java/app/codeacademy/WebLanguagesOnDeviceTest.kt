@@ -11,6 +11,7 @@ import app.codeacademy.runner.RunStatus
 import app.codeacademy.runner.RunnerClient
 import app.codeacademy.runner.WebRunner
 import app.codeacademy.runner.WebRunnerHost
+import app.codeacademy.runner.WebSandbox
 import app.codeacademy.ui.assignmentRunner
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -18,6 +19,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeTrue
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,20 +33,31 @@ class WebLanguagesOnDeviceTest {
     companion object {
         private val ctx = InstrumentationRegistry.getInstrumentation().targetContext
         private lateinit var host: WebRunnerHost
+        /** Старый WebView (например, эмулятор API 29 без обновлений) не умеет WEB_MESSAGE_LISTENER. */
+        private val webOk = WebSandbox.supported()
 
         @JvmStatic @BeforeClass fun start() {
+            if (!webOk) {
+                Log.i("CAPROBE", "webrunner: WebView без WEB_MESSAGE_LISTENER — веб-языки недоступны")
+                return
+            }
             host = WebRunnerHost(ctx)
             val t0 = System.currentTimeMillis()
             assertTrue("веб-песочница не запустилась", runBlocking { host.prepare() })
             Log.i("CAPROBE", "webrunner: старт ${System.currentTimeMillis() - t0} мс")
         }
 
-        @JvmStatic @AfterClass fun stop() = host.close()
+        @JvmStatic @AfterClass fun stop() {
+            if (::host.isInitialized) host.close()
+        }
     }
 
-    private fun web(lang: String) = WebRunner(host, lang)
+    private fun web(lang: String): WebRunner {
+        assumeTrue("WebView без WEB_MESSAGE_LISTENER — веб-раннер недоступен", webOk)
+        return WebRunner(host, lang)
+    }
 
-    @Test fun jsRunErrorStop() = runBlocking {
+    @Test fun jsRunErrorStop() = runBlocking<Unit> {
         val js = web("js")
         val ok = js.run("const a = [1, 2, 3]\nconsole.log(a.map(x => x * 2).join(' '))", 8_000)
         assertEquals(ok.stderr, RunStatus.OK, ok.status)
@@ -76,7 +89,7 @@ class WebLanguagesOnDeviceTest {
         Log.i("CAPROBE", "js: цикл прерван за $loopMs мс")
     }
 
-    @Test fun htmlRunAndLint() = runBlocking {
+    @Test fun htmlRunAndLint() = runBlocking<Unit> {
         val html = web("html")
         val r = html.run("<h1>Привет</h1>\n<p id=\"x\">5</p>\n<img src=\"a.png\">\n<script>console.log(+document.getElementById('x').textContent * 2)</script>", 8_000)
         assertEquals(r.stderr, RunStatus.OK, r.status)
@@ -88,7 +101,7 @@ class WebLanguagesOnDeviceTest {
         assertTrue(net.stdout + net.stderr, "сеть есть" !in net.stdout)
     }
 
-    @Test fun sqlRunErrorStop() = runBlocking {
+    @Test fun sqlRunErrorStop() = runBlocking<Unit> {
         val sql = web("sql")
         val ok = sql.runWith("SELECT name FROM t ORDER BY name;", 10_000, "", null,
             setup = "CREATE TABLE t (name TEXT); INSERT INTO t VALUES ('Борис'), ('Анна');")
@@ -108,7 +121,7 @@ class WebLanguagesOnDeviceTest {
         Log.i("CAPROBE", "sql: зависший запрос остановлен за ${System.currentTimeMillis() - t0} мс")
     }
 
-    @Test fun kotlinSyntax() = runBlocking {
+    @Test fun kotlinSyntax() = runBlocking<Unit> {
         val kt = web("kotlin")
         val ok = kt.run("fun main() {\n    val n = 3\n    println(\"n = \$n\")\n}\n", 10_000)
         assertEquals(ok.stderr, RunStatus.OK, ok.status)
@@ -119,7 +132,7 @@ class WebLanguagesOnDeviceTest {
     }
 
     /** Все задания новых пакетов: исполнитель — как в приложении (веб-язык задания или Python A для FastAPI и ответов). */
-    @Test fun newPacksAutocheck() = runBlocking {
+    @Test fun newPacksAutocheck() = runBlocking<Unit> {
         val content = ContentRepository(ctx.assets)
         val service = AssessmentService()
         val python = RunnerClient(ctx, isolated = false)
@@ -131,6 +144,7 @@ class WebLanguagesOnDeviceTest {
                 val ref = LessonRef(pack.id, lesson.id)
                 for (a in content.assignments(ref)) {
                     val lang = if (a.isAnswerTask) "A" else assignmentRunner(a, lesson.runner)
+                    if (lang in WebRunner.LANGS && !webOk) continue
                     val runner: CodeRunner = if (lang in WebRunner.LANGS) web(lang) else python
                     val t0 = System.currentTimeMillis()
                     val good = service.evaluate(runner, a, a.solution)
@@ -151,7 +165,7 @@ class WebLanguagesOnDeviceTest {
         problems.forEach { Log.e("CAPROBE", it) }
         assertTrue("проблемы:\n" + problems.joinToString("\n"), problems.isEmpty())
         // Не меньше трёх автопроверяемых заданий на каждый язык этапа 7 (FastAPI — исполнитель A).
-        for (l in listOf("html", "js", "sql", "kotlin")) assertTrue("$l: ${perLang[l]} заданий", (perLang[l] ?: 0) >= 3)
+        if (webOk) for (l in listOf("html", "js", "sql", "kotlin")) assertTrue("$l: ${perLang[l]} заданий", (perLang[l] ?: 0) >= 3)
         assertTrue("FastAPI/ответы: ${perLang["A"]}", (perLang["A"] ?: 0) >= 3)
     }
 }
