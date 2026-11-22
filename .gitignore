@@ -24,3 +24,4 @@ app/schemas/
 web-runner/node_modules/
 web-runner/src/generated/
 app/src/main/assets/webrunner/
+app/src/main/cpp/llama.cpp/
