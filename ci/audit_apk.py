@@ -158,7 +158,7 @@ def audit_signature(apksigner, apk, signer_file):
     proto = sha256_of_keystore("signing/prototype.keystore", "codeacademy-proto", "android") if os.path.isfile("signing/prototype.keystore") else None
     kind = "prototype" if digest and proto and digest == proto else "release"
     results.append(("INFO", f"Подпись: SHA-256 {digest or '?'} — {'ключ ПРОТОТИПА (публичный, пароль «android»)' if kind == 'prototype' else 'релизный ключ'}"))
-    check(kind == "release", "APK подписан релизным ключом, а не публичным ключом прототипа", warn_only=True)
+    check(kind == "release", "Подпись релизная (а не публичный ключ прототипа)", "ключ прототипа: годится для проверки, не для распространения" if kind != "release" else "", warn_only=True)
     if signer_file:
         with open(signer_file, "w") as f:
             f.write(kind + "\n")

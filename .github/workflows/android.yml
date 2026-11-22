@@ -162,7 +162,7 @@ jobs:
       - name: Lint — итог в отчёт
         if: always()
         run: |
-          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          python3 - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
           import glob, re, collections
           fs = glob.glob("app/build/reports/lint-results-release.xml")
           print("### Lint (release)")

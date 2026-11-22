@@ -79,7 +79,7 @@ object ProjectZip {
 
     private fun utf8(bytes: ByteArray): String? = try {
         Charsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT).onUnmappableCharacter(CodingErrorAction.REPORT)
-            .decode(ByteBuffer.wrap(bytes)).toString().removePrefix("﻿")
+            .decode(ByteBuffer.wrap(bytes)).toString().removePrefix("\uFEFF")
     } catch (_: CharacterCodingException) {
         null
     }
