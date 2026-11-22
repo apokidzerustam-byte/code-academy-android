@@ -25,6 +25,9 @@ FORBIDDEN = {
     "android.permission.SYSTEM_ALERT_WINDOW", "android.permission.REQUEST_INSTALL_PACKAGES", "android.permission.QUERY_ALL_PACKAGES",
 }
 EXPORTED_ALLOWED = {".MainActivity", PACKAGE + ".MainActivity"}
+# Компоненты библиотек, открытые наружу, но защищённые системным разрешением (достучаться может только оболочка adb/система):
+# ProfileInstallReceiver (AndroidX profileinstaller) принимает команды только при разрешении DUMP.
+EXPORTED_PROTECTED = {"androidx.profileinstaller.ProfileInstallReceiver": "android.permission.DUMP"}
 ANDROID_NS = "http://schemas.android.com/apk/res/android"
 
 results = []  # (статус, текст)
@@ -106,9 +109,12 @@ def audit_manifest(aapt2, apk):
             has_filter = any(c["tag"] == "intent-filter" and c["parent"] is e for c in elems)
             is_exp = truthy(e["attrs"].get("exported", "false" if not has_filter else "true"))
             if is_exp:
+                if EXPORTED_PROTECTED.get(name) and e["attrs"].get("permission") == EXPORTED_PROTECTED[name]:
+                    results.append(("INFO", f"Открыт наружу, но защищён разрешением {e['attrs'].get('permission')}: {name}"))
+                    continue
                 exported.append(name)
     extra = [n for n in exported if n not in EXPORTED_ALLOWED]
-    check(not extra, "Наружу открыта только главная Activity", f"открыты: {exported}")
+    check(not extra, "Наружу открыта только главная Activity", f"лишние: {extra}" if extra else f"открыта: {exported}")
     perms = [e["attrs"].get("name", "?") for e in elems if e["tag"].startswith("uses-permission")]
     bad = sorted(set(perms) & FORBIDDEN)
     check(not bad, "Нет запрещённых разрешений (сеть, личные данные, хранилище)", f"найдены: {bad}" if bad else f"всего разрешений: {len(perms)}")
@@ -123,8 +129,8 @@ def audit_badging(aapt2, apk):
     check(bool(pkg) and pkg.group(1) == PACKAGE, "Идентификатор приложения", pkg.group(1) if pkg else "не найден")
     if pkg:
         results.append(("INFO", f"Версия: {pkg.group(3)} (versionCode {pkg.group(2)})"))
-    sdk = re.search(r"sdkVersion:'(\d+)'", out)
-    tgt = re.search(r"targetSdkVersion:'(\d+)'", out)
+    sdk = re.search(r"(?m)^(?:min)?[sS]dkVersion:'(\d+)'", out)
+    tgt = re.search(r"(?m)^targetSdkVersion:'(\d+)'", out)
     check(bool(sdk) and int(sdk.group(1)) == MIN_SDK, "minSdk", f"{sdk.group(1) if sdk else '?'} (ожидается {MIN_SDK})")
     check(bool(tgt) and int(tgt.group(1)) == TARGET_SDK, "targetSdk", f"{tgt.group(1) if tgt else '?'} (ожидается {TARGET_SDK})")
     check("application-icon-" in out, "Иконка есть в APK")
@@ -214,7 +220,16 @@ def audit_content(apk):
                     bad.append(f"{os.path.basename(i.filename)}={al}")
     check(checked > 0 and not bad, "Нативные библиотеки arm64 выровнены под страницы 16 КБ",
           f"проверено {checked}; не выровнены: {', '.join(bad[:6]) or 'нет'}" + (f" (+{len(bad) - 6})" if len(bad) > 6 else ""), warn_only=True)
-    check(not any(n.endswith((".keystore", ".jks", ".pem")) or "secret" in n.lower() for n in names), "В APK нет ключей и секретов")
+    stores = sorted(n for n in names if n.lower().endswith((".keystore", ".jks", ".p12", ".pfx")))
+    private = []
+    for i in z.infolist():
+        if i.filename.lower().endswith((".pem", ".key")) and i.file_size < 4_000_000:
+            if b"PRIVATE KEY" in z.read(i.filename):
+                private.append(i.filename)
+    pems = sorted(n for n in names if n.lower().endswith((".pem", ".key", ".crt")))
+    if pems:
+        results.append(("INFO", f"Файлы сертификатов в APK (публичные, закрытых ключей в них нет): {', '.join(pems[:6])}"))
+    check(not stores and not private, "В APK нет хранилищ ключей и закрытых ключей", f"найдены: {stores + private}" if stores or private else "")
     check(not any(re.search(r"(^|/)(recordings?|voice_raw|raw_voice)/", n) for n in names), "В APK нет сырых записей голоса")
 
 

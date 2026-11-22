@@ -42,9 +42,12 @@ class SettingsUiTest {
     private fun waitTag(tag: String, ms: Long = 15_000) =
         rule.waitUntil(ms) { rule.onAllNodes(hasTestTag(tag)).fetchSemanticsNodes().isNotEmpty() }
 
+    private fun settingsShown() = rule.onAllNodes(hasTestTag("theme-system")).fetchSemanticsNodes().isNotEmpty()
+
+    /** Открывает настройки; после пересоздания Activity навигация уже восстановила экран настроек — тогда ничего не нажимается. */
     private fun openSettings() {
-        rule.waitUntil(15_000) { rule.onAllNodes(androidx.compose.ui.test.hasContentDescription("Настройки")).fetchSemanticsNodes().isNotEmpty() }
-        rule.onNodeWithContentDescription("Настройки").performClick()
+        rule.waitUntil(15_000) { settingsShown() || rule.onAllNodes(androidx.compose.ui.test.hasContentDescription("Настройки")).fetchSemanticsNodes().isNotEmpty() }
+        if (!settingsShown()) rule.onNodeWithContentDescription("Настройки").performClick()
         waitTag("theme-system")
     }
 
