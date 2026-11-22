@@ -12,6 +12,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import app.codeacademy.assessment.AssessmentService
 import app.codeacademy.content.ContentRepository
+import app.codeacademy.content.ProjectRef
 import app.codeacademy.runner.CodeRunner
 import app.codeacademy.runner.PyodideRunner
 import app.codeacademy.runner.RunnerClient
@@ -149,7 +150,7 @@ class ProjectsUiTest {
         openCourse()
         checkAndNext()
         waitTag("project-done")
-        val passed = runBlocking { c.progress.passedMilestones(app.codeacademy.content.ProjectRef("python-basics", "shopping")) }
+        val passed = runBlocking { c.progress.passedMilestones(ProjectRef("python-basics", "shopping")) }
         assertEquals(setOf("collect", "unique"), passed)
         // Попытки этапов видны в статистике навыков.
         assertTrue(runBlocking { c.progress.skills.first() }.any { it.skillId == "python.lists" && it.successes >= 2 })

@@ -5,9 +5,11 @@ import android.content.Context
 import app.codeacademy.assessment.AssessmentService
 import app.codeacademy.content.ContentRepository
 import app.codeacademy.data.AppDatabase
+import app.codeacademy.data.BackupManager
 import app.codeacademy.data.ProgressRepository
 import app.codeacademy.data.ProjectRepository
 import app.codeacademy.runner.CodeRunner
+import app.codeacademy.runner.ProjectFiles
 import app.codeacademy.runner.PyodideRunner
 import app.codeacademy.runner.RunnerClient
 import app.codeacademy.runner.WebRunner
@@ -32,16 +34,16 @@ class AppContainer(context: Context) {
     val assessment = AssessmentService()
 
     /** Резервная копия: все таблицы базы + настройки; при восстановлении папки запуска проектов пересоздаются. */
-    val backup by lazy {
-        app.codeacademy.data.BackupManager(
+    val backup: BackupManager by lazy {
+        BackupManager(
             db,
-            object : app.codeacademy.data.BackupManager.SettingsStore {
+            object : BackupManager.SettingsStore {
                 override suspend fun snapshot() = settings.snapshot()
                 override suspend fun replaceAll(values: Map<String, Any>) = settings.replaceAll(values)
                 override suspend fun clearAll() = settings.clearAll()
             },
             appVersion = BuildConfig.VERSION_NAME,
-            wipeFiles = { java.io.File(app.filesDir, "projects").let { if (it.exists()) app.codeacademy.runner.ProjectFiles.wipe(it) } },
+            wipeFiles = { java.io.File(app.filesDir, "projects").let { if (it.exists()) ProjectFiles.wipe(it) } },
         )
     }
 
