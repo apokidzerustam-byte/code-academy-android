@@ -29,12 +29,12 @@ int main(int argc, char ** argv) {
     llama_backend_init();
     mentor::Engine e;
     const int threads = std::max(1u, std::min(8u, std::thread::hardware_concurrency()));
-    const std::string err = e.load(argv[1], n_ctx, static_cast<int>(threads));
+    const std::string err = e.load(argv[1], n_ctx, static_cast<int>(threads), static_cast<int>(threads));
     if (!err.empty()) {
         fprintf(stderr, "load error: %s\n", err.c_str());
         return 1;
     }
-    fprintf(stderr, "model: %s, threads %d\n", e.description().c_str(), threads);
+    fprintf(stderr, "model: %s, threads %d\n%s\n", e.description().c_str(), threads, mentor::Engine::system_info().c_str());
     std::string line, prompt;
     int n = 0;
     while (std::getline(std::cin, line)) {
@@ -52,8 +52,8 @@ int main(int argc, char ** argv) {
         });
         printf("\n%s\n", SEP);
         fflush(stdout);
-        fprintf(stderr, "#%d prompt=%d gen=%d prompt_ms=%.0f gen_ms=%.0f tok/s=%.1f %s\n", ++n, st.prompt_tokens,
-                st.generated_tokens, st.prompt_ms, st.gen_ms,
+        fprintf(stderr, "#%d prompt=%d cached=%d gen=%d prompt_ms=%.0f gen_ms=%.0f tok/s=%.1f %s\n", ++n, st.prompt_tokens,
+                st.prompt_cached, st.generated_tokens, st.prompt_ms, st.gen_ms,
                 st.gen_ms > 0 ? st.generated_tokens * 1000.0 / st.gen_ms : 0.0, st.error.c_str());
         prompt.clear();
     }

@@ -62,6 +62,9 @@ fun MentorPanel(
     var question by rememberSaveable { mutableStateOf("") }
     var reply by remember { mutableStateOf<MentorReply?>(null) }
     var partial by remember { mutableStateOf<String?>(null) }
+    // Ответ по материалам курса, который показывается сразу, пока нейросеть ещё считает.
+    var instant by remember { mutableStateOf<MentorReply?>(null) }
+    var elapsedMs by remember { mutableStateOf(0L) }
     var job by remember { mutableStateOf<Job?>(null) }
     // Проверка файлов модели — один раз на смену настроек, а не на каждую перерисовку.
     val model = remember(settings) { c.activeModel(settings) }
@@ -69,18 +72,25 @@ fun MentorPanel(
     fun ask(q: String, forced: Intent?) {
         job?.cancel()
         reply = null
+        instant = null
         partial = ""
         val j = scope.launch {
+            val t0 = System.currentTimeMillis()
             val ctx = context()
             val mentor = c.mentor(settings)
             val intent = forced ?: IntentClassifier.classify(q, ctx.task?.isAnswerTask == true)
-            val r = mentor.answer(q, ctx, intent) { p -> partial = p }
+            val r = mentor.answer(q, ctx, intent, onPartial = { p -> partial = p }, onLite = { l ->
+                instant = l
+                l.revealedHint?.let(onHintRevealed)
+            })
+            elapsedMs = System.currentTimeMillis() - t0
             reply = r
             partial = null
+            instant = null
             r.revealedHint?.let(onHintRevealed)
         }
         job = j
-        j.invokeOnCompletion { if (job === j) partial = null }
+        j.invokeOnCompletion { if (job === j) { partial = null; instant = null } }
     }
 
     if (!open) {
@@ -121,14 +131,26 @@ fun MentorPanel(
                     TextButton(onClick = { c.mentorClient.stop() }, modifier = Modifier.testTag("mentor-stop")) { Text("Стоп") }
                 }
             }
-            partial?.takeIf { it.isNotBlank() }?.let { MarkdownText(it) }
-            reply?.let { r -> MentorReplyView(r, openLesson) }
+            // Пока нейросеть считает, ученик уже читает ответ по материалам курса.
+            if (partial != null) instant?.let { l ->
+                Card(Modifier.fillMaxWidth().testTag("mentor-instant")) {
+                    Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text("Пока нейросеть думает — ответ по материалам курса:", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                        MarkdownText(l.text)
+                    }
+                }
+            }
+            partial?.takeIf { it.isNotBlank() }?.let {
+                Text("Нейросеть отвечает:", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                MarkdownText(it)
+            }
+            reply?.let { r -> MentorReplyView(r, openLesson, timing = if (r.source == Source.LLM) timingLine(elapsedMs, c.mentorClient.lastStats) else null) }
         }
     }
 }
 
 @Composable
-private fun MentorReplyView(r: MentorReply, openLesson: ((LessonLink) -> Unit)?) {
+private fun MentorReplyView(r: MentorReply, openLesson: ((LessonLink) -> Unit)?, timing: String? = null) {
     Card(Modifier.fillMaxWidth().testTag("mentor-reply")) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             MarkdownText(r.text)
@@ -138,8 +160,20 @@ private fun MentorReplyView(r: MentorReply, openLesson: ((LessonLink) -> Unit)?)
             val source = if (r.source == Source.LLM) "Ответила нейросеть на телефоне — проверяйте её советы." else "Ответ по материалам курса."
             Text(source, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline, modifier = Modifier.testTag("mentor-source"))
             r.note?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline) }
+            timing?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline, modifier = Modifier.testTag("mentor-timing")) }
         }
     }
+}
+
+/** Где ушло время: загрузка модели, разбор запроса (сколько токенов взято из кэша) и скорость ответа. */
+fun timingLine(totalMs: Long, st: app.codeacademy.mentor.GenStats?): String {
+    val total = "%.1f".format(totalMs / 1000.0)
+    st ?: return "Время ответа: $total с."
+    val parts = mutableListOf("всего $total с")
+    if (st.loadMs > 0) parts += "загрузка модели ${"%.1f".format(st.loadMs / 1000.0)} с"
+    parts += "запрос ${st.promptTokens} ток. за ${"%.1f".format(st.promptMs / 1000.0)} с" + (if (st.cachedTokens > 0) " (${st.cachedTokens} из кэша)" else "")
+    parts += "ответ ${st.generatedTokens} ток., ${"%.0f".format(st.tokensPerSecond)} ток/с"
+    return parts.joinToString(" · ")
 }
 
 /** Текст последней ошибки для наставника: проверка (если не прошла), иначе консоль запуска. */

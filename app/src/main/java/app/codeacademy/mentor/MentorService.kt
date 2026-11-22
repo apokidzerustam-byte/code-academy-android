@@ -30,6 +30,8 @@ object MentorProtocol {
     const val KEY_MODEL = "model"
     const val KEY_PROMPT = "prompt"
     const val KEY_MAX_TOKENS = "maxTokens"
+    const val KEY_INFO = "info"
+    const val KEY_LOAD_MS = "loadMs"
     const val KEY_TEXT = "text"
     const val KEY_STATS = "stats"
     const val KEY_HOT = "hot"
@@ -47,6 +49,8 @@ class MentorService : Service() {
     private lateinit var messenger: Messenger
     @Volatile private var llm: NativeLlm? = null
     @Volatile private var loadedPath: String? = null
+    @Volatile private var loadMs = 0L
+    @Volatile private var info = ""
     @Volatile private var hot = false
     private val activeId = AtomicLong(0)
     private var thermalListener: Any? = null
@@ -115,7 +119,9 @@ class MentorService : Service() {
                 return
             }
             val path = data.getString(P.KEY_MODEL) ?: error("не указан файл модели")
+            val wasLoaded = llm != null && loadedPath == path
             val engine = ensureLoaded(path)
+            val loadedNow = if (wasLoaded) 0L else loadMs
             val stats = engine.generate(data.getString(P.KEY_PROMPT).orEmpty(), data.getInt(P.KEY_MAX_TOKENS, 320).coerceIn(16, 1024),
                 temperature = 0.3f, seed = 42) cb@{ piece ->
                 if (activeId.get() != id || hot) return@cb false
@@ -123,6 +129,8 @@ class MentorService : Service() {
             }
             send(reply, P.MSG_DONE, id, Bundle().apply {
                 putString(P.KEY_STATS, stats)
+                putString(P.KEY_INFO, info)
+                putLong(P.KEY_LOAD_MS, loadedNow)
                 putBoolean(P.KEY_HOT, hot)
             })
         } catch (t: Throwable) {
@@ -140,10 +148,13 @@ class MentorService : Service() {
         val f = File(path)
         require(f.isFile && f.canonicalPath.startsWith(File(filesDir, "models").canonicalPath + File.separator)) { "файл модели не найден" }
         NativeLlm.init(applicationInfo.nativeLibraryDir)
-        val cores = Runtime.getRuntime().availableProcessors()
-        val threads = (cores / 2).coerceIn(2, 4)
-        val engine = NativeLlm.load(f.path, N_CTX, threads)
-        Log.i(TAG, "модель: ${engine.description}, потоков $threads")
+        val threads = CpuTopology.detect()
+        val t0 = System.currentTimeMillis()
+        val engine = NativeLlm.load(f.path, N_CTX, threads.generation, threads.prompt)
+        loadMs = System.currentTimeMillis() - t0
+        info = "${engine.description}\nЯдер: ${threads.cores}, быстрых: ${threads.fastCores}; загрузка модели ${loadMs} мс\n" +
+            "Процессор: ${CpuTopology.features(NativeLlm.systemInfo()).joinToString(", ").ifBlank { "нет сведений" }}"
+        Log.i(TAG, info)
         llm = engine
         loadedPath = path
         return engine

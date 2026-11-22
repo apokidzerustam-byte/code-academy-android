@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.codeacademy.mentor.CpuTopology
 import app.codeacademy.mentor.Intent as MentorIntent
 import app.codeacademy.mentor.MentorContext
 import app.codeacademy.mentor.ModelCatalog
@@ -138,9 +139,13 @@ fun MentorSettingsSection() {
                 testResult = "Генерирую…"
                 val r = c.mentor(s).answer("Что такое переменная?", MentorContext(), MentorIntent.EXPLAIN_TOPIC)
                 val st = c.mentorClient.lastStats
+                val info = c.mentorClient.lastInfo
+                val feats = info.substringAfter("Процессор: ", "").lineSequence().first().split(", ").filter { f -> f.isNotEmpty() && f.all { ch -> ch.isUpperCase() || ch.isDigit() || ch == '_' } }
+                val warn = if (feats.isNotEmpty() && !CpuTopology.hasFastMatmul(feats))
+                    "\nВнимание: быстрые инструкции процессора не используются — ответы будут медленными. Отправьте разработчику эти строки." else ""
                 testResult = if (r.source == Source.LLM && st != null) {
-                    "Работает: ${st.generatedTokens} токенов, ${"%.1f".format(st.tokensPerSecond)} токенов/с.\n\n${r.text}"
-                } else "Нейросеть не ответила, сработал лёгкий режим. ${r.note.orEmpty()}"
+                    "Работает. ${timingLine(st.loadMs + st.promptMs + st.genMs, st)}\n$info$warn\n\n${r.text}"
+                } else "Нейросеть не ответила, сработал лёгкий режим. ${r.note.orEmpty()}\n$info"
             }
         }, modifier = Modifier.testTag("mentor-test")) { Text("Проверить нейросеть") }
         testResult?.let { Text(it, style = MaterialTheme.typography.bodySmall) }

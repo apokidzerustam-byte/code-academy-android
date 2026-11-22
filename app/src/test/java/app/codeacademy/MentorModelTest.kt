@@ -1,7 +1,6 @@
 package app.codeacademy
 
 import app.codeacademy.mentor.Intent
-import app.codeacademy.mentor.LlmEngine
 import app.codeacademy.mentor.Mentor
 import app.codeacademy.mentor.PromptBuilder
 import app.codeacademy.mentor.SolutionGuard
@@ -10,11 +9,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Test
-import java.io.BufferedReader
 import java.io.File
-import java.io.InputStreamReader
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 /**
  * Наставник с настоящей моделью (Qwen2.5-Coder через mentor_cli — то же ядро llama.cpp, что в приложении).
@@ -25,48 +20,6 @@ import java.util.concurrent.TimeUnit
 class MentorModelTest {
     private val cli = System.getenv("CA_MENTOR_CLI")
     private val model = System.getenv("CA_MENTOR_MODEL")
-
-    private class CliEngine(cli: String, model: String, maxTokens: Int) : LlmEngine, AutoCloseable {
-        private val proc = ProcessBuilder(cli, model, "4096", maxTokens.toString()).redirectError(File("build/reports/mentor-cli.log")).start()
-        private val out = BufferedReader(InputStreamReader(proc.inputStream, Charsets.UTF_8))
-        private val input = proc.outputStream.bufferedWriter(Charsets.UTF_8)
-        val raw = mutableListOf<String>()
-        var totalMs = 0L
-
-        /** Если одна генерация зависла, процесс убивается (иначе readLine блокирует CI до таймаута всего job). */
-        private val watchdog = Executors.newSingleThreadScheduledExecutor { r -> Thread(r, "mentor-watchdog").apply { isDaemon = true } }
-
-        override suspend fun generate(prompt: String, maxTokens: Int, onPiece: (String) -> Boolean): String {
-            val t0 = System.currentTimeMillis()
-            input.write(prompt.replace("\n<<<END>>>", "\n<<<END >>>"))
-            input.write("\n<<<END>>>\n")
-            input.flush()
-            val sb = StringBuilder()
-            var forwarding = true
-            val killer = watchdog.schedule({ proc.destroyForcibly() }, GENERATION_TIMEOUT_S, TimeUnit.SECONDS)
-            try {
-                while (true) {
-                    val line = out.readLine() ?: error("mentor_cli завершился или завис дольше $GENERATION_TIMEOUT_S с")
-                    if (line == "<<<END>>>") break
-                    if (sb.isNotEmpty()) { sb.append('\n'); if (forwarding) forwarding = onPiece("\n") }
-                    sb.append(line)
-                    if (forwarding) forwarding = onPiece(line)
-                }
-            } finally {
-                killer.cancel(false)
-            }
-            totalMs += System.currentTimeMillis() - t0
-            val text = sb.toString().removeSuffix("\n")
-            raw += text
-            return text
-        }
-
-        override fun close() { input.close(); proc.waitFor(); watchdog.shutdownNow() }
-    }
-
-    private companion object {
-        const val GENERATION_TIMEOUT_S = 300L
-    }
 
     @Test fun provocationsWithRealModel() = runBlocking<Unit> {
         assumeTrue("нет CA_MENTOR_CLI/CA_MENTOR_MODEL — тест с моделью выполняется в CI", cli != null && model != null)
@@ -130,5 +83,36 @@ class MentorModelTest {
         assertTrue("ни один полезный ответ модели не дошёл до ученика (заменено защитой: $replaced из $generations)", usefulFromLlm > 0)
         // Проверка формата: служебные метки не просачиваются в ответ.
         assertTrue(engine.raw.none { PromptBuilder.clean(it).contains("<|im_") })
+    }
+
+    /**
+     * Кэш начала запроса (общая часть промпта не пересчитывается) не должен менять ответ:
+     * тот же запрос после другого запроса даёт тот же текст, что и «холодный» (допускается расхождение ближе к концу
+     * из-за разной последовательности вычислений); при испорченном кэше текст расходится с первых слов.
+     */
+    @Test fun prefixCacheKeepsAnswersIntact() = runBlocking<Unit> {
+        assumeTrue("нет CA_MENTOR_CLI/CA_MENTOR_MODEL — тест с моделью выполняется в CI", cli != null && model != null)
+        val log = File("build/reports/mentor-cache.log")
+        val engine = CliEngine(cli!!, model!!, 60, log = log)
+        val a = Corpus.items.first { it.task.id == "a1-greet" }
+        val b = Corpus.items.first { it.task.id == "a2-sum-until-zero" }
+        val mentor = Mentor(Corpus.kb, engine)
+        val q = "Объясни тему этого задания простыми словами"
+        mentor.answer(q, a.context(hintsShown = 1, attempts = 1), Intent.EXPLAIN_TOPIC, maxTokens = 60)
+        mentor.answer(q, b.context(hintsShown = 1, attempts = 1), Intent.EXPLAIN_TOPIC, maxTokens = 60)
+        mentor.answer(q, a.context(hintsShown = 1, attempts = 1), Intent.EXPLAIN_TOPIC, maxTokens = 60)
+        mentor.answer(q, a.context(hintsShown = 1, attempts = 1), Intent.EXPLAIN_TOPIC, maxTokens = 60)
+        val stats = engine.stats()
+        val raw = engine.raw.toList()
+        engine.close()
+        val common = raw[0].commonPrefixWith(raw[2]).length
+        val report = "Кэш начала запроса: токенов в запросах ${stats.map { it.promptTokens }}, из кэша ${stats.map { it.cached }}; " +
+            "одинаковое начало ответов: $common симв. из ${raw[0].length}; повтор подряд: ${raw[2].commonPrefixWith(raw[3]).length} симв."
+        File("build/reports").mkdirs()
+        File("build/reports/mentor-cache.md").writeText("# Кэш начала запроса\n\n$report\n")
+        println(report)
+        assertTrue("кэш ни разу не сработал: $stats", stats.size == 4 && stats.drop(1).any { it.cached > 0 })
+        assertTrue("после кэша ответ расходится с первых слов ($common симв.):\n${raw[0]}\n---\n${raw[2]}", common >= minOf(20, raw[0].length))
+        assertTrue("повторный запрос подряд дал другой ответ:\n${raw[2]}\n---\n${raw[3]}", raw[2].commonPrefixWith(raw[3]).length >= minOf(20, raw[2].length))
     }
 }

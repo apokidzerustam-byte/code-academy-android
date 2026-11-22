@@ -54,7 +54,8 @@ bool Engine::abort_cb(void * data) {
     return static_cast<Engine *>(data)->stop_.load();
 }
 
-std::string Engine::load(const std::string & path, int n_ctx, int n_threads) {
+std::string Engine::load(const std::string & path, int n_ctx, int n_threads, int n_threads_batch) {
+    cached_.clear();
     if (ctx_) { llama_free(ctx_); ctx_ = nullptr; }
     if (model_) { llama_model_free(model_); model_ = nullptr; }
     llama_model_params mp = llama_model_default_params();
@@ -66,7 +67,7 @@ std::string Engine::load(const std::string & path, int n_ctx, int n_threads) {
     cp.n_batch = static_cast<uint32_t>(n_ctx);
     cp.n_ubatch = 512;
     cp.n_threads = n_threads;
-    cp.n_threads_batch = n_threads;
+    cp.n_threads_batch = n_threads_batch;
     cp.no_perf = true;
     cp.abort_callback = &Engine::abort_cb;
     cp.abort_callback_data = this;
@@ -77,14 +78,22 @@ std::string Engine::load(const std::string & path, int n_ctx, int n_threads) {
         return "не хватило памяти для контекста модели";
     }
     n_ctx_ = n_ctx;
+    n_threads_ = n_threads;
+    n_threads_batch_ = n_threads_batch;
     return "";
+}
+
+std::string Engine::system_info() {
+    const char * s = llama_print_system_info();
+    return s ? std::string(s) : std::string();
 }
 
 std::string Engine::description() const {
     if (!model_) return "";
     char buf[256];
     const int n = llama_model_desc(model_, buf, sizeof(buf));
-    return n > 0 ? std::string(buf, std::min<int>(n, sizeof(buf) - 1)) : "";
+    std::string d = n > 0 ? std::string(buf, std::min<int>(n, sizeof(buf) - 1)) : "";
+    return d + " | потоки " + std::to_string(n_threads_) + "/" + std::to_string(n_threads_batch_);
 }
 
 GenStats Engine::generate(const std::string & prompt, const GenParams & p, const PieceCallback & on_piece) {
@@ -92,9 +101,6 @@ GenStats Engine::generate(const std::string & prompt, const GenParams & p, const
     if (!ctx_) { st.error = "модель не загружена"; return st; }
     stop_.store(false);
     const llama_vocab * vocab = llama_model_get_vocab(model_);
-
-    // Новый разговор — пустая память контекста.
-    llama_memory_clear(llama_get_memory(ctx_), true);
 
     const int n_prompt = -llama_tokenize(vocab, prompt.c_str(), static_cast<int32_t>(prompt.size()), nullptr, 0, true, true);
     std::vector<llama_token> tokens(std::max(n_prompt, 1));
@@ -119,8 +125,19 @@ GenStats Engine::generate(const std::string & prompt, const GenParams & p, const
     }
     llama_batch_ext * batch = llama_batch_ext_init(ctx_);
 
+    // Общее начало с прошлым запросом (системные правила, условие задания) уже посчитано — берём из памяти контекста.
+    // Последний токен запроса пересчитывается всегда: по нему получают вероятности первого токена ответа.
+    llama_memory_t mem = llama_get_memory(ctx_);
+    int keep = 0;
+    const int limit = std::min<int>(static_cast<int>(cached_.size()), n_prompt - 1);
+    while (keep < limit && cached_[keep] == tokens[keep]) ++keep;
+    if (keep > 0 && !llama_memory_seq_rm(mem, 0, keep, -1)) keep = 0;
+    if (keep == 0) llama_memory_clear(mem, true);
+    cached_.clear(); // пока идёт вычисление, содержимое памяти не соответствует никакому запросу
+    st.prompt_cached = keep;
+
     double t0 = now_ms();
-    batch_set(batch, tokens.data(), n_prompt, 0, true);
+    batch_set(batch, tokens.data() + keep, n_prompt - keep, keep, true);
     int rc = llama_process(ctx_, LLAMA_PROCESS_TYPE_DECODE, batch);
     st.prompt_ms = now_ms() - t0;
     std::string pending; // байты незавершённого символа UTF-8
@@ -150,6 +167,9 @@ GenStats Engine::generate(const std::string & prompt, const GenParams & p, const
     }
     if (!pending.empty() && st.error.empty() && !st.stopped) on_piece(pending);
     st.gen_ms = now_ms() - t0;
+    // Запрос остаётся в кэше (ответ из памяти убирается); после остановки или ошибки память очищается целиком.
+    if (st.error.empty() && !st.stopped && llama_memory_seq_rm(mem, 0, n_prompt, -1)) cached_.assign(tokens.begin(), tokens.begin() + n_prompt);
+    else llama_memory_clear(mem, true);
     llama_batch_ext_free(batch);
     llama_sampler_free(smpl);
     return st;

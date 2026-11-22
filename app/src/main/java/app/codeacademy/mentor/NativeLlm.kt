@@ -14,7 +14,7 @@ class NativeLlm private constructor(@Volatile private var handle: Long) {
 
     val description: String get() = nativeDescribe(handle)
 
-    /** Возвращает JSON со статистикой: promptTokens, generatedTokens, promptMs, genMs, stopped, truncated. */
+    /** Возвращает JSON со статистикой: promptTokens, cachedTokens, generatedTokens, promptMs, genMs, stopped, truncated. */
     fun generate(prompt: String, maxTokens: Int, temperature: Float, seed: Int, cb: PieceCallback): String {
         check(handle != 0L) { "модель выгружена" }
         return nativeGenerate(handle, prompt, maxTokens, temperature, seed, cb)
@@ -45,12 +45,16 @@ class NativeLlm private constructor(@Volatile private var handle: Long) {
             initialized = true
         }
 
-        fun load(path: String, nCtx: Int, nThreads: Int): NativeLlm = NativeLlm(Init.nativeLoad(path, nCtx, nThreads))
+        fun load(path: String, nCtx: Int, nThreads: Int, nThreadsBatch: Int): NativeLlm = NativeLlm(Init.nativeLoad(path, nCtx, nThreads, nThreadsBatch))
+
+        /** Возможности процессора, которые использует выбранный вариант бэкенда. */
+        fun systemInfo(): String = Init.nativeSystemInfo()
     }
 
     /** Статические функции JNI без экземпляра. */
     private object Init {
         @JvmStatic external fun nativeInit(libDir: String)
-        @JvmStatic external fun nativeLoad(path: String, nCtx: Int, nThreads: Int): Long
+        @JvmStatic external fun nativeLoad(path: String, nCtx: Int, nThreads: Int, nThreadsBatch: Int): Long
+        @JvmStatic external fun nativeSystemInfo(): String
     }
 }

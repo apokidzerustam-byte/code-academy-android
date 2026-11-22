@@ -54,11 +54,11 @@ Java_app_codeacademy_mentor_NativeLlm_00024Init_nativeInit(JNIEnv * env, jclass,
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_app_codeacademy_mentor_NativeLlm_00024Init_nativeLoad(JNIEnv * env, jclass, jstring path, jint nCtx, jint nThreads) {
+Java_app_codeacademy_mentor_NativeLlm_00024Init_nativeLoad(JNIEnv * env, jclass, jstring path, jint nCtx, jint nThreads, jint nThreadsBatch) {
     auto e = std::make_unique<mentor::Engine>();
     std::string err;
     try {
-        err = e->load(to_utf8(env, path), nCtx, nThreads);
+        err = e->load(to_utf8(env, path), nCtx, nThreads, nThreadsBatch);
     } catch (const std::exception & ex) {
         err = std::string("не удалось загрузить модель: ") + ex.what();
     }
@@ -68,6 +68,11 @@ Java_app_codeacademy_mentor_NativeLlm_00024Init_nativeLoad(JNIEnv * env, jclass,
     }
     __android_log_print(ANDROID_LOG_INFO, TAG, "модель загружена: %s", e->description().c_str());
     return reinterpret_cast<jlong>(e.release());
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_app_codeacademy_mentor_NativeLlm_00024Init_nativeSystemInfo(JNIEnv * env, jclass) {
+    return to_java(env, mentor::Engine::system_info());
 }
 
 extern "C" JNIEXPORT jstring JNICALL
@@ -103,6 +108,7 @@ Java_app_codeacademy_mentor_NativeLlm_nativeGenerate(JNIEnv * env, jobject, jlon
     }
     if (env->ExceptionCheck()) return nullptr;
     const std::string json = std::string("{\"promptTokens\":") + std::to_string(st.prompt_tokens) +
+        ",\"cachedTokens\":" + std::to_string(st.prompt_cached) +
         ",\"generatedTokens\":" + std::to_string(st.generated_tokens) +
         ",\"promptMs\":" + std::to_string(static_cast<long>(st.prompt_ms)) +
         ",\"genMs\":" + std::to_string(static_cast<long>(st.gen_ms)) +

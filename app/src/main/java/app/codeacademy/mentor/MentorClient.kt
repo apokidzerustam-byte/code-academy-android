@@ -19,7 +19,13 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 /** Статистика последней генерации (для настроек и тестов). */
-data class GenStats(val promptTokens: Int, val generatedTokens: Int, val promptMs: Long, val genMs: Long, val stopped: Boolean) {
+data class GenStats(
+    val promptTokens: Int, val generatedTokens: Int, val promptMs: Long, val genMs: Long, val stopped: Boolean,
+    /** Сколько токенов начала запроса взято из памяти контекста без пересчёта. */
+    val cachedTokens: Int = 0,
+    /** Сколько ушло на загрузку модели в этом запросе (0 — модель уже была в памяти). */
+    val loadMs: Long = 0,
+) {
     val tokensPerSecond: Double get() = if (genMs > 0) generatedTokens * 1000.0 / genMs else 0.0
 }
 
@@ -31,6 +37,10 @@ class MentorClient(private val context: Context, private val modelPath: () -> St
     @Volatile private var connecting: CompletableDeferred<Messenger>? = null
     @Volatile private var pending: Pending? = null
     @Volatile var lastStats: GenStats? = null
+        private set
+
+    /** Описание модели, число потоков и возможности процессора — для проверки на телефоне. */
+    @Volatile var lastInfo: String = ""
         private set
 
     private class Pending(val id: Long, val onPiece: (String) -> Boolean, val done: (Result<String>) -> Unit) {
@@ -116,7 +126,8 @@ class MentorClient(private val context: Context, private val modelPath: () -> St
                 if (!p.onPiece(piece)) stop()
             }
             MentorProtocol.MSG_DONE -> {
-                lastStats = data.getString(MentorProtocol.KEY_STATS)?.let(::parseStats)
+                lastStats = data.getString(MentorProtocol.KEY_STATS)?.let { parseStats(it, data.getLong(MentorProtocol.KEY_LOAD_MS, 0)) }
+                data.getString(MentorProtocol.KEY_INFO)?.let { lastInfo = it }
                 pending = null
                 if (data.getBoolean(MentorProtocol.KEY_HOT)) {
                     p.done(Result.failure(IllegalStateException("Телефон перегрелся — нейросеть остановлена, ответил лёгкий режим.")))
@@ -135,8 +146,9 @@ class MentorClient(private val context: Context, private val modelPath: () -> St
         p.done(Result.failure(IllegalStateException(msg)))
     }
 
-    private fun parseStats(json: String): GenStats? = runCatching {
+    private fun parseStats(json: String, loadMs: Long): GenStats? = runCatching {
         val o = JSONObject(json)
-        GenStats(o.getInt("promptTokens"), o.getInt("generatedTokens"), o.getLong("promptMs"), o.getLong("genMs"), o.getBoolean("stopped"))
+        GenStats(o.getInt("promptTokens"), o.getInt("generatedTokens"), o.getLong("promptMs"), o.getLong("genMs"), o.getBoolean("stopped"),
+            cachedTokens = o.optInt("cachedTokens", 0), loadMs = loadMs)
     }.getOrNull()
 }
