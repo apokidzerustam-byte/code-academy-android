@@ -1,0 +1,75 @@
+{
+  "id": "a3-css",
+  "type": "write",
+  "title": "Покрасить и выделить",
+  "statement": "Разметку менять не нужно. Добавьте в `head` тег `style` с двумя правилами:\n\n- элемент с `id=\"title\"` — **красный** цвет текста (`red`);\n- элементы с классом `sale` — **жирный** шрифт (`bold`).",
+  "goal": "Писать CSS-правила с селекторами по id и по классу.",
+  "input": "Страница с заголовком и двумя абзацами.",
+  "expectedResult": "Заголовок красный, абзац со скидкой жирный, остальное как было.",
+  "constraints": [
+    "Не меняйте разметку body.",
+    "Обычный абзац должен остаться обычным."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <h1 id=\"title\">Магазин</h1>\n  <p class=\"sale\">Скидка 20%</p>\n  <p>Обычный текст</p>\n</body>\n</html>\n",
+  "hints": [
+    "Правила CSS пишут внутри <style> в head.",
+    "По id выбирают через решётку: #title.",
+    "По классу — через точку: .sale.",
+    "Свойства: color для цвета текста, font-weight для жирности.",
+    "<style>\n  #title { color: red; }\n  .sale { font-weight: bold; }\n</style>"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "red",
+        "expr": "getComputedStyle(document.querySelector('#title')).color",
+        "expected": "rgb(255, 0, 0)"
+      },
+      {
+        "id": "bold",
+        "expr": "getComputedStyle(document.querySelector('.sale')).fontWeight",
+        "expected": "700"
+      },
+      {
+        "id": "plain",
+        "hidden": true,
+        "expr": "getComputedStyle(document.querySelector('p:not(.sale)')).fontWeight",
+        "expected": "400",
+        "hint": "Жирным должен стать только абзац с классом sale"
+      },
+      {
+        "id": "plain-color",
+        "hidden": true,
+        "expr": "getComputedStyle(document.querySelector('p:not(.sale)')).color",
+        "expected": "rgb(0, 0, 0)",
+        "hint": "Красным должен быть только заголовок"
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    #title { color: red; }\n    .sale { font-weight: bold; }\n  </style>\n</head>\n<body>\n  <h1 id=\"title\">Магазин</h1>\n  <p class=\"sale\">Скидка 20%</p>\n  <p>Обычный текст</p>\n</body>\n</html>\n",
+  "explanation": "#title выбирает один элемент по id, .sale — все элементы с этим классом.",
+  "criteria": [
+    "Заголовок красный.",
+    "Только абзац sale жирный."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    title { color: red; }\n    .sale { font-weight: bold; }\n  </style>\n</head>\n<body>\n  <h1 id=\"title\">Магазин</h1>\n  <p class=\"sale\">Скидка 20%</p>\n  <p>Обычный текст</p>\n</body>\n</html>\n",
+      "why": "Без решётки селектор ищет тег <title>, а не id."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    #title { color: red; }\n    p { font-weight: bold; }\n  </style>\n</head>\n<body>\n  <h1 id=\"title\">Магазин</h1>\n  <p class=\"sale\">Скидка 20%</p>\n  <p>Обычный текст</p>\n</body>\n</html>\n",
+      "why": "Селектор p делает жирными все абзацы."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    #title { color: red }\n    .sale { font-weight: bold }\n    body { color: red; }\n  </style>\n</head>\n<body>\n  <h1 id=\"title\">Магазин</h1>\n  <p class=\"sale\">Скидка 20%</p>\n  <p>Обычный текст</p>\n</body>\n</html>\n",
+      "why": "Красным стал весь текст страницы."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    #title { colour: red; }\n    .sale { font-weight: bold; }\n  </style>\n</head>\n<body>\n  <h1 id=\"title\">Магазин</h1>\n  <p class=\"sale\">Скидка 20%</p>\n  <p>Обычный текст</p>\n</body>\n</html>\n",
+      "why": "Свойство называется color, а не colour."
+    }
+  ]
+}

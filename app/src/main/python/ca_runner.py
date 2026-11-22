@@ -143,6 +143,11 @@ _PRELOAD = (
     "_statistics", "statistics", "unicodedata", "_sqlite3", "sqlite3", "zlib", "_hashlib",
     "hashlib", "_sha2", "_md5", "binascii", "_pickle", "_zoneinfo", "_bz2", "_lzma",
     "pyexpat", "_elementtree", "_multibytecodec", "_uuid", "fractions", "itertools",
+    # Учебный FastAPI (уровень A, Chaquopy): пакеты загружаются заранее, до включения песочницы.
+    "typing_extensions", "pydantic", "starlette", "anyio", "anyio._backends._asyncio", "sniffio",
+    "h11", "httpcore", "httpx", "fastapi", "fastapi.testclient", "fastapi.responses", "fastapi.encoders",
+    "starlette.testclient", "starlette.routing", "fastapi.routing", "anyio.from_thread", "anyio.abc",
+    "email.mime.text", "concurrent.futures.thread",
 )
 
 
@@ -347,6 +352,8 @@ def _values_equal(expected, actual, tol):
             return False
     if isinstance(expected, (list, tuple)) and isinstance(actual, (list, tuple)):
         return len(expected) == len(actual) and all(_values_equal(e, a, tol) for e, a in zip(expected, actual))
+    if isinstance(expected, dict) and isinstance(actual, dict):
+        return expected.keys() == actual.keys() and all(_values_equal(expected[k], actual[k], tol) for k in expected)
     return expected == actual
 
 
@@ -507,6 +514,117 @@ def _check_answer(answer, spec):
     return {"kind": "answer", "cases": cases}
 
 
+def _fastapi_case(client, case):
+    method = case.get("method", "GET").upper()
+    kwargs = {}
+    for key in ("json", "params", "headers"):
+        if key in case:
+            kwargs[key] = case[key]
+    resp = client.request(method, case["path"], **kwargs)
+    try:
+        body = resp.json()
+    except ValueError:
+        body = resp.text
+    return resp.status_code, body
+
+
+def _check_fastapi(code, spec, sandbox_dir, max_output):
+    """Учебный API на FastAPI: запросы через TestClient (без сети), сравнение кода ответа и JSON."""
+    global _ACTIVE, _SANDBOX
+    try:
+        from fastapi.testclient import TestClient
+    except ImportError:
+        return {"loadError": "FastAPI недоступен в этом режиме выполнения. Выберите в настройках режим A или «Авто»."}
+    filename = "main.py"
+    out, err = _CappedIO(max_output), _CappedIO(max_output)
+    old_streams = sys.stdout, sys.stderr, sys.stdin
+    old_cwd = os.getcwd()
+    sys.dont_write_bytecode = True
+    reports = []
+    app_name = spec.get("app", "app")
+    try:
+        _install_hook()
+        if sandbox_dir:
+            os.makedirs(sandbox_dir, exist_ok=True)
+            os.chdir(sandbox_dir)
+            _SANDBOX = _real(sandbox_dir)
+            sys.path.insert(0, _SANDBOX)
+        linecache.cache[filename] = (len(code), None, code.splitlines(True), filename)
+        try:
+            compiled = compile(code, filename, "exec")
+        except SyntaxError as e:
+            return {"compileError": "".join(traceback.format_exception_only(type(e), e))}
+        g = {"__name__": "__check__", "__file__": filename, "__builtins__": _safe_builtins()}
+        sys.stdout, sys.stderr, sys.stdin = out, err, io.StringIO("")
+        _ACTIVE = True
+        try:
+            exec(compiled, g)
+        except BaseException as e:  # noqa: BLE001
+            _ACTIVE = False
+            return {"loadError": _user_traceback(e, filename)}
+        _ACTIVE = False
+        app = g.get(app_name)
+        if app is None or not callable(app):
+            return {"loadError": f"Приложение {app_name} не найдено. Создайте его: {app_name} = FastAPI()"}
+        tol = float(spec.get("tolerance", 1e-9))
+        # Без «with»: события запуска (lifespan) не нужны, а клиент создаётся до включения песочницы.
+        client = TestClient(app)
+        if True:
+            for case in spec["cases"]:
+                shown = {"method": case.get("method", "GET").upper(), "path": case["path"]}
+                if "json" in case:
+                    shown["json"] = case["json"]
+                if "params" in case:
+                    shown["params"] = case["params"]
+                expected = {"status": case.get("expected_status", 200)}
+                if "expected_json" in case:
+                    expected["json"] = case["expected_json"]
+                try:
+                    _ACTIVE = True
+                    status, body = _fastapi_case(client, case)
+                    _ACTIVE = False
+                except BaseException as e:  # noqa: BLE001 — ошибка в обработчике ученика
+                    _ACTIVE = False
+                    rep = _case_report(case, False, expected, None, _user_traceback(e, filename))
+                    if not rep["hidden"]:
+                        rep["input"] = shown
+                    reports.append(rep)
+                    continue
+                actual = {"status": status}
+                if "expected_json" in case:
+                    actual["json"] = body
+                ok = status == expected["status"] and ("expected_json" not in case or _values_equal(case["expected_json"], body, tol))
+                if "expected_json_contains" in case:
+                    sub = case["expected_json_contains"]
+                    ok = ok and isinstance(body, dict) and all(k in body and _values_equal(v, body[k], tol) for k, v in sub.items())
+                    expected["json_contains"] = sub
+                    actual["json"] = body
+                rep = _case_report(case, ok, expected, actual)
+                if not rep["hidden"]:
+                    rep["input"] = shown
+                if not ok and not rep.get("hint"):
+                    if status != expected["status"]:
+                        rep["hint"] = f"Код ответа {status}, а нужен {expected['status']}"
+                    else:
+                        rep["hint"] = "Код ответа верный, но данные в ответе другие"
+                reports.append(rep)
+    finally:
+        _ACTIVE = False
+        sys.stdout, sys.stderr, sys.stdin = old_streams
+        try:
+            os.chdir(old_cwd)
+        except OSError:
+            pass
+        if _SANDBOX:
+            _forget_user_modules(_SANDBOX)
+            try:
+                sys.path.remove(_SANDBOX)
+            except ValueError:
+                pass
+        _SANDBOX = None
+    return {"cases": reports}
+
+
 def check(code, tests_json, sandbox_dir=None, max_output=4096):
     """Проверка решения. tests_json: {"kind": "stdout"|"function", ...}. Возвращает JSON-отчёт."""
     spec = json.loads(tests_json)
@@ -515,6 +633,8 @@ def check(code, tests_json, sandbox_dir=None, max_output=4096):
         res = _check_stdout(code, spec, sandbox_dir, max_output)
     elif spec["kind"] == "function":
         res = _check_function(code, spec, sandbox_dir, max_output)
+    elif spec["kind"] == "fastapi":
+        res = _check_fastapi(code, spec, sandbox_dir, max_output)
     elif spec["kind"] == "answer":
         # «Предскажи результат»: code — ответ ученика текстом, код не выполняется.
         res = _check_answer(code, spec)

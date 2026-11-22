@@ -3,6 +3,7 @@ package app.codeacademy.assessment
 import app.codeacademy.content.Assignment
 import app.codeacademy.runner.CodeRunner
 import app.codeacademy.runner.RunStatus
+import app.codeacademy.runner.WebRunner
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
@@ -32,6 +33,8 @@ data class CheckReport(
     val compileError: String? = null,
     val loadError: String? = null,
     val durationMs: Long = 0,
+    /** Замечания линтера HTML/CSS: на результат не влияют. */
+    val warnings: List<String> = emptyList(),
 )
 
 /** Итог проверки для экрана и статистики. */
@@ -64,7 +67,15 @@ class AssessmentService(private val json: Json = Json { ignoreUnknownKeys = true
     fun testsJson(a: Assignment): String = a.tests.toString()
 
     suspend fun evaluate(runner: CodeRunner, a: Assignment, code: String): Verdict {
-        val r = runner.check(code, testsJson(a), timeoutMs = 10_000, project = "check-${a.id}")
+        // Веб-проверка открывает страницу заново для каждого теста — ей нужно больше времени.
+        // FastAPI: первый импорт fastapi/pydantic на слабом телефоне занимает несколько секунд.
+        val kind = (a.tests["kind"] as? kotlinx.serialization.json.JsonPrimitive)?.content
+        val timeout = when {
+            runner is WebRunner -> 25_000L
+            kind == "fastapi" -> 40_000L
+            else -> 10_000L
+        }
+        val r = runner.check(code, testsJson(a), timeoutMs = timeout, project = "check-${a.id}")
         if (r.status != RunStatus.OK) return Verdict(null, r.status, r.stderr)
         val report = runCatching { json.decodeFromString(CheckReport.serializer(), r.stdout) }.getOrNull()
             ?: return Verdict(null, RunStatus.ERROR, "Некорректный отчёт проверки: ${r.stdout.take(200)}")

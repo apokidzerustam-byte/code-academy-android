@@ -1,0 +1,104 @@
+{
+  "id": "a5-update",
+  "type": "write",
+  "title": "Исправьте год",
+  "statement": "Роман «Мастер и Маргарита» впервые напечатали в журнале в **1966** году. Исправьте год **только у этой книги** командой UPDATE.",
+  "goal": "Изменять данные: UPDATE … SET … WHERE.",
+  "input": "Таблица books.",
+  "expectedResult": "У книги «Мастер и Маргарита» год 1966, остальные строки не изменились.",
+  "constraints": [
+    "Не забудьте WHERE: без условия UPDATE изменит все строки."
+  ],
+  "starterCode": "-- Измените год одной книги\n",
+  "hints": [
+    "Изменение строк — команда UPDATE.",
+    "UPDATE таблица SET столбец = значение …",
+    "Какую строку менять, говорит WHERE — как в SELECT.",
+    "Название — текст, пишите его в одинарных кавычках точно как в таблице.",
+    "UPDATE books SET year = 1966 WHERE title = 'Мастер и Маргарита';"
+  ],
+  "tests": {
+    "kind": "sql",
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE books (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  author TEXT,\n  year INTEGER\n);\n\nINSERT INTO books (title, author, year) VALUES\n  ('Мастер и Маргарита', 'Булгаков', 1967),\n  ('Война и мир', 'Толстой', 1869),\n  ('Евгений Онегин', 'Пушкин', 1833),\n  ('Анна Каренина', 'Толстой', 1878);\n",
+        "query": "SELECT title, year FROM books ORDER BY id",
+        "expected": {
+          "rows": [
+            [
+              "Мастер и Маргарита",
+              1966
+            ],
+            [
+              "Война и мир",
+              1869
+            ],
+            [
+              "Евгений Онегин",
+              1833
+            ],
+            [
+              "Анна Каренина",
+              1878
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h1",
+        "hidden": true,
+        "setup": "CREATE TABLE books (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  author TEXT,\n  year INTEGER\n);\nINSERT INTO books (title, author, year) VALUES\n  ('Идиот', 'Достоевский', 1869),\n  ('Собачье сердце', 'Булгаков', 1987),\n  ('Белая гвардия', 'Булгаков', 1925),\n  ('Бесы', 'Достоевский', 1872),\n  ('Мёртвые души', 'Гоголь', 1842);\nINSERT INTO books (title, author, year) VALUES ('Мастер и Маргарита', 'Булгаков', 1967);",
+        "query": "SELECT title, year FROM books ORDER BY id",
+        "expected": {
+          "rows": [
+            [
+              "Идиот",
+              1869
+            ],
+            [
+              "Собачье сердце",
+              1987
+            ],
+            [
+              "Белая гвардия",
+              1925
+            ],
+            [
+              "Бесы",
+              1872
+            ],
+            [
+              "Мёртвые души",
+              1842
+            ],
+            [
+              "Мастер и Маргарита",
+              1966
+            ]
+          ]
+        },
+        "hint": "Меняться должна только одна книга — с этим названием"
+      }
+    ]
+  },
+  "solution": "UPDATE books SET year = 1966\nWHERE title = 'Мастер и Маргарита';\n",
+  "explanation": "UPDATE меняет значения в строках, которые подходят под WHERE. Без WHERE изменились бы все книги.",
+  "criteria": [
+    "Изменена ровно одна строка."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "UPDATE books SET year = 1966;",
+      "why": "Нет WHERE — изменились все книги."
+    },
+    {
+      "code": "UPDATE books SET year = 1966 WHERE author = 'Булгаков';",
+      "why": "Условие по автору захватывает и другие книги Булгакова."
+    },
+    {
+      "code": "SELECT title, year FROM books;",
+      "why": "SELECT только читает данные, а нужно их изменить."
+    }
+  ]
+}

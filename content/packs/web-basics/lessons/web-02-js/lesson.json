@@ -1,0 +1,53 @@
+{
+  "id": "web-02-js",
+  "title": "JavaScript: функции, циклы и кнопки",
+  "goal": "Писать функции и циклы на JavaScript, понимать ошибки и бесконечные циклы, реагировать на нажатия на странице.",
+  "skills": [
+    "js.basics",
+    "js.functions",
+    "js.dom",
+    "js.events"
+  ],
+  "prerequisites": [
+    "web-01-html-css"
+  ],
+  "runner": "js",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-greet.json",
+    "assignments/a2-max.json",
+    "assignments/a3-fix.json",
+    "assignments/a4-likes.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Функция печатает вместо return",
+      "fix": "Проверка сравнивает возвращённое значение: пишите return.",
+      "errorType": "AssertionError"
+    },
+    {
+      "mistake": "Опечатка в имени переменной",
+      "fix": "ReferenceError подсказывает имя и строку.",
+      "errorType": "ReferenceError"
+    },
+    {
+      "mistake": "Бесконечный цикл while",
+      "fix": "Внутри цикла меняйте переменную из условия.",
+      "errorType": "InfiniteLoopError"
+    },
+    {
+      "mistake": "Переменная счётчика внутри обработчика",
+      "fix": "Объявляйте её снаружи, иначе она обнуляется при каждом нажатии."
+    },
+    {
+      "mistake": "\"2\" + 2",
+      "fix": "Плюс со строкой склеивает. Для чисел используйте Number(...)."
+    }
+  ]
+}

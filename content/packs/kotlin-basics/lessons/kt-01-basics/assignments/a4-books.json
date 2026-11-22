@@ -1,0 +1,86 @@
+{
+  "id": "a4-books",
+  "type": "write",
+  "title": "Старые книги",
+  "statement": "1. Объявите `data class Book` со свойствами `title: String` и `year: Int` (оба `val`).\n2. Напишите функцию `oldBooks(books: List<Book>): List<Book>`, которая возвращает только книги, написанные **раньше 1900 года**.",
+  "goal": "Описывать данные классом data class и фильтровать список.",
+  "input": "Список книг.",
+  "expectedResult": "Список книг до 1900 года.",
+  "constraints": [
+    "1900 год уже не подходит."
+  ],
+  "starterCode": "// data class Book и функция oldBooks\n",
+  "hints": [
+    "data class Book(val title: String, val year: Int).",
+    "Тип списка книг — List<Book>.",
+    "filter оставляет элементы, для которых условие в фигурных скобках истинно.",
+    "Внутри filter текущая книга — it, год — it.year.",
+    "fun oldBooks(books: List<Book>): List<Book> = books.filter { it.year < 1900 }"
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "cls",
+        "type": "class",
+        "name": "Book",
+        "kind": "data class"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "oldBooks",
+        "paramTypes": [
+          "List<Book>"
+        ],
+        "returns": "List<Book>"
+      },
+      {
+        "id": "props",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "data\\s+class\\s+Book\\s*\\(\\s*val\\s+title\\s*:\\s*String\\s*,\\s*val\\s+year\\s*:\\s*Int\\s*\\)",
+        "message": "У Book два свойства: val title: String и val year: Int"
+      },
+      {
+        "id": "loop",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "\\bfilter\\b|\\bfor\\b",
+        "message": "Отберите книги: filter или цикл for"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    val b = listOf(Book(\"Онегин\", 1833), Book(\"Мастер\", 1967), Book(\"Анна\", 1878), Book(\"Ровно\", 1900))\n    println(oldBooks(b).map { it.title })\n    println(oldBooks(listOf()).size)\n}",
+      "expected_stdout": "[Онегин, Анна]\n0"
+    }
+  },
+  "solution": "data class Book(val title: String, val year: Int)\n\nfun oldBooks(books: List<Book>): List<Book> = books.filter { it.year < 1900 }\n",
+  "explanation": "data class хранит данные; filter { it.year < 1900 } возвращает новый список подходящих книг.",
+  "criteria": [
+    "Book — data class с двумя свойствами.",
+    "oldBooks возвращает List<Book>."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "class Book(val title: String, val year: Int)\n\nfun oldBooks(books: List<Book>): List<Book> = books.filter { it.year < 1900 }\n",
+      "why": "Нужен именно data class."
+    },
+    {
+      "code": "data class Book(val title: String, val year: Int)\n\nfun oldBooks(books: List<Book>): List<String> = books.filter { it.year < 1900 }.map { it.title }\n",
+      "why": "Функция должна возвращать книги, а не названия."
+    },
+    {
+      "code": "data class Book(val title: String, val year: String)\n\nfun oldBooks(books: List<Book>): List<Book> = books\n",
+      "why": "year должен быть Int, и книги нужно отобрать."
+    },
+    {
+      "code": "data class Book(val title: String, val year: Int)\n",
+      "why": "Нет функции oldBooks."
+    }
+  ]
+}

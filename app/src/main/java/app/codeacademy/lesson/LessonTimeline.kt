@@ -103,8 +103,10 @@ class LessonTimeline(scenario: Scenario, narration: NarrationMeta? = null) {
     fun frame(t: Long): PlayerFrame {
         val tt = t.coerceIn(0, totalMs)
         val current = sceneAt(tt)
-        val files = linkedMapOf("main.py" to "")
-        var file = "main.py"
+        // Первый файл урока (main.py, main.sql, index.html…) — по первому действию сценария.
+        val first = scenes.firstNotNullOfOrNull { sc -> sc.actions.firstOrNull()?.action?.file } ?: "main.py"
+        val files = linkedMapOf(first to "")
+        var file = first
         var highlight = emptySet<Int>()
         var output = ""
         var isError = false

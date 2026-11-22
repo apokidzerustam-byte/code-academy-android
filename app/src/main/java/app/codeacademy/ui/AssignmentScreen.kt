@@ -41,7 +41,9 @@ import app.codeacademy.content.Assignment
 import app.codeacademy.content.Lesson
 import app.codeacademy.content.LessonRef
 import app.codeacademy.runner.CodeRunner
+import app.codeacademy.runner.RunResult
 import app.codeacademy.runner.RunStatus
+import app.codeacademy.runner.WebRunner
 import app.codeacademy.settings.RunnerMode
 import app.codeacademy.settings.Settings
 import kotlinx.coroutines.delay
@@ -49,17 +51,68 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 private val HINT_TITLES = listOf("Намёк", "Направление", "Концепция", "Где искать", "Алгоритм")
 
-/** W по умолчанию; в режиме AUTO при недоступном W — переход на A. */
-suspend fun resolveRunner(c: AppContainer, mode: RunnerMode, lessonRunner: String): Pair<String, CodeRunner> {
-    val first = c.runner(mode, lessonRunner)
+/**
+ * W по умолчанию; в режиме AUTO при недоступном W — переход на A. Задания «предскажи результат»
+ * проверяются Python-песочницей при любом языке урока (код не выполняется — сравнивается текст).
+ */
+suspend fun resolveRunner(c: AppContainer, mode: RunnerMode, lessonRunner: String, answerTask: Boolean = false): Pair<String, CodeRunner> {
+    val lr = if (answerTask && lessonRunner in WebRunner.LANGS) "W" else lessonRunner
+    val first = c.runner(mode, lr)
     if (first.first == "W" && mode == RunnerMode.AUTO && first.second.prepare()?.pythonStarted != true) {
-        return c.runner(mode, lessonRunner, wAvailable = false)
+        return c.runner(mode, lr, wAvailable = false)
     }
     return first
 }
+
+/**
+ * Исполнитель задания: веб-задания несут свой язык (в уроке JavaScript бывает задание со страницей HTML),
+ * остальные — язык урока.
+ */
+fun assignmentRunner(a: app.codeacademy.content.Assignment, lessonRunner: String): String {
+    val t = a.tests
+    val kind = (t["kind"] as? kotlinx.serialization.json.JsonPrimitive)?.content
+    if (kind == "web") return (t["lang"] as? kotlinx.serialization.json.JsonPrimitive)?.content ?: "html"
+    return lessonRunner
+}
+
+/** Язык подсветки редактора для языка урока. */
+fun editorLanguage(lessonRunner: String): String = when (lessonRunner) {
+    "html" -> "html"
+    "js" -> "javascript"
+    "sql" -> "sql"
+    "kotlin" -> "kotlin"
+    else -> "python"
+}
+
+/** Как называется исполнитель на экране. */
+fun runnerTitle(name: String): String = when (name) {
+    "W" -> "Режим выполнения: изолированный (W)"
+    "A" -> "Режим выполнения: ограниченный (A)"
+    "html", "js" -> "Выполнение: песочница браузера, без интернета"
+    "sql" -> "Выполнение: SQLite в песочнице, новая база при каждом запуске"
+    "kotlin" -> "Kotlin: проверка синтаксиса и устройства кода (запуск — через GitHub Actions)"
+    else -> name
+}
+
+/** Таблицы и данные для запуска SQL-задания — из первого открытого теста. */
+private fun sqlSetup(a: Assignment): String =
+    runCatching {
+        a.tests["cases"]!!.jsonArray.map { it.jsonObject }.firstOrNull { it["hidden"]?.jsonPrimitive?.contentOrNull != "true" }
+            ?.get("setup")?.jsonPrimitive?.contentOrNull
+    }.getOrNull().orEmpty()
+
+private fun formatOutput(r: RunResult): String = buildString {
+    if (r.status != RunStatus.OK) append("[${statusText(r.status)}]\n")
+    append(r.stdout)
+    if (r.stderr.isNotBlank()) append(if (r.stdout.isEmpty() || r.stdout.endsWith("\n")) "" else "\n").append(r.stderr)
+    if (r.truncated) append("\n(вывод обрезан)")
+}.ifBlank { "(программа ничего не вывела)" }
 
 private fun JsonElement?.show(): String = when (this) {
     null -> "—"
@@ -93,6 +146,9 @@ fun AssignmentScreen(
     var verdict by remember { mutableStateOf<Verdict?>(null) }
     var attempts by remember { mutableStateOf(0) }
     var runnerName by remember { mutableStateOf("") }
+    var activeRunner by remember { mutableStateOf<CodeRunner?>(null) }
+    val preview = remember { WebPreviewController() }
+    var showPreview by remember { mutableStateOf(false) }
     val draftKey = "${ref.key}/$index"
     val startedAt = remember { System.currentTimeMillis() }
 
@@ -155,7 +211,8 @@ fun AssignmentScreen(
                     modifier = Modifier.fillMaxWidth().heightIn(min = 140.dp).testTag("code"),
                 )
             } else if (loaded) {
-                CodeEditor(value = code, onValueChange = { code = it }, plain = settings.plainEditor, height = 240.dp, readOnly = busy != null)
+                CodeEditor(value = code, onValueChange = { code = it }, plain = settings.plainEditor, height = 240.dp,
+                    readOnly = busy != null, language = editorLanguage(assignmentRunner(asg, lesson!!.runner)))
             }
 
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -163,15 +220,21 @@ fun AssignmentScreen(
                     OutlinedButton(enabled = busy == null, onClick = {
                         scope.launch {
                             busy = "Выполняется…"
-                            val (name, runner) = resolveRunner(c, settings.runner, lesson!!.runner)
+                            val (name, runner) = resolveRunner(c, settings.runner, assignmentRunner(asg, lesson!!.runner))
                             runnerName = name
-                            val r = runner.run(code, 5_000, "", "a-${asg.id}")
-                            output = buildString {
-                                if (r.status != RunStatus.OK) append("[${statusText(r.status)}]\n")
-                                append(r.stdout)
-                                if (r.stderr.isNotBlank()) append(if (r.stdout.isEmpty()) "" else "\n").append(r.stderr)
-                                if (r.truncated) append("\n(вывод обрезан)")
-                            }.ifBlank { "(программа ничего не вывела)" }
+                            activeRunner = runner
+                            val r = when {
+                                // Страница видна ученику: запуск в предпросмотре, вывод кликов дописывается в консоль.
+                                name == "html" -> {
+                                    showPreview = true
+                                    preview.onOutput = { _, text -> output = (output.orEmpty() + text).takeLast(20_000) }
+                                    preview.run("html", code)
+                                }
+                                runner is WebRunner -> runner.runWith(code, 8_000, "", null, setup = if (name == "sql") sqlSetup(asg) else "")
+                                else -> runner.run(code, if ("fastapi" in code) 20_000 else 5_000, "", "a-${asg.id}")
+                            }
+                            output = formatOutput(r)
+                            activeRunner = null
                             busy = null
                         }
                     }, modifier = Modifier.testTag("run")) { Text("Запустить") }
@@ -179,8 +242,9 @@ fun AssignmentScreen(
                 Button(enabled = busy == null && code.isNotBlank(), onClick = {
                     scope.launch {
                         busy = "Проверка…"
-                        val (name, runner) = resolveRunner(c, settings.runner, lesson!!.runner)
+                        val (name, runner) = resolveRunner(c, settings.runner, assignmentRunner(asg, lesson!!.runner), asg.isAnswerTask)
                         runnerName = name
+                        activeRunner = runner
                         val submitted = code
                         val v = c.assessment.evaluate(runner, asg, submitted)
                         val used = if (solutionShown) 6 else hintsShown
@@ -192,19 +256,25 @@ fun AssignmentScreen(
                         }
                         verdict = v
                         attempts++
+                        activeRunner = null
                         busy = null
                     }
                 }, modifier = Modifier.testTag("check")) { Text("Проверить") }
                 if (busy != null) {
+                    OutlinedButton(onClick = { activeRunner?.stop(); preview.stop() }, modifier = Modifier.testTag("stop")) { Text("Стоп") }
                     CircularProgressIndicator(Modifier.padding(4.dp))
                     Text(busy!!)
                 }
             }
             if (runnerName.isNotEmpty()) {
                 Text(
-                    if (runnerName == "W") "Режим выполнения: изолированный (W)" else "Режим выполнения: ограниченный (A)",
+                    runnerTitle(runnerName),
                     style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline,
                 )
+            }
+            if (showPreview) {
+                Text("Страница", style = MaterialTheme.typography.titleSmall)
+                WebPreview(preview, height = 300.dp)
             }
             output?.let {
                 Text("Консоль", style = MaterialTheme.typography.titleSmall)
@@ -325,6 +395,10 @@ private fun VerdictView(v: Verdict, asg: Assignment) {
                     }
                     if (ok) Text(asg.explanation)
                 }
+            }
+            if (r != null && r.warnings.isNotEmpty()) {
+                Text("Замечания (на оценку не влияют):", style = MaterialTheme.typography.labelLarge)
+                r.warnings.take(8).forEach { Text("• $it", style = MaterialTheme.typography.bodySmall) }
             }
         }
     }

@@ -1,0 +1,80 @@
+{
+  "id": "a2-grade",
+  "type": "write",
+  "title": "Оценка через when",
+  "statement": "Напишите функцию `grade(score: Int): String` с помощью `when`:\n\n- 90 и больше → `отлично`;\n- от 60 до 89 → `зачёт`;\n- меньше 60 → `незачёт`.",
+  "goal": "Выбирать результат конструкцией when.",
+  "input": "Целое score от 0 до 100.",
+  "expectedResult": "Строка-оценка.",
+  "constraints": [
+    "Используйте when (не цепочку if).",
+    "90 — уже «отлично», 60 — уже «зачёт»."
+  ],
+  "starterCode": "// Функция grade через when\n",
+  "hints": [
+    "Заголовок: fun grade(score: Int): String.",
+    "when без аргумента: when { условие -> результат }.",
+    "Ветки проверяются сверху вниз — начните с самого строгого условия.",
+    "Последняя ветка — else -> \"незачёт\".",
+    "fun grade(score: Int): String = when {\n    score >= 90 -> \"отлично\"\n    score >= 60 -> \"зачёт\"\n    else -> \"незачёт\"\n}"
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "grade",
+        "paramTypes": [
+          "Int"
+        ],
+        "returns": "String"
+      },
+      {
+        "id": "when",
+        "type": "contains",
+        "pattern": "\\bwhen\\b",
+        "message": "Используйте when"
+      },
+      {
+        "id": "else",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "\\belse\\s*->",
+        "message": "В when нужна ветка else для остальных случаев"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    for (s in listOf(95, 90, 75, 60, 59, 0)) println(grade(s))\n}",
+      "expected_stdout": "отлично\nотлично\nзачёт\nзачёт\nнезачёт\nнезачёт"
+    }
+  },
+  "solution": "fun grade(score: Int): String = when {\n    score >= 90 -> \"отлично\"\n    score >= 60 -> \"зачёт\"\n    else -> \"незачёт\"\n}\n",
+  "explanation": "when проверяет ветки сверху вниз и возвращает результат первой подходящей; else — для остальных.",
+  "criteria": [
+    "Используется when с else.",
+    "Границы 90 и 60 включены."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "fun grade(score: Int): String {\n    if (score >= 90) return \"отлично\"\n    if (score >= 60) return \"зачёт\"\n    return \"незачёт\"\n}\n",
+      "why": "Работает, но задание — на when."
+    },
+    {
+      "code": "fun grade(score: Int) = when {\n    score >= 90 -> \"отлично\"\n    score >= 60 -> \"зачёт\"\n    else -> \"незачёт\"\n}\n",
+      "why": "Не указан тип результата String."
+    },
+    {
+      "code": "fun grade(score: Int): String = when {\n    score >= 90 -> \"отлично\"\n    score >= 60 -> \"зачёт\"\n}\n",
+      "why": "Нет ветки else — Kotlin не скомпилирует when без неё."
+    },
+    {
+      "code": "fun grade(score: String): String = when {\n    else -> \"незачёт\"\n}\n",
+      "why": "Параметр должен быть Int."
+    }
+  ]
+}

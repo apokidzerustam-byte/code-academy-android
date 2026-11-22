@@ -1,0 +1,19 @@
+{
+  "id": "kotlin-basics",
+  "version": "0.1.0",
+  "stage": 12,
+  "title": "Kotlin для Андроида",
+  "description": "Язык Андроида: типы, функции, when, data class. На телефоне — проверка синтаксиса и структуры, запуск — в GitHub Actions. Пилот этапа 12.",
+  "language": "kotlin",
+  "minAppVersion": 1,
+  "lessons": [
+    "kt-01-basics"
+  ],
+  "skills": {
+    "kt.basics": "Kotlin: main, val и var",
+    "kt.functions": "Функции и типы",
+    "kt.when": "when и циклы",
+    "kt.data": "data class и списки",
+    "kt.syntax": "Синтаксические ошибки"
+  }
+}

@@ -16,6 +16,7 @@ concurrency:
 
 env:
   GRADLE_VERSION: "8.14.3"
+  KOTLIN_VERSION: "2.1.20"
 
 permissions:
   contents: write
@@ -28,10 +29,24 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.13" }
-      - run: pip install pytest jsonschema
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "17" }
+      # Те же версии FastAPI/pydantic, что ставит Chaquopy в приложение (app/build.gradle.kts).
+      - run: pip install pytest jsonschema "fastapi==0.125.0" "pydantic==1.10.27" "httpx==0.28.1"
+      - name: Компилятор Kotlin (проверка эталонов и вывода сцен)
+        run: |
+          curl -sSLo /tmp/kotlinc.zip "https://github.com/JetBrains/kotlin/releases/download/v${KOTLIN_VERSION}/kotlin-compiler-${KOTLIN_VERSION}.zip"
+          unzip -q /tmp/kotlinc.zip -d /opt
+          echo "KOTLINC=/opt/kotlinc/bin/kotlinc" >> "$GITHUB_ENV"
+      - name: Веб-раннер — тесты и сборка (HTML/CSS/JS, SQL, Kotlin)
+        working-directory: web-runner
+        run: npm install --no-audit --no-fund && npm test && npm run build
       - run: python -m pytest harness-tests -v
+        env: { CA_REQUIRE_FASTAPI: "1" }
       - name: Проверка контент-пакетов
-        run: python tools/validate_content.py content/packs --json content-report.json
+        run: python tools/validate_content.py content/packs --json content-report.json --require-kotlinc
       - name: Отчёт о контенте
         if: always()
         run: |
@@ -59,8 +74,24 @@ jobs:
       - name: Сборка раннера Pyodide
         working-directory: pyodide-web
         run: npm install --no-audit --no-fund && npm run build
+      - name: Сборка веб-раннера (HTML/CSS/JS, SQL, Kotlin)
+        working-directory: web-runner
+        run: npm install --no-audit --no-fund && npm run build
       - name: Модульные тесты (JVM)
         run: gradle --no-daemon :app:testDebugUnitTest
+      - name: Шаблон проекта Kotlin — сценарий GitHub Actions по-настоящему
+        working-directory: app/build/kotlin-template
+        run: |
+          # Выполняем шаги run: из .github/workflows/kotlin.yml шаблона, как их выполнит GitHub у ученика.
+          python3 - <<'PY' > steps.sh
+          import re
+          wf = open(".github/workflows/kotlin.yml", encoding="utf-8").read()
+          for block in re.findall(r"run: \|\n((?:          .*\n)+)|run: (.+)\n", wf):
+              print(block[0].replace("          ", "", 1).replace("\n          ", "\n") if block[0] else block[1])
+          PY
+          cat steps.sh
+          bash -e steps.sh | tee run.log
+          grep -q "Привет, Мир!" run.log
       - name: Сборка APK
         run: gradle --no-daemon :app:assembleDebug :app:assembleRelease
       - name: Размер APK
@@ -115,6 +146,9 @@ jobs:
       - name: Сборка раннера Pyodide
         working-directory: pyodide-web
         run: npm install --no-audit --no-fund && npm run build
+      - name: Сборка веб-раннера (HTML/CSS/JS, SQL, Kotlin)
+        working-directory: web-runner
+        run: npm install --no-audit --no-fund && npm run build
       - name: Предсборка тестового APK
         run: gradle --no-daemon :app:assembleDebug :app:assembleDebugAndroidTest
       - name: Инструментальные тесты
@@ -142,51 +176,3 @@ jobs:
             build/ci/
             app/build/reports/androidTests/
             app/build/outputs/androidTest-results/
-
-  fastapi-probe:
-    name: Зонд FastAPI (${{ matrix.spec }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    continue-on-error: true
-    strategy:
-      fail-fast: false
-      matrix:
-        spec: [v2, v2strict, v1]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with: { distribution: temurin, java-version: "17" }
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.13" }
-      - uses: gradle/actions/setup-gradle@v4
-        with: { gradle-version: "${{ env.GRADLE_VERSION }}" }
-      - name: Включить KVM
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-      - name: Установка пакетов через Chaquopy pip
-        run: gradle --no-daemon :probe-fastapi:assembleDebug :probe-fastapi:assembleDebugAndroidTest -PfastapiSpec=${{ matrix.spec }} 2>&1 | tee build-pip.log; exit ${PIPESTATUS[0]}
-      - name: Тест на эмуляторе
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 34
-          arch: x86_64
-          target: default
-          disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
-          script: bash ci/emulator-tests.sh :probe-fastapi:connectedDebugAndroidTest -PfastapiSpec=${{ matrix.spec }}
-      - name: Итог
-        if: always()
-        run: |
-          echo "### FastAPI ${{ matrix.spec }}" >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          (cat build/ci/probe.log 2>/dev/null || grep -iE "error|pydantic" build-pip.log | tail -40) >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: fastapi-probe-${{ matrix.spec }}
-          path: |
-            build/ci/
-            build-pip.log

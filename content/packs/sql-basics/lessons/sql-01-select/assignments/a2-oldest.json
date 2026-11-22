@@ -1,0 +1,113 @@
+{
+  "id": "a2-oldest",
+  "type": "write",
+  "title": "Две самые старые книги",
+  "statement": "Выведите название и год (`title`, `year`) **двух самых старых** книг: сначала самую старую.",
+  "goal": "Сортировать (ORDER BY) и ограничивать (LIMIT).",
+  "input": "Таблица books.",
+  "expectedResult": "Два столбца title, year; две строки по возрастанию года.",
+  "constraints": [
+    "Порядок строк важен."
+  ],
+  "starterCode": "SELECT title, year FROM books\n",
+  "hints": [
+    "Самые старые — это самые маленькие годы.",
+    "Отсортируйте строки по году: ORDER BY year.",
+    "По умолчанию ORDER BY сортирует по возрастанию — от старых к новым.",
+    "Ограничить число строк можно словом LIMIT в самом конце запроса.",
+    "SELECT title, year FROM books ORDER BY year LIMIT 2;"
+  ],
+  "tests": {
+    "kind": "sql",
+    "ordered": true,
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE books (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  author TEXT,\n  year INTEGER\n);\n\nINSERT INTO books (title, author, year) VALUES\n  ('Мастер и Маргарита', 'Булгаков', 1967),\n  ('Война и мир', 'Толстой', 1869),\n  ('Евгений Онегин', 'Пушкин', 1833),\n  ('Анна Каренина', 'Толстой', 1878);\n",
+        "expected": {
+          "columns": [
+            "title",
+            "year"
+          ],
+          "rows": [
+            [
+              "Евгений Онегин",
+              1833
+            ],
+            [
+              "Война и мир",
+              1869
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h1",
+        "hidden": true,
+        "setup": "CREATE TABLE books (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  author TEXT,\n  year INTEGER\n);\nINSERT INTO books (title, author, year) VALUES\n  ('Идиот', 'Достоевский', 1869),\n  ('Собачье сердце', 'Булгаков', 1987),\n  ('Белая гвардия', 'Булгаков', 1925),\n  ('Бесы', 'Достоевский', 1872),\n  ('Мёртвые души', 'Гоголь', 1842);\n",
+        "expected": {
+          "columns": [
+            "title",
+            "year"
+          ],
+          "rows": [
+            [
+              "Мёртвые души",
+              1842
+            ],
+            [
+              "Идиот",
+              1869
+            ]
+          ]
+        },
+        "hint": "Сначала сортировка, потом LIMIT"
+      },
+      {
+        "id": "h2",
+        "hidden": true,
+        "setup": "CREATE TABLE books (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  author TEXT,\n  year INTEGER\n);\nINSERT INTO books (title, author, year) VALUES\n  ('Отцы и дети', 'Тургенев', 1862),\n  ('Ревизор', 'Гоголь', 1836),\n  ('Обломов', 'Гончаров', 1859);\n",
+        "expected": {
+          "columns": [
+            "title",
+            "year"
+          ],
+          "rows": [
+            [
+              "Ревизор",
+              1836
+            ],
+            [
+              "Обломов",
+              1859
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  "solution": "SELECT title, year FROM books\nORDER BY year\nLIMIT 2;\n",
+  "explanation": "ORDER BY year ставит книги от старых к новым, LIMIT 2 оставляет первые две.",
+  "criteria": [
+    "Ровно две строки.",
+    "Сначала самая старая книга."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "SELECT title, year FROM books ORDER BY year DESC LIMIT 2;",
+      "why": "DESC выбирает самые новые, а не самые старые."
+    },
+    {
+      "code": "SELECT title, year FROM books LIMIT 2;",
+      "why": "Без сортировки — просто первые добавленные строки."
+    },
+    {
+      "code": "SELECT title, year FROM books ORDER BY year;",
+      "why": "Нет LIMIT — выводятся все книги."
+    },
+    {
+      "code": "SELECT title, year FROM books ORDER BY title LIMIT 2;",
+      "why": "Сортировка по названию, а не по году."
+    }
+  ]
+}

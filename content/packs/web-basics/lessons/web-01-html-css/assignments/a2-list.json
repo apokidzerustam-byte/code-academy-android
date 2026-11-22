@@ -1,0 +1,71 @@
+{
+  "id": "a2-list",
+  "type": "write",
+  "title": "Список языков",
+  "statement": "Под заголовком добавьте **маркированный список** из трёх пунктов по порядку: `Python`, `SQL`, `Kotlin`.",
+  "goal": "Писать вложенные теги ul и li.",
+  "input": "Заготовка с заголовком.",
+  "expectedResult": "Один список ul с тремя пунктами li.",
+  "constraints": [
+    "Порядок пунктов важен."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <h1>Что я изучу</h1>\n  <!-- Список здесь -->\n</body>\n</html>\n",
+  "hints": [
+    "Маркированный список — тег ul.",
+    "Каждый пункт — отдельный тег li внутри ul.",
+    "li закрывается до того, как начнётся следующий.",
+    "Скелет: <ul> <li>…</li> <li>…</li> <li>…</li> </ul>",
+    "<ul>\n  <li>Python</li>\n  <li>SQL</li>\n  <li>Kotlin</li>\n</ul>"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "count",
+        "expr": "document.querySelectorAll('ul > li').length",
+        "expected": 3
+      },
+      {
+        "id": "items",
+        "expr": "[...document.querySelectorAll('ul > li')].map(li => li.textContent.trim())",
+        "expected": [
+          "Python",
+          "SQL",
+          "Kotlin"
+        ]
+      },
+      {
+        "id": "ul",
+        "hidden": true,
+        "expr": "document.querySelectorAll('ul').length",
+        "expected": 1,
+        "hint": "Все пункты — в одном списке ul"
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <h1>Что я изучу</h1>\n  <ul>\n    <li>Python</li>\n    <li>SQL</li>\n    <li>Kotlin</li>\n  </ul>\n</body>\n</html>\n",
+  "explanation": "ul — сам список, li — его пункты. Пункты вложены в ul.",
+  "criteria": [
+    "Три пункта li в одном ul.",
+    "Порядок как в условии."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <h1>Что я изучу</h1>\n  <ul>\n    <li>Python</li>\n    <li>SQL</li>\n  </ul>\n</body>\n</html>\n",
+      "why": "Пунктов два, а нужно три."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <h1>Что я изучу</h1>\n  <ul><li>Python</li></ul>\n  <ul><li>SQL</li></ul>\n  <ul><li>Kotlin</li></ul>\n</body>\n</html>\n",
+      "why": "Три отдельных списка вместо одного."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <h1>Что я изучу</h1>\n  <p>Python</p>\n  <p>SQL</p>\n  <p>Kotlin</p>\n</body>\n</html>\n",
+      "why": "Абзацы — не список."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <h1>Что я изучу</h1>\n  <ul>\n    <li>Kotlin</li>\n    <li>SQL</li>\n    <li>Python</li>\n  </ul>\n</body>\n</html>\n",
+      "why": "Порядок перепутан."
+    }
+  ]
+}

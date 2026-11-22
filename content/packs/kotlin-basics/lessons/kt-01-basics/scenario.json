@@ -1,0 +1,283 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Kotlin — язык Андроида",
+      "narration": "Kotlin — основной язык для приложений на Андроиде, на нём написано и это приложение. Он строгий: у каждого значения есть тип, и многие ошибки находятся ещё до запуска. Программа на Котлине сначала компилируется — переводится в код для виртуальной машины Java. Такого компилятора в телефоне нет, поэтому здесь приложение проверяет синтаксис и структуру кода, а собрать и запустить программу можно бесплатно в GitHub Actions. Вывод, который вы увидите в уроке, получен настоящим компилятором.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "На телефоне: **проверка синтаксиса и структуры**. Запуск: GitHub Actions или компьютер.",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "main",
+      "title": "main, val и var",
+      "narration": "Программа начинается с функции main. println печатает строку. Переменные бывают двух видов: val — значение нельзя изменить, var — можно. Тип Котлин выводит сам: name — строка, age — целое число. В строке знак доллар подставляет значение переменной. Так программа выведет приветствие и возраст двадцать один.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "Main.kt"
+        },
+        {
+          "type": "type",
+          "text": "fun main() {\n    println(\"Привет, Kotlin!\")\n    val name = \"Аня\"\n    var age = 20\n    age = age + 1\n    println(\"$name, $age\")\n}\n",
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            1,
+            7
+          ],
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            3
+          ],
+          "file": "Main.kt",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            4,
+            5
+          ],
+          "file": "Main.kt",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            6
+          ],
+          "file": "Main.kt",
+          "cue": 4
+        },
+        {
+          "type": "run",
+          "file": "Main.kt",
+          "cue": 5
+        },
+        {
+          "type": "output",
+          "text": "Привет, Kotlin!\nАня, 21\n",
+          "cue": 5
+        }
+      ]
+    },
+    {
+      "id": "funcs",
+      "title": "Функции и типы",
+      "narration": "Функцию объявляют словом fun. У каждого параметра пишут тип через двоеточие, и тип результата — после скобок. Int — целое число, Double — дробное, String — строка. Если функция — одно выражение, можно написать её короче, через знак равно. Квадрат семи — сорок девять, половина пяти — две с половиной.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "Main.kt"
+        },
+        {
+          "type": "type",
+          "text": "fun square(x: Int): Int {\n    return x * x\n}\n\nfun half(x: Double): Double = x / 2\n\nfun main() {\n    println(square(7))\n    println(half(5.0))\n}\n",
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            1,
+            2,
+            3
+          ],
+          "file": "Main.kt",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            5
+          ],
+          "file": "Main.kt",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "Main.kt",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "49\n2.5\n",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "when",
+      "title": "when и циклы",
+      "narration": "Вместо длинной цепочки if в Котлине есть when: слева условие, после стрелки — результат, else — для всех остальных случаев. Цикл for проходит по диапазону: минус один, две точки, один — это числа от минус одного до одного включительно. Внутри строки фигурные скобки после доллара подставляют результат вызова.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "Main.kt"
+        },
+        {
+          "type": "type",
+          "text": "fun describe(n: Int): String = when {\n    n < 0 -> \"отрицательное\"\n    n == 0 -> \"ноль\"\n    else -> \"положительное\"\n}\n\nfun main() {\n    for (i in -1..1) {\n        println(\"$i: ${describe(i)}\")\n    }\n}\n",
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            8
+          ],
+          "file": "Main.kt",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            9
+          ],
+          "file": "Main.kt",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "Main.kt",
+          "cue": 2
+        },
+        {
+          "type": "output",
+          "text": "-1: отрицательное\n0: ноль\n1: положительное\n",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "data",
+      "title": "data class и списки",
+      "narration": "data class — класс для хранения данных: перечисляем свойства в скобках, а Котлин сам добавляет печать, сравнение и копирование. listOf создаёт список. filter оставляет элементы, для которых условие в фигурных скобках истинно; слово ит — текущий элемент. Останется только Онегин.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "Main.kt"
+        },
+        {
+          "type": "type",
+          "text": "data class Book(val title: String, val year: Int)\n\nfun main() {\n    val books = listOf(Book(\"Онегин\", 1833), Book(\"Мастер\", 1967))\n    val old = books.filter { it.year < 1900 }\n    println(old)\n}\n",
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            1
+          ],
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            4
+          ],
+          "file": "Main.kt",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            5
+          ],
+          "file": "Main.kt",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "Main.kt",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "[Book(title=Онегин, year=1833)]\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "errors",
+      "title": "Синтаксические ошибки",
+      "narration": "Забудем закрывающую скобку у println и нажмём «Запустить». Приложение разобрало код и показало строку с ошибкой: ожидалась скобка. Это та же проверка, что выполняется в заданиях: сначала синтаксис, потом структура — есть ли нужные функции, с какими типами параметров и результата, использованы ли нужные конструкции.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "Main.kt"
+        },
+        {
+          "type": "type",
+          "text": "fun main() {\n    val name = \"Аня\"\n    println(\"Привет, $name\"\n}\n",
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            3
+          ],
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "note",
+          "md": "Задания по Kotlin на телефоне проверяют: синтаксис → имена и типы функций и классов → нужные конструкции.",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "ci",
+      "title": "Запуск в GitHub Actions",
+      "narration": "Чтобы запустить программу, создайте в разделе «Проекты» проект Kotlin. В нём уже есть файл сценария сборки для GitHub Actions и инструкция по шагам. Вы переносите файлы в свой репозиторий на GitHub, и через минуту во вкладке Actions виден вывод программы. Это бесплатно и работает даже с телефона.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "Проекты → новый → Kotlin → файл README.md: пошаговая инструкция для GitHub Actions.",
+          "cue": 0
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итоги",
+      "narration": "Итак: fun main — начало программы, val и var — переменные, у параметров и результата функций есть типы, when заменяет цепочки if, for in проходит по диапазону, data class хранит данные, filter отбирает элементы списка. Переходите к заданиям.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`val`/`var` · `fun f(x: Int): Int` · `when { … -> … }` · `for (i in 1..n)` · `data class` · `filter { it … }`",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}

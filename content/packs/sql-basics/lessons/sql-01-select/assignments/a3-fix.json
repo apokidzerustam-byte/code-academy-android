@@ -1,0 +1,82 @@
+{
+  "id": "a3-fix",
+  "type": "fix",
+  "title": "Исправьте запрос",
+  "statement": "Запрос должен вывести названия и авторов (`title`, `author`) всех книг Булгакова, но в нём две ошибки. Найдите и исправьте их.",
+  "goal": "Читать сообщения об ошибках SQL.",
+  "input": "Таблица books.",
+  "expectedResult": "Два столбца: title и author, только книги Булгакова.",
+  "constraints": [
+    "Запустите запрос и прочитайте сообщение об ошибке."
+  ],
+  "starterCode": "SELECT title author FROM books\nWHERE author = Булгаков;\n",
+  "hints": [
+    "Запустите запрос: база подскажет, где первая ошибка.",
+    "Посмотрите, как записан текст в условии WHERE.",
+    "Текст в SQL пишется в одинарных кавычках, иначе база ищет столбец с таким именем.",
+    "Сколько столбцов выводит SELECT? Между столбцами нужна запятая — без неё второе слово становится новым именем первого столбца.",
+    "SELECT title, author FROM books WHERE author = 'Булгаков';"
+  ],
+  "tests": {
+    "kind": "sql",
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE books (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  author TEXT,\n  year INTEGER\n);\n\nINSERT INTO books (title, author, year) VALUES\n  ('Мастер и Маргарита', 'Булгаков', 1967),\n  ('Война и мир', 'Толстой', 1869),\n  ('Евгений Онегин', 'Пушкин', 1833),\n  ('Анна Каренина', 'Толстой', 1878);\n",
+        "expected": {
+          "columns": [
+            "title",
+            "author"
+          ],
+          "rows": [
+            [
+              "Мастер и Маргарита",
+              "Булгаков"
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h1",
+        "hidden": true,
+        "setup": "CREATE TABLE books (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  author TEXT,\n  year INTEGER\n);\nINSERT INTO books (title, author, year) VALUES\n  ('Идиот', 'Достоевский', 1869),\n  ('Собачье сердце', 'Булгаков', 1987),\n  ('Белая гвардия', 'Булгаков', 1925),\n  ('Бесы', 'Достоевский', 1872),\n  ('Мёртвые души', 'Гоголь', 1842);\n",
+        "expected": {
+          "columns": [
+            "title",
+            "author"
+          ],
+          "rows": [
+            [
+              "Собачье сердце",
+              "Булгаков"
+            ],
+            [
+              "Белая гвардия",
+              "Булгаков"
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  "solution": "SELECT title, author FROM books\nWHERE author = 'Булгаков';\n",
+  "explanation": "Текст 'Булгаков' в кавычках — это значение, а не имя столбца. Столбцы в SELECT разделяются запятыми: без запятой `title author` — это столбец title, переименованный в author.",
+  "criteria": [
+    "Нет ошибок выполнения.",
+    "Два столбца."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "SELECT title author FROM books\nWHERE author = Булгаков;\n",
+      "why": "Обе ошибки на месте."
+    },
+    {
+      "code": "SELECT title author FROM books\nWHERE author = 'Булгаков';\n",
+      "why": "Исправлены кавычки, но не запятая: выводится один столбец."
+    },
+    {
+      "code": "SELECT title, author FROM books\nWHERE author = \"Булгаков\";\n",
+      "why": "Двойные кавычки в SQL означают имя столбца (SQLite прощает это, но работает только если столбца с таким именем нет) — пишите текст в одинарных кавычках."
+    }
+  ]
+}

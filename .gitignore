@@ -20,3 +20,7 @@ app/schemas/
 
 # Публичный ключ прототипа (см. TECHNICAL_DECISIONS); любые другие ключи — не в репозиторий.
 !signing/prototype.keystore
+
+web-runner/node_modules/
+web-runner/src/generated/
+app/src/main/assets/webrunner/

@@ -31,6 +31,7 @@ class PilotContentOnDeviceTest {
         var checked = 0
         val t0 = System.currentTimeMillis()
         for ((pack, lesson) in content.allLessons()) {
+            if (pack.id != "python-basics") continue // другие языки — WebLanguagesOnDeviceTest
             val ref = LessonRef(pack.id, lesson.id)
             for (a in content.assignments(ref)) {
                 val good = service.evaluate(runner, a, a.solution)

@@ -1,0 +1,100 @@
+{
+  "id": "a3-fix",
+  "type": "fix",
+  "title": "2 + 3 = 23?",
+  "statement": "Запрос `/add?a=2&b=3` должен вернуть `{\"sum\": 5}`, а возвращает `{\"sum\": \"23\"}`. Исправьте обработчик.",
+  "goal": "Понимать, зачем нужны аннотации типов в FastAPI.",
+  "input": "Параметры запроса a и b.",
+  "expectedResult": "Сумма чисел.",
+  "constraints": [
+    "Не числа должны давать код 422."
+  ],
+  "starterCode": "from fastapi import FastAPI\n\napp = FastAPI()\n\n\n@app.get(\"/add\")\ndef add(a, b):\n    return {\"sum\": a + b}\n",
+  "hints": [
+    "Запустите и подумайте: почему 2 и 3 «склеились»?",
+    "Из адреса всё приходит текстом.",
+    "FastAPI превращает текст в число, только если знает тип параметра.",
+    "Добавьте аннотации типов обоим параметрам.",
+    "def add(a: int, b: int):"
+  ],
+  "tests": {
+    "kind": "fastapi",
+    "cases": [
+      {
+        "id": "v1",
+        "path": "/add",
+        "params": {
+          "a": 2,
+          "b": 3
+        },
+        "expected_json": {
+          "sum": 5
+        }
+      },
+      {
+        "id": "v2",
+        "path": "/add",
+        "params": {
+          "a": 10,
+          "b": -4
+        },
+        "expected_json": {
+          "sum": 6
+        }
+      },
+      {
+        "id": "h1",
+        "hidden": true,
+        "path": "/add",
+        "params": {
+          "a": 0,
+          "b": 0
+        },
+        "expected_json": {
+          "sum": 0
+        }
+      },
+      {
+        "id": "h2",
+        "hidden": true,
+        "path": "/add",
+        "params": {
+          "a": "x",
+          "b": 1
+        },
+        "expected_status": 422,
+        "hint": "Не число должно давать 422"
+      },
+      {
+        "id": "h3",
+        "hidden": true,
+        "path": "/add",
+        "params": {
+          "a": 1
+        },
+        "expected_status": 422,
+        "hint": "Оба параметра обязательны"
+      }
+    ]
+  },
+  "solution": "from fastapi import FastAPI\n\napp = FastAPI()\n\n\n@app.get(\"/add\")\ndef add(a: int, b: int):\n    return {\"sum\": a + b}\n",
+  "explanation": "Без аннотаций параметры — строки, и + склеивает их. С a: int, b: int FastAPI превращает их в числа и отвечает 422 на не числа.",
+  "criteria": [
+    "Сумма чисел.",
+    "Не число → 422."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from fastapi import FastAPI\n\napp = FastAPI()\n\n\n@app.get(\"/add\")\ndef add(a, b):\n    return {\"sum\": int(a) + int(b)}\n",
+      "why": "Сумма верна, но «x» вызывает ошибку 500 вместо понятного 422."
+    },
+    {
+      "code": "from fastapi import FastAPI\n\napp = FastAPI()\n\n\n@app.get(\"/add\")\ndef add(a: int, b):\n    return {\"sum\": a + b}\n",
+      "why": "Тип указан только у a."
+    },
+    {
+      "code": "from fastapi import FastAPI\n\napp = FastAPI()\n\n\n@app.get(\"/add\")\ndef add(a: str, b: str):\n    return {\"sum\": a + b}\n",
+      "why": "Тип str — по-прежнему строки."
+    }
+  ]
+}

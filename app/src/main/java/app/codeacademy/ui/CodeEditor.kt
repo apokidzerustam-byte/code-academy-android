@@ -3,6 +3,7 @@ package app.codeacademy.ui
 import android.annotation.SuppressLint
 import android.os.Handler
 import android.os.Looper
+import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
@@ -24,6 +25,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -162,6 +164,10 @@ private fun RichEditor(value: String, onValueChange: (String) -> Unit, language:
         lastFromEditor[0] = latestValue
     }
 
+    // Рендер-процесс WebView общий для всех WebView приложения: если он завершился (падение или
+    // остановка зависшей страницы ученика), редактор пересоздаётся — текст хранится в приложении.
+    var generation by remember { mutableStateOf(0) }
+    key(generation) {
     AndroidView(
         modifier = Modifier.fillMaxWidth().height(height).padding(vertical = 4.dp).testTag("code-editor"),
         factory = { ctx ->
@@ -187,6 +193,16 @@ private fun RichEditor(value: String, onValueChange: (String) -> Unit, language:
                     override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse =
                         loader.shouldInterceptRequest(request.url)
                             ?: WebResourceResponse("text/plain", "utf-8", 403, "Blocked", emptyMap(), ByteArrayInputStream(ByteArray(0)))
+
+                    override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean {
+                        if (controller.webView === view) {
+                            controller.webView = null
+                            controller.ready = false
+                        }
+                        view.destroy()
+                        generation++
+                        return true
+                    }
                 }
                 controller.webView = this
                 loadUrl("$ORIGIN/assets/editor/index.html")
@@ -199,6 +215,7 @@ private fun RichEditor(value: String, onValueChange: (String) -> Unit, language:
             }
         },
     )
+    }
     LaunchedEffect(readOnly) {
         if (controller.ready) controller.webView?.evaluateJavascript("caEditor.setReadOnly($readOnly)", null)
     }

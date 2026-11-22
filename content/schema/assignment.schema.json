@@ -3,62 +3,433 @@
   "$id": "https://codeacademy.app/schema/assignment.schema.json",
   "title": "Задание с автопроверкой",
   "type": "object",
-  "required": ["id", "type", "title", "statement", "goal", "input", "expectedResult", "constraints", "hints", "tests", "solution", "explanation", "criteria"],
+  "required": [
+    "id",
+    "type",
+    "title",
+    "statement",
+    "goal",
+    "input",
+    "expectedResult",
+    "constraints",
+    "hints",
+    "tests",
+    "solution",
+    "explanation",
+    "criteria"
+  ],
   "additionalProperties": false,
   "properties": {
-    "id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
-    "type": {"enum": ["write", "complete", "fix", "predict", "optimize", "function", "multi_file", "review", "design", "mini_project"]},
-    "title": {"type": "string"},
-    "statement": {"type": "string", "minLength": 10, "description": "Условие (Markdown)"},
-    "goal": {"type": "string"},
-    "input": {"type": "string", "description": "Входные данные словами"},
-    "expectedResult": {"type": "string"},
-    "constraints": {"type": "array", "items": {"type": "string"}},
-    "starterCode": {"type": "string"},
-    "code": {"type": "string", "description": "Код для разбора (predict/review)"},
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "type": {
+      "enum": [
+        "write",
+        "complete",
+        "fix",
+        "predict",
+        "optimize",
+        "function",
+        "multi_file",
+        "review",
+        "design",
+        "mini_project"
+      ]
+    },
+    "title": {
+      "type": "string"
+    },
+    "statement": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Условие (Markdown)"
+    },
+    "goal": {
+      "type": "string"
+    },
+    "input": {
+      "type": "string",
+      "description": "Входные данные словами"
+    },
+    "expectedResult": {
+      "type": "string"
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "starterCode": {
+      "type": "string"
+    },
+    "code": {
+      "type": "string",
+      "description": "Код для разбора (predict/review)"
+    },
     "hints": {
-      "type": "array", "minItems": 5, "maxItems": 5,
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
       "description": "Ступени ТЗ: намёк, направление, концепция, проблемный участок, алгоритм. Шестая ступень — solution.",
-      "items": {"type": "string", "minLength": 5}
+      "items": {
+        "type": "string",
+        "minLength": 5
+      }
     },
     "tests": {
-      "type": "object", "required": ["kind"],
+      "type": "object",
+      "required": [
+        "kind"
+      ],
       "properties": {
-        "kind": {"enum": ["stdout", "function", "answer"]},
-        "function": {"type": "string"},
-        "match": {"enum": ["strip", "exact", "lines_unordered"]},
-        "tolerance": {"type": "number"},
-        "expected_answer": {"type": "string"},
+        "kind": {
+          "enum": [
+            "stdout",
+            "function",
+            "answer",
+            "fastapi",
+            "web",
+            "sql",
+            "kotlin"
+          ]
+        },
+        "function": {
+          "type": "string"
+        },
+        "match": {
+          "enum": [
+            "strip",
+            "exact",
+            "lines_unordered"
+          ]
+        },
+        "tolerance": {
+          "type": "number"
+        },
+        "expected_answer": {
+          "type": "string"
+        },
         "cases": {
           "type": "array",
           "items": {
-            "type": "object", "required": ["id"],
+            "type": "object",
+            "required": [
+              "id"
+            ],
             "properties": {
-              "id": {"type": "string"}, "hidden": {"type": "boolean"}, "hint": {"type": "string"},
-              "stdin": {"type": "string"}, "expected_stdout": {"type": "string"},
-              "args": {"type": "array"}, "kwargs": {"type": "object"}, "expected": {}, "expected_error": {"type": "string"}
+              "id": {
+                "type": "string"
+              },
+              "hidden": {
+                "type": "boolean"
+              },
+              "hint": {
+                "type": "string"
+              },
+              "stdin": {
+                "type": "string"
+              },
+              "expected_stdout": {
+                "type": "string"
+              },
+              "args": {
+                "type": "array"
+              },
+              "kwargs": {
+                "type": "object"
+              },
+              "expected": {},
+              "expected_error": {
+                "type": "string"
+              },
+              "function": {
+                "type": "string"
+              },
+              "expr": {
+                "type": "string",
+                "description": "web: выражение JS на странице ученика, результат сравнивается с expected"
+              },
+              "before": {
+                "type": "string",
+                "description": "web: действия перед проверкой (клики и т. п.)"
+              },
+              "setup": {
+                "type": "string",
+                "description": "sql: таблицы и данные теста"
+              },
+              "query": {
+                "type": "string",
+                "description": "sql: проверочный запрос после кода ученика (для INSERT/UPDATE/DELETE)"
+              },
+              "method": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string"
+              },
+              "json": {},
+              "params": {
+                "type": "object"
+              },
+              "headers": {
+                "type": "object"
+              },
+              "expected_status": {
+                "type": "integer"
+              },
+              "expected_json": {},
+              "expected_json_contains": {
+                "type": "object"
+              },
+              "type": {
+                "enum": [
+                  "syntax",
+                  "function",
+                  "class",
+                  "contains",
+                  "not_contains"
+                ],
+                "description": "kotlin: вид проверки"
+              },
+              "name": {
+                "type": "string"
+              },
+              "paramTypes": {
+                "type": "array"
+              },
+              "returns": {
+                "type": "string"
+              },
+              "pattern": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "raw": {
+                "type": "boolean"
+              },
+              "kind": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "lang": {
+          "enum": [
+            "html",
+            "js"
+          ],
+          "description": "web: html — код задания это HTML-страница, js — скрипт"
+        },
+        "ordered": {
+          "type": "boolean",
+          "description": "sql: порядок строк важен (задание с ORDER BY)"
+        },
+        "checkColumns": {
+          "type": "boolean",
+          "description": "sql: сравнивать имена столбцов"
+        },
+        "app": {
+          "type": "string",
+          "description": "fastapi: имя переменной приложения (по умолчанию app)"
+        },
+        "jvm": {
+          "type": "object",
+          "description": "kotlin: проверка поведения эталона в CI настоящим kotlinc (на телефоне не выполняется)",
+          "required": [
+            "main",
+            "expected_stdout"
+          ],
+          "properties": {
+            "main": {
+              "type": "string"
+            },
+            "expected_stdout": {
+              "type": "string"
             }
           }
         }
       },
       "allOf": [
-        {"if": {"properties": {"kind": {"const": "function"}}}, "then": {"required": ["function", "cases"]}},
-        {"if": {"properties": {"kind": {"const": "stdout"}}}, "then": {"required": ["cases"]}},
-        {"if": {"properties": {"kind": {"const": "answer"}}}, "then": {"required": ["expected_answer"]}}
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "function"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "function",
+              "cases"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "stdout"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "cases"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "answer"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "expected_answer"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "web"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "lang",
+              "cases"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "sql"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "cases"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "kotlin"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "cases"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "fastapi"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "cases"
+            ]
+          }
+        }
       ]
     },
-    "solution": {"type": "string", "minLength": 1},
-    "explanation": {"type": "string", "minLength": 10},
-    "criteria": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "solution": {
+      "type": "string",
+      "minLength": 1
+    },
+    "explanation": {
+      "type": "string",
+      "minLength": 10
+    },
+    "criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
     "wrongSolutions": {
       "type": "array",
       "description": "Типовые неверные решения: валидатор проверяет, что тесты их ловят",
-      "items": {"type": "object", "required": ["code", "why"], "additionalProperties": false,
-                "properties": {"code": {"type": "string"}, "why": {"type": "string"}, "answer": {"type": "string"}}}
+      "items": {
+        "type": "object",
+        "required": [
+          "code",
+          "why"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "why": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          }
+        }
+      }
     }
   },
   "allOf": [
-    {"if": {"properties": {"type": {"enum": ["complete", "fix"]}}}, "then": {"required": ["starterCode"]}},
-    {"if": {"properties": {"type": {"enum": ["predict", "review"]}}}, "then": {"required": ["code"]}}
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "enum": [
+              "complete",
+              "fix"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "starterCode"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "enum": [
+              "predict",
+              "review"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "code"
+        ]
+      }
+    }
   ]
 }

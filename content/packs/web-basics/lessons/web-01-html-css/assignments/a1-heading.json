@@ -1,0 +1,71 @@
+{
+  "id": "a1-heading",
+  "type": "write",
+  "title": "Заголовок и абзац",
+  "statement": "Допишите страницу: внутри `body` должны быть **главный заголовок** с текстом `Мой сайт` и **абзац** с текстом `Я учусь программировать.`",
+  "goal": "Писать парные теги h1 и p.",
+  "input": "Заготовка страницы.",
+  "expectedResult": "На странице заголовок h1 и абзац p с нужным текстом.",
+  "constraints": [
+    "Текст — точно как в условии (пробелы по краям не важны).",
+    "Заголовок h1 один."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <!-- Ваш код здесь -->\n</body>\n</html>\n",
+  "hints": [
+    "Главный заголовок — тег h1, абзац — тег p.",
+    "Парный тег: <h1>текст</h1>.",
+    "Всё видимое пишут между <body> и </body>.",
+    "Проверьте, что закрыли оба тега косой чертой.",
+    "<h1>Мой сайт</h1>\n<p>Я учусь программировать.</p>"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "h1",
+        "expr": "(document.querySelector('h1') || {}).textContent",
+        "expected": "Мой сайт"
+      },
+      {
+        "id": "p",
+        "expr": "(document.querySelector('p') || {}).textContent",
+        "expected": "Я учусь программировать."
+      },
+      {
+        "id": "one",
+        "hidden": true,
+        "expr": "document.querySelectorAll('h1').length",
+        "expected": 1,
+        "hint": "Главный заголовок на странице должен быть один"
+      },
+      {
+        "id": "inbody",
+        "hidden": true,
+        "expr": "!!document.querySelector('body > h1') && !!document.querySelector('body > p')",
+        "expected": true,
+        "hint": "Заголовок и абзац пишут внутри body"
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <h1>Мой сайт</h1>\n  <p>Я учусь программировать.</p>\n</body>\n</html>\n",
+  "explanation": "h1 — заголовок первого уровня, p — абзац. Оба внутри body, поэтому видны на странице.",
+  "criteria": [
+    "Есть h1 «Мой сайт».",
+    "Есть p с нужным текстом."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <h2>Мой сайт</h2>\n  <p>Я учусь программировать.</p>\n</body>\n</html>\n",
+      "why": "Нужен заголовок первого уровня h1, а не h2."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <h1>Мой сайт</h1>\n  <div>Я учусь программировать.</div>\n</body>\n</html>\n",
+      "why": "Текст должен быть в абзаце p."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <h1>Мой сайт</h1>\n  <h1>Я учусь программировать.</h1>\n</body>\n</html>\n",
+      "why": "Абзац — не заголовок; h1 должен быть один."
+    }
+  ]
+}

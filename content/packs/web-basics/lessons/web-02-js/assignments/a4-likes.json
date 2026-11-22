@@ -1,0 +1,71 @@
+{
+  "id": "a4-likes",
+  "type": "write",
+  "title": "Кнопка «Нравится»",
+  "statement": "На странице есть кнопка `id=\"like\"` и счётчик `<span id=\"likes\">0</span>`. Допишите скрипт: каждое нажатие кнопки увеличивает число в счётчике на 1.\n\nНажмите «Запустить» и попробуйте кнопку в предпросмотре.",
+  "goal": "Находить элементы страницы и реагировать на нажатие.",
+  "input": "Страница с кнопкой и счётчиком.",
+  "expectedResult": "После N нажатий в счётчике число N.",
+  "constraints": [
+    "Разметку не меняйте — только скрипт."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Лайки</title>\n</head>\n<body>\n  <button id=\"like\">Нравится</button>\n  <p>Лайков: <span id=\"likes\">0</span></p>\n  <script>\n    // ваш код\n  </script>\n</body>\n</html>\n",
+  "hints": [
+    "Сначала найдите кнопку: document.getElementById(\"like\").",
+    "Подпишитесь на нажатие: addEventListener(\"click\", () => { … }).",
+    "Храните число в переменной let снаружи обработчика.",
+    "Внутри обработчика увеличьте число и запишите его в textContent счётчика.",
+    "let likes = 0;\ndocument.getElementById(\"like\").addEventListener(\"click\", () => {\n  likes++;\n  document.getElementById(\"likes\").textContent = likes;\n});"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "start",
+        "expr": "document.getElementById('likes').textContent.trim()",
+        "expected": "0"
+      },
+      {
+        "id": "one",
+        "before": "document.getElementById('like').click();",
+        "expr": "document.getElementById('likes').textContent.trim()",
+        "expected": "1"
+      },
+      {
+        "id": "three",
+        "before": "document.getElementById('like').click();document.getElementById('like').click();document.getElementById('like').click();",
+        "expr": "document.getElementById('likes').textContent.trim()",
+        "expected": "3"
+      },
+      {
+        "id": "h1",
+        "hidden": true,
+        "before": "document.getElementById('like').click();document.getElementById('like').click();document.getElementById('like').click();document.getElementById('like').click();document.getElementById('like').click();document.getElementById('like').click();document.getElementById('like').click();",
+        "expr": "document.getElementById('likes').textContent.trim()",
+        "expected": "7",
+        "hint": "Каждое нажатие — плюс один"
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Лайки</title>\n</head>\n<body>\n  <button id=\"like\">Нравится</button>\n  <p>Лайков: <span id=\"likes\">0</span></p>\n  <script>\n    let likes = 0;\n    document.getElementById(\"like\").addEventListener(\"click\", () => {\n      likes++;\n      document.getElementById(\"likes\").textContent = likes;\n    });\n  </script>\n</body>\n</html>\n",
+  "explanation": "Переменная likes живёт между нажатиями; обработчик click увеличивает её и показывает в span.",
+  "criteria": [
+    "Счётчик растёт на 1 за нажатие.",
+    "До нажатий показан 0."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Лайки</title>\n</head>\n<body>\n  <button id=\"like\">Нравится</button>\n  <p>Лайков: <span id=\"likes\">0</span></p>\n  <script>\n    document.getElementById(\"like\").addEventListener(\"click\", () => {\n      let likes = 0;\n      likes++;\n      document.getElementById(\"likes\").textContent = likes;\n    });\n  </script>\n</body>\n</html>\n",
+      "why": "Переменная создаётся заново при каждом нажатии — счётчик всегда 1."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Лайки</title>\n</head>\n<body>\n  <button id=\"like\">Нравится</button>\n  <p>Лайков: <span id=\"likes\">0</span></p>\n  <script>\n    let likes = 0;\n    document.getElementById(\"like\").addEventListener(\"click\", () => {\n      likes++;\n      console.log(likes);\n    });\n  </script>\n</body>\n</html>\n",
+      "why": "Число печатается в консоль, но на странице не меняется."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Лайки</title>\n</head>\n<body>\n  <button id=\"like\">Нравится</button>\n  <p>Лайков: <span id=\"likes\">0</span></p>\n  <script>\n    let likes = 0;\n    document.getElementById(\"likes\").addEventListener(\"click\", () => {\n      likes++;\n      document.getElementById(\"likes\").textContent = likes;\n    });\n  </script>\n</body>\n</html>\n",
+      "why": "Обработчик повешен на счётчик, а не на кнопку."
+    }
+  ]
+}

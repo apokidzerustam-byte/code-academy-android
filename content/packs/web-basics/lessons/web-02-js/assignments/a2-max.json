@@ -1,0 +1,110 @@
+{
+  "id": "a2-max",
+  "type": "write",
+  "title": "Самое большое число",
+  "statement": "Напишите функцию `maxOf(numbers)`: она получает непустой массив чисел и **возвращает** наибольшее из них.\n\nПример: `maxOf([3, 9, 4])` → `9`.",
+  "goal": "Обходить массив циклом и запоминать лучшее значение.",
+  "input": "Непустой массив чисел.",
+  "expectedResult": "Наибольшее число.",
+  "constraints": [
+    "Числа могут быть отрицательными.",
+    "Math.max тоже можно, но попробуйте циклом."
+  ],
+  "starterCode": "function maxOf(numbers) {\n  // ваш код\n}\n",
+  "hints": [
+    "Заведите переменную для лучшего найденного числа.",
+    "Начните с первого элемента массива, а не с нуля.",
+    "Пройдите по всем элементам циклом for of.",
+    "Если элемент больше лучшего — запомните его.",
+    "let best = numbers[0];\nfor (const x of numbers) { if (x > best) best = x; }\nreturn best;"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "maxOf",
+        "args": [
+          [
+            3,
+            9,
+            4
+          ]
+        ],
+        "expected": 9
+      },
+      {
+        "id": "v2",
+        "function": "maxOf",
+        "args": [
+          [
+            10,
+            2
+          ]
+        ],
+        "expected": 10
+      },
+      {
+        "id": "h1",
+        "hidden": true,
+        "function": "maxOf",
+        "args": [
+          [
+            -5,
+            -2,
+            -9
+          ]
+        ],
+        "expected": -2,
+        "hint": "Все числа могут быть отрицательными — не начинайте поиск с нуля"
+      },
+      {
+        "id": "h2",
+        "hidden": true,
+        "function": "maxOf",
+        "args": [
+          [
+            7
+          ]
+        ],
+        "expected": 7,
+        "hint": "Массив из одного числа"
+      },
+      {
+        "id": "h3",
+        "hidden": true,
+        "function": "maxOf",
+        "args": [
+          [
+            1,
+            5,
+            5,
+            2
+          ]
+        ],
+        "expected": 5
+      }
+    ]
+  },
+  "solution": "function maxOf(numbers) {\n  let best = numbers[0];\n  for (const x of numbers) {\n    if (x > best) {\n      best = x;\n    }\n  }\n  return best;\n}\n",
+  "explanation": "best начинается с первого элемента; цикл заменяет его каждым большим числом.",
+  "criteria": [
+    "Работает с отрицательными числами.",
+    "Работает с массивом из одного числа."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "function maxOf(numbers) {\n  let best = 0;\n  for (const x of numbers) {\n    if (x > best) best = x;\n  }\n  return best;\n}\n",
+      "why": "Начальное значение 0 ломает случай, когда все числа отрицательные."
+    },
+    {
+      "code": "function maxOf(numbers) {\n  return numbers[numbers.length - 1];\n}\n",
+      "why": "Последний элемент — не обязательно наибольший."
+    },
+    {
+      "code": "function maxOf(numbers) {\n  let best = numbers[0];\n  for (const x of numbers) {\n    if (x < best) best = x;\n  }\n  return best;\n}\n",
+      "why": "Знак сравнения наоборот: ищется минимум."
+    }
+  ]
+}

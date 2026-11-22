@@ -94,7 +94,7 @@ jobs:
             cp "$a"/reports/*.json content-pipeline/reports/
           done
       - name: Проверка контента
-        run: pip install jsonschema && python tools/validate_content.py content/packs
+        run: pip install jsonschema && python tools/validate_content.py content/packs --no-run  # код проверяет workflow «Android»
       - name: Коммит
         run: |
           git config user.name "github-actions"

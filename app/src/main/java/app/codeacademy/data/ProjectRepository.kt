@@ -30,12 +30,14 @@ class ProjectRepository(private val db: AppDatabase, private val clock: () -> Lo
     suspend fun files(id: String): Map<String, String> =
         db.projects().files(id).filter { it.path != META }.associate { it.path to it.content }
 
-    suspend fun create(title: String): String {
+    /** Новый проект из шаблона: python, web, sql или kotlin. */
+    suspend fun create(title: String, template: String = "python"): String {
         val id = "p" + clock().toString(36) + (1000..9999).random()
         val now = clock()
+        val files = TEMPLATES[template] ?: TEMPLATES.getValue("python")
         db.withTransaction {
             db.projects().upsert(ProjectFileEntity(id, META, title.trim().ifBlank { "Проект" }, now))
-            db.projects().upsert(ProjectFileEntity(id, "main.py", TEMPLATE, now))
+            for ((path, text) in files) db.projects().upsert(ProjectFileEntity(id, path, text, now))
         }
         return id
     }
@@ -67,5 +69,75 @@ class ProjectRepository(private val db: AppDatabase, private val clock: () -> Lo
     companion object {
         const val META = ".project"
         const val TEMPLATE = "# Мой проект\nname = input(\"Как вас зовут? \")\nprint(\"Привет,\", name)\n"
+
+        val KOTLIN_WORKFLOW = """name: Kotlin
+on: [push, workflow_dispatch]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "17" }
+      - name: Установить kotlinc
+        run: |
+          curl -sSLo kotlinc.zip https://github.com/JetBrains/kotlin/releases/download/v2.1.20/kotlin-compiler-2.1.20.zip
+          unzip -q kotlinc.zip
+      - name: Собрать
+        run: ./kotlinc/bin/kotlinc *.kt -include-runtime -d app.jar
+      - name: Запустить
+        run: java -jar app.jar
+"""
+
+        val KOTLIN_README = """# Проект на Kotlin
+
+В телефоне приложение проверяет синтаксис Kotlin. Собрать и запустить программу
+можно бесплатно в GitHub Actions (нужен аккаунт на github.com).
+
+С телефона:
+1. На github.com нажмите «+» → «New repository», введите имя, «Create repository».
+2. «Add file» → «Create new file». Имя: Main.kt. Скопируйте сюда текст Main.kt из проекта.
+   Нажмите «Commit changes».
+3. Снова «Add file» → «Create new file». Имя: .github/workflows/kotlin.yml
+   Скопируйте текст файла .github/workflows/kotlin.yml из проекта. «Commit changes».
+4. Вкладка «Actions» → запуск «Kotlin» → шаг «Запустить»: там вывод программы.
+
+С компьютера проще: «Экспорт ZIP» в проекте, распакуйте архив и загрузите все файлы
+(включая папку .github) через «Add file» → «Upload files».
+"""
+
+        /** Шаблоны проектов: имя → файлы. */
+        val TEMPLATES: Map<String, Map<String, String>> = mapOf(
+            "python" to mapOf("main.py" to TEMPLATE),
+            "web" to mapOf(
+                "index.html" to """<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Моя страница</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Привет!</h1>
+  <button id="btn">Нажми меня</button>
+  <p id="out"></p>
+  <script src="script.js"></script>
+</body>
+</html>
+""",
+                "style.css" to "body {\n  font-family: sans-serif;\n  margin: 16px;\n}\n\nh1 {\n  color: #3949ab;\n}\n",
+                "script.js" to "let clicks = 0\ndocument.getElementById('btn').addEventListener('click', () => {\n  clicks++\n  document.getElementById('out').textContent = 'Нажатий: ' + clicks\n  console.log('клик', clicks)\n})\n",
+            ),
+            "sql" to mapOf(
+                "schema.sql" to "-- Таблицы и данные: выполняются перед каждым запуском другого .sql файла\nCREATE TABLE users (\n  id INTEGER PRIMARY KEY,\n  name TEXT NOT NULL,\n  age INTEGER\n);\n\nINSERT INTO users (name, age) VALUES\n  ('Анна', 20),\n  ('Борис', 31),\n  ('Вера', 17);\n",
+                "query.sql" to "SELECT name, age\nFROM users\nWHERE age >= 18\nORDER BY age;\n",
+            ),
+            "kotlin" to mapOf(
+                "Main.kt" to "fun main() {\n    val name = \"Мир\"\n    println(\"Привет, \$name!\")\n}\n",
+                // Компилятора Kotlin в телефоне нет: проект собирается и запускается в GitHub Actions.
+                ".github/workflows/kotlin.yml" to KOTLIN_WORKFLOW,
+                "README.md" to KOTLIN_README,
+            ),
+        )
     }
 }

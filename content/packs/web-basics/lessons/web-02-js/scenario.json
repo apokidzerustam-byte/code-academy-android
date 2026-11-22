@@ -1,0 +1,312 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Язык браузера",
+      "narration": "JavaScript — язык, который понимает каждый браузер. Он оживляет страницы: реагирует на нажатия, меняет текст, проверяет формы. Сегодня сначала потренируемся в консоли, как с Питоном, а в конце подключим код к странице. Код выполняется во встроенном браузере приложения, без доступа к интернету.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "JavaScript работает в браузере. Вывод в консоль — `console.log(...)`.",
+          "cue": 0
+        }
+      ]
+    },
+    {
+      "id": "vars",
+      "title": "Переменные и вывод",
+      "narration": "Переменную объявляют словом let, если значение будет меняться, или const, если не будет. Строки пишут в кавычках, а в конце строки ставят точку с запятой. Вывод — console точка log, через запятую можно передать несколько значений. Ещё удобная запись — шаблонная строка в обратных кавычках: внутри доллар и фигурные скобки подставляют значение. Запускаем.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.js"
+        },
+        {
+          "type": "type",
+          "text": "let name = \"Аня\";\nconst year = 2026;\nconsole.log(\"Привет,\", name);\nconsole.log(`Сейчас ${year} год`);\n",
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            1
+          ],
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            2
+          ],
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            3
+          ],
+          "file": "main.js",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            4
+          ],
+          "file": "main.js",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "main.js",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "Привет, Аня\nСейчас 2026 год\n",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "func",
+      "title": "Функции",
+      "narration": "Функцию объявляют словом function, затем имя, параметры в скобках и тело в фигурных скобках. return возвращает результат. В заданиях проверка вызывает вашу функцию с разными аргументами и сравнивает ответ, поэтому важно именно вернуть значение, а не напечатать. Запустим: шестнадцать и две целых двадцать пять.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.js"
+        },
+        {
+          "type": "type",
+          "text": "function square(x) {\n  return x * x;\n}\n\nconsole.log(square(4));\nconsole.log(square(1.5));\n",
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            1,
+            2,
+            3
+          ],
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            2
+          ],
+          "file": "main.js",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "main.js",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "16\n2.25\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "loop",
+      "title": "Массив, цикл и условие",
+      "narration": "Массив — список значений в квадратных скобках. Цикл for of проходит по каждому элементу. Условие if пишут в круглых скобках, а тело — в фигурных. Знак плюс плюс увеличивает число на один. Посчитаем, сколько оценок не ниже шестидесяти. Запускаем.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.js"
+        },
+        {
+          "type": "type",
+          "text": "const scores = [72, 95, 58, 81];\nlet passed = 0;\nfor (const s of scores) {\n  if (s >= 60) {\n    passed++;\n  }\n}\nconsole.log(\"Сдали:\", passed, \"из\", scores.length);\n",
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            1
+          ],
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            3
+          ],
+          "file": "main.js",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            4,
+            5,
+            6
+          ],
+          "file": "main.js",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "main.js",
+          "cue": 5
+        },
+        {
+          "type": "output",
+          "text": "Сдали: 3 из 4\n",
+          "cue": 5
+        }
+      ]
+    },
+    {
+      "id": "errors",
+      "title": "Ошибки",
+      "narration": "Ошибёмся в имени переменной. Запускаем. Ошибка ReferenceError: имя не определено, и приложение показывает номер строки. Читайте сообщение целиком: оно почти всегда указывает, где искать.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.js"
+        },
+        {
+          "type": "type",
+          "text": "let total = 10;\nconsole.log(totl * 2);\n",
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "main.js",
+          "cue": 1
+        },
+        {
+          "type": "output",
+          "text": "ReferenceError: totl is not defined (строка 2)\n",
+          "stream": "stderr",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            2
+          ],
+          "file": "main.js",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "infinite",
+      "title": "Бесконечный цикл",
+      "narration": "А теперь классическая ошибка: забыли увеличить счётчик в цикле while, и условие никогда не станет ложным. Такой код повесил бы обычную страницу. Приложение следит за циклами и через две секунды останавливает программу с понятным сообщением. Кнопка «Стоп» тоже всегда работает.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.js"
+        },
+        {
+          "type": "type",
+          "text": "let i = 0;\nwhile (i < 5) {\n  console.log(i);\n}\n",
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            2,
+            3,
+            4
+          ],
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "main.js",
+          "cue": 2
+        },
+        {
+          "type": "output",
+          "text": "0\n0\n0\n…\nInfiniteLoopError: цикл в строке 2 работает дольше 2 с — похоже, он бесконечный. Проверьте условие выхода из цикла.\n",
+          "stream": "stderr",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "dom",
+      "title": "Код на странице",
+      "narration": "Теперь подключим код к странице. Скрипт пишут в теге script в конце body. document точка getElementById находит элемент по id. addEventListener подписывается на событие: при каждом нажатии кнопки увеличиваем счётчик и записываем его в textContent — текст элемента. В заданиях проверка сама нажимает кнопки и читает, что получилось на странице.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "index.html"
+        },
+        {
+          "type": "type",
+          "text": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Счётчик</title>\n</head>\n<body>\n  <p>Нажатий: <span id=\"count\">0</span></p>\n  <button id=\"btn\">Нажми</button>\n  <script>\n    const btn = document.getElementById(\"btn\");\n    const count = document.getElementById(\"count\");\n    let n = 0;\n    btn.addEventListener(\"click\", () => {\n      n++;\n      count.textContent = n;\n      console.log(\"клик\", n);\n    });\n  </script>\n</body>\n</html>\n",
+          "file": "index.html",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            10,
+            19
+          ],
+          "file": "index.html",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            11,
+            12
+          ],
+          "file": "index.html",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            14,
+            15,
+            16,
+            17,
+            18
+          ],
+          "file": "index.html",
+          "cue": 3
+        },
+        {
+          "type": "note",
+          "md": "Нашли элемент → подписались на событие → изменили текст: `el.textContent = …`.",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итоги",
+      "narration": "Итак: let и const для переменных, console точка log для вывода, function и return для функций, for of и if для обхода и условий. На странице — getElementById, addEventListener и textContent. Переходите к заданиям.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`let`/`const` · `console.log` · `function … return` · `for (const x of arr)` · `addEventListener`",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}

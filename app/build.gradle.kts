@@ -20,7 +20,7 @@ android {
         // Номер сборки CI: каждая новая версия ставится поверх предыдущей.
         val run = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
         versionCode = run
-        versionName = "0.0.6-proto.$run"
+        versionName = "0.0.7-proto.$run"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             // arm64 — телефоны, x86_64 — эмулятор в CI.
@@ -88,6 +88,13 @@ ksp {
 chaquopy {
     defaultConfig {
         version = "3.13"
+        // FastAPI для режима A (урок «Веб-API»). pydantic-core v2 (Rust) для Android недоступен,
+        // поэтому pydantic 1.10 на чистом Python — версии подобраны зондом probe-fastapi.
+        pip {
+            install("fastapi==0.125.0")
+            install("pydantic==1.10.27")
+            install("httpx==0.28.1")
+        }
     }
 }
 

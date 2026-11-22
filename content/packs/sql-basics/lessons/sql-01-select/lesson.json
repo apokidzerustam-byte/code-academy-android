@@ -1,0 +1,52 @@
+{
+  "id": "sql-01-select",
+  "title": "SQL: первые запросы SELECT",
+  "goal": "Создавать таблицу, добавлять строки и выбирать данные запросами SELECT, WHERE, ORDER BY и LIMIT; изменять данные UPDATE.",
+  "skills": [
+    "sql.tables",
+    "sql.select",
+    "sql.where",
+    "sql.order",
+    "sql.update",
+    "sql.errors"
+  ],
+  "prerequisites": [],
+  "runner": "sql",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-where.json",
+    "assignments/a2-oldest.json",
+    "assignments/a3-fix.json",
+    "assignments/a4-predict.json",
+    "assignments/a5-update.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Текст в условии без кавычек",
+      "fix": "Пишите 'Толстой' в одинарных кавычках — без них база ищет столбец.",
+      "errorType": "SQLError"
+    },
+    {
+      "mistake": "Опечатка в имени столбца или таблицы",
+      "fix": "Сверьте имя со схемой: SELECT * FROM таблица; покажет все столбцы.",
+      "errorType": "SQLError"
+    },
+    {
+      "mistake": "Пропущена запятая между столбцами",
+      "fix": "SELECT title, year — без запятой второе слово станет псевдонимом первого столбца."
+    },
+    {
+      "mistake": "UPDATE или DELETE без WHERE",
+      "fix": "Без условия команда меняет все строки таблицы."
+    },
+    {
+      "mistake": "Ожидали порядок без ORDER BY",
+      "fix": "Порядок строк гарантирует только ORDER BY."
+    }
+  ]
+}

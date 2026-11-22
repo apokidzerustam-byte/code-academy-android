@@ -14,9 +14,12 @@ import { javascript } from "@codemirror/lang-javascript";
 import { html } from "@codemirror/lang-html";
 import { css } from "@codemirror/lang-css";
 import { sql } from "@codemirror/lang-sql";
+import { StreamLanguage } from "@codemirror/language";
+import { kotlin as kotlinMode } from "@codemirror/legacy-modes/mode/clike";
 import { oneDark } from "@codemirror/theme-one-dark";
 
-const LANGS = { python, javascript, html, css, sql };
+const kotlin = () => StreamLanguage.define(kotlinMode);
+const LANGS = { python, javascript, html, css, sql, kotlin };
 const language = new Compartment();
 const theme = new Compartment();
 const fontSize = new Compartment();

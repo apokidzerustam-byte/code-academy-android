@@ -32,7 +32,7 @@ class ContentParsingTest {
                     val a = json.decodeFromString(Assignment.serializer(), File(dir, it).readText())
                     assertEquals(5, a.hints.size)
                     val kind = a.tests["kind"]!!.jsonPrimitive.content
-                    assertTrue(kind in setOf("stdout", "function", "answer"))
+                    assertTrue(kind in setOf("stdout", "function", "answer", "fastapi", "web", "sql", "kotlin"))
                     assertEquals(kind == "answer", a.isAnswerTask)
                 }
             }

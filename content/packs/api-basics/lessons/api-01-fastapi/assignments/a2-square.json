@@ -1,0 +1,87 @@
+{
+  "id": "a2-square",
+  "type": "write",
+  "title": "Квадрат числа",
+  "statement": "Сделайте адрес **GET** `/square/{n}`: он возвращает `{\"n\": n, \"square\": n²}`.\n\nНапример, `/square/4` → `{\"n\": 4, \"square\": 16}`. Если в пути не число — код **422**.",
+  "goal": "Принимать параметр из пути с типом int.",
+  "input": "Целое n в пути.",
+  "expectedResult": "JSON с n и квадратом.",
+  "constraints": [
+    "n — целое, может быть отрицательным."
+  ],
+  "starterCode": "from fastapi import FastAPI\n\napp = FastAPI()\n\n# ваш обработчик\n",
+  "hints": [
+    "Параметр пути пишут в фигурных скобках: \"/square/{n}\".",
+    "Имя в скобках и имя параметра функции совпадают.",
+    "Укажите тип: n: int — тогда FastAPI сам проверит и превратит в число.",
+    "Квадрат — n * n.",
+    "@app.get(\"/square/{n}\")\ndef square(n: int):\n    return {\"n\": n, \"square\": n * n}"
+  ],
+  "tests": {
+    "kind": "fastapi",
+    "cases": [
+      {
+        "id": "v1",
+        "path": "/square/4",
+        "expected_json": {
+          "n": 4,
+          "square": 16
+        }
+      },
+      {
+        "id": "v2",
+        "path": "/square/0",
+        "expected_json": {
+          "n": 0,
+          "square": 0
+        }
+      },
+      {
+        "id": "h1",
+        "hidden": true,
+        "path": "/square/-3",
+        "expected_json": {
+          "n": -3,
+          "square": 9
+        },
+        "hint": "Отрицательные числа тоже"
+      },
+      {
+        "id": "h2",
+        "hidden": true,
+        "path": "/square/12",
+        "expected_json": {
+          "n": 12,
+          "square": 144
+        }
+      },
+      {
+        "id": "h3",
+        "hidden": true,
+        "path": "/square/abc",
+        "expected_status": 422,
+        "hint": "Не число в пути должно давать 422 — укажите тип параметра"
+      }
+    ]
+  },
+  "solution": "from fastapi import FastAPI\n\napp = FastAPI()\n\n\n@app.get(\"/square/{n}\")\ndef square(n: int):\n    return {\"n\": n, \"square\": n * n}\n",
+  "explanation": "{n} в пути передаётся в функцию; аннотация int превращает текст в число, а «abc» даёт 422.",
+  "criteria": [
+    "Верно для любых целых.",
+    "Не число → 422."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from fastapi import FastAPI\n\napp = FastAPI()\n\n\n@app.get(\"/square/{n}\")\ndef square(n):\n    return {\"n\": n, \"square\": n * n}\n",
+      "why": "Без типа n — строка: умножение строки на строку падает."
+    },
+    {
+      "code": "from fastapi import FastAPI\n\napp = FastAPI()\n\n\n@app.get(\"/square/{n}\")\ndef square(n: int):\n    return {\"n\": n, \"square\": n * 2}\n",
+      "why": "n * 2 — это удвоение, а не квадрат."
+    },
+    {
+      "code": "from fastapi import FastAPI\n\napp = FastAPI()\n\n\n@app.get(\"/square/{num}\")\ndef square(n: int):\n    return {\"n\": n, \"square\": n * n}\n",
+      "why": "Имя в пути (num) не совпадает с параметром функции (n)."
+    }
+  ]
+}

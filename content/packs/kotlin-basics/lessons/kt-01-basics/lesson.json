@@ -1,0 +1,49 @@
+{
+  "id": "kt-01-basics",
+  "title": "Kotlin: первые шаги",
+  "goal": "Писать функции с типами, использовать when, циклы и data class; исправлять синтаксические ошибки.",
+  "skills": [
+    "kt.basics",
+    "kt.functions",
+    "kt.when",
+    "kt.data",
+    "kt.syntax"
+  ],
+  "prerequisites": [],
+  "runner": "kotlin",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-square.json",
+    "assignments/a2-grade.json",
+    "assignments/a3-fix.json",
+    "assignments/a4-books.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Нет типа результата функции",
+      "fix": "Пишите тип после скобок: fun f(x: Int): Int."
+    },
+    {
+      "mistake": "Изменение val",
+      "fix": "val нельзя переназначить — используйте var."
+    },
+    {
+      "mistake": "when без else",
+      "fix": "Если ветки не покрывают все случаи, добавьте else ->."
+    },
+    {
+      "mistake": "Незакрытая скобка",
+      "fix": "Приложение показывает строку синтаксической ошибки: проверьте пары скобок."
+    },
+    {
+      "mistake": "Тип Double вместо Int",
+      "fix": "Int — целое, Double — дробное: они не взаимозаменяемы."
+    }
+  ]
+}

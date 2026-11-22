@@ -1,0 +1,49 @@
+{
+  "id": "web-01-html-css",
+  "title": "HTML и CSS: первая страница",
+  "goal": "Собрать страницу из тегов HTML и оформить её правилами CSS; понимать предупреждения о незакрытых тегах.",
+  "skills": [
+    "web.html",
+    "web.lists",
+    "web.css",
+    "web.cascade",
+    "web.errors"
+  ],
+  "prerequisites": [],
+  "runner": "html",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-heading.json",
+    "assignments/a2-list.json",
+    "assignments/a3-css.json",
+    "assignments/a4-fix.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Не закрыт парный тег",
+      "fix": "У каждого <p>, <li>, <h1> должна быть пара </p>, </li>, </h1>."
+    },
+    {
+      "mistake": "Селектор без # или .",
+      "fix": "#id — по id, .class — по классу; без знака ищется тег с таким именем."
+    },
+    {
+      "mistake": "Нет ; между свойствами CSS",
+      "fix": "Каждое свойство заканчивается точкой с запятой."
+    },
+    {
+      "mistake": "Опечатка в имени свойства",
+      "fix": "color, не colour; font-weight, не font-wieght. Приложение предупреждает о неизвестных свойствах."
+    },
+    {
+      "mistake": "Картинка без alt",
+      "fix": "Добавьте alt=\"описание\" — его читают программы для незрячих."
+    }
+  ]
+}

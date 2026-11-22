@@ -1,0 +1,85 @@
+{
+  "id": "a1-greet",
+  "type": "write",
+  "title": "Функция приветствия",
+  "statement": "Напишите функцию `greet(name)`, которая **возвращает** строку `Привет, <имя>!`.\n\nНапример, `greet(\"Аня\")` возвращает `Привет, Аня!`.",
+  "goal": "Писать функцию с параметром и return.",
+  "input": "Аргумент name — строка.",
+  "expectedResult": "Строка-приветствие.",
+  "constraints": [
+    "Функция должна вернуть значение (return), печатать не нужно."
+  ],
+  "starterCode": "function greet(name) {\n  // ваш код\n}\n",
+  "hints": [
+    "Объявите function greet(name) { … }.",
+    "Результат отдаётся словом return.",
+    "Строку удобно собрать шаблоном в обратных кавычках.",
+    "Внутри шаблона имя подставляется так: ${name}.",
+    "function greet(name) {\n  return `Привет, ${name}!`;\n}"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "greet",
+        "args": [
+          "Аня"
+        ],
+        "expected": "Привет, Аня!"
+      },
+      {
+        "id": "v2",
+        "function": "greet",
+        "args": [
+          "мир"
+        ],
+        "expected": "Привет, мир!"
+      },
+      {
+        "id": "h1",
+        "hidden": true,
+        "function": "greet",
+        "args": [
+          "Ли"
+        ],
+        "expected": "Привет, Ли!",
+        "hint": "Имя подставляется любое"
+      },
+      {
+        "id": "h2",
+        "hidden": true,
+        "function": "greet",
+        "args": [
+          ""
+        ],
+        "expected": "Привет, !",
+        "hint": "Пустое имя тоже подставляется как есть"
+      }
+    ]
+  },
+  "solution": "function greet(name) {\n  return `Привет, ${name}!`;\n}\n",
+  "explanation": "return отдаёт строку тому, кто вызвал функцию; шаблон подставляет имя.",
+  "criteria": [
+    "Возвращает строку для любого имени."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "function greet(name) {\n  console.log(`Привет, ${name}!`);\n}\n",
+      "why": "Функция печатает, но ничего не возвращает."
+    },
+    {
+      "code": "function greet(name) {\n  return \"Привет, Аня!\";\n}\n",
+      "why": "Ответ «зашит» под пример."
+    },
+    {
+      "code": "function greet(name) {\n  return `Привет, ${name}`;\n}\n",
+      "why": "Потерян восклицательный знак."
+    },
+    {
+      "code": "function hello(name) {\n  return `Привет, ${name}!`;\n}\n",
+      "why": "Функция должна называться greet."
+    }
+  ]
+}

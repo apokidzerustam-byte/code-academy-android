@@ -1,0 +1,76 @@
+{
+  "id": "a3-fix",
+  "type": "fix",
+  "title": "Две потерянные скобки",
+  "statement": "Программа должна напечатать `Сумма: 5`, но не компилируется. Найдите и исправьте **две** синтаксические ошибки.",
+  "goal": "Читать сообщения о синтаксических ошибках.",
+  "input": "—",
+  "expectedResult": "Программа без синтаксических ошибок.",
+  "constraints": [
+    "Не меняйте логику — только скобки."
+  ],
+  "starterCode": "fun add(a: Int, b: Int): Int {\n    return a + b\n\nfun main() {\n    val total = add(2, 3)\n    println(\"Сумма: $total\"\n}\n",
+  "hints": [
+    "Нажмите «Запустить»: приложение покажет первую ошибку и её строку.",
+    "У каждой { должна быть своя }.",
+    "Где заканчивается функция add?",
+    "У println тоже должна закрыться круглая скобка.",
+    "Добавьте } после return a + b и ) в конце println(\"Сумма: $total\")."
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "add",
+        "type": "function",
+        "name": "add",
+        "paramTypes": [
+          "Int",
+          "Int"
+        ],
+        "returns": "Int"
+      },
+      {
+        "id": "main",
+        "type": "function",
+        "name": "main",
+        "paramTypes": []
+      },
+      {
+        "id": "call",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "add\\s*\\(\\s*2\\s*,\\s*3\\s*\\)",
+        "message": "main должна вызывать add(2, 3)"
+      }
+    ],
+    "jvm": {
+      "main": "",
+      "expected_stdout": "Сумма: 5"
+    }
+  },
+  "solution": "fun add(a: Int, b: Int): Int {\n    return a + b\n}\n\nfun main() {\n    val total = add(2, 3)\n    println(\"Сумма: $total\")\n}\n",
+  "explanation": "Функция add не была закрыта фигурной скобкой, а вызов println — круглой.",
+  "criteria": [
+    "Код компилируется.",
+    "Функции add и main на месте."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "fun add(a: Int, b: Int): Int {\n    return a + b\n}\n\nfun main() {\n    val total = add(2, 3)\n    println(\"Сумма: $total\"\n}\n",
+      "why": "Исправлена только фигурная скобка."
+    },
+    {
+      "code": "fun add(a: Int, b: Int): Int {\n    return a + b\n\nfun main() {\n    val total = add(2, 3)\n    println(\"Сумма: $total\")\n}\n",
+      "why": "Исправлена только круглая скобка."
+    },
+    {
+      "code": "fun main() {\n    println(\"Сумма: 5\")\n}\n",
+      "why": "Функцию add удалили — задача была исправить ошибки."
+    }
+  ]
+}

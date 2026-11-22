@@ -1,0 +1,80 @@
+{
+  "id": "a3-fix",
+  "type": "fix",
+  "title": "Не хватает последнего",
+  "statement": "Функция `sumTo(n)` должна возвращать сумму `1 + 2 + … + n`, но для `sumTo(3)` выдаёт `3` вместо `6`. Исправьте.",
+  "goal": "Находить ошибку «на единицу» в границе цикла.",
+  "input": "Целое n ≥ 0.",
+  "expectedResult": "Сумма от 1 до n.",
+  "constraints": [
+    "Исправьте ошибку, а не подгоняйте ответ."
+  ],
+  "starterCode": "// Должна вернуть сумму 1 + 2 + … + n\nfunction sumTo(n) {\n  let s = 0;\n  for (let i = 1; i < n; i++) {\n    s += i;\n  }\n  return s;\n}\n",
+  "hints": [
+    "Вызовите sumTo(3) и посчитайте вручную, какие i проходит цикл.",
+    "Цикл проходит i = 1 и 2. А 3?",
+    "Посмотрите на условие продолжения цикла.",
+    "Число n тоже должно войти в сумму: нужно «меньше или равно».",
+    "for (let i = 1; i <= n; i++)"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "sumTo",
+        "args": [
+          3
+        ],
+        "expected": 6
+      },
+      {
+        "id": "v2",
+        "function": "sumTo",
+        "args": [
+          1
+        ],
+        "expected": 1
+      },
+      {
+        "id": "h1",
+        "hidden": true,
+        "function": "sumTo",
+        "args": [
+          100
+        ],
+        "expected": 5050
+      },
+      {
+        "id": "h2",
+        "hidden": true,
+        "function": "sumTo",
+        "args": [
+          0
+        ],
+        "expected": 0,
+        "hint": "Для n = 0 сумма пустая — 0"
+      }
+    ]
+  },
+  "solution": "// Должна вернуть сумму 1 + 2 + … + n\nfunction sumTo(n) {\n  let s = 0;\n  for (let i = 1; i <= n; i++) {\n    s += i;\n  }\n  return s;\n}\n",
+  "explanation": "Условие i < n останавливает цикл до n, поэтому последнее слагаемое терялось. i <= n включает его.",
+  "criteria": [
+    "Сумма верна для любого n."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "// Должна вернуть сумму 1 + 2 + … + n\nfunction sumTo(n) {\n  let s = 0;\n  for (let i = 0; i < n; i++) {\n    s += i;\n  }\n  return s;\n}\n",
+      "why": "Начало с 0 ничего не меняет: по-прежнему нет n."
+    },
+    {
+      "code": "// Должна вернуть сумму 1 + 2 + … + n\nfunction sumTo(n) {\n  let s = 0;\n  for (let i = 1; i < n; i++) {\n    s += i;\n  }\n  return s + 1;\n}\n",
+      "why": "Подгонка: верно только для отдельных n."
+    },
+    {
+      "code": "// Должна вернуть сумму 1 + 2 + … + n\nfunction sumTo(n) {\n  let s = 1;\n  for (let i = 1; i <= n; i++) {\n    s += i;\n  }\n  return s;\n}\n",
+      "why": "Сумма начинается не с нуля — лишняя единица."
+    }
+  ]
+}

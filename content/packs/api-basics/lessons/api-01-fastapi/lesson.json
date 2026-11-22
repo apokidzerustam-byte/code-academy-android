@@ -1,0 +1,50 @@
+{
+  "id": "api-01-fastapi",
+  "title": "FastAPI: первый веб-API",
+  "goal": "Писать обработчики FastAPI с параметрами пути и запроса, принимать JSON через модели и возвращать коды 404 и 422.",
+  "skills": [
+    "api.http",
+    "api.routes",
+    "api.params",
+    "api.models",
+    "api.errors"
+  ],
+  "prerequisites": [],
+  "runner": "A",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-hello.json",
+    "assignments/a2-square.json",
+    "assignments/a3-fix.json",
+    "assignments/a4-order.json",
+    "assignments/a5-404.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Нет аннотации типа у параметра",
+      "fix": "Без типа параметр — строка. Пишите n: int.",
+      "errorType": "TypeError"
+    },
+    {
+      "mistake": "Имя в пути не совпадает с параметром функции",
+      "fix": "\"/square/{n}\" → def square(n: int)."
+    },
+    {
+      "mistake": "print вместо return",
+      "fix": "Ответ API — то, что функция возвращает."
+    },
+    {
+      "mistake": "Ошибка возвращена словарём",
+      "fix": "Код ошибки задаёт raise HTTPException(status_code=404, …)."
+    },
+    {
+      "mistake": "Обращение к словарю без проверки",
+      "fix": "Неизвестный ключ → KeyError и код 500. Проверяйте in."
+    }
+  ]
+}

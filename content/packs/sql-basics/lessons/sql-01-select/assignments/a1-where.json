@@ -1,0 +1,95 @@
+{
+  "id": "a1-where",
+  "type": "write",
+  "title": "Книги XX века",
+  "statement": "В таблице `books` есть столбцы `id`, `title`, `author`, `year`.\n\nНапишите запрос, который выводит **только названия** (`title`) книг, написанных **после 1900 года**.",
+  "goal": "Выбирать строки условием WHERE.",
+  "input": "Таблица books (создаётся автоматически перед запуском).",
+  "expectedResult": "Один столбец title: книги с year больше 1900.",
+  "constraints": [
+    "Порядок строк не важен.",
+    "Нажмите «Запустить», чтобы увидеть данные таблицы: SELECT * FROM books;"
+  ],
+  "starterCode": "-- Ваш запрос\n",
+  "hints": [
+    "Нужны не все строки, а только подходящие — это работа для WHERE.",
+    "Выберите один столбец: SELECT title FROM books.",
+    "Условие на число пишется без кавычек: year > 1900.",
+    "Порядок частей: SELECT … FROM … WHERE …;",
+    "SELECT title FROM books WHERE year > 1900;"
+  ],
+  "tests": {
+    "kind": "sql",
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE books (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  author TEXT,\n  year INTEGER\n);\n\nINSERT INTO books (title, author, year) VALUES\n  ('Мастер и Маргарита', 'Булгаков', 1967),\n  ('Война и мир', 'Толстой', 1869),\n  ('Евгений Онегин', 'Пушкин', 1833),\n  ('Анна Каренина', 'Толстой', 1878);\n",
+        "expected": {
+          "columns": [
+            "title"
+          ],
+          "rows": [
+            [
+              "Мастер и Маргарита"
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h1",
+        "hidden": true,
+        "setup": "CREATE TABLE books (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  author TEXT,\n  year INTEGER\n);\nINSERT INTO books (title, author, year) VALUES\n  ('Идиот', 'Достоевский', 1869),\n  ('Собачье сердце', 'Булгаков', 1987),\n  ('Белая гвардия', 'Булгаков', 1925),\n  ('Бесы', 'Достоевский', 1872),\n  ('Мёртвые души', 'Гоголь', 1842);\n",
+        "expected": {
+          "columns": [
+            "title"
+          ],
+          "rows": [
+            [
+              "Собачье сердце"
+            ],
+            [
+              "Белая гвардия"
+            ]
+          ]
+        },
+        "hint": "Условие должно работать для любых книг, а не только для примера"
+      },
+      {
+        "id": "h2",
+        "hidden": true,
+        "setup": "CREATE TABLE books (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  author TEXT,\n  year INTEGER\n);\nINSERT INTO books (title, author, year) VALUES\n  ('Отцы и дети', 'Тургенев', 1862),\n  ('Ревизор', 'Гоголь', 1836),\n  ('Обломов', 'Гончаров', 1859);\n",
+        "expected": {
+          "columns": [
+            "title"
+          ],
+          "rows": []
+        },
+        "hint": "Если подходящих книг нет, запрос возвращает пустую таблицу"
+      }
+    ]
+  },
+  "solution": "SELECT title FROM books\nWHERE year > 1900;\n",
+  "explanation": "WHERE year > 1900 оставляет только строки, где год больше 1900; SELECT title выводит один столбец.",
+  "criteria": [
+    "Выводится один столбец title.",
+    "Работает на любых данных."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "SELECT title FROM books WHERE title = 'Мастер и Маргарита';",
+      "why": "Ответ «зашит» под пример — на других данных неверно."
+    },
+    {
+      "code": "SELECT * FROM books WHERE year > 1900;",
+      "why": "Лишние столбцы: нужен только title."
+    },
+    {
+      "code": "SELECT title FROM books WHERE year < 1900;",
+      "why": "Условие наоборот."
+    },
+    {
+      "code": "SELECT title FROM books;",
+      "why": "Нет условия — выводятся все книги."
+    }
+  ]
+}

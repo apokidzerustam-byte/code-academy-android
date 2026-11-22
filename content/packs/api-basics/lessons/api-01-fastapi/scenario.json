@@ -1,0 +1,261 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Что такое веб-API",
+      "narration": "Когда приложение в телефоне показывает погоду или список заказов, оно обращается к серверу по адресу и получает данные, обычно в формате JSON. Такой набор адресов и правил называется веб-API. Запрос состоит из метода и пути: GET — получить данные, POST — отправить новые. Сервер отвечает кодом: двести — всё хорошо, четыреста четыре — не найдено, четыреста двадцать два — неверные данные. Сегодня напишем свой API на Питоне с помощью библиотеки FastAPI.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "Запрос: **метод** (GET, POST) + **путь** (`/items/5`). Ответ: **код** (200, 404, 422) + **JSON**.",
+          "cue": 2
+        },
+        {
+          "type": "note",
+          "md": "Коды: `200` — ок, `404` — не найдено, `422` — неверные данные.",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "first",
+      "title": "Первое приложение",
+      "narration": "Импортируем FastAPI и создаём приложение app. Обработчик — обычная функция, а строка с собакой над ней, декоратор, говорит: на запрос GET по пути косая черта вызывай эту функцию. Функция возвращает словарь, а FastAPI сам превращает его в JSON.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "from fastapi import FastAPI\nfrom fastapi.testclient import TestClient\n\napp = FastAPI()\n\n\n@app.get(\"/\")\ndef root():\n    return {\"message\": \"Привет\"}\n",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            4
+          ],
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            7,
+            8,
+            9
+          ],
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            9
+          ],
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "client",
+      "title": "Запрос без сети",
+      "narration": "На компьютере такое приложение запускают сервером uvicorn и открывают в браузере. В приложении сеть закрыта, поэтому используем тестовый клиент: он передаёт запрос прямо в app, как настоящий браузер, но без интернета. client точка get отправляет запрос, у ответа есть код status_code и метод json. Запускаем. Код двести и наш словарь.",
+      "actions": [
+        {
+          "type": "type",
+          "text": "\n\nclient = TestClient(app)\nr = client.get(\"/\")\nprint(r.status_code, r.json())\n",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            12,
+            13,
+            14
+          ],
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "200 {'message': 'Привет'}\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "path",
+      "title": "Параметр в пути",
+      "narration": "Часть пути может быть параметром: фигурные скобки item_id. FastAPI передаёт его в функцию с тем же именем. Аннотация двоеточие int важна: FastAPI сам превратит текст из адреса в число и проверит его. Запросим пятый товар — получаем число и удвоенное число. А если в пути не число, FastAPI отвечает кодом четыреста двадцать два, и наша функция даже не вызывается.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "from fastapi import FastAPI\nfrom fastapi.testclient import TestClient\n\napp = FastAPI()\n\n\n@app.get(\"/items/{item_id}\")\ndef get_item(item_id: int):\n    return {\"item_id\": item_id, \"double\": item_id * 2}\n\n\nclient = TestClient(app)\nprint(client.get(\"/items/5\").json())\nprint(client.get(\"/items/abc\").status_code)\n",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            7
+          ],
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            8
+          ],
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "{'item_id': 5, 'double': 10}\n422\n",
+          "cue": 3
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            14
+          ],
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "query",
+      "title": "Параметры запроса",
+      "narration": "Параметры, которых нет в пути, FastAPI берёт из строки запроса после вопросительного знака, например search вопрос q равно ко. У параметров могут быть значения по умолчанию: limit равен трём, если его не передали. Тестовый клиент передаёт их словарём params. Запускаем.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "from fastapi import FastAPI\nfrom fastapi.testclient import TestClient\n\napp = FastAPI()\n\n\n@app.get(\"/search\")\ndef search(q: str = \"\", limit: int = 3):\n    words = [\"кот\", \"код\", \"компот\", \"кофе\", \"сок\"]\n    found = [w for w in words if q in w]\n    return {\"q\": q, \"found\": found[:limit]}\n\n\nclient = TestClient(app)\nprint(client.get(\"/search\", params={\"q\": \"ко\"}).json())\nprint(client.get(\"/search\", params={\"q\": \"ко\", \"limit\": 1}).json())\n",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            8
+          ],
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            15,
+            16
+          ],
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "{'q': 'ко', 'found': ['кот', 'код', 'компот']}\n{'q': 'ко', 'found': ['кот']}\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "post",
+      "title": "POST и модель данных",
+      "narration": "Для отправки данных используют POST, а форму данных описывают классом-моделью на основе BaseModel из библиотеки pydantic. У товара есть название, цена и количество, по умолчанию один. Обработчик получает уже проверенный объект item. Отправим JSON с чаем: итог десять. А если цены нет, FastAPI сам вернёт четыреста двадцать два с описанием, какого поля не хватает.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "from fastapi import FastAPI\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel\n\napp = FastAPI()\n\n\nclass Item(BaseModel):\n    name: str\n    price: float\n    qty: int = 1\n\n\n@app.post(\"/items\")\ndef create_item(item: Item):\n    return {\"name\": item.name, \"total\": item.price * item.qty}\n\n\nclient = TestClient(app)\nr = client.post(\"/items\", json={\"name\": \"Чай\", \"price\": 2.5, \"qty\": 4})\nprint(r.status_code, r.json())\nr = client.post(\"/items\", json={\"name\": \"Чай\"})\nprint(r.status_code)\n",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            14,
+            15,
+            16
+          ],
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "200 {'name': 'Чай', 'total': 10.0}\n422\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "errors",
+      "title": "Свои ошибки: 404",
+      "narration": "Иногда ошибку должен вернуть сам обработчик, например если книги с таким номером нет. Для этого поднимают исключение HTTPException с кодом и пояснением detail. Запросим вторую книгу и седьмую. Вторая нашлась, а для седьмой код четыреста четыре и наше сообщение.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\n\napp = FastAPI()\nBOOKS = {1: \"Война и мир\", 2: \"Мастер и Маргарита\"}\n\n\n@app.get(\"/books/{book_id}\")\ndef get_book(book_id: int):\n    if book_id not in BOOKS:\n        raise HTTPException(status_code=404, detail=\"Книга не найдена\")\n    return {\"id\": book_id, \"title\": BOOKS[book_id]}\n\n\nclient = TestClient(app)\nprint(client.get(\"/books/2\").json())\nr = client.get(\"/books/7\")\nprint(r.status_code, r.json())\n",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            10,
+            11
+          ],
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "cue": 2
+        },
+        {
+          "type": "output",
+          "text": "{'id': 2, 'title': 'Мастер и Маргарита'}\n404 {'detail': 'Книга не найдена'}\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итоги",
+      "narration": "Итак: app равно FastAPI, декораторы get и post связывают путь с функцией, параметры берутся из пути и строки запроса, а тело запроса описывает модель BaseModel. Аннотации типов включают проверку, неверные данные дают четыреста двадцать два, а свою ошибку возвращают через HTTPException. В заданиях проверка отправляет запросы к вашему app и сравнивает код и JSON ответа.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "На компьютере: `pip install fastapi uvicorn`, затем `uvicorn main:app --reload` и адрес http://127.0.0.1:8000/docs.",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "id": "a1-hello",
+  "type": "write",
+  "title": "Первый адрес API",
+  "statement": "Добавьте в приложение обработчик: на запрос **GET** `/hello` он возвращает JSON `{\"text\": \"Привет, API!\"}`.",
+  "goal": "Связывать путь и функцию декоратором.",
+  "input": "Запрос GET /hello.",
+  "expectedResult": "Код 200 и JSON с ключом text.",
+  "constraints": [
+    "Приложение должно называться app.",
+    "Нажмите «Запустить», чтобы проверить, что код без ошибок."
+  ],
+  "starterCode": "from fastapi import FastAPI\n\napp = FastAPI()\n\n# ваш обработчик\n",
+  "hints": [
+    "Обработчик — функция с декоратором над ней.",
+    "Декоратор для GET: @app.get(\"путь\").",
+    "Путь начинается с косой черты: \"/hello\".",
+    "Функция возвращает словарь — FastAPI превратит его в JSON.",
+    "@app.get(\"/hello\")\ndef hello():\n    return {\"text\": \"Привет, API!\"}"
+  ],
+  "tests": {
+    "kind": "fastapi",
+    "cases": [
+      {
+        "id": "v1",
+        "method": "GET",
+        "path": "/hello",
+        "expected_status": 200,
+        "expected_json": {
+          "text": "Привет, API!"
+        }
+      },
+      {
+        "id": "h1",
+        "hidden": true,
+        "method": "GET",
+        "path": "/",
+        "expected_status": 404,
+        "hint": "Отвечать должен только путь /hello"
+      },
+      {
+        "id": "h2",
+        "hidden": true,
+        "method": "POST",
+        "path": "/hello",
+        "expected_status": 405,
+        "hint": "Обработчик — для метода GET"
+      }
+    ]
+  },
+  "solution": "from fastapi import FastAPI\n\napp = FastAPI()\n\n\n@app.get(\"/hello\")\ndef hello():\n    return {\"text\": \"Привет, API!\"}\n",
+  "explanation": "@app.get(\"/hello\") связывает GET-запрос по пути /hello с функцией; словарь становится JSON-ответом.",
+  "criteria": [
+    "GET /hello → 200 и нужный JSON.",
+    "Другие пути и методы не отвечают."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from fastapi import FastAPI\n\napp = FastAPI()\n\n\n@app.get(\"/\")\ndef hello():\n    return {\"text\": \"Привет, API!\"}\n",
+      "why": "Путь «/» вместо «/hello»."
+    },
+    {
+      "code": "from fastapi import FastAPI\n\napp = FastAPI()\n\n\n@app.post(\"/hello\")\ndef hello():\n    return {\"text\": \"Привет, API!\"}\n",
+      "why": "Нужен GET, а не POST."
+    },
+    {
+      "code": "from fastapi import FastAPI\n\napp = FastAPI()\n\n\n@app.get(\"/hello\")\ndef hello():\n    return \"Привет, API!\"\n",
+      "why": "Вернулась строка, а нужен JSON-объект с ключом text."
+    },
+    {
+      "code": "from fastapi import FastAPI\n\napp = FastAPI()\n\n\n@app.get(\"/hello\")\ndef hello():\n    print({\"text\": \"Привет, API!\"})\n",
+      "why": "Функция печатает, а не возвращает — ответ null."
+    }
+  ]
+}

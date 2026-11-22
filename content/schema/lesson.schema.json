@@ -3,29 +3,116 @@
   "$id": "https://codeacademy.app/schema/lesson.schema.json",
   "title": "Урок",
   "type": "object",
-  "required": ["id", "title", "goal", "skills", "scenario", "notes", "assignments", "passCriteria", "commonMistakes"],
+  "required": [
+    "id",
+    "title",
+    "goal",
+    "skills",
+    "scenario",
+    "notes",
+    "assignments",
+    "passCriteria",
+    "commonMistakes"
+  ],
   "additionalProperties": false,
   "properties": {
-    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
-    "title": {"type": "string", "minLength": 3},
-    "goal": {"type": "string", "minLength": 10, "description": "Что ученик сможет после урока"},
-    "skills": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^[a-z0-9][a-z0-9.-]*$"}, "description": "Узлы карты знаний, которые развивает урок"},
-    "prerequisites": {"type": "array", "items": {"type": "string"}, "description": "Навыки, нужные до урока"},
-    "runner": {"enum": ["W", "A"], "default": "W", "description": "W — изолированный Pyodide; A — Chaquopy (asyncio, потоки, сервер)"},
-    "scenario": {"type": "string", "description": "Файл сценария анимированного урока"},
-    "notes": {"type": "string", "description": "Конспект в Markdown"},
-    "assignments": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3
+    },
+    "goal": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Что ученик сможет после урока"
+    },
+    "skills": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9.-]*$"
+      },
+      "description": "Узлы карты знаний, которые развивает урок"
+    },
+    "prerequisites": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Навыки, нужные до урока"
+    },
+    "runner": {
+      "enum": [
+        "W",
+        "A",
+        "html",
+        "js",
+        "sql",
+        "kotlin"
+      ],
+      "default": "W",
+      "description": "Python: W — изолированный Pyodide; A — Chaquopy (asyncio, потоки, FastAPI). html/js — песочница браузера; sql — SQLite (sql.js); kotlin — проверка синтаксиса и структуры (tree-sitter)"
+    },
+    "scenario": {
+      "type": "string",
+      "description": "Файл сценария анимированного урока"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Конспект в Markdown"
+    },
+    "assignments": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
     "passCriteria": {
-      "type": "object", "required": ["minAssignmentsPassed"], "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "minAssignmentsPassed"
+      ],
+      "additionalProperties": false,
       "properties": {
-        "minAssignmentsPassed": {"type": "integer", "minimum": 1},
-        "minScorePercent": {"type": "integer", "minimum": 0, "maximum": 100, "default": 80}
+        "minAssignmentsPassed": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "minScorePercent": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 80
+        }
       }
     },
     "commonMistakes": {
-      "type": "array", "minItems": 1,
-      "items": {"type": "object", "required": ["mistake", "fix"], "additionalProperties": false,
-                "properties": {"mistake": {"type": "string"}, "fix": {"type": "string"}, "errorType": {"type": "string"}}}
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "mistake",
+          "fix"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "mistake": {
+            "type": "string"
+          },
+          "fix": {
+            "type": "string"
+          },
+          "errorType": {
+            "type": "string"
+          }
+        }
+      }
     }
   }
 }

@@ -1,0 +1,63 @@
+{
+  "id": "a4-fix",
+  "type": "fix",
+  "title": "Почему стили не работают",
+  "statement": "Задумано: цена — жирная, подсказка — зелёная и размером 14px. Но ни одно правило не сработало. Найдите и исправьте **две** ошибки в CSS.",
+  "goal": "Находить ошибки в селекторах и свойствах CSS.",
+  "input": "Страница с ошибками в style.",
+  "expectedResult": "Все три стиля применяются.",
+  "constraints": [
+    "Разметку body не меняйте."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    price { font-weight: bold; }\n    .hint { color: green font-size: 14px; }\n  </style>\n</head>\n<body>\n  <p id=\"price\">Цена: 100 zł</p>\n  <p class=\"hint\">Доставка бесплатно</p>\n</body>\n</html>\n",
+  "hints": [
+    "Запустите: приложение покажет предупреждения CSS.",
+    "Как выбрать элемент по id? Какой символ нужен перед именем?",
+    "Посмотрите на второе правило: чем разделяются свойства?",
+    "Нужны #price и точка с запятой после green.",
+    "#price { font-weight: bold; }\n.hint { color: green; font-size: 14px; }"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "price",
+        "expr": "getComputedStyle(document.querySelector('#price')).fontWeight",
+        "expected": "700"
+      },
+      {
+        "id": "green",
+        "expr": "getComputedStyle(document.querySelector('.hint')).color",
+        "expected": "rgb(0, 128, 0)"
+      },
+      {
+        "id": "size",
+        "hidden": true,
+        "expr": "getComputedStyle(document.querySelector('.hint')).fontSize",
+        "expected": "14px",
+        "hint": "Размер шрифта подсказки тоже должен примениться"
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    #price { font-weight: bold; }\n    .hint { color: green; font-size: 14px; }\n  </style>\n</head>\n<body>\n  <p id=\"price\">Цена: 100 zł</p>\n  <p class=\"hint\">Доставка бесплатно</p>\n</body>\n</html>\n",
+  "explanation": "Без # селектор ищет тег <price>. Без «;» браузер читает «green font-size: 14px» как одно неверное значение и отбрасывает оба свойства.",
+  "criteria": [
+    "Цена жирная.",
+    "Подсказка зелёная, 14px."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    #price { font-weight: bold; }\n    .hint { color: green font-size: 14px; }\n  </style>\n</head>\n<body>\n  <p id=\"price\">Цена: 100 zł</p>\n  <p class=\"hint\">Доставка бесплатно</p>\n</body>\n</html>\n",
+      "why": "Исправлена только одна ошибка: нет «;» после green."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    price { font-weight: bold; }\n    .hint { color: green; font-size: 14px; }\n  </style>\n</head>\n<body>\n  <p id=\"price\">Цена: 100 zł</p>\n  <p class=\"hint\">Доставка бесплатно</p>\n</body>\n</html>\n",
+      "why": "Селектор price без решётки."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .price { font-weight: bold; }\n    .hint { color: green; font-size: 14px; }\n  </style>\n</head>\n<body>\n  <p id=\"price\">Цена: 100 zł</p>\n  <p class=\"hint\">Доставка бесплатно</p>\n</body>\n</html>\n",
+      "why": "Точка выбирает по классу, а у цены id."
+    }
+  ]
+}

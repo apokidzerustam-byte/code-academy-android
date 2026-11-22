@@ -3,6 +3,8 @@ package app.codeacademy.ui
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -34,6 +37,7 @@ import kotlinx.coroutines.withContext
 import java.text.DateFormat
 import java.util.Date
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ProjectsScreen(onBack: () -> Unit, openProject: (String) -> Unit) {
     val c = LocalContainer.current
@@ -70,18 +74,28 @@ fun ProjectsScreen(onBack: () -> Unit, openProject: (String) -> Unit) {
 
     if (creating) {
         var title by remember { mutableStateOf("") }
+        var template by remember { mutableStateOf("python") }
         AlertDialog(
             onDismissRequest = { creating = false },
             title = { Text("Новый проект") },
             text = {
-                OutlinedTextField(title, { title = it }, label = { Text("Название") }, singleLine = true,
-                    modifier = Modifier.testTag("project-title"))
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(title, { title = it }, label = { Text("Название") }, singleLine = true,
+                        modifier = Modifier.testTag("project-title"))
+                    Text("Шаблон", style = MaterialTheme.typography.labelLarge)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        for ((id, name) in listOf("python" to "Python", "web" to "Веб-страница", "sql" to "SQL", "kotlin" to "Kotlin")) {
+                            FilterChip(selected = template == id, onClick = { template = id }, label = { Text(name) },
+                                modifier = Modifier.testTag("template-$id"))
+                        }
+                    }
+                }
             },
             confirmButton = {
                 TextButton(onClick = {
                     creating = false
                     scope.launch {
-                        val id = c.projects.create(title)
+                        val id = c.projects.create(title, template)
                         // Навигация — строго в главном потоке (после транзакции Room продолжение может прийти из другого).
                         withContext(Dispatchers.Main.immediate) { openProject(id) }
                     }

@@ -1,0 +1,78 @@
+{
+  "id": "a1-square",
+  "type": "write",
+  "title": "Квадрат числа",
+  "statement": "Напишите функцию `square`, которая принимает целое число `x` (тип `Int`) и **возвращает** его квадрат (тип `Int`).",
+  "goal": "Объявлять функцию с типами параметра и результата.",
+  "input": "Целое x.",
+  "expectedResult": "x * x.",
+  "constraints": [
+    "Функция main не нужна.",
+    "На телефоне проверяются синтаксис и заголовок функции."
+  ],
+  "starterCode": "// Функция square\n",
+  "hints": [
+    "Функцию объявляют словом fun.",
+    "Тип параметра пишут через двоеточие: x: Int.",
+    "Тип результата — после скобок: ): Int.",
+    "Результат возвращают словом return.",
+    "fun square(x: Int): Int {\n    return x * x\n}"
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "square",
+        "paramTypes": [
+          "Int"
+        ],
+        "returns": "Int"
+      },
+      {
+        "id": "mul",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "x\\s*\\*\\s*x",
+        "message": "Квадрат — это x * x"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    println(square(5))\n    println(square(-3))\n    println(square(0))\n}",
+      "expected_stdout": "25\n9\n0"
+    }
+  },
+  "solution": "fun square(x: Int): Int {\n    return x * x\n}\n",
+  "explanation": "fun square(x: Int): Int — имя, параметр с типом и тип результата; return x * x возвращает квадрат.",
+  "criteria": [
+    "Заголовок fun square(x: Int): Int.",
+    "Возвращает x * x."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "fun square(x: Int) {\n    println(x * x)\n}\n",
+      "why": "Нет типа результата: функция печатает, а не возвращает."
+    },
+    {
+      "code": "fun square(x: Double): Double {\n    return x * x\n}\n",
+      "why": "Нужен тип Int, а не Double."
+    },
+    {
+      "code": "fun sqr(x: Int): Int {\n    return x * x\n}\n",
+      "why": "Функция должна называться square."
+    },
+    {
+      "code": "fun square(x: Int): Int {\n    return x * x\n",
+      "why": "Не закрыта фигурная скобка."
+    },
+    {
+      "code": "fun square(x: Int): Int {\n    return x + x\n}\n",
+      "why": "x + x — удвоение, а не квадрат."
+    }
+  ]
+}

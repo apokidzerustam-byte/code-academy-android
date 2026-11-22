@@ -1,0 +1,107 @@
+{
+  "id": "a4-order",
+  "type": "write",
+  "title": "Создать заказ",
+  "statement": "Опишите модель `Order` с полями `product` (строка), `qty` (целое) и `price` (дробное). Сделайте **POST** `/orders`: он принимает заказ и возвращает `{\"product\": …, \"total\": qty × price}`.\n\nЕсли поля нет или тип неверный — код **422** (FastAPI сделает это сам).",
+  "goal": "Принимать JSON через модель BaseModel.",
+  "input": "JSON заказа.",
+  "expectedResult": "JSON с product и total.",
+  "constraints": [
+    "Все три поля обязательны."
+  ],
+  "starterCode": "from fastapi import FastAPI\nfrom pydantic import BaseModel\n\napp = FastAPI()\n\n# модель Order и обработчик POST /orders\n",
+  "hints": [
+    "Модель — класс, унаследованный от BaseModel.",
+    "Поля модели — аннотации: product: str, qty: int, price: float.",
+    "Обработчик POST: @app.post(\"/orders\").",
+    "Параметр функции с типом модели — это тело запроса: def create_order(order: Order).",
+    "class Order(BaseModel):\n    product: str\n    qty: int\n    price: float\n\n@app.post(\"/orders\")\ndef create_order(order: Order):\n    return {\"product\": order.product, \"total\": order.qty * order.price}"
+  ],
+  "tests": {
+    "kind": "fastapi",
+    "cases": [
+      {
+        "id": "v1",
+        "method": "POST",
+        "path": "/orders",
+        "json": {
+          "product": "Кофе",
+          "qty": 2,
+          "price": 3.5
+        },
+        "expected_json": {
+          "product": "Кофе",
+          "total": 7.0
+        }
+      },
+      {
+        "id": "h1",
+        "hidden": true,
+        "method": "POST",
+        "path": "/orders",
+        "json": {
+          "product": "Сок",
+          "qty": 3,
+          "price": 1.25
+        },
+        "expected_json": {
+          "product": "Сок",
+          "total": 3.75
+        }
+      },
+      {
+        "id": "h2",
+        "hidden": true,
+        "method": "POST",
+        "path": "/orders",
+        "json": {
+          "product": "Сок",
+          "price": 1.25
+        },
+        "expected_status": 422,
+        "hint": "Без qty заказ неполный — 422"
+      },
+      {
+        "id": "h3",
+        "hidden": true,
+        "method": "POST",
+        "path": "/orders",
+        "json": {
+          "product": "Сок",
+          "qty": "много",
+          "price": 1
+        },
+        "expected_status": 422,
+        "hint": "qty должно быть целым числом"
+      },
+      {
+        "id": "h4",
+        "hidden": true,
+        "method": "GET",
+        "path": "/orders",
+        "expected_status": 405,
+        "hint": "Заказ создаётся методом POST"
+      }
+    ]
+  },
+  "solution": "from fastapi import FastAPI\nfrom pydantic import BaseModel\n\napp = FastAPI()\n\n\nclass Order(BaseModel):\n    product: str\n    qty: int\n    price: float\n\n\n@app.post(\"/orders\")\ndef create_order(order: Order):\n    return {\"product\": order.product, \"total\": order.qty * order.price}\n",
+  "explanation": "BaseModel описывает тело запроса и проверяет типы; total считается из полей объекта.",
+  "criteria": [
+    "Итог qty × price.",
+    "Неполный заказ → 422."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from fastapi import FastAPI\nfrom pydantic import BaseModel\n\napp = FastAPI()\n\n\nclass Order(BaseModel):\n    product: str\n    qty: int = 1\n    price: float\n\n\n@app.post(\"/orders\")\ndef create_order(order: Order):\n    return {\"product\": order.product, \"total\": order.qty * order.price}\n",
+      "why": "qty необязательно — заказ без количества принимается."
+    },
+    {
+      "code": "from fastapi import FastAPI\nfrom pydantic import BaseModel\n\napp = FastAPI()\n\n\nclass Order(BaseModel):\n    product: str\n    qty: int\n    price: float\n\n\n@app.post(\"/orders\")\ndef create_order(order: Order):\n    return {\"product\": order.product, \"total\": order.qty + order.price}\n",
+      "why": "Сложение вместо умножения."
+    },
+    {
+      "code": "from fastapi import FastAPI\nfrom pydantic import BaseModel\n\napp = FastAPI()\n\n\nclass Order(BaseModel):\n    product: str\n    qty: int\n    price: float\n\n\n@app.get(\"/orders\")\ndef create_order(order: Order):\n    return {\"product\": order.product, \"total\": order.qty * order.price}\n",
+      "why": "Создание — метод POST, а не GET."
+    }
+  ]
+}

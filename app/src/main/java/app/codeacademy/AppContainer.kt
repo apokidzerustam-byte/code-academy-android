@@ -10,6 +10,8 @@ import app.codeacademy.data.ProjectRepository
 import app.codeacademy.runner.CodeRunner
 import app.codeacademy.runner.PyodideRunner
 import app.codeacademy.runner.RunnerClient
+import app.codeacademy.runner.WebRunner
+import app.codeacademy.runner.WebRunnerHost
 import app.codeacademy.settings.RunnerMode
 import app.codeacademy.settings.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
@@ -35,10 +37,18 @@ class AppContainer(context: Context) {
     private var runnerW: PyodideRunner? = null
     private var runnerA: RunnerClient? = null
 
-    /** Исполнитель кода: W по умолчанию; A — если выбран явно или урок требует A, или W недоступен. */
+    private val webHost by lazy { WebRunnerHost(app) }
+    private val webRunners = mutableMapOf<String, WebRunner>()
+
+    /**
+     * Исполнитель кода. Python: W по умолчанию; A — если выбран явно, урок требует A (например, FastAPI)
+     * или W недоступен. HTML/JS, SQL и Kotlin — всегда песочница браузера (имя совпадает с языком).
+     */
     @Synchronized
     fun runner(mode: RunnerMode, lessonRunner: String = "W", wAvailable: Boolean = true): Pair<String, CodeRunner> =
-        if (mode == RunnerMode.A || lessonRunner == "A" || (mode == RunnerMode.AUTO && !wAvailable)) {
+        if (lessonRunner in WebRunner.LANGS) {
+            lessonRunner to webRunners.getOrPut(lessonRunner) { WebRunner(webHost, lessonRunner) }
+        } else if (mode == RunnerMode.A || lessonRunner == "A" || (mode == RunnerMode.AUTO && !wAvailable)) {
             "A" to (runnerA ?: RunnerClient(app, isolated = false).also { runnerA = it })
         } else {
             "W" to (runnerW ?: PyodideRunner(app).also { runnerW = it })

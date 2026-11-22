@@ -1,0 +1,39 @@
+{
+  "id": "a5-predict",
+  "type": "predict",
+  "title": "Какого цвета текст?",
+  "statement": "Три правила задают цвет одному абзацу. Какого цвета будет текст «Привет»? Ответьте одним словом по-английски, как в CSS: `red`, `green` или `blue`.",
+  "goal": "Понимать, какое правило CSS побеждает.",
+  "input": "—",
+  "expectedResult": "Одно слово.",
+  "constraints": [],
+  "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    #msg { color: blue; }\n    .info { color: green; }\n    p { color: red; }\n  </style>\n</head>\n<body>\n  <p id=\"msg\" class=\"info\">Привет</p>\n</body>\n</html>\n",
+  "hints": [
+    "Все три правила подходят к абзацу.",
+    "Побеждает самый точный селектор, а не последний.",
+    "Точность: id сильнее класса, класс сильнее тега.",
+    "У абзаца есть id «msg».",
+    "Ответ: blue."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "blue"
+  },
+  "solution": "blue",
+  "explanation": "Правило #msg (по id) точнее, чем .info (по классу) и p (по тегу), поэтому его цвет побеждает, хотя оно написано первым.",
+  "criteria": [
+    "Верный цвет."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "red",
+      "answer": "red",
+      "why": "Правило p написано последним, но селектор по тегу самый слабый."
+    },
+    {
+      "code": "green",
+      "answer": "green",
+      "why": "Класс слабее id."
+    }
+  ]
+}

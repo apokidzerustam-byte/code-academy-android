@@ -1,0 +1,19 @@
+{
+  "id": "api-basics",
+  "version": "0.1.0",
+  "stage": 10,
+  "title": "Веб-API на FastAPI",
+  "description": "Свой сервер на Python: обработчики, параметры, модели данных и коды ответа. Запросы — тестовым клиентом без сети. Пилот этапа 10.",
+  "language": "python",
+  "minAppVersion": 1,
+  "lessons": [
+    "api-01-fastapi"
+  ],
+  "skills": {
+    "api.http": "HTTP: методы, пути, коды ответа",
+    "api.routes": "Обработчики FastAPI",
+    "api.params": "Параметры пути и запроса",
+    "api.models": "Тело запроса: модели pydantic",
+    "api.errors": "Ошибки API: 404 и 422"
+  }
+}

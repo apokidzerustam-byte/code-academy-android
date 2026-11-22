@@ -1,0 +1,24 @@
+{
+  "id": "web-basics",
+  "version": "0.1.0",
+  "stage": 6,
+  "title": "Веб: HTML, CSS и JavaScript",
+  "description": "Страницы во встроенном браузере без интернета: разметка, оформление и поведение. Пилот этапа 6.",
+  "language": "html",
+  "minAppVersion": 1,
+  "lessons": [
+    "web-01-html-css",
+    "web-02-js"
+  ],
+  "skills": {
+    "web.html": "HTML: теги и структура страницы",
+    "web.lists": "Списки и ссылки",
+    "web.css": "CSS: селекторы и свойства",
+    "web.cascade": "Каскад: какое правило побеждает",
+    "web.errors": "Ошибки в HTML и CSS",
+    "js.basics": "JavaScript: переменные и вывод",
+    "js.functions": "Функции JavaScript",
+    "js.dom": "Работа со страницей (DOM)",
+    "js.events": "События: нажатие кнопки"
+  }
+}
