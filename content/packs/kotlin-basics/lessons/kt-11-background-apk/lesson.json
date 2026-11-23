@@ -1,0 +1,45 @@
+{
+  "id": "kt-11-background-apk",
+  "title": "Kotlin: фоновая работа и сборка APK",
+  "goal": "Выбирать инструмент фоновой работы, понимать повторы и условия WorkManager, подписывать и версионировать APK.",
+  "skills": [
+    "kt.work.tool",
+    "kt.work.manager",
+    "kt.apk.sign"
+  ],
+  "prerequisites": [
+    "kt-10-permissions"
+  ],
+  "runner": "kotlin",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-tool.json",
+    "assignments/a2-backoff.json",
+    "assignments/a3-version.json",
+    "assignments/a4-period.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Долгая работа в корутине экрана",
+      "fix": "Для работы, которая должна пережить закрытие экрана, используйте WorkManager."
+    },
+    {
+      "mistake": "Служба переднего плана для всего подряд",
+      "fix": "Она нужна только когда пользователь видит и ждёт результат."
+    },
+    {
+      "mistake": "Потерян ключ подписи или он лежит в репозитории",
+      "fix": "Храните ключ отдельно и делайте его резервную копию; пароли — в секретах."
+    },
+    {
+      "mistake": "versionCode не вырос",
+      "fix": "Номер должен только расти: сопоставьте версию для людей с числом."
+    }
+  ]
+}

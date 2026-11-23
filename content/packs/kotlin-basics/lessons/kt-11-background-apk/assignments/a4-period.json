@@ -1,0 +1,69 @@
+{
+  "id": "a4-period",
+  "type": "fix",
+  "title": "Минимальный период",
+  "statement": "Периодическая работа WorkManager не бывает чаще, чем раз в **15 минут**: если просят меньше — берётся 15, а если больше — остаётся как есть. Функция `periodMinutes` ведёт себя наоборот (60 превращает в 15). Исправьте её.",
+  "goal": "Применять нижнюю границу значения.",
+  "input": "requested: Int",
+  "expectedResult": "Минуты.",
+  "constraints": [
+    "Сигнатуру не менять."
+  ],
+  "starterCode": "fun periodMinutes(requested: Int): Int = minOf(requested, 15)\n",
+  "hints": [
+    "Проверьте на примере: 60 должно остаться 60, а сейчас получается 15.",
+    "minOf берёт меньшее из двух чисел, и это ограничивает значение сверху.",
+    "Нам нужна нижняя граница: результат не меньше 15.",
+    "Для нижней границы нужно большее из двух чисел.",
+    "maxOf(requested, 15)"
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "periodMinutes",
+        "paramTypes": [
+          "Int"
+        ],
+        "returns": "Int"
+      },
+      {
+        "id": "fix",
+        "type": "contains",
+        "pattern": "maxOf\\s*\\(\\s*requested\\s*,\\s*15\\s*\\)|maxOf\\s*\\(\\s*15\\s*,\\s*requested\\s*\\)|requested\\s*\\.coerceAtLeast\\s*\\(\\s*15\\s*\\)|if\\s*\\(\\s*requested\\s*<\\s*15\\s*\\)\\s*15\\s*else\\s*requested|if\\s*\\(\\s*requested\\s*>=\\s*15\\s*\\)\\s*requested\\s*else\\s*15",
+        "message": "Период не может быть меньше 15: берите большее из двух (maxOf или coerceAtLeast)",
+        "hint": "Сейчас функция режет период сверху: 60 минут превращаются в 15"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    println(periodMinutes(5))\n    println(periodMinutes(15))\n    println(periodMinutes(60))\n}",
+      "expected_stdout": "15\n15\n60"
+    }
+  },
+  "solution": "fun periodMinutes(requested: Int): Int = maxOf(requested, 15)\n",
+  "explanation": "minOf ограничивает значение сверху, maxOf — снизу. Минимальный период 15 минут — это ограничение снизу, поэтому нужен maxOf.",
+  "criteria": [
+    "5 → 15.",
+    "60 → 60."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "fun periodMinutes(requested: Int): Int = minOf(requested, 15)\n",
+      "why": "Ошибка осталась: minOf режет период сверху."
+    },
+    {
+      "code": "fun periodMinutes(requested: Int): Int = 15\n",
+      "why": "Период всегда 15: значения больше 15 должны сохраняться."
+    },
+    {
+      "code": "fun periodMinutes(requested: Int): Int = requested.coerceAtMost(15)\n",
+      "why": "coerceAtMost — верхняя граница; нужна нижняя (coerceAtLeast)."
+    }
+  ]
+}

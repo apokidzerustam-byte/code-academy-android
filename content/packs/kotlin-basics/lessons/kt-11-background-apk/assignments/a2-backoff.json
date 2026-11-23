@@ -1,0 +1,90 @@
+{
+  "id": "a2-backoff",
+  "type": "write",
+  "title": "Пауза перед повтором",
+  "statement": "Напишите функцию `retryDelay(attempt: Int): Int`: пауза в секундах перед повтором номер `attempt` (1, 2, 3…). Первая — 30 секунд, каждая следующая вдвое больше (30, 60, 120…), но не больше 18000 секунд (5 часов). Попытки считайте не больше 15.",
+  "goal": "Рассчитать экспоненциальную паузу.",
+  "input": "attempt: Int",
+  "expectedResult": "Секунды.",
+  "constraints": [],
+  "starterCode": "// Напишите функцию retryDelay\n",
+  "hints": [
+    "Пауза удваивается: 30, 60, 120, 240…",
+    "Это 30, умноженное на степень двойки: 30·2⁰, 30·2¹, 30·2²…",
+    "Показатель степени равен номеру попытки минус один: для первой попытки он нулевой.",
+    "Двойку в степени n получают сдвигом: 1 shl n.",
+    "minOf(30 * (1 shl (attempt - 1)), 18000)"
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "retryDelay",
+        "paramTypes": [
+          "Int"
+        ],
+        "returns": "Int"
+      },
+      {
+        "id": "base",
+        "type": "contains",
+        "pattern": "\\b30\\b",
+        "message": "Первая пауза — 30 секунд"
+      },
+      {
+        "id": "exp",
+        "type": "contains",
+        "pattern": "\\bshl\\b|\\bpow\\s*\\(|\\*=\\s*2\\b|\\*\\s*2\\b|\\b2\\s*\\*",
+        "message": "Пауза растёт вдвое с каждой попыткой: степень двойки"
+      },
+      {
+        "id": "cap",
+        "type": "contains",
+        "pattern": "\\b18000\\b",
+        "message": "Потолок — 18000 секунд (5 часов)"
+      },
+      {
+        "id": "first",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "-\\s*1\\b|\\bfor\\b|\\brepeat\\b|\\bwhile\\b",
+        "message": "Первая попытка — 30 с (степень двойки от номера попытки минус один)"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    for (a in listOf(1, 2, 3, 4, 6, 10, 11, 12, 15)) println(retryDelay(a))\n}",
+      "expected_stdout": "30\n60\n120\n240\n960\n15360\n18000\n18000\n18000"
+    }
+  },
+  "solution": "fun retryDelay(attempt: Int): Int = minOf(30 * (1 shl (attempt - 1)), 18000)\n",
+  "explanation": "Показатель степени на единицу меньше номера попытки, иначе первая пауза окажется 60 секунд. minOf ограничивает рост потолком в 5 часов.",
+  "criteria": [
+    "Рост вдвое.",
+    "Первая пауза 30 с.",
+    "Потолок 18000 с."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "fun retryDelay(attempt: Int): Int = 30 * attempt\n",
+      "why": "Рост линейный: нужен рост вдвое (степень двойки)."
+    },
+    {
+      "code": "fun retryDelay(attempt: Int): Int = 30 * (1 shl (attempt - 1))\n",
+      "why": "Нет потолка: пауза не должна превышать 18000 секунд."
+    },
+    {
+      "code": "fun retryDelay(attempt: Int): Int = minOf(10 * (1 shl (attempt - 1)), 18000)\n",
+      "why": "Первая пауза должна быть 30 секунд."
+    },
+    {
+      "code": "fun retryDelay(attempt: Int): Int = minOf(30 * (1 shl attempt), 18000)\n",
+      "why": "Сдвиг на attempt даёт первую паузу в 60 секунд: нужен attempt - 1."
+    }
+  ]
+}

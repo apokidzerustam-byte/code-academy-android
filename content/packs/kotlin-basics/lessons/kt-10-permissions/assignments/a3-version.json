@@ -1,0 +1,98 @@
+{
+  "id": "a3-version",
+  "type": "complete",
+  "title": "Нужно ли разрешение",
+  "statement": "Допишите `canNotify(sdk: Int, granted: Boolean): Boolean`: можно ли показывать уведомления. До Android 13 (SDK **меньше 33**) разрешение не требуется — всегда `true`. Начиная с SDK 33 — только если `granted`.",
+  "goal": "Учесть версию Android в проверке разрешения.",
+  "input": "sdk: Int, granted: Boolean",
+  "expectedResult": "Boolean.",
+  "constraints": [],
+  "starterCode": "fun canNotify(sdk: Int, granted: Boolean): Boolean {\n    // до Android 13 (SDK 33) разрешение не требуется\n}\n",
+  "hints": [
+    "Сначала разберите случай старой системы: версия ниже 33.",
+    "На старых версиях уведомления разрешены всегда.",
+    "На версии 33 и выше результат совпадает со значением granted.",
+    "Условие для старой системы: sdk < 33.",
+    "if (sdk < 33) return true; return granted"
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "canNotify",
+        "paramTypes": [
+          "Int",
+          "Boolean"
+        ],
+        "returns": "Boolean"
+      },
+      {
+        "id": "v33",
+        "type": "contains",
+        "pattern": "\\b33\\b|\\b32\\b",
+        "message": "Граница — SDK 33 (Android 13)"
+      },
+      {
+        "id": "g",
+        "type": "contains",
+        "pattern": "(\\breturn|\\|\\||&&|\\belse|->)\\s*\\(?\\s*granted\\b|\\)\\s+granted\\b",
+        "message": "Начиная с SDK 33 всё зависит от granted"
+      },
+      {
+        "id": "w1",
+        "hidden": true,
+        "type": "not_contains",
+        "pattern": ">=\\s*33\\s*\\|\\|",
+        "message": "Перепутано направление: для SDK ниже 33 уведомления можно показывать без разрешения"
+      },
+      {
+        "id": "w2",
+        "hidden": true,
+        "type": "not_contains",
+        "pattern": "<\\s*33\\s*&&",
+        "message": "Для SDK ниже 33 разрешение не нужно: не требуйте granted"
+      },
+      {
+        "id": "w3",
+        "hidden": true,
+        "type": "not_contains",
+        "pattern": ">=\\s*33\\s*\\)\\s*(\\{\\s*)?(return\\s+)?true",
+        "message": "Для SDK 33 и выше нужно разрешение"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    println(canNotify(26, false))\n    println(canNotify(32, false))\n    println(canNotify(33, false))\n    println(canNotify(33, true))\n    println(canNotify(35, false))\n}",
+      "expected_stdout": "true\ntrue\nfalse\ntrue\nfalse"
+    }
+  },
+  "solution": "fun canNotify(sdk: Int, granted: Boolean): Boolean {\n    if (sdk < 33) return true\n    return granted\n}\n",
+  "explanation": "Разрешение POST_NOTIFICATIONS появилось в Android 13 (SDK 33). На старых версиях его нет, поэтому уведомления показываются всегда; на новых — только после согласия.",
+  "criteria": [
+    "SDK < 33 → true.",
+    "SDK ≥ 33 → granted."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "fun canNotify(sdk: Int, granted: Boolean): Boolean {\n    return granted\n}\n",
+      "why": "Не учтена версия: на SDK ниже 33 уведомления разрешены без запроса."
+    },
+    {
+      "code": "fun canNotify(sdk: Int, granted: Boolean): Boolean {\n    return sdk >= 33 || granted\n}\n",
+      "why": "Направление перепутано: на SDK 33 без разрешения уведомления показывать нельзя."
+    },
+    {
+      "code": "fun canNotify(sdk: Int, granted: Boolean): Boolean {\n    return sdk < 33 && granted\n}\n",
+      "why": "На старых версиях разрешение не требуется: granted проверяется только с SDK 33."
+    },
+    {
+      "code": "fun canNotify(sdk: Int, granted: Boolean): Boolean {\n    if (sdk >= 33) return true\n    return granted\n}\n",
+      "why": "Для SDK 33 и выше нужно разрешение, а не безусловное true."
+    }
+  ]
+}

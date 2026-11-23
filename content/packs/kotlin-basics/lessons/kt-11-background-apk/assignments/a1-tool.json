@@ -1,0 +1,99 @@
+{
+  "id": "a1-tool",
+  "type": "complete",
+  "title": "Какой инструмент выбрать",
+  "statement": "Допишите ветки `when` в `chooseTool`. Порядок вопросов: пользователь видит работу → «служба переднего плана»; нужно точное время → «будильник»; работа должна пережить перезапуск → «WorkManager»; иначе → «корутина».",
+  "goal": "Выбрать инструмент фоновой работы.",
+  "input": "три признака Boolean",
+  "expectedResult": "Название инструмента.",
+  "constraints": [
+    "Порядок веток важен."
+  ],
+  "starterCode": "fun chooseTool(visibleToUser: Boolean, exactTime: Boolean, mustSurviveRestart: Boolean): String = when {\n    // допишите четыре ветки\n}\n",
+  "hints": [
+    "Каждая ветка when — условие, стрелка и результат.",
+    "Ветки проверяются сверху вниз; первая подходящая побеждает.",
+    "Сначала visibleToUser, затем exactTime, затем mustSurviveRestart.",
+    "Последняя ветка else возвращает «корутина».",
+    "visibleToUser -> \"служба переднего плана\"; exactTime -> \"будильник\"; mustSurviveRestart -> \"WorkManager\"; else -> \"корутина\""
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "chooseTool",
+        "paramTypes": [
+          "Boolean",
+          "Boolean",
+          "Boolean"
+        ],
+        "returns": "String"
+      },
+      {
+        "id": "v",
+        "raw": true,
+        "type": "contains",
+        "pattern": "\\bvisibleToUser\\s*->\\s*\"служба переднего плана\"",
+        "message": "Пользователь видит работу — «служба переднего плана»"
+      },
+      {
+        "id": "x",
+        "raw": true,
+        "type": "contains",
+        "pattern": "\\bexactTime\\s*->\\s*\"будильник\"",
+        "message": "Нужно точное время — «будильник»"
+      },
+      {
+        "id": "m",
+        "raw": true,
+        "type": "contains",
+        "pattern": "\\bmustSurviveRestart\\s*->\\s*\"WorkManager\"",
+        "message": "Должна пережить перезапуск — «WorkManager»"
+      },
+      {
+        "id": "e",
+        "raw": true,
+        "type": "contains",
+        "pattern": "\\belse\\s*->\\s*\"корутина\"",
+        "message": "Иначе — «корутина»"
+      },
+      {
+        "id": "order",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "\\bvisibleToUser\\s*->[\\s\\S]*\\bexactTime\\s*->[\\s\\S]*\\bmustSurviveRestart\\s*->",
+        "message": "Порядок: видит ли пользователь, затем точное время, затем перезапуск"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    println(chooseTool(true, true, true))\n    println(chooseTool(false, true, true))\n    println(chooseTool(false, false, true))\n    println(chooseTool(false, false, false))\n}",
+      "expected_stdout": "служба переднего плана\nбудильник\nWorkManager\nкорутина"
+    }
+  },
+  "solution": "fun chooseTool(visibleToUser: Boolean, exactTime: Boolean, mustSurviveRestart: Boolean): String = when {\n    visibleToUser -> \"служба переднего плана\"\n    exactTime -> \"будильник\"\n    mustSurviveRestart -> \"WorkManager\"\n    else -> \"корутина\"\n}\n",
+  "explanation": "when выбирает первую подходящую ветку, поэтому порядок задаёт приоритет: если пользователь видит работу, остальные признаки уже неважны.",
+  "criteria": [
+    "Четыре ветки.",
+    "Порядок как в условии."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "fun chooseTool(visibleToUser: Boolean, exactTime: Boolean, mustSurviveRestart: Boolean): String = when {\n    mustSurviveRestart -> \"WorkManager\"\n    exactTime -> \"будильник\"\n    visibleToUser -> \"служба переднего плана\"\n    else -> \"корутина\"\n}\n",
+      "why": "Порядок веток неверен: сначала проверяется, видит ли пользователь работу."
+    },
+    {
+      "code": "fun chooseTool(visibleToUser: Boolean, exactTime: Boolean, mustSurviveRestart: Boolean): String = when {\n    visibleToUser -> \"служба переднего плана\"\n    exactTime -> \"будильник\"\n    else -> \"корутина\"\n}\n",
+      "why": "Нет ветки «WorkManager»."
+    },
+    {
+      "code": "fun chooseTool(visibleToUser: Boolean, exactTime: Boolean, mustSurviveRestart: Boolean): String = when {\n    visibleToUser -> \"будильник\"\n    exactTime -> \"служба переднего плана\"\n    mustSurviveRestart -> \"WorkManager\"\n    else -> \"корутина\"\n}\n",
+      "why": "Результаты веток перепутаны."
+    }
+  ]
+}

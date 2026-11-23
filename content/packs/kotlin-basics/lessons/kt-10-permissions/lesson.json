@@ -1,0 +1,45 @@
+{
+  "id": "kt-10-permissions",
+  "title": "Kotlin: разрешения и уведомления Android",
+  "goal": "Понимать схему запроса разрешений, учитывать версии Android, создавать канал уведомлений и формулировать текст уведомления.",
+  "skills": [
+    "kt.perm.flow",
+    "kt.perm.version",
+    "kt.notify"
+  ],
+  "prerequisites": [
+    "kt-09-navigation"
+  ],
+  "runner": "kotlin",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-step.json",
+    "assignments/a2-plural.json",
+    "assignments/a3-version.json",
+    "assignments/a4-missing.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Все разрешения при первом запуске",
+      "fix": "Просите разрешение, когда функция понадобилась, и объясняйте зачем."
+    },
+    {
+      "mistake": "Нет запасного пути при отказе",
+      "fix": "Приложение должно работать без разрешения: покажите объяснение и продолжайте."
+    },
+    {
+      "mistake": "Не учтены версии Android",
+      "fix": "Проверяйте SDK_INT: уведомления требуют разрешения с SDK 33, каналы — с SDK 26."
+    },
+    {
+      "mistake": "Неверная форма слова после числа",
+      "fix": "Проверяйте сначала остаток от деления на 100 (11–14), затем на 10."
+    }
+  ]
+}

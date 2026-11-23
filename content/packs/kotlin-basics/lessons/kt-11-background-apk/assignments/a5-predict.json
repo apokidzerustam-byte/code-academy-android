@@ -1,0 +1,44 @@
+{
+  "id": "a5-predict",
+  "type": "predict",
+  "title": "Повторы работы",
+  "statement": "Функция `resultFor` возвращает результат работы, как `doWork`: успех, повтор или окончательный провал. Что выведет программа?",
+  "goal": "Проследить логику повторов.",
+  "input": "—",
+  "expectedResult": "Три строки.",
+  "constraints": [],
+  "code": "fun resultFor(ok: Boolean, attempt: Int, max: Int): String = when {\n    ok -> \"success\"\n    attempt < max -> \"retry\"\n    else -> \"failure\"\n}\n\nfun main() {\n    var attempt = 0\n    val outcomes = listOf(false, false, true)\n    val log = mutableListOf<String>()\n    for (ok in outcomes) {\n        attempt++\n        log.add(resultFor(ok, attempt, 3))\n    }\n    println(log)\n    println(resultFor(false, 3, 3))\n    println(resultFor(false, 1, 1))\n}\n",
+  "hints": [
+    "Сначала разберите resultFor: при успехе — success; иначе, если попыток меньше максимума, — retry; иначе failure.",
+    "В цикле попытки нумеруются 1, 2, 3.",
+    "Первая и вторая попытки неудачны, но 1 < 3 и 2 < 3: оба раза retry.",
+    "Третья попытка успешна: success.",
+    "resultFor(false, 3, 3): 3 < 3 ложно — failure; resultFor(false, 1, 1): 1 < 1 ложно — failure."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "[retry, retry, success]\nfailure\nfailure"
+  },
+  "solution": "[retry, retry, success]\nfailure\nfailure",
+  "explanation": "Две неудачи при попытках 1 и 2 (меньше трёх) дают retry, третья попытка успешна. Когда попытка достигла максимума, а работа не удалась, повторять уже нельзя — failure.",
+  "criteria": [
+    "Все три строки верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "[retry, retry, retry]\nretry\nretry",
+      "answer": "[retry, retry, retry]\nretry\nretry",
+      "why": "Когда попытка равна максимуму, повтора уже нет: failure."
+    },
+    {
+      "code": "[retry, retry, failure]\nfailure\nfailure",
+      "answer": "[retry, retry, failure]\nfailure\nfailure",
+      "why": "Третья попытка в списке успешна — success."
+    },
+    {
+      "code": "[retry, retry, success]\nretry\nfailure",
+      "answer": "[retry, retry, success]\nretry\nfailure",
+      "why": "При attempt = 3 и max = 3 условие attempt < max ложно: failure."
+    }
+  ]
+}

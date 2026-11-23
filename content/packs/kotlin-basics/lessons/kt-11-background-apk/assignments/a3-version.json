@@ -1,0 +1,86 @@
+{
+  "id": "a3-version",
+  "type": "write",
+  "title": "Номер версии",
+  "statement": "Напишите функцию `versionCode(name: String): Int`: из версии вида `1.2.3` получите число `старшая * 10000 + средняя * 100 + младшая`. Например, `1.2.3` → 10203, `2.10.5` → 21005. Считайте, что вход всегда корректен и содержит три числа.",
+  "goal": "Связать версию для людей с versionCode.",
+  "input": "name: String",
+  "expectedResult": "Int.",
+  "constraints": [],
+  "starterCode": "// Напишите функцию versionCode\n",
+  "hints": [
+    "Версию нужно разбить на три части по точке.",
+    "Строку делит метод split(\".\"); части — тоже строки.",
+    "Каждую часть превращают в число методом toInt(); для списка — map { it.toInt() }.",
+    "Старшая часть весит 10000, средняя — 100, младшая — 1.",
+    "val p = name.split(\".\").map { it.toInt() }; return p[0] * 10000 + p[1] * 100 + p[2]"
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "versionCode",
+        "paramTypes": [
+          "String"
+        ],
+        "returns": "Int"
+      },
+      {
+        "id": "split",
+        "raw": true,
+        "type": "contains",
+        "pattern": "split\\s*\\(\\s*\"\\.\"\\s*\\)",
+        "message": "Версия разбивается по точкам: split(\".\")"
+      },
+      {
+        "id": "w",
+        "type": "contains",
+        "pattern": "\\b10000\\b",
+        "message": "Старшая часть умножается на 10000"
+      },
+      {
+        "id": "w2",
+        "type": "contains",
+        "pattern": "\\*\\s*100\\b|\\b100\\s*\\*",
+        "message": "Средняя часть умножается на 100"
+      },
+      {
+        "id": "num",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "toInt\\s*\\(\\s*\\)|toIntOrNull",
+        "message": "Части версии — строки: превратите их в числа"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    println(versionCode(\"1.0.0\"))\n    println(versionCode(\"1.2.3\"))\n    println(versionCode(\"2.10.5\"))\n    println(versionCode(\"0.9.12\"))\n}",
+      "expected_stdout": "10000\n10203\n21005\n912"
+    }
+  },
+  "solution": "fun versionCode(name: String): Int {\n    val p = name.split(\".\").map { it.toInt() }\n    return p[0] * 10000 + p[1] * 100 + p[2]\n}\n",
+  "explanation": "Разряды с запасом (по два десятичных знака на среднюю и младшую части) делают числа монотонными: большая версия всегда даёт большее число.",
+  "criteria": [
+    "Разбор по точкам.",
+    "Веса 10000, 100 и 1."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "fun versionCode(name: String): Int {\n    val p = name.split(\".\").map { it.toInt() }\n    return p[0] * 1000 + p[1] * 100 + p[2]\n}\n",
+      "why": "Вес старшей части должен быть 10000."
+    },
+    {
+      "code": "fun versionCode(name: String): Int {\n    return name.replace(\".\", \"\").toInt()\n}\n",
+      "why": "Склейка цифр ломает порядок: 1.10.0 станет меньше 1.2.3. Нужны веса разрядов."
+    },
+    {
+      "code": "fun versionCode(name: String): Int {\n    val p = name.split(\".\").map { it.toInt() }\n    return p[0] + p[1] + p[2]\n}\n",
+      "why": "Сумма частей не различает версии: нужны веса 10000, 100 и 1."
+    }
+  ]
+}

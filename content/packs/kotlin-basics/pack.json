@@ -15,7 +15,9 @@
     "kt-06-state",
     "kt-07-viewmodel",
     "kt-08-room",
-    "kt-09-navigation"
+    "kt-09-navigation",
+    "kt-10-permissions",
+    "kt-11-background-apk"
   ],
   "skills": {
     "kt.basics": "Kotlin: main, val и var",
@@ -47,6 +49,12 @@
     "kt.room.db": "Room: база, версии и миграции",
     "kt.nav.routes": "Навигация: маршруты и NavHost",
     "kt.nav.args": "Навигация: аргументы маршрутов",
-    "kt.nav.backstack": "Навигация: стопка экранов"
+    "kt.nav.backstack": "Навигация: стопка экранов",
+    "kt.perm.flow": "Разрешения Android: схема запроса",
+    "kt.perm.version": "Разрешения и версии Android",
+    "kt.notify": "Уведомления: канал и текст",
+    "kt.work.tool": "Фоновая работа: выбор инструмента",
+    "kt.work.manager": "WorkManager: повторы и условия",
+    "kt.apk.sign": "Сборка APK: подпись и versionCode"
   }
 }

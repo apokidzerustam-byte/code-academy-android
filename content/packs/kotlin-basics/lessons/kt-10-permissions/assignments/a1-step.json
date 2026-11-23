@@ -1,0 +1,91 @@
+{
+  "id": "a1-step",
+  "type": "complete",
+  "title": "Что делать с разрешением",
+  "statement": "Допишите ветки `when` в функции `nextStep(granted, shouldShowRationale)`: если разрешение выдано (`granted`) — вернуть «использовать»; если не выдано, но пользователь отказывал (`shouldShowRationale`) — «объяснить»; иначе — «спросить». Порядок проверок важен.",
+  "goal": "Выбрать действие по состоянию разрешения.",
+  "input": "granted, shouldShowRationale: Boolean",
+  "expectedResult": "Одна из трёх строк.",
+  "constraints": [
+    "Порядок веток when: сначала granted."
+  ],
+  "starterCode": "fun nextStep(granted: Boolean, shouldShowRationale: Boolean): String = when {\n    // допишите три ветки\n}\n",
+  "hints": [
+    "Ветка when записывается как условие, стрелка и результат.",
+    "Первой проверяйте granted: если разрешение есть, остальное не важно.",
+    "Вторая ветка — shouldShowRationale: сначала объясняем, зачем нужно разрешение.",
+    "Последняя ветка — else.",
+    "granted -> \"использовать\"; shouldShowRationale -> \"объяснить\"; else -> \"спросить\""
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "nextStep",
+        "paramTypes": [
+          "Boolean",
+          "Boolean"
+        ],
+        "returns": "String"
+      },
+      {
+        "id": "g",
+        "raw": true,
+        "type": "contains",
+        "pattern": "\\bgranted\\s*->\\s*\"использовать\"",
+        "message": "Если разрешение выдано — «использовать»: granted -> \"использовать\""
+      },
+      {
+        "id": "r",
+        "raw": true,
+        "type": "contains",
+        "pattern": "\\bshouldShowRationale\\s*->\\s*\"объяснить\"",
+        "message": "Если пользователь уже отказывал — «объяснить»"
+      },
+      {
+        "id": "e",
+        "raw": true,
+        "type": "contains",
+        "pattern": "\\belse\\s*->\\s*\"спросить\"",
+        "message": "Во всех остальных случаях — «спросить»"
+      },
+      {
+        "id": "order",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "\\bgranted\\s*->[\\s\\S]*\\bshouldShowRationale\\s*->",
+        "message": "Сначала проверьте granted: если разрешение выдано, остальное не важно"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    println(nextStep(true, true))\n    println(nextStep(true, false))\n    println(nextStep(false, true))\n    println(nextStep(false, false))\n}",
+      "expected_stdout": "использовать\nиспользовать\nобъяснить\nспросить"
+    }
+  },
+  "solution": "fun nextStep(granted: Boolean, shouldShowRationale: Boolean): String = when {\n    granted -> \"использовать\"\n    shouldShowRationale -> \"объяснить\"\n    else -> \"спросить\"\n}\n",
+  "explanation": "when проверяет ветки сверху вниз и берёт первую подходящую, поэтому порядок задаёт приоритет: выданное разрешение важнее подсказки, а подсказка важнее первого запроса.",
+  "criteria": [
+    "Три ветки.",
+    "Порядок: granted, затем shouldShowRationale."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "fun nextStep(granted: Boolean, shouldShowRationale: Boolean): String = when {\n    shouldShowRationale -> \"объяснить\"\n    granted -> \"использовать\"\n    else -> \"спросить\"\n}\n",
+      "why": "Порядок веток: при выданном разрешении объяснять ничего не нужно, granted проверяется первым."
+    },
+    {
+      "code": "fun nextStep(granted: Boolean, shouldShowRationale: Boolean): String = when {\n    granted -> \"использовать\"\n    else -> \"спросить\"\n}\n",
+      "why": "Нет ветки «объяснить»."
+    },
+    {
+      "code": "fun nextStep(granted: Boolean, shouldShowRationale: Boolean): String = when {\n    granted -> \"спросить\"\n    shouldShowRationale -> \"объяснить\"\n    else -> \"использовать\"\n}\n",
+      "why": "Результаты перепутаны: выданное разрешение — «использовать»."
+    }
+  ]
+}

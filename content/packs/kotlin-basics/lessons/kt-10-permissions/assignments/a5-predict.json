@@ -1,0 +1,44 @@
+{
+  "id": "a5-predict",
+  "type": "predict",
+  "title": "Выданные и недостающие",
+  "statement": "Что выведет программа? Множество `granted` меняется по ходу работы.",
+  "goal": "Проследить изменение множества разрешений.",
+  "input": "—",
+  "expectedResult": "Четыре строки.",
+  "constraints": [],
+  "code": "fun main() {\n    val granted = mutableSetOf(\"camera\")\n    val required = listOf(\"camera\", \"mic\", \"notifications\")\n    println(required.filter { it !in granted })\n    granted.add(\"mic\")\n    println(required.filter { it !in granted }.size)\n    println(required.all { it in granted })\n    granted.addAll(required)\n    println(required.all { it in granted })\n}\n",
+  "hints": [
+    "В начале выдано только camera.",
+    "Первая строка: из трёх требуемых не выдано два — mic и notifications, в порядке списка required.",
+    "После add(\"mic\") не хватает только notifications: размер результата 1.",
+    "all проверяет, что условие верно для каждого элемента: notifications всё ещё нет — false.",
+    "addAll добавляет все три разрешения: тогда all даст true."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "[mic, notifications]\n1\nfalse\ntrue"
+  },
+  "solution": "[mic, notifications]\n1\nfalse\ntrue",
+  "explanation": "Сначала недостают mic и notifications. После выдачи mic остаётся одно (notifications), и all ещё false. После addAll выданы все три — true.",
+  "criteria": [
+    "Все четыре строки верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "[camera]\n1\nfalse\ntrue",
+      "answer": "[camera]\n1\nfalse\ntrue",
+      "why": "Первая строка — недостающие, а не выданные разрешения."
+    },
+    {
+      "code": "[mic, notifications]\n2\nfalse\ntrue",
+      "answer": "[mic, notifications]\n2\nfalse\ntrue",
+      "why": "После выдачи mic недостающее одно: notifications."
+    },
+    {
+      "code": "[mic, notifications]\n1\ntrue\ntrue",
+      "answer": "[mic, notifications]\n1\ntrue\ntrue",
+      "why": "notifications ещё не выдано, поэтому all даёт false."
+    }
+  ]
+}
