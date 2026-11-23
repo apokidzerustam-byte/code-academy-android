@@ -242,7 +242,10 @@ a2 = asg("a2-spin", "write", "Крутящийся индикатор",
 
 # --- Задание 3: reduced motion ---
 t3 = {"kind": "web", "lang": "html", "cases": [
-    {"id": "base", "expr": CS_DOT + ".animationName", "expected": "pulse"},
+    # Читаем правило из таблицы стилей, а не вычисленный стиль: у людей (и на эмуляторе) с настройкой «убрать анимации»
+    # WebView сам включает prefers-reduced-motion, и вычисленное значение зависело бы от настройки телефона.
+    {"id": "base", "expr": RULES + ".some(r => r.selectorText === '.dot' && r.style && r.style.animationName === 'pulse')", "expected": True,
+     "hint": "В основном правиле .dot анимация pulse должна остаться"},
     {"id": "media", "expr": RULES + ".some(r => r.media && /prefers-reduced-motion:\\s*reduce/.test(r.conditionText || r.media.mediaText) && [...r.cssRules].some(x => x.style && x.style.animationName === 'none'))", "expected": True,
      "hint": "Внутри медиазапроса анимация должна отключаться: animation: none"},
 ]}

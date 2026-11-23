@@ -170,15 +170,22 @@ ORD = ("CREATE TABLE orders (id INTEGER PRIMARY KEY, customer TEXT NOT NULL);\nI
 ORD_B = ("CREATE TABLE orders (id INTEGER PRIMARY KEY, customer TEXT NOT NULL);\n")
 CNT = "SELECT COUNT(*) FROM orders;"
 a2 = sql_task("a2-rollback", "complete", "Отменить удаление",
-              "Сотрудник начал транзакцию и выполнил `DELETE FROM orders;`, но удалять заказы было нельзя. Допишите завершение транзакции так, чтобы **изменения были отменены**.",
-              "Отменять транзакцию командой ROLLBACK.", "BEGIN;\nDELETE FROM orders;\nROLLBACK;",
-              [(ORD, False, None, CNT), (ORD, True, "Заказы должны остаться", "SELECT id, customer FROM orders ORDER BY id;"), (ORD_B, True, None, CNT)],
-              [("BEGIN;\nDELETE FROM orders;\nCOMMIT;", "COMMIT фиксирует удаление, а нужно отменить."),
-               ("BEGIN;\nDELETE FROM orders;", "Транзакция осталась открытой, удаление не отменено.")],
-              hints("Транзакция уже открыта и содержит опасную команду.", "Отменяет транзакцию отдельная команда.", "COMMIT фиксирует изменения, а нужна обратная команда.", "Это слово из двух частей: «откат».",
-                    "Команда состоит из одного слова: по-английски «откат назад» (roll back), слитно."),
-              "ROLLBACK откатывает все изменения с момента BEGIN: заказы возвращаются в прежнее состояние.",
-              starter="BEGIN;\nDELETE FROM orders;\n-- завершите транзакцию\n")
+              "Сотрудник начал транзакцию и выполнил `DELETE FROM orders;`, но удалять заказы было нельзя. "
+              "Допишите скрипт: **отмените** транзакцию, а затем добавьте заказ клиента «Г» (таблица `orders`, поле `customer`). "
+              "В итоге должны остаться прежние заказы и появиться новый.",
+              "Отменять транзакцию командой ROLLBACK и продолжать работу после неё.",
+              "BEGIN;\nDELETE FROM orders;\nROLLBACK;\nINSERT INTO orders (customer) VALUES ('Г');",
+              [(ORD, False, None, CNT),
+               (ORD, True, "Прежние заказы должны остаться, новый — добавиться", "SELECT id, customer FROM orders ORDER BY id;"),
+               (ORD_B, True, None, CNT)],
+              [("BEGIN;\nDELETE FROM orders;\nCOMMIT;\nINSERT INTO orders (customer) VALUES ('Г');", "COMMIT фиксирует удаление, а нужно отменить."),
+               ("BEGIN;\nDELETE FROM orders;\nINSERT INTO orders (customer) VALUES ('Г');", "Транзакция осталась открытой: удаление не отменено."),
+               ("BEGIN;\nDELETE FROM orders;\nROLLBACK;", "Заказ «Г» не добавлен.")],
+              hints("Транзакция уже открыта и содержит опасное удаление.", "Сначала завершите транзакцию так, чтобы удаление не сохранилось.",
+                    "COMMIT фиксирует изменения, а нужна обратная команда.", "Команда отката — «откат назад» по-английски (roll back), слитно, одно слово.",
+                    "ROLLBACK; а следом обычный INSERT INTO orders (customer) VALUES ('Г'); — после отката транзакции уже нет."),
+              "ROLLBACK откатывает все изменения с момента BEGIN: заказы возвращаются в прежнее состояние. После отката транзакции нет, и следующая команда выполняется как обычно.",
+              starter="BEGIN;\nDELETE FROM orders;\n-- отмените удаление и добавьте заказ «Г»\n")
 
 LOGT = LOG + "INSERT INTO log (msg) VALUES ('старое');\n"
 a3 = sql_task("a3-savepoint", "complete", "Частичный откат",

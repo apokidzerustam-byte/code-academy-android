@@ -23,8 +23,9 @@
     "cases": [
       {
         "id": "base",
-        "expr": "getComputedStyle(document.querySelector('.dot')).animationName",
-        "expected": "pulse"
+        "expr": "[...document.styleSheets].flatMap(s => [...s.cssRules]).some(r => r.selectorText === '.dot' && r.style && r.style.animationName === 'pulse')",
+        "expected": true,
+        "hint": "В основном правиле .dot анимация pulse должна остаться"
       },
       {
         "id": "media",
