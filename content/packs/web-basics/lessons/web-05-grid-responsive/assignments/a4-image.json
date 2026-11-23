@@ -1,0 +1,78 @@
+{
+  "id": "a4-image",
+  "type": "fix",
+  "title": "Картинка вылезает за экран",
+  "statement": "Картинка шириной 800px не помещается на экран телефона: страница прокручивается вбок. Исправьте страницу, чтобы картинка **умещалась по ширине** и **сохраняла пропорции** (2 : 1), а в `head` была строка `meta viewport` с `width=device-width`. Тег `img` менять не нужно.",
+  "goal": "Сделать картинку гибкой и подключить viewport.",
+  "input": "Страница с широкой картинкой.",
+  "expectedResult": "Картинка по ширине экрана без искажений, meta viewport на месте.",
+  "constraints": [
+    "Размеры в атрибутах img не меняйте."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <h1>Фото</h1>\n  <img src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='400'%3E%3Crect width='800' height='400' fill='%2380cbc4'/%3E%3C/svg%3E\" alt=\"Фото\" width=\"800\" height=\"400\">\n</body>\n</html>\n",
+  "hints": [
+    "Картинка шире экрана: страница получила горизонтальную прокрутку.",
+    "Ограничьте ширину: max-width: 100%.",
+    "У тега есть атрибут height=400: без height: auto картинка сплющится.",
+    "Для телефона в head нужна строка meta с name=\"viewport\".",
+    "img { max-width: 100%; height: auto; } и <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">."
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "noscroll",
+        "expr": "document.documentElement.scrollWidth <= innerWidth",
+        "expected": true
+      },
+      {
+        "id": "fits",
+        "expr": "Math.round(document.querySelector('img').getBoundingClientRect().right) <= innerWidth",
+        "expected": true
+      },
+      {
+        "id": "ratio",
+        "expr": "Math.abs(document.querySelector('img').offsetWidth / document.querySelector('img').offsetHeight - 2) < 0.02",
+        "expected": true
+      },
+      {
+        "id": "meta",
+        "expr": "((document.querySelector('meta[name=\"viewport\"]') || {}).content || '').replace(/\\s/g, '').includes('width=device-width')",
+        "expected": true
+      },
+      {
+        "id": "one",
+        "hidden": true,
+        "expr": "document.querySelectorAll('img').length",
+        "expected": 1,
+        "hint": "Картинку нужно оставить"
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    img {\n      max-width: 100%;\n      height: auto;\n    }\n  </style>\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n</head>\n<body>\n  <h1>Фото</h1>\n  <img src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='400'%3E%3Crect width='800' height='400' fill='%2380cbc4'/%3E%3C/svg%3E\" alt=\"Фото\" width=\"800\" height=\"400\">\n</body>\n</html>\n",
+  "explanation": "max-width: 100% не даёт картинке выйти за контейнер, height: auto сохраняет пропорции, а meta viewport говорит телефону, что страницу не нужно уменьшать.",
+  "criteria": [
+    "Нет горизонтальной прокрутки.",
+    "Пропорции сохранены.",
+    "Строка viewport на месте."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    img {\n      max-width: 100%;\n    }\n  </style>\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n</head>\n<body>\n  <h1>Фото</h1>\n  <img src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='400'%3E%3Crect width='800' height='400' fill='%2380cbc4'/%3E%3C/svg%3E\" alt=\"Фото\" width=\"800\" height=\"400\">\n</body>\n</html>\n",
+      "why": "Высота осталась 400px: картинка сплющена."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    img {\n      max-width: 100%;\n      height: auto;\n    }\n  </style>\n</head>\n<body>\n  <h1>Фото</h1>\n  <img src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='400'%3E%3Crect width='800' height='400' fill='%2380cbc4'/%3E%3C/svg%3E\" alt=\"Фото\" width=\"800\" height=\"400\">\n</body>\n</html>\n",
+      "why": "Нет строки meta viewport."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    body {\n      overflow-x: hidden;\n    }\n  </style>\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n</head>\n<body>\n  <h1>Фото</h1>\n  <img src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='400'%3E%3Crect width='800' height='400' fill='%2380cbc4'/%3E%3C/svg%3E\" alt=\"Фото\" width=\"800\" height=\"400\">\n</body>\n</html>\n",
+      "why": "Прокрутка спрятана, а картинка по-прежнему обрезана за экраном."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    img {\n      width: 100%;\n      height: 400px;\n    }\n  </style>\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n</head>\n<body>\n  <h1>Фото</h1>\n  <img src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='400'%3E%3Crect width='800' height='400' fill='%2380cbc4'/%3E%3C/svg%3E\" alt=\"Фото\" width=\"800\" height=\"400\">\n</body>\n</html>\n",
+      "why": "Пропорции не сохраняются: высота зафиксирована."
+    }
+  ]
+}

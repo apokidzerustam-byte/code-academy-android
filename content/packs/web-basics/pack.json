@@ -10,7 +10,8 @@
     "web-01-html-css",
     "web-02-js",
     "web-03-layout",
-    "web-04-forms"
+    "web-04-forms",
+    "web-05-grid-responsive"
   ],
   "skills": {
     "web.html": "HTML: теги и структура страницы",
@@ -27,7 +28,10 @@
     "web.layout": "Раскладка страницы",
     "web.semantic": "Смысловые теги страницы",
     "web.forms": "Формы: label, input, select",
-    "web.validation": "Проверка полей в браузере"
+    "web.validation": "Проверка полей в браузере",
+    "web.grid": "CSS Grid: колонки, fr, gap",
+    "web.responsive": "Адаптивность: viewport, гибкие единицы, картинки",
+    "web.media": "Медиазапросы и mobile-first"
   },
   "projects": [
     "card"

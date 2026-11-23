@@ -1,0 +1,72 @@
+{
+  "id": "a2-span",
+  "type": "write",
+  "title": "Шапка на всю ширину",
+  "statement": "В сетке из **двух колонок** первый элемент `.top` («Шапка») должен занять **всю ширину** сетки, а четыре карточки `.card` — стоять под ним в две колонки. Разметку и правила `.page`, `.card` не меняйте: добавьте правило для `.top` (цвет фона любой).",
+  "goal": "Растянуть элемент на все колонки сетки.",
+  "input": "Сетка с шапкой и четырьмя карточками.",
+  "expectedResult": "Шапка на всю ширину, карточки под ней в две колонки.",
+  "constraints": [
+    "Правило для .top добавляется в style."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .page {\n      display: grid;\n      grid-template-columns: 1fr 1fr;\n      gap: 8px;\n    }\n    .card { background: #b2dfdb; }\n  </style>\n</head>\n<body>\n  <div class=\"page\">\n    <div class=\"top\">Шапка</div>\n    <div class=\"card\">1</div>\n    <div class=\"card\">2</div>\n    <div class=\"card\">3</div>\n    <div class=\"card\">4</div>\n  </div>\n</body>\n</html>\n",
+  "hints": [
+    "Растягивать нужно сам элемент, а не его родителя.",
+    "Положение элемента по колонкам задаёт свойство grid-column.",
+    "Запись «от первой линии до последней»: 1 / -1.",
+    "Минус один всегда означает последнюю линию сетки.",
+    ".top { grid-column: 1 / -1; }"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "wide",
+        "expr": "Math.round(document.querySelector('.top').getBoundingClientRect().width) === Math.round(document.querySelector('.page').getBoundingClientRect().width)",
+        "expected": true
+      },
+      {
+        "id": "cols",
+        "expr": "new Set([...document.querySelectorAll('.card')].map(c => Math.round(c.getBoundingClientRect().left))).size",
+        "expected": 2
+      },
+      {
+        "id": "below",
+        "expr": "Math.round(document.querySelector('.top').getBoundingClientRect().bottom) <= Math.round(document.querySelector('.card').getBoundingClientRect().top)",
+        "expected": true
+      },
+      {
+        "id": "five",
+        "hidden": true,
+        "expr": "document.querySelectorAll('.page > div').length",
+        "expected": 5,
+        "hint": "Разметку менять не нужно"
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .page {\n      display: grid;\n      grid-template-columns: 1fr 1fr;\n      gap: 8px;\n    }\n    .card { background: #b2dfdb; }\n    .top {\n      grid-column: 1 / -1;\n      background: #ffe082;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"page\">\n    <div class=\"top\">Шапка</div>\n    <div class=\"card\">1</div>\n    <div class=\"card\">2</div>\n    <div class=\"card\">3</div>\n    <div class=\"card\">4</div>\n  </div>\n</body>\n</html>\n",
+  "explanation": "grid-column: 1 / -1 тянет элемент от первой линии сетки до последней, независимо от числа колонок.",
+  "criteria": [
+    "Шапка на всю ширину.",
+    "Карточки в две колонки под шапкой."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .page {\n      display: grid;\n      grid-template-columns: 1fr 1fr;\n      gap: 8px;\n    }\n    .card { background: #b2dfdb; }\n    .top {\n      width: 100%;\n      background: #ffe082;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"page\">\n    <div class=\"top\">Шапка</div>\n    <div class=\"card\">1</div>\n    <div class=\"card\">2</div>\n    <div class=\"card\">3</div>\n    <div class=\"card\">4</div>\n  </div>\n</body>\n</html>\n",
+      "why": "width: 100% относится к ячейке сетки, а ячейка — одна колонка."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .page {\n      display: grid;\n      grid-template-columns: 1fr 1fr;\n      gap: 8px;\n    }\n    .card { background: #b2dfdb; }\n    .top {\n      grid-column: 1;\n      background: #ffe082;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"page\">\n    <div class=\"top\">Шапка</div>\n    <div class=\"card\">1</div>\n    <div class=\"card\">2</div>\n    <div class=\"card\">3</div>\n    <div class=\"card\">4</div>\n  </div>\n</body>\n</html>\n",
+      "why": "Элемент остаётся в первой колонке."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .page {\n      display: grid;\n      grid-template-columns: 1fr;\n      gap: 8px;\n    }\n    .card { background: #b2dfdb; }\n    .top {\n      background: #ffe082;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"page\">\n    <div class=\"top\">Шапка</div>\n    <div class=\"card\">1</div>\n    <div class=\"card\">2</div>\n    <div class=\"card\">3</div>\n    <div class=\"card\">4</div>\n  </div>\n</body>\n</html>\n",
+      "why": "Сетка превращена в одну колонку: карточки не стоят в две."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .page {\n      display: grid;\n      grid-template-columns: 1fr 1fr;\n      gap: 8px;\n    }\n    .card { background: #b2dfdb; }\n    .top {\n      grid-row: 1 / -1;\n      background: #ffe082;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"page\">\n    <div class=\"top\">Шапка</div>\n    <div class=\"card\">1</div>\n    <div class=\"card\">2</div>\n    <div class=\"card\">3</div>\n    <div class=\"card\">4</div>\n  </div>\n</body>\n</html>\n",
+      "why": "grid-row управляет строками, а не колонками."
+    }
+  ]
+}

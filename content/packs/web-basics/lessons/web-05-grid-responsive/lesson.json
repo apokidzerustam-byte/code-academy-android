@@ -1,0 +1,45 @@
+{
+  "id": "web-05-grid-responsive",
+  "title": "CSS Grid и адаптивная вёрстка",
+  "goal": "Раскладывать элементы сеткой и делать страницу, которая хорошо выглядит на любом экране.",
+  "skills": [
+    "web.grid",
+    "web.responsive",
+    "web.media"
+  ],
+  "prerequisites": [
+    "web-04-forms"
+  ],
+  "runner": "html",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-predict.json",
+    "assignments/a2-span.json",
+    "assignments/a3-media.json",
+    "assignments/a4-image.json",
+    "assignments/a5-autofit.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Нет display: grid у родителя",
+      "fix": "grid-template-columns и gap работают только у элемента с display: grid."
+    },
+    {
+      "mistake": "Нет meta viewport",
+      "fix": "Добавьте в head строку с width=device-width, иначе телефон уменьшит страницу."
+    },
+    {
+      "mistake": "У картинки max-width без height: auto",
+      "fix": "Пишите оба свойства, иначе пропорции нарушатся."
+    },
+    {
+      "mistake": "Медиазапрос max-width вместо min-width",
+      "fix": "Mobile-first: базовые правила для телефона, а min-width добавляет широкие раскладки."
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "id": "a3-media",
+  "type": "write",
+  "title": "Три колонки на широком экране",
+  "statement": "Сейчас галерея — сетка без заданных колонок. Сделайте раскладку **mobile-first**: на узком экране (телефон, 360px) элементы стоят в **одну колонку**, а на экранах шириной **от 600px** — в **три равные колонки**. Разметку и правило `.gallery` не меняйте — добавьте медиазапрос.",
+  "goal": "Написать адаптивную раскладку в стиле mobile-first.",
+  "input": "Страница с галереей из шести элементов.",
+  "expectedResult": "Одна колонка на телефоне, три — от 600px.",
+  "constraints": [
+    "Используйте min-width: 600px."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .gallery {\n      display: grid;\n      gap: 8px;\n    }\n    .gallery div { background: #b2dfdb; }\n  </style>\n</head>\n<body>\n  <div class=\"gallery\">\n    <div>1</div>\n    <div>2</div>\n    <div>3</div>\n    <div>4</div>\n    <div>5</div>\n    <div>6</div>\n  </div>\n</body>\n</html>\n",
+  "hints": [
+    "Базовая раскладка уже подходит для телефона: одна колонка.",
+    "Для широких экранов нужен медиазапрос: @media (...) { ... }.",
+    "Условие «от 600px и шире» записывают через min-width.",
+    "Внутри медиазапроса пишут правило для .gallery с колонками.",
+    "@media (min-width: 600px) { .gallery { grid-template-columns: repeat(3, 1fr); } }"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "phone",
+        "expr": "new Set([...document.querySelectorAll('.gallery > div')].map(d => Math.round(d.getBoundingClientRect().left))).size",
+        "expected": 1
+      },
+      {
+        "id": "media",
+        "expr": "(() => { const rules = [...document.styleSheets].flatMap(s => [...s.cssRules]).filter(r => r.media && /^\\(min-width:\\s*600px\\)$/.test((r.conditionText || r.media.mediaText).trim())); return rules.some(r => [...r.cssRules].some(x => { const v = x.style && x.style.gridTemplateColumns; if (!v) return false; const m = v.match(/^repeat\\(\\s*3\\s*,\\s*(.+)\\)$/); if (m) return true; const p = v.trim().split(/\\s+/); return p.length === 3 && p.every(q => q === p[0]); })); })()",
+        "expected": true
+      },
+      {
+        "id": "six",
+        "hidden": true,
+        "expr": "document.querySelectorAll('.gallery > div').length",
+        "expected": 6,
+        "hint": "Разметку менять не нужно"
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .gallery {\n      display: grid;\n      gap: 8px;\n    }\n    .gallery div { background: #b2dfdb; }\n    @media (min-width: 600px) {\n      .gallery {\n        grid-template-columns: repeat(3, 1fr);\n      }\n    }\n  </style>\n</head>\n<body>\n  <div class=\"gallery\">\n    <div>1</div>\n    <div>2</div>\n    <div>3</div>\n    <div>4</div>\n    <div>5</div>\n    <div>6</div>\n  </div>\n</body>\n</html>\n",
+  "explanation": "Базовые правила описывают телефон, а медиазапрос с min-width добавляет колонки только на широких экранах.",
+  "criteria": [
+    "Одна колонка на узком экране.",
+    "Три колонки от 600px."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .gallery {\n      display: grid;\n      gap: 8px;\n    }\n    .gallery div { background: #b2dfdb; }\n    .gallery {\n      grid-template-columns: repeat(3, 1fr);\n    }\n  </style>\n</head>\n<body>\n  <div class=\"gallery\">\n    <div>1</div>\n    <div>2</div>\n    <div>3</div>\n    <div>4</div>\n    <div>5</div>\n    <div>6</div>\n  </div>\n</body>\n</html>\n",
+      "why": "Три колонки заданы всегда, а не только на широких экранах."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .gallery {\n      display: grid;\n      gap: 8px;\n    }\n    .gallery div { background: #b2dfdb; }\n    @media (max-width: 600px) {\n      .gallery {\n        grid-template-columns: repeat(3, 1fr);\n      }\n    }\n  </style>\n</head>\n<body>\n  <div class=\"gallery\">\n    <div>1</div>\n    <div>2</div>\n    <div>3</div>\n    <div>4</div>\n    <div>5</div>\n    <div>6</div>\n  </div>\n</body>\n</html>\n",
+      "why": "max-width включает три колонки на узких экранах — наоборот."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .gallery {\n      display: grid;\n      gap: 8px;\n    }\n    .gallery div { background: #b2dfdb; }\n    @media (min-width: 900px) {\n      .gallery {\n        grid-template-columns: repeat(3, 1fr);\n      }\n    }\n  </style>\n</head>\n<body>\n  <div class=\"gallery\">\n    <div>1</div>\n    <div>2</div>\n    <div>3</div>\n    <div>4</div>\n    <div>5</div>\n    <div>6</div>\n  </div>\n</body>\n</html>\n",
+      "why": "Порог 900px, а нужен 600px."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .gallery {\n      display: grid;\n      gap: 8px;\n    }\n    .gallery div { background: #b2dfdb; }\n    @media (min-width: 600px) {\n      .gallery {\n        grid-template-columns: 1fr 1fr;\n      }\n    }\n  </style>\n</head>\n<body>\n  <div class=\"gallery\">\n    <div>1</div>\n    <div>2</div>\n    <div>3</div>\n    <div>4</div>\n    <div>5</div>\n    <div>6</div>\n  </div>\n</body>\n</html>\n",
+      "why": "Две колонки вместо трёх."
+    }
+  ]
+}

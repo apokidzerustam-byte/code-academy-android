@@ -1,0 +1,44 @@
+{
+  "id": "a1-predict",
+  "type": "predict",
+  "title": "Какая ширина у средней колонки?",
+  "statement": "Сетка `1fr 2fr 1fr` с промежутком `12px` между колонками стоит на странице шириной **360px** (у `body` стандартные поля `8px`, то есть сетка занимает 344px). Какова ширина **средней** колонки в пикселях? Ответьте числом.",
+  "goal": "Посчитать доли fr с учётом промежутков.",
+  "input": "—",
+  "expectedResult": "Одно число.",
+  "constraints": [],
+  "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .gallery {\n      display: grid;\n      grid-template-columns: 1fr 2fr 1fr;\n      gap: 12px;\n    }\n    .gallery div { background: #b2dfdb; }\n  </style>\n</head>\n<body>\n  <div class=\"gallery\">\n    <div>1</div>\n    <div>2</div>\n    <div>3</div>\n    <div>4</div>\n    <div>5</div>\n    <div>6</div>\n  </div>\n</body>\n</html>\n",
+  "hints": [
+    "Сначала найдите ширину сетки: 360 минус поля body по 8px с каждой стороны.",
+    "Промежутки (gap) вычитаются из ширины до деления на доли.",
+    "Между тремя колонками два промежутка по 12px.",
+    "Свободное место: 344 − 24 = 320. Долей всего 1 + 2 + 1 = 4.",
+    "Одна доля — 80px, а средняя колонка занимает две доли."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "160"
+  },
+  "solution": "160",
+  "explanation": "(344 − 2·12) / 4 = 80px на одну долю; средняя колонка — две доли: 160px.",
+  "criteria": [
+    "Верное число."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "172",
+      "answer": "172",
+      "why": "Промежутки не вычтены: 344 / 4 · 2."
+    },
+    {
+      "code": "107",
+      "answer": "107",
+      "why": "Колонки приняты за равные: (344 − 24) / 3."
+    },
+    {
+      "code": "80",
+      "answer": "80",
+      "why": "Это ширина крайней колонки, а не средней."
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "id": "a5-autofit",
+  "type": "write",
+  "title": "Каталог с самоподбором колонок",
+  "statement": "Галерея из шести карточек должна подбирать число колонок сама: каждая колонка **не уже 80px**, а оставшееся место делится между колонками поровну. Промежуток уже задан. Добавьте в `.gallery` свойство колонок на основе `repeat`, `auto-fit` и `minmax` — **без медиазапросов**.",
+  "goal": "Собрать сетку, число колонок которой зависит от ширины экрана.",
+  "input": "Страница с галереей.",
+  "expectedResult": "Три колонки на экране 360px, подбор — автоматический.",
+  "constraints": [
+    "Без медиазапросов.",
+    "Минимальная ширина колонки — 80px."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .gallery {\n      display: grid;\n      gap: 10px;\n    }\n    .gallery div { background: #b2dfdb; }\n  </style>\n</head>\n<body>\n  <div class=\"gallery\">\n    <div>1</div>\n    <div>2</div>\n    <div>3</div>\n    <div>4</div>\n    <div>5</div>\n    <div>6</div>\n  </div>\n</body>\n</html>\n",
+  "hints": [
+    "Число колонок должно подбираться по ширине экрана, а не задаваться числом.",
+    "Для этого в repeat вместо числа ставят слово auto-fit.",
+    "Ширину колонки задаёт minmax(минимум, максимум).",
+    "Минимум — 80px, максимум — 1fr: колонки делят остаток поровну.",
+    "grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "cols",
+        "expr": "new Set([...document.querySelectorAll('.gallery > div')].map(d => Math.round(d.getBoundingClientRect().left))).size",
+        "expected": 3
+      },
+      {
+        "id": "fill",
+        "expr": "Math.round([...document.querySelectorAll('.gallery > div')][2].getBoundingClientRect().right) === innerWidth - 8",
+        "expected": true
+      },
+      {
+        "id": "gap",
+        "expr": "(() => { const r = [...document.querySelectorAll('.gallery > div')].map(d => d.getBoundingClientRect()); return Math.round(r[1].left - r[0].right); })()",
+        "expected": 10
+      },
+      {
+        "id": "auto",
+        "expr": "/repeat\\(\\s*auto-(fit|fill)\\s*,\\s*minmax\\(\\s*80px\\s*,\\s*1fr\\s*\\)\\s*\\)/.test([...document.styleSheets].flatMap(s => [...s.cssRules]).map(r => r.cssText).join(' '))",
+        "expected": true
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .gallery {\n      display: grid;\n      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));\n      gap: 10px;\n    }\n    .gallery div { background: #b2dfdb; }\n  </style>\n</head>\n<body>\n  <div class=\"gallery\">\n    <div>1</div>\n    <div>2</div>\n    <div>3</div>\n    <div>4</div>\n    <div>5</div>\n    <div>6</div>\n  </div>\n</body>\n</html>\n",
+  "explanation": "repeat(auto-fit, minmax(80px, 1fr)) создаёт столько колонок не уже 80px, сколько помещается, и растягивает их на всю ширину.",
+  "criteria": [
+    "Колонки подбираются сами.",
+    "Занимают всю ширину.",
+    "Промежуток 10px."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .gallery {\n      display: grid;\n      grid-template-columns: repeat(3, 1fr);\n      gap: 10px;\n    }\n    .gallery div { background: #b2dfdb; }\n  </style>\n</head>\n<body>\n  <div class=\"gallery\">\n    <div>1</div>\n    <div>2</div>\n    <div>3</div>\n    <div>4</div>\n    <div>5</div>\n    <div>6</div>\n  </div>\n</body>\n</html>\n",
+      "why": "Три колонки заданы жёстко: число не зависит от ширины экрана."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .gallery {\n      display: grid;\n      grid-template-columns: repeat(auto-fit, 80px);\n      gap: 10px;\n    }\n    .gallery div { background: #b2dfdb; }\n  </style>\n</head>\n<body>\n  <div class=\"gallery\">\n    <div>1</div>\n    <div>2</div>\n    <div>3</div>\n    <div>4</div>\n    <div>5</div>\n    <div>6</div>\n  </div>\n</body>\n</html>\n",
+      "why": "Колонки по 80px не растягиваются на всю ширину."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .gallery {\n      display: grid;\n      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));\n      gap: 10px;\n    }\n    .gallery div { background: #b2dfdb; }\n  </style>\n</head>\n<body>\n  <div class=\"gallery\">\n    <div>1</div>\n    <div>2</div>\n    <div>3</div>\n    <div>4</div>\n    <div>5</div>\n    <div>6</div>\n  </div>\n</body>\n</html>\n",
+      "why": "Минимум 150px: получается две колонки вместо трёх."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .gallery {\n      display: grid;\n      grid-template-columns: repeat(auto-fit, minmax(80px, 80px));\n      gap: 10px;\n    }\n    .gallery div { background: #b2dfdb; }\n  </style>\n</head>\n<body>\n  <div class=\"gallery\">\n    <div>1</div>\n    <div>2</div>\n    <div>3</div>\n    <div>4</div>\n    <div>5</div>\n    <div>6</div>\n  </div>\n</body>\n</html>\n",
+      "why": "Максимум тоже 80px: колонки не растягиваются."
+    }
+  ]
+}
