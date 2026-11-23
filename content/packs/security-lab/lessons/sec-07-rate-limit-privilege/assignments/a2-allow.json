@@ -1,0 +1,72 @@
+{
+  "id": "a2-allow",
+  "type": "complete",
+  "title": "Ограничитель запросов",
+  "statement": "Допишите `allow(key, now)`. Первая строка ввода — `лимит окно` (секунд), вторая — число запросов, затем строки `ключ время`. Запрос разрешён, если для этого ключа в окне (записи, у которых `now - t < окно`) меньше `лимит` записей; разрешённый запрос записывается, отказ **не** записывается. Для каждого запроса выведите `ALLOW` или `DENY`.",
+  "goal": "Реализовать окно запросов по ключу.",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "LIMIT, WINDOW = [int(x) for x in input().split()]\nhits = {}\n\n\ndef allow(key, now):\n    # Запрос разрешён, если в окне WINDOW секунд у ключа меньше LIMIT записей\n    pass\n\n\nfor _ in range(int(input())):\n    key, now = input().split()\n    print(\"ALLOW\" if allow(key, int(now)) else \"DENY\")\n",
+  "hints": [
+    "Для каждого ключа в словаре hits хранится список времён.",
+    "Сначала оставьте только записи внутри окна: now - t < WINDOW.",
+    "Если записей уже не меньше LIMIT, верните False и ничего не добавляйте.",
+    "Иначе добавьте now в список и сохраните список в hits.",
+    "Не забудьте сохранить и урезанный список, чтобы старые записи не накапливались."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "3 10\n6\nanna 0\nanna 1\nanna 2\nanna 3\nanna 11\nanna 12\n",
+        "expected_stdout": "ALLOW\nALLOW\nALLOW\nDENY\nALLOW\nALLOW\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "2 5\n5\na 0\nb 0\na 1\na 5\nb 1\n",
+        "expected_stdout": "ALLOW\nALLOW\nALLOW\nALLOW\nALLOW\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "1 3\n4\nx 0\nx 2\nx 3\nx 5\n",
+        "expected_stdout": "ALLOW\nDENY\nALLOW\nDENY\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "5 10\n2\nq 1\nq 1\n",
+        "expected_stdout": "ALLOW\nALLOW\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "LIMIT, WINDOW = [int(x) for x in input().split()]\nhits = {}\n\n\ndef allow(key, now):\n    recent = [t for t in hits.get(key, []) if now - t < WINDOW]\n    if len(recent) >= LIMIT:\n        hits[key] = recent\n        return False\n    recent.append(now)\n    hits[key] = recent\n    return True\n\n\nfor _ in range(int(input())):\n    key, now = input().split()\n    print(\"ALLOW\" if allow(key, int(now)) else \"DENY\")\n",
+  "explanation": "Окно считается от текущего момента: записи старше окна не учитываются. Запрос, который отклонили, в счёт не идёт, а ключи считаются независимо.",
+  "criteria": [
+    "Окно считается правильно.",
+    "Ключи независимы.",
+    "Отказы не записываются."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "LIMIT, WINDOW = [int(x) for x in input().split()]\nhits = {}\n\n\ndef allow(key, now):\n    # Запрос разрешён, если в окне WINDOW секунд у ключа меньше LIMIT записей\n    pass\n\n\nfor _ in range(int(input())):\n    key, now = input().split()\n    print(\"ALLOW\" if allow(key, int(now)) else \"DENY\")\n",
+      "why": "Заготовка: функция ничего не возвращает, всё отклоняется."
+    },
+    {
+      "code": "LIMIT, WINDOW = [int(x) for x in input().split()]\nhits = {}\n\n\ndef allow(key, now):\n    recent = [t for t in hits.get(key, []) if now - t <= WINDOW]\n    if len(recent) >= LIMIT:\n        hits[key] = recent\n        return False\n    recent.append(now)\n    hits[key] = recent\n    return True\n\n\nfor _ in range(int(input())):\n    key, now = input().split()\n    print(\"ALLOW\" if allow(key, int(now)) else \"DENY\")\n",
+      "why": "Граница окна: запись выходит из окна, когда прошло ровно WINDOW секунд."
+    },
+    {
+      "code": "LIMIT, WINDOW = [int(x) for x in input().split()]\nhits = {}\n\n\ndef allow(key, now):\n    recent = [t for t in [t for v in hits.values() for t in v] if now - t < WINDOW]\n    if len(recent) >= LIMIT:\n        hits[key] = recent\n        return False\n    recent.append(now)\n    hits[key] = recent\n    return True\n\n\nfor _ in range(int(input())):\n    key, now = input().split()\n    print(\"ALLOW\" if allow(key, int(now)) else \"DENY\")\n",
+      "why": "Счёт общий для всех ключей, а должен быть отдельным."
+    },
+    {
+      "code": "LIMIT, WINDOW = [int(x) for x in input().split()]\nhits = {}\n\n\ndef allow(key, now):\n    recent = [t for t in hits.get(key, []) if now - t < WINDOW]\n    if len(recent) > LIMIT:\n        hits[key] = recent\n        return False\n    recent.append(now)\n    hits[key] = recent\n    return True\n\n\nfor _ in range(int(input())):\n    key, now = input().split()\n    print(\"ALLOW\" if allow(key, int(now)) else \"DENY\")\n",
+      "why": "Граница лимита: при LIMIT записей запрос уже нужно отклонять."
+    }
+  ]
+}

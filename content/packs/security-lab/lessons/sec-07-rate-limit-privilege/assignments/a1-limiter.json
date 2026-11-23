@@ -1,0 +1,41 @@
+{
+  "id": "a1-limiter",
+  "type": "predict",
+  "title": "Решения ограничителя",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Решения ограничителя",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "class RateLimiter:\n    def __init__(self, limit, window):\n        self.limit = limit\n        self.window = window\n        self.hits = {}\n\n    def allow(self, key, now):\n        recent = [t for t in self.hits.get(key, []) if now - t < self.window]\n        if len(recent) >= self.limit:\n            self.hits[key] = recent\n            return False\n        recent.append(now)\n        self.hits[key] = recent\n        return True\n\n\nlimiter = RateLimiter(2, 5)\nfor key, t in [(\"a\", 0), (\"a\", 1), (\"a\", 2), (\"b\", 3), (\"a\", 5), (\"a\", 6), (\"a\", 7)]:\n    print(f\"{key}@{t}: {limiter.allow(key, t)}\")\n",
+  "hints": [
+    "Лимит два запроса за пять секунд для каждого ключа отдельно.",
+    "a@0 и a@1 проходят: записей ещё меньше двух.",
+    "a@2: в окне уже две записи (0 и 1), отказ; отказ не записывается.",
+    "b@3 — другой ключ, у него нет записей, проход. a@5: запись 0 уже вне окна (5 - 0 = 5, не меньше 5), остаётся запись 1.",
+    "a@5 проходит и записывается; a@6: в окне 5, а запись 1 ушла (6 - 1 = 5); тоже проход; a@7: в окне 5 и 6, отказ."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "a@0: True\na@1: True\na@2: False\nb@3: True\na@5: True\na@6: True\na@7: False\n"
+  },
+  "solution": "a@0: True\na@1: True\na@2: False\nb@3: True\na@5: True\na@6: True\na@7: False\n",
+  "explanation": "Запись выходит из окна, когда с неё прошло не меньше окна. Отказы не записываются, а счёт ведётся отдельно по каждому ключу.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "a@0: True\na@1: True\na@2: False\nb@3: False\na@5: True\na@6: True\na@7: False",
+      "answer": "a@0: True\na@1: True\na@2: False\nb@3: False\na@5: True\na@6: True\na@7: False",
+      "why": "Счёт идёт отдельно для каждого ключа: первый запрос b проходит."
+    },
+    {
+      "code": "a@0: True\na@1: True\na@2: False\nb@3: True\na@5: False\na@6: True\na@7: True",
+      "answer": "a@0: True\na@1: True\na@2: False\nb@3: True\na@5: False\na@6: True\na@7: True",
+      "why": "Запись на момент 0 выходит из окна, когда прошло ровно 5 секунд: условие now - t < 5 уже ложно."
+    }
+  ]
+}

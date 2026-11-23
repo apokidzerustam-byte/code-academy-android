@@ -15,7 +15,8 @@
     "sec-03-sql-injection",
     "sec-04-xss",
     "sec-05-secrets-csrf",
-    "sec-06-https-headers"
+    "sec-06-https-headers",
+    "sec-07-rate-limit-privilege"
   ],
   "skills": {
     "sec.model": "Модель угроз",
@@ -35,6 +36,9 @@
     "sec.hmac": "HMAC-токены",
     "sec.https": "HTTPS и перенаправление",
     "sec.cookie-flags": "Флаги безопасности куки",
-    "sec.headers": "Заголовки безопасности"
+    "sec.headers": "Заголовки безопасности",
+    "sec.rate-limit": "Ограничение частоты запросов",
+    "sec.least-privilege": "Минимальные привилегии",
+    "sec.scopes": "Области действия токенов"
   }
 }

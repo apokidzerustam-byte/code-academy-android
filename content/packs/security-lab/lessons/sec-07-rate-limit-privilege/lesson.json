@@ -1,0 +1,45 @@
+{
+  "id": "sec-07-rate-limit-privilege",
+  "title": "Ограничение частоты и минимальные привилегии",
+  "goal": "Ограничивать частоту запросов и выдавать права по принципу минимальных привилегий.",
+  "skills": [
+    "sec.rate-limit",
+    "sec.least-privilege",
+    "sec.scopes"
+  ],
+  "prerequisites": [
+    "sec-06-https-headers"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-limiter.json",
+    "assignments/a2-allow.json",
+    "assignments/a3-can.json",
+    "assignments/a4-retry-after.json",
+    "assignments/a5-scopes.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Список запрещённого вместо списка разрешённого",
+      "fix": "Перечисляйте разрешённое: всё остальное по умолчанию запрещено."
+    },
+    {
+      "mistake": "Один ключ с полными правами на всё",
+      "fix": "Выдавайте узкие области и срок жизни."
+    },
+    {
+      "mistake": "Ограничение частоты только на вход",
+      "fix": "Лимитируйте регистрацию, отправку кодов и дорогие операции."
+    },
+    {
+      "mistake": "Вечная блокировка учётной записи",
+      "fix": "Увеличивайте паузу между попытками и комбинируйте ключи (адрес и имя)."
+    }
+  ]
+}

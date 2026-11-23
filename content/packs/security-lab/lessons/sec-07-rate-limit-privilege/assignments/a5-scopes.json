@@ -1,0 +1,151 @@
+{
+  "id": "a5-scopes",
+  "type": "write",
+  "title": "Области токена",
+  "statement": "Токен имеет список областей `granted`, например `[\"read:orders\", \"write:*\"]`. Область записывается как `действие:ресурс`. Звёздочка в конце (`write:*`) покрывает **любой ресурс** этого действия, а область `*` — всё. Напишите `has_scopes(granted, required)`: верните `True`, если токен покрывает **каждую** область из `required` (для пустого `required` — `True`).",
+  "goal": "Проверить области токена.",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def has_scopes(granted, required):\n    # True, если токен покрывает все нужные области (учтите \"действие:*\" и \"*\")\n    pass\n",
+  "hints": [
+    "Для каждой нужной области ищем, какая из выданных её покрывает.",
+    "Покрывает её либо точное совпадение, либо звёздочка *.",
+    "Область вида действие:* покрывает все области, начинающиеся с «действие:».",
+    "Префикс берите вместе с двоеточием: у «read:*» это «read:».",
+    "Все нужные области должны быть покрыты: используйте all."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "has_scopes",
+    "cases": [
+      {
+        "args": [
+          [
+            "read:orders",
+            "write:*"
+          ],
+          [
+            "read:orders"
+          ]
+        ],
+        "id": "v1",
+        "expected": true
+      },
+      {
+        "args": [
+          [
+            "read:orders",
+            "write:*"
+          ],
+          [
+            "write:users",
+            "write:orders"
+          ]
+        ],
+        "id": "v2",
+        "expected": true
+      },
+      {
+        "args": [
+          [
+            "read:orders",
+            "write:*"
+          ],
+          [
+            "read:users"
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          [
+            "read:orders"
+          ],
+          [
+            "read:orders",
+            "write:orders"
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          [
+            "*"
+          ],
+          [
+            "delete:x",
+            "read:y"
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": true
+      },
+      {
+        "args": [
+          [
+            "read:*"
+          ],
+          [
+            "readonly:x"
+          ]
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          [],
+          []
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": true
+      },
+      {
+        "args": [
+          [],
+          [
+            "read:x"
+          ]
+        ],
+        "id": "h8",
+        "hidden": true,
+        "expected": false
+      }
+    ]
+  },
+  "solution": "def has_scopes(granted, required):\n    def covered(scope):\n        for g in granted:\n            if g == \"*\" or g == scope:\n                return True\n            if g.endswith(\":*\") and scope.startswith(g[:-1]):\n                return True\n        return False\n\n    return all(covered(scope) for scope in required)\n",
+  "explanation": "Области токена проверяются по каждой нужной области. Подстановка «действие:*» сравнивается по префиксу вместе с двоеточием, иначе «read» совпадёт с «readonly».",
+  "criteria": [
+    "Покрыты все нужные области.",
+    "Подстановки учтены.",
+    "Префикс сравнивается вместе с двоеточием."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def has_scopes(granted, required):\n    def covered(scope):\n        for g in granted:\n            if g == \"*\" or g == scope:\n                return True\n            if g.endswith(\":*\") and scope.startswith(g[:-1]):\n                return True\n        return False\n\n    return any(covered(scope) for scope in required)\n",
+      "why": "Нужно покрыть каждую требуемую область, а не любую."
+    },
+    {
+      "code": "def has_scopes(granted, required):\n    def covered(scope):\n        for g in granted:\n            if g == \"*\" or g == scope:\n                return True\n        return False\n\n    return all(covered(scope) for scope in required)\n",
+      "why": "Подстановка действие:* не учитывается."
+    },
+    {
+      "code": "def has_scopes(granted, required):\n    def covered(scope):\n        for g in granted:\n            if g == \"*\" or g == scope:\n                return True\n            if g.endswith(\":*\") and scope.startswith(g[:-2]):\n                return True\n        return False\n\n    return all(covered(scope) for scope in required)\n",
+      "why": "Префикс read без двоеточия ошибочно покрывает область readonly:x."
+    },
+    {
+      "code": "def has_scopes(granted, required):\n    def covered(scope):\n        for g in granted:\n            if g == scope:\n                return True\n            if g.endswith(\":*\") and scope.startswith(g[:-1]):\n                return True\n        return False\n\n    return all(covered(scope) for scope in required)\n",
+      "why": "Область * должна покрывать всё."
+    }
+  ]
+}

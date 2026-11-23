@@ -1,0 +1,174 @@
+{
+  "id": "a4-retry-after",
+  "type": "write",
+  "title": "Сколько ждать",
+  "statement": "Напишите `retry_after(times, now, limit, window)`: `times` — времена прошлых запросов, `now` — текущий момент. Если в окне (`now - t < window`) меньше `limit` запросов, верните `0`. Иначе верните число секунд до момента, когда выйдет из окна самая старая запись, мешающая новому запросу: она выходит, когда `t + window` достигнет текущего времени. Это значение для заголовка `Retry-After`.",
+  "goal": "Вычислить значение Retry-After.",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def retry_after(times, now, limit, window):\n    # Через сколько секунд снова можно сделать запрос (0, если можно сейчас)\n    pass\n",
+  "hints": [
+    "Сначала оставьте записи внутри окна и отсортируйте их.",
+    "Если их меньше лимита, ждать не нужно: верните 0.",
+    "Иначе нужно дождаться, пока из окна выйдет самая старая запись, мешающая новому запросу.",
+    "Она выходит в момент t + window.",
+    "Сколько осталось ждать: t + window - now; если записей больше лимита, мешающая запись — recent[len(recent) - limit]."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "retry_after",
+    "cases": [
+      {
+        "args": [
+          [
+            0,
+            1,
+            2
+          ],
+          3,
+          3,
+          10
+        ],
+        "id": "v1",
+        "expected": 7
+      },
+      {
+        "args": [
+          [
+            0,
+            1
+          ],
+          3,
+          3,
+          10
+        ],
+        "id": "v2",
+        "expected": 0
+      },
+      {
+        "args": [
+          [
+            0,
+            1,
+            2
+          ],
+          10,
+          3,
+          10
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          [
+            5,
+            6,
+            7
+          ],
+          8,
+          3,
+          10
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 7
+      },
+      {
+        "args": [
+          [],
+          5,
+          3,
+          10
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          [
+            0,
+            3,
+            4
+          ],
+          5,
+          3,
+          10
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": 5
+      },
+      {
+        "args": [
+          [
+            0,
+            1,
+            2,
+            3
+          ],
+          4,
+          3,
+          10
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": 7
+      },
+      {
+        "args": [
+          [
+            0,
+            1,
+            2
+          ],
+          100,
+          3,
+          10
+        ],
+        "id": "h8",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          [
+            0,
+            5,
+            6
+          ],
+          10,
+          3,
+          10
+        ],
+        "id": "h9",
+        "hidden": true,
+        "expected": 0
+      }
+    ]
+  },
+  "solution": "def retry_after(times, now, limit, window):\n    recent = sorted(t for t in times if now - t < window)\n    if len(recent) < limit:\n        return 0\n    blocking = recent[len(recent) - limit]\n    return blocking + window - now\n",
+  "explanation": "Ждать нужно до момента, когда из окна выйдет запись, мешающая новому запросу: t + window - now. Если запросов меньше лимита, ждать не нужно.",
+  "criteria": [
+    "Меньше лимита — 0.",
+    "Берётся самая старая мешающая запись.",
+    "Граница окна учтена."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def retry_after(times, now, limit, window):\n    recent = sorted(t for t in times if now - t < window)\n    if len(recent) < limit:\n        return 0\n    blocking = recent[-1]\n    return blocking + window - now\n",
+      "why": "Нужна самая старая из мешающих записей, а не самая новая."
+    },
+    {
+      "code": "def retry_after(times, now, limit, window):\n    recent = sorted(t for t in times if now - t < window)\n    if len(recent) < limit:\n        return 0\n    blocking = recent[len(recent) - limit]\n    return window\n",
+      "why": "Ожидание не зависит от того, когда были запросы."
+    },
+    {
+      "code": "def retry_after(times, now, limit, window):\n    recent = sorted(times)\n    if len(recent) < limit:\n        return 0\n    blocking = recent[len(recent) - limit]\n    return blocking + window - now\n",
+      "why": "Записи вне окна не отбрасываются: давно прошедшие запросы всё ещё считаются."
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "id": "a3-can",
+  "type": "fix",
+  "title": "Список разрешённого вместо запрещённого",
+  "statement": "Функция `can(role, action)` построена на списке **запрещённого**: гость с неизвестной ролью и новое действие `export` оказываются разрешены. Перепишите её на списке **разрешённого**: `viewer` — `read`; `editor` — `read`, `write`; `admin` — `read`, `write`, `delete`. Всё остальное запрещено.",
+  "goal": "Перейти на запрет по умолчанию.",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "DENIED = {\"viewer\": {\"write\", \"delete\"}, \"editor\": {\"delete\"}, \"admin\": set()}\n\n\ndef can(role, action):\n    return action not in DENIED.get(role, set())\n",
+  "hints": [
+    "Запишите, что разрешено каждой роли, а не что запрещено.",
+    "Права роли удобно хранить множеством: {\"read\", \"write\"}.",
+    "Таблица ролей — словарь: роль → множество действий.",
+    "Неизвестной роли в таблице нет: get с пустым множеством даёт отказ.",
+    "can возвращает: действие входит в права роли."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "can",
+    "cases": [
+      {
+        "args": [
+          "viewer",
+          "read"
+        ],
+        "id": "v1",
+        "expected": true
+      },
+      {
+        "args": [
+          "viewer",
+          "write"
+        ],
+        "id": "v2",
+        "expected": false
+      },
+      {
+        "args": [
+          "guest",
+          "read"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          "viewer",
+          "export"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          "admin",
+          "delete"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": true
+      },
+      {
+        "args": [
+          "editor",
+          "delete"
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          "admin",
+          "export"
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          "",
+          "read"
+        ],
+        "id": "h8",
+        "hidden": true,
+        "expected": false
+      }
+    ]
+  },
+  "solution": "PERMISSIONS = {\n    \"viewer\": {\"read\"},\n    \"editor\": {\"read\", \"write\"},\n    \"admin\": {\"read\", \"write\", \"delete\"},\n}\n\n\ndef can(role, action):\n    return action in PERMISSIONS.get(role, set())\n",
+  "explanation": "Список разрешённого безопаснее: всё, что не перечислено, запрещено, в том числе новые роли и действия. Список запрещённого приходится дополнять после каждого нового действия.",
+  "criteria": [
+    "Права заданы таблицей разрешённого.",
+    "Неизвестная роль и действие запрещены."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "DENIED = {\"viewer\": {\"write\", \"delete\"}, \"editor\": {\"delete\"}, \"admin\": set()}\n\n\ndef can(role, action):\n    return action not in DENIED.get(role, set())\n",
+      "why": "Исходная версия: неизвестная роль и новое действие разрешены."
+    },
+    {
+      "code": "DENIED = {\"viewer\": {\"write\", \"delete\"}, \"editor\": {\"delete\"}, \"admin\": {\"export\"}, \"guest\": {\"read\", \"write\", \"delete\"}}\n\n\ndef can(role, action):\n    return action not in DENIED.get(role, set())\n",
+      "why": "Запрещены только перечисленные пары: роль без записи в таблице получает всё."
+    },
+    {
+      "code": "PERMISSIONS = {\n    \"viewer\": {\"read\"},\n    \"editor\": {\"read\", \"write\"},\n    \"admin\": {\"read\", \"write\", \"delete\"},\n}\n\n\ndef can(role, action):\n    return action in PERMISSIONS.get(role, {\"read\"})\n",
+      "why": "Для неизвестной роли по умолчанию разрешено чтение: запрет по умолчанию нарушен."
+    }
+  ]
+}
