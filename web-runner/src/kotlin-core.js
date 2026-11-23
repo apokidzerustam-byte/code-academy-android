@@ -114,12 +114,25 @@ function topIndex(s, ch, from = 0) {
   return -1;
 }
 
+/** Убирает аннотации в начале объявления: @Entity(tableName = "t") data class X → data class X. */
+function stripAnnotations(text) {
+  let s = text.trimStart();
+  while (s[0] === "@") {
+    const m = s.match(/^@(?:\w+:)?[\w.]+/);
+    if (!m) break;
+    let i = m[0].length;
+    if (s[i] === "(") i = skipBalanced(s, i);
+    s = s.slice(i).trimStart();
+  }
+  return s;
+}
+
 /** Классы: [{ name, kind: "class" | "data class" | "interface" | "object", line }]. */
 export function classes(tree, cleanCode) {
   const out = [];
   for (const type of ["class_declaration", "object_declaration"]) {
     for (const n of collect(tree.rootNode, type)) {
-      const head = cleanCode.slice(n.startIndex, n.endIndex).split(/[{(]/)[0];
+      const head = stripAnnotations(cleanCode.slice(n.startIndex, n.endIndex)).split(/[{(]/)[0];
       const m = head.match(/\b(data\s+class|enum\s+class|class|interface|object)\s+([A-Za-z_]\w*)/);
       if (m) out.push({ name: m[2], kind: m[1].replace(/\s+/, " "), line: n.startPosition.row + 1 });
     }
