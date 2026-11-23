@@ -1,0 +1,33 @@
+{
+  "id": "android-prep",
+  "version": "0.1.0",
+  "stage": 2,
+  "title": "Подготовка Android",
+  "description": "Файлы и терминал на телефоне: команды оболочки, пути, права, поиск и Python в терминале — на настоящей оболочке в песочнице.",
+  "language": "bash",
+  "minAppVersion": 1,
+  "lessons": [
+    "ap-01-first-commands",
+    "ap-02-files",
+    "ap-03-paths",
+    "ap-04-text-tools",
+    "ap-05-scripts"
+  ],
+  "skills": {
+    "term.pwd-ls-cd": "pwd, ls, cd",
+    "term.mkdir": "mkdir",
+    "term.redirect": "echo и перенаправление",
+    "term.cp-mv": "cp и mv",
+    "term.rm": "rm",
+    "term.glob": "Маски файлов",
+    "term.abs-rel": "Абсолютные и относительные пути",
+    "term.tree": "Дерево папок",
+    "term.home": "Домашняя папка",
+    "term.grep": "grep",
+    "term.head-tail-wc": "head, tail, wc",
+    "term.pipe": "Конвейер",
+    "term.script": "Скрипты оболочки",
+    "term.chmod": "Права и chmod",
+    "term.exit-code": "Коды возврата"
+  }
+}

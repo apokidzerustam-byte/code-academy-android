@@ -1,0 +1,41 @@
+{
+  "id": "a1-ls-r",
+  "type": "predict",
+  "title": "Дерево папок",
+  "statement": "Что выведут эти команды? Запишите вывод построчно, не запуская их.",
+  "goal": "Дерево папок",
+  "input": "Нет.",
+  "expectedResult": "Вывод команд.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "mkdir -p a/b/c\ntouch a/b/c/f.txt a/top.txt\nls -R a\n",
+  "hints": [
+    "ls -R показывает папку и все вложенные.",
+    "Сначала идёт содержимое a: b и top.txt.",
+    "Затем — a/b: внутри только c.",
+    "Затем — a/b/c: файл f.txt.",
+    "Блоки разделены пустой строкой."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "a:\nb\ntop.txt\n\na/b:\nc\n\na/b/c:\nf.txt"
+  },
+  "solution": "a:\nb\ntop.txt\n\na/b:\nc\n\na/b/c:\nf.txt",
+  "explanation": "ls -R печатает блок для каждой папки: заголовок с путём и список.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "a:\nb\ntop.txt\n\na/b:\nc\n\na/b/c:",
+      "answer": "a:\nb\ntop.txt\n\na/b:\nc\n\na/b/c:",
+      "why": "Вложенная папка c содержит файл f.txt."
+    },
+    {
+      "code": "a:\nb\ntop.txt",
+      "answer": "a:\nb\ntop.txt",
+      "why": "ls -R обходит все вложенные папки."
+    }
+  ]
+}

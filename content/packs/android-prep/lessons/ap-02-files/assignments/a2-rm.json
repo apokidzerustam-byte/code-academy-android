@@ -1,0 +1,41 @@
+{
+  "id": "a2-rm",
+  "type": "predict",
+  "title": "Что осталось после удаления",
+  "statement": "Что выведут эти команды? Запишите вывод построчно, не запуская их.",
+  "goal": "Что осталось после удаления",
+  "input": "Нет.",
+  "expectedResult": "Вывод команд.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "touch a.txt b.txt c.txt\nrm b.txt\nmkdir d\ntouch d/x\nrm -r d\nls\n",
+  "hints": [
+    "Создаются три файла.",
+    "rm b.txt удаляет один файл.",
+    "Затем создаётся папка d с файлом внутри.",
+    "rm -r d удаляет папку вместе с содержимым.",
+    "Остаются a.txt и c.txt."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "a.txt\nc.txt"
+  },
+  "solution": "a.txt\nc.txt",
+  "explanation": "rm удаляет файл, rm -r — папку со всем содержимым; после этого ls показывает остаток.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "a.txt\nb.txt\nc.txt\nd",
+      "answer": "a.txt\nb.txt\nc.txt\nd",
+      "why": "Файл b.txt и папка d удалены."
+    },
+    {
+      "code": "a.txt\nc.txt\nd",
+      "answer": "a.txt\nc.txt\nd",
+      "why": "Папка d удалена командой rm -r."
+    }
+  ]
+}

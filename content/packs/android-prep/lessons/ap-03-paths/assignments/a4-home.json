@@ -1,0 +1,47 @@
+{
+  "id": "a4-home",
+  "type": "write",
+  "title": "Вернуться домой",
+  "statement": "Вы глубоко в папках `school/math`. Введите **самую короткую команду**, которая возвращает в домашнюю папку (`cd` и значок `~`).",
+  "goal": "Вернуться домой",
+  "input": "Текст команды.",
+  "expectedResult": "Одна команда, как в терминале.",
+  "constraints": [
+    "Ответьте точной командой из условия, без лишних пробелов."
+  ],
+  "hints": [
+    "Домашняя папка имеет свой значок.",
+    "Значок — тильда.",
+    "Команда та же, что и всегда для смены папки.",
+    "Напишите cd, пробел и тильду.",
+    "Ответ: cd ~"
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "cd ~",
+    "shell": {
+      "setup": "mkdir -p school/math school/art\ntouch school/math/algebra.txt school/art/paint.txt\ncd school/math\n",
+      "check": "pwd",
+      "expected": "/home/user"
+    }
+  },
+  "solution": "cd ~",
+  "explanation": "~ — сокращение для домашней папки пользователя; cd ~ работает из любого места.",
+  "criteria": [
+    "Команда записана без ошибок."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "cd ..",
+      "why": "Поднимает только на один уровень."
+    },
+    {
+      "code": "cd /",
+      "why": "Ведёт в корень, а не домой."
+    },
+    {
+      "code": "cd school",
+      "why": "Папки school в math нет."
+    }
+  ]
+}

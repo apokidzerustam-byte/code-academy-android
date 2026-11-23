@@ -1,0 +1,41 @@
+{
+  "id": "a2-ls-cat",
+  "type": "predict",
+  "title": "Список и содержимое",
+  "statement": "Что выведут эти команды? Запишите вывод построчно, не запуская их.",
+  "goal": "Список и содержимое",
+  "input": "Нет.",
+  "expectedResult": "Вывод команд.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "mkdir a b\necho hello > a/x.txt\nls\nls a\ncat a/x.txt\n",
+  "hints": [
+    "Команда mkdir a b создаёт две папки.",
+    "Файл x.txt создан внутри папки a.",
+    "Первый ls показывает две папки: a и b.",
+    "Второй ls показывает файл внутри a.",
+    "cat печатает текст файла."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "a\nb\nx.txt\nhello"
+  },
+  "solution": "a\nb\nx.txt\nhello",
+  "explanation": "ls без аргументов показывает текущую папку, ls с именем — указанную.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "a\nb\nhello",
+      "answer": "a\nb\nhello",
+      "why": "Команда ls a печатает содержимое папки a: файл x.txt."
+    },
+    {
+      "code": "a b\nx.txt\nhello",
+      "answer": "a b\nx.txt\nhello",
+      "why": "ls печатает каждое имя на отдельной строке, если вывод идёт не в терминал."
+    }
+  ]
+}

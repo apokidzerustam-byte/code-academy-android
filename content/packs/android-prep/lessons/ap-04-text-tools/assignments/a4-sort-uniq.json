@@ -1,0 +1,47 @@
+{
+  "id": "a4-sort-uniq",
+  "type": "write",
+  "title": "Уникальные фрукты",
+  "statement": "Сохраните в файл `unique.txt` уникальные строки `fruits.txt` по алфавиту. Введите **одну команду с конвейером**: `sort fruits.txt | uniq`, а вывод перенаправьте `>` в `unique.txt`.",
+  "goal": "Уникальные фрукты",
+  "input": "Текст команды.",
+  "expectedResult": "Одна команда, как в терминале.",
+  "constraints": [
+    "Ответьте точной командой из условия, без лишних пробелов."
+  ],
+  "hints": [
+    "Нужно убрать одинаковые строки.",
+    "Для этого есть uniq.",
+    "Но он убирает только соседние повторы.",
+    "Поэтому сначала sort, затем конвейер.",
+    "Ответ: sort fruits.txt | uniq > unique.txt"
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "sort fruits.txt | uniq > unique.txt",
+    "shell": {
+      "setup": "printf \"яблоко\\nбанан\\nвишня\\nбанан\\nапельсин\\n\" > fruits.txt\n",
+      "check": "cat unique.txt",
+      "expected": "апельсин\nбанан\nвишня\nяблоко"
+    }
+  },
+  "solution": "sort fruits.txt | uniq > unique.txt",
+  "explanation": "sort ставит одинаковые строки рядом, uniq оставляет по одной из каждой группы.",
+  "criteria": [
+    "Команда записана без ошибок."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "uniq fruits.txt > unique.txt",
+      "why": "Без сортировки удаляются только соседние повторы."
+    },
+    {
+      "code": "sort fruits.txt > unique.txt",
+      "why": "Повторы остаются."
+    },
+    {
+      "code": "sort fruits.txt | wc -l > unique.txt",
+      "why": "В файл попадёт число, а не строки."
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "id": "a1-pwd",
+  "type": "predict",
+  "title": "Куда мы пришли",
+  "statement": "Что выведут эти команды? Запишите вывод построчно, не запуская их.",
+  "goal": "Куда мы пришли",
+  "input": "Нет.",
+  "expectedResult": "Вывод команд.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "mkdir docs\ncd docs\npwd\ncd ..\npwd\n",
+  "hints": [
+    "Команда pwd печатает полный путь.",
+    "Мы начинаем в папке /home/user/project.",
+    "mkdir docs создаёт вложенную папку docs.",
+    "После cd docs путь заканчивается на /docs.",
+    "После cd .. мы снова в project."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "/home/user/project/docs\n/home/user/project"
+  },
+  "solution": "/home/user/project/docs\n/home/user/project",
+  "explanation": "Путь растёт при входе в папку и сокращается на одно звено при cd ..",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "/home/user/project/docs\n/home/user",
+      "answer": "/home/user/project/docs\n/home/user",
+      "why": "Подъём на уровень вверх возвращает в project, а не в домашнюю папку."
+    },
+    {
+      "code": "/home/user/docs\n/home/user/project",
+      "answer": "/home/user/docs\n/home/user/project",
+      "why": "Папка docs создана внутри project."
+    }
+  ]
+}

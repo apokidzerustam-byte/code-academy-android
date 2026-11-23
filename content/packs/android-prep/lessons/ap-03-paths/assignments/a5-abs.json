@@ -1,0 +1,41 @@
+{
+  "id": "a5-abs",
+  "type": "predict",
+  "title": "Абсолютно и относительно",
+  "statement": "Что выведут эти команды? Запишите вывод построчно, не запуская их.",
+  "goal": "Абсолютно и относительно",
+  "input": "Нет.",
+  "expectedResult": "Вывод команд.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "mkdir -p school/math school/art\ntouch school/math/algebra.txt school/art/paint.txt\ncd /home/user/project/school\ncd math\npwd\ncd /\npwd\ncd ~\npwd\n",
+  "hints": [
+    "cd с абсолютным путём ведёт в school.",
+    "cd math входит в math.",
+    "Первый pwd: /home/user/project/school/math.",
+    "cd / — корень, второй pwd печатает /.",
+    "cd ~ — домашняя папка: /home/user."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "bash: line 5: cd: /home/user/project/school: No such file or directory\nbash: line 6: cd: math: No such file or directory\n/home/user/project\n/\n/home/user"
+  },
+  "solution": "bash: line 5: cd: /home/user/project/school: No such file or directory\nbash: line 6: cd: math: No such file or directory\n/home/user/project\n/\n/home/user",
+  "explanation": "Абсолютные пути и ~ работают из любой папки, относительные — только от текущей.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "/home/user/project/school/math\n/\n/home/user/project",
+      "answer": "/home/user/project/school/math\n/\n/home/user/project",
+      "why": "Тильда — домашняя папка пользователя, а не project."
+    },
+    {
+      "code": "/home/user/project/math\n/\n/home/user",
+      "answer": "/home/user/project/math\n/\n/home/user",
+      "why": "Папка math лежит в school."
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "id": "a1-head-tail",
+  "type": "predict",
+  "title": "Начало и конец",
+  "statement": "Что выведут эти команды? Запишите вывод построчно, не запуская их.",
+  "goal": "Начало и конец",
+  "input": "Нет.",
+  "expectedResult": "Вывод команд.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "printf \"яблоко\\nбанан\\nвишня\\nбанан\\nапельсин\\n\" > fruits.txt\nhead -n 2 fruits.txt\ntail -n 2 fruits.txt\nwc -l fruits.txt\n",
+  "hints": [
+    "head показывает первые строки, tail — последние.",
+    "head -n 2: яблоко и банан.",
+    "tail -n 2: последние две строки файла.",
+    "Это банан и апельсин.",
+    "wc -l печатает число строк и имя файла: 5 fruits.txt."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "яблоко\nбанан\nбанан\nапельсин\n5 fruits.txt"
+  },
+  "solution": "яблоко\nбанан\nбанан\nапельсин\n5 fruits.txt",
+  "explanation": "head и tail берут строки с начала и с конца, wc -l считает строки.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "яблоко\nбанан\nбанан\nапельсин\n4 fruits.txt",
+      "answer": "яблоко\nбанан\nбанан\nапельсин\n4 fruits.txt",
+      "why": "В файле пять строк, а не четыре."
+    },
+    {
+      "code": "яблоко\nбанан\nвишня\nапельсин\n5 fruits.txt",
+      "answer": "яблоко\nбанан\nвишня\nапельсин\n5 fruits.txt",
+      "why": "tail -n 2 печатает две последние строки."
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "id": "a3-cp",
+  "type": "write",
+  "title": "Копирование",
+  "statement": "В папке есть файл `notes.txt`. Введите команду, которая создаёт его **копию** `notes_backup.txt`.",
+  "goal": "Копирование",
+  "input": "Текст команды.",
+  "expectedResult": "Одна команда, как в терминале.",
+  "constraints": [
+    "Ответьте точной командой из условия, без лишних пробелов."
+  ],
+  "hints": [
+    "Для копирования есть команда на две буквы.",
+    "Это cp.",
+    "Первым аргументом — откуда копируем.",
+    "Вторым — как назовём копию.",
+    "Ответ: cp notes.txt notes_backup.txt"
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "cp notes.txt notes_backup.txt",
+    "shell": {
+      "setup": "echo заметки > notes.txt\n",
+      "check": "cat notes_backup.txt\ncat notes.txt",
+      "expected": "заметки\nзаметки"
+    }
+  },
+  "solution": "cp notes.txt notes_backup.txt",
+  "explanation": "cp источник приёмник: копия получает содержимое источника, источник не меняется.",
+  "criteria": [
+    "Команда записана без ошибок."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "mv notes.txt notes_backup.txt",
+      "why": "mv переименует исходный файл, копии не будет."
+    },
+    {
+      "code": "cp notes_backup.txt notes.txt",
+      "why": "Порядок аргументов: сначала откуда, потом куда."
+    },
+    {
+      "code": "touch notes_backup.txt",
+      "why": "Создаётся пустой файл без содержимого."
+    }
+  ]
+}

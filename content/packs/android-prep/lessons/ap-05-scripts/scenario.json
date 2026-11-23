@@ -1,0 +1,203 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Скрипт — команды в файле",
+      "narration": "Если одни и те же команды приходится вводить снова и снова, их записывают в файл. Такой файл называется скриптом. Скрипт на языке оболочки — обычный текст, в котором команды идут по порядку. Первой строкой принято указывать, какой программой его выполнять. Чтобы запустить скрипт, ему нужно выдать право на исполнение.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "**Скрипт** — файл с командами · нужно право на исполнение",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "create",
+      "title": "Пишем скрипт",
+      "narration": "Создадим файл hello.sh. Первая строка с решёткой и восклицательным знаком называется шебанг: она говорит, что исполнять файл нужно оболочкой bash. Затем объявим переменную name без пробелов вокруг знака равно и выведем приветствие. Чтобы подставить значение переменной, перед её именем ставят знак доллара.",
+      "actions": [
+        {
+          "type": "type",
+          "text": "printf '#!/bin/bash\\nname=\"Анна\"\\necho \"Привет, $name!\"\\n' > hello.sh\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "cat hello.sh\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "output",
+          "text": "#!/bin/bash\nname=\"Анна\"\necho \"Привет, $name!\"\n",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "chmod",
+      "title": "Права на исполнение",
+      "narration": "Попробуем запустить скрипт командой точка-слеш и имя файла. Система откажет: у файла нет права на исполнение. Команда chmod с плюсом и буквой x добавляет это право. Посмотрим на права командой stat: буква x в строке прав означает, что файл исполняемый.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "./hello.sh\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "output",
+          "text": "bash: line 3: ./hello.sh: Permission denied\n",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "chmod +x hello.sh\nstat -c %A hello.sh\n",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "output",
+          "text": "-rwxr-xr-x\n",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "runit",
+      "title": "Запускаем и проверяем код возврата",
+      "narration": "Теперь скрипт запускается. После каждой команды оболочка запоминает код завершения: ноль означает успех, любое другое число — ошибку. Узнать его можно через специальную переменную: знак доллара и вопросительный знак. Запустим скрипт и проверим код.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "./hello.sh\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "output",
+          "text": "Привет, Анна!\n",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "echo $?\n",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "output",
+          "text": "0\n",
+          "cue": 2
+        },
+        {
+          "type": "type",
+          "text": "ls nothing\necho $?\n",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "ls: cannot access 'nothing': No such file or directory\n2\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "python",
+      "title": "Python из терминала",
+      "narration": "Терминал можно использовать и для запуска программ на Python. Ключ c позволяет выполнить короткий фрагмент прямо в командной строке. А файл с программой запускают командой python3 и именем файла. На телефоне в Termux Python устанавливается отдельно, но команды остаются точно такими же.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "python3 -c \"print(2 + 3)\"\n",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "output",
+          "text": "5\n",
+          "cue": 1
+        },
+        {
+          "type": "type",
+          "text": "echo \"print('Привет из Python')\" > app.py\npython3 app.py\n",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "output",
+          "text": "Привет из Python\n",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. Скрипт — файл с командами, первая строка с шебангом указывает интерпретатор. Права на исполнение выдаёт chmod плюс x. Переменные задают без пробелов, а значение берут через доллар. Код возврата ноль означает успех. И наконец, python3 запускает программы на Python. На этом основы терминала закончены: можно переходить к программированию.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`#!/bin/bash` · `chmod +x` · `./script.sh` · `$?` · `python3 файл.py`",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}

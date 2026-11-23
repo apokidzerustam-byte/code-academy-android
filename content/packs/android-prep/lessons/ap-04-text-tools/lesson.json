@@ -1,0 +1,45 @@
+{
+  "id": "ap-04-text-tools",
+  "title": "Работа с текстом и конвейеры",
+  "goal": "Искать, считать и фильтровать строки и соединять команды в конвейер.",
+  "skills": [
+    "term.grep",
+    "term.head-tail-wc",
+    "term.pipe"
+  ],
+  "prerequisites": [
+    "ap-03-paths"
+  ],
+  "runner": "A",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-head-tail.json",
+    "assignments/a2-grep.json",
+    "assignments/a3-count.json",
+    "assignments/a4-sort-uniq.json",
+    "assignments/a5-pipe.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Используют uniq без sort",
+      "fix": "uniq убирает только соседние повторы."
+    },
+    {
+      "mistake": "Путают grep -c и wc -l",
+      "fix": "grep -c считает строки с совпадением, wc -l — все строки."
+    },
+    {
+      "mistake": "Ищут слово без учёта регистра",
+      "fix": "Добавьте ключ -i."
+    },
+    {
+      "mistake": "Забывают пробелы вокруг |",
+      "fix": "Пробелы необязательны, но так читать легче."
+    }
+  ]
+}

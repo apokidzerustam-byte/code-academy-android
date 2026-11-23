@@ -1,0 +1,45 @@
+{
+  "id": "ap-02-files",
+  "title": "Работа с файлами",
+  "goal": "Создавать, копировать, переименовывать, перемещать и удалять файлы командами.",
+  "skills": [
+    "term.cp-mv",
+    "term.rm",
+    "term.glob"
+  ],
+  "prerequisites": [
+    "ap-01-first-commands"
+  ],
+  "runner": "A",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-cp-mv.json",
+    "assignments/a2-rm.json",
+    "assignments/a3-cp.json",
+    "assignments/a4-mv.json",
+    "assignments/a5-rm-glob.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Перепутали порядок аргументов в cp/mv",
+      "fix": "Сначала источник, потом приёмник."
+    },
+    {
+      "mistake": "Удаляют по маске не проверив",
+      "fix": "Сначала ls с той же маской."
+    },
+    {
+      "mistake": "Ждут корзину",
+      "fix": "rm удаляет безвозвратно."
+    },
+    {
+      "mistake": "Забывают -r для папки",
+      "fix": "Папку удаляет rm -r."
+    }
+  ]
+}

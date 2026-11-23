@@ -1,0 +1,45 @@
+{
+  "id": "ap-05-scripts",
+  "title": "Скрипты и запуск программ",
+  "goal": "Писать простые скрипты, управлять правами и запускать Python из терминала.",
+  "skills": [
+    "term.script",
+    "term.chmod",
+    "term.exit-code"
+  ],
+  "prerequisites": [
+    "ap-04-text-tools"
+  ],
+  "runner": "A",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-var.json",
+    "assignments/a2-exit.json",
+    "assignments/a3-chmod.json",
+    "assignments/a4-script.json",
+    "assignments/a5-python.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Пишут пробелы вокруг = в переменной",
+      "fix": "name=\"Анна\" — без пробелов."
+    },
+    {
+      "mistake": "Запускают скрипт без ./",
+      "fix": "Текущая папка не входит в список поиска команд: ./script.sh."
+    },
+    {
+      "mistake": "Забывают chmod +x",
+      "fix": "Без права на исполнение: Permission denied."
+    },
+    {
+      "mistake": "Путают одинарные и двойные кавычки",
+      "fix": "Подстановка $var работает только в двойных."
+    }
+  ]
+}

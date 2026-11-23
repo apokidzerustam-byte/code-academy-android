@@ -1,0 +1,47 @@
+{
+  "id": "a3-mkdir",
+  "type": "write",
+  "title": "Создать папку",
+  "statement": "Создайте папку `projects`. Введите команду (`mkdir` и имя).",
+  "goal": "Создать папку",
+  "input": "Текст команды.",
+  "expectedResult": "Одна команда, как в терминале.",
+  "constraints": [
+    "Ответьте точной командой из условия, без лишних пробелов."
+  ],
+  "hints": [
+    "Для создания папки есть специальная команда.",
+    "Она начинается на mk.",
+    "mkdir — «make directory».",
+    "После команды укажите имя папки.",
+    "Команда состоит из слова mkdir, пробела и имени новой папки из условия."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "mkdir projects",
+    "shell": {
+      "setup": "",
+      "check": "test -d projects && echo \"папка projects создана\"",
+      "expected": "папка projects создана"
+    }
+  },
+  "solution": "mkdir projects",
+  "explanation": "mkdir создаёт пустую папку с указанным именем.",
+  "criteria": [
+    "Команда записана без ошибок."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "cd projects",
+      "why": "Папки ещё нет — перейти некуда."
+    },
+    {
+      "code": "touch projects",
+      "why": "touch создаёт файл, а не папку."
+    },
+    {
+      "code": "ls projects",
+      "why": "ls только показывает содержимое."
+    }
+  ]
+}

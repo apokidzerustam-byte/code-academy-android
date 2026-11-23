@@ -1,0 +1,43 @@
+{
+  "id": "ap-01-first-commands",
+  "title": "Первые команды терминала",
+  "goal": "Ориентироваться в файловой системе и создавать папки и файлы командами.",
+  "skills": [
+    "term.pwd-ls-cd",
+    "term.mkdir",
+    "term.redirect"
+  ],
+  "prerequisites": [],
+  "runner": "A",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-pwd.json",
+    "assignments/a2-ls-cat.json",
+    "assignments/a3-mkdir.json",
+    "assignments/a4-cd.json",
+    "assignments/a5-redirect.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Ждут сообщения «готово» после команды",
+      "fix": "Молчание — это успех; ошибки терминал печатает."
+    },
+    {
+      "mistake": "Путают > и >>",
+      "fix": "Одинарный знак перезаписывает, двойной дописывает."
+    },
+    {
+      "mistake": "Забывают, где находятся",
+      "fix": "Проверяйте путь командой pwd."
+    },
+    {
+      "mistake": "Пишут cd без пробела перед двумя точками",
+      "fix": "Правильно: cd .. (пробел обязателен)."
+    }
+  ]
+}

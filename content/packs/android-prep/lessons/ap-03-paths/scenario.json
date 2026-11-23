@@ -1,0 +1,182 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Дорога к файлу",
+      "narration": "Чтобы указать файл, нужно описать путь к нему. Есть два способа. Абсолютный путь начинается с корня, с одного слеша, и одинаково работает из любой папки. Относительный путь считается от текущей папки и поэтому короче, но зависит от того, где вы находитесь. Понимание путей — основа работы с файлами и в терминале, и в программах.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "**Абсолютный** путь — от корня `/` · **относительный** — от текущей папки",
+          "cue": 1
+        }
+      ]
+    },
+    {
+      "id": "tree",
+      "title": "Строим дерево папок",
+      "narration": "Подготовим небольшую структуру: папка school, внутри неё папки math и art, а в каждой по одному файлу. Ключ p у команды mkdir создаёт сразу всю цепочку вложенных папок. Команда ls с ключом R покажет всё дерево целиком: так проще увидеть, что где лежит.",
+      "actions": [
+        {
+          "type": "type",
+          "text": "mkdir -p school/math school/art\ntouch school/math/algebra.txt school/art/paint.txt\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "ls -R school\n",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "output",
+          "text": "school:\nart\nmath\n\nschool/art:\npaint.txt\n\nschool/math:\nalgebra.txt\n",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "abs",
+      "title": "Абсолютные пути",
+      "narration": "Абсолютный путь начинается со слеша. Команда cd с абсолютным путём ведёт в нужную папку откуда угодно. Если вам нужна домашняя папка пользователя, её обозначает значок тильда. Перейдём в папку math и убедимся командой pwd.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "cd /home/user/project/school/math\n",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "type",
+          "text": "pwd\n",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "bash: line 3: cd: /home/user/project/school/math: No such file or directory\n/home/user/project\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "rel",
+      "title": "Относительные пути",
+      "narration": "Мы сейчас в папке math. Чтобы увидеть файл соседней папки art, не нужно писать полный путь: поднимемся на уровень вверх через две точки и зайдём в art. Одна точка означает текущую папку, а две — родительскую. Команда cat с таким путём покажет, что файл на месте, хотя в нём пока пусто.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "ls ../art\n",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "output",
+          "text": "ls: cannot access '../art': No such file or directory\n",
+          "cue": 1
+        },
+        {
+          "type": "type",
+          "text": "cd ../art\npwd\n",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "output",
+          "text": "bash: line 3: cd: ../art: No such file or directory\n/home/user/project\n",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "home",
+      "title": "Домашняя папка и корень",
+      "narration": "Выполним cd с тильдой: так вы возвращаетесь домой из любого места, а pwd покажет, что мы в домашней папке. А просто слеш — это корень файловой системы, самая верхняя папка. На Android в Termux домашняя папка лежит внутри памяти приложения, поэтому доступ к файлам телефона настраивается отдельно.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "cd ~\npwd\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "output",
+          "text": "/home/user\n",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "cd /\npwd\n",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "output",
+          "text": "/\n",
+          "cue": 1
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. Абсолютный путь начинается со слеша и не зависит от текущей папки. Относительный считается от текущей. Одна точка — это здесь, две точки — выше. Тильда — домашняя папка, а слеш — корень. Если путь не работает, проверьте командой pwd, где вы сейчас находитесь.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`/…` абсолютный · `./`, `../` относительный · `~` дом · `/` корень",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "id": "a4-mv",
+  "type": "write",
+  "title": "Переименование",
+  "statement": "Файл `draft.txt` нужно переименовать в `final.txt`. Введите команду.",
+  "goal": "Переименование",
+  "input": "Текст команды.",
+  "expectedResult": "Одна команда, как в терминале.",
+  "constraints": [
+    "Ответьте точной командой из условия, без лишних пробелов."
+  ],
+  "hints": [
+    "Переименовать помогает команда, которая и перемещает.",
+    "Это mv.",
+    "Первым пишут старое имя.",
+    "Вторым — новое.",
+    "Ответ: mv draft.txt final.txt"
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "mv draft.txt final.txt",
+    "shell": {
+      "setup": "echo текст > draft.txt\n",
+      "check": "cat final.txt\ntest -e draft.txt || echo \"старого имени больше нет\"",
+      "expected": "текст\nстарого имени больше нет"
+    }
+  },
+  "solution": "mv draft.txt final.txt",
+  "explanation": "mv старое новое: в той же папке это переименование.",
+  "criteria": [
+    "Команда записана без ошибок."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "cp draft.txt final.txt",
+      "why": "cp оставит старое имя и создаст копию."
+    },
+    {
+      "code": "mv final.txt draft.txt",
+      "why": "Порядок аргументов перепутан."
+    },
+    {
+      "code": "rm draft.txt",
+      "why": "Удаляет файл, а не переименовывает."
+    }
+  ]
+}

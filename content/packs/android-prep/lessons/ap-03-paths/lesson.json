@@ -1,0 +1,45 @@
+{
+  "id": "ap-03-paths",
+  "title": "Пути: абсолютные и относительные",
+  "goal": "Описывать место файла абсолютным и относительным путём и перемещаться по дереву.",
+  "skills": [
+    "term.abs-rel",
+    "term.tree",
+    "term.home"
+  ],
+  "prerequisites": [
+    "ap-02-files"
+  ],
+  "runner": "A",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-ls-r.json",
+    "assignments/a2-relative.json",
+    "assignments/a3-cd-rel.json",
+    "assignments/a4-home.json",
+    "assignments/a5-abs.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Путают ../art и art",
+      "fix": "Без .. путь считается от текущей папки."
+    },
+    {
+      "mistake": "Думают, что ~ — это текущая папка",
+      "fix": "~ — домашняя; текущая — точка."
+    },
+    {
+      "mistake": "Не проверяют место перед удалением",
+      "fix": "Сначала pwd и ls."
+    },
+    {
+      "mistake": "Пишут пути с пробелами без кавычек",
+      "fix": "Имя с пробелом берут в кавычки."
+    }
+  ]
+}

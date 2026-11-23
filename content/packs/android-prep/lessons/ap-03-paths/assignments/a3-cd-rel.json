@@ -1,0 +1,47 @@
+{
+  "id": "a3-cd-rel",
+  "type": "write",
+  "title": "Относительный путь",
+  "statement": "Вы в папке `school/math`. Введите команду, которая переходит в соседнюю папку `art` **относительным путём** (через `..`).",
+  "goal": "Относительный путь",
+  "input": "Текст команды.",
+  "expectedResult": "Одна команда, как в терминале.",
+  "constraints": [
+    "Ответьте точной командой из условия, без лишних пробелов."
+  ],
+  "hints": [
+    "Сначала нужно подняться на уровень вверх.",
+    "Подъём — две точки.",
+    "Потом заходим в соседнюю папку art.",
+    "Части пути разделяет слеш.",
+    "Ответ: cd ../art"
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "cd ../art",
+    "shell": {
+      "setup": "mkdir -p school/math school/art\ntouch school/math/algebra.txt school/art/paint.txt\ncd school/math\n",
+      "check": "pwd",
+      "expected": "/home/user/project/school/art"
+    }
+  },
+  "solution": "cd ../art",
+  "explanation": "../art — на уровень вверх и затем в art; так достигают соседних папок.",
+  "criteria": [
+    "Команда записана без ошибок."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "cd art",
+      "why": "Внутри math нет папки art."
+    },
+    {
+      "code": "cd ../math",
+      "why": "Остаёмся в той же папке."
+    },
+    {
+      "code": "cd ..",
+      "why": "Попадаем в school, а не в art."
+    }
+  ]
+}

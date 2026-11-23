@@ -1,0 +1,41 @@
+{
+  "id": "a1-cp-mv",
+  "type": "predict",
+  "title": "Копия и перенос",
+  "statement": "Что выведут эти команды? Запишите вывод построчно, не запуская их.",
+  "goal": "Копия и перенос",
+  "input": "Нет.",
+  "expectedResult": "Вывод команд.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "echo data > a.txt\ncp a.txt b.txt\nmv a.txt c.txt\nls\ncat b.txt\n",
+  "hints": [
+    "cp оставляет оригинал.",
+    "После cp есть a.txt и b.txt.",
+    "mv переименовывает a.txt в c.txt.",
+    "ls покажет b.txt и c.txt.",
+    "Копия содержит тот же текст: data."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "b.txt\nc.txt\ndata"
+  },
+  "solution": "b.txt\nc.txt\ndata",
+  "explanation": "cp создаёт копию, mv переименовывает исходный файл.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "a.txt\nb.txt\nc.txt\ndata",
+      "answer": "a.txt\nb.txt\nc.txt\ndata",
+      "why": "mv переименовал a.txt, поэтому его больше нет."
+    },
+    {
+      "code": "b.txt\nc.txt\n",
+      "answer": "b.txt\nc.txt\n",
+      "why": "Файл b.txt — копия, в нём тот же текст."
+    }
+  ]
+}

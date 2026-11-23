@@ -1,0 +1,41 @@
+{
+  "id": "a2-relative",
+  "type": "predict",
+  "title": "Где мы окажемся",
+  "statement": "Что выведут эти команды? Запишите вывод построчно, не запуская их.",
+  "goal": "Где мы окажемся",
+  "input": "Нет.",
+  "expectedResult": "Вывод команд.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "mkdir -p school/math school/art\ntouch school/math/algebra.txt school/art/paint.txt\ncd school/math\ncd ../art\npwd\ncd ..\npwd\n",
+  "hints": [
+    "Мы начинаем в /home/user/project.",
+    "cd school/math ведёт в math.",
+    "../art — подняться в school и войти в art.",
+    "Путь стал /home/user/project/school/art.",
+    "cd .. поднимает в school."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "/home/user/project/school/art\n/home/user/project/school"
+  },
+  "solution": "/home/user/project/school/art\n/home/user/project/school",
+  "explanation": "Две точки заменяют имя родительской папки; ../art — это «соседняя папка art».",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "/home/user/project/school/art\n/home/user/project",
+      "answer": "/home/user/project/school/art\n/home/user/project",
+      "why": "Из art подъём на уровень вверх ведёт в school."
+    },
+    {
+      "code": "/home/user/project/school/math/art\n/home/user/project/school/math",
+      "answer": "/home/user/project/school/math/art\n/home/user/project/school/math",
+      "why": "../art — соседняя папка, а не вложенная."
+    }
+  ]
+}
