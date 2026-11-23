@@ -1,0 +1,84 @@
+{
+  "id": "a2-unique",
+  "type": "function",
+  "title": "Первый уникальный символ",
+  "statement": "Напишите `first_unique(s)`: верните **первый символ**, который встречается в строке ровно один раз; если такого нет — пустую строку `\"\"`.\n\nПример: `first_unique(\"swiss\")` → `\"w\"`.",
+  "goal": "Первый уникальный символ",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Сначала нужно узнать, сколько раз встречается каждый символ.",
+    "Подсчёт: counts[ch] = counts.get(ch, 0) + 1.",
+    "Второй проход — по самой строке, чтобы сохранить порядок.",
+    "Верните первый символ со счётом 1.",
+    "Если такого нет — return ''."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "first_unique",
+    "cases": [
+      {
+        "args": [
+          "swiss"
+        ],
+        "id": "v1",
+        "expected": "w"
+      },
+      {
+        "args": [
+          "aabb"
+        ],
+        "id": "v2",
+        "expected": ""
+      },
+      {
+        "args": [
+          ""
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": ""
+      },
+      {
+        "args": [
+          "z"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "z"
+      },
+      {
+        "args": [
+          "abcab"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": "c"
+      },
+      {
+        "args": [
+          "ааббв"
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": "в"
+      }
+    ]
+  },
+  "solution": "def first_unique(s):\n    counts = {}\n    for ch in s:\n        counts[ch] = counts.get(ch, 0) + 1\n    for ch in s:\n        if counts[ch] == 1:\n            return ch\n    return \"\"\n",
+  "explanation": "Два прохода: первый считает, второй сохраняет порядок появления. Итоговая сложность O(n).",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def first_unique(s):\n    for ch in sorted(set(s)):\n        if s.count(ch) == 1:\n            return ch\n    return \"\"\n",
+      "why": "Выбирается первый по алфавиту, а не по порядку в строке."
+    },
+    {
+      "code": "def first_unique(s):\n    counts = {}\n    for ch in s:\n        counts[ch] = counts.get(ch, 0) + 1\n    for ch in s:\n        if counts[ch] == 1:\n            return ch\n",
+      "why": "Для строки без уникальных символов возвращается None вместо пустой строки."
+    }
+  ]
+}

@@ -1,0 +1,164 @@
+{
+  "id": "a4-levels",
+  "type": "function",
+  "title": "Уровни дерева",
+  "statement": "Используя `Node`, `insert`, `build`, напишите `by_levels(values)`: верните список уровней — каждый уровень это список значений слева направо.\n\nПример: `by_levels([5, 3, 8, 1, 4, 9])` → `[[5], [3, 8], [1, 4, 9]]`.",
+  "goal": "Уровни дерева",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Уровень — это все узлы на одной глубине.",
+    "Начните со списка из корня.",
+    "Для каждого уровня соберите значения, затем потомков для следующего уровня.",
+    "Порядок потомков: сначала левый, потом правый.",
+    "Цикл идёт, пока текущий уровень не пуст."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "by_levels",
+    "cases": [
+      {
+        "args": [
+          [
+            5,
+            3,
+            8,
+            1,
+            4,
+            9
+          ]
+        ],
+        "id": "v1",
+        "expected": [
+          [
+            5
+          ],
+          [
+            3,
+            8
+          ],
+          [
+            1,
+            4,
+            9
+          ]
+        ]
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            1
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          [
+            1
+          ]
+        ]
+      },
+      {
+        "args": [
+          [
+            1,
+            2,
+            3
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          [
+            1
+          ],
+          [
+            2
+          ],
+          [
+            3
+          ]
+        ]
+      },
+      {
+        "args": [
+          [
+            4,
+            2,
+            6,
+            1,
+            3,
+            5,
+            7
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          [
+            4
+          ],
+          [
+            2,
+            6
+          ],
+          [
+            1,
+            3,
+            5,
+            7
+          ]
+        ]
+      },
+      {
+        "args": [
+          [
+            3,
+            2,
+            1
+          ]
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": [
+          [
+            3
+          ],
+          [
+            2
+          ],
+          [
+            1
+          ]
+        ]
+      }
+    ]
+  },
+  "solution": "class Node:\n    def __init__(self, value):\n        self.value = value\n        self.left = None\n        self.right = None\n\n\ndef insert(node, value):\n    if node is None:\n        return Node(value)\n    if value < node.value:\n        node.left = insert(node.left, value)\n    elif value > node.value:\n        node.right = insert(node.right, value)\n    return node\n\n\ndef build(values):\n    root = None\n    for v in values:\n        root = insert(root, v)\n    return root\n\n\ndef by_levels(values):\n    root = build(values)\n    levels = []\n    current = [root] if root else []\n    while current:\n        levels.append([node.value for node in current])\n        nxt = []\n        for node in current:\n            if node.left:\n                nxt.append(node.left)\n            if node.right:\n                nxt.append(node.right)\n        current = nxt\n    return levels\n",
+  "explanation": "Обход по уровням: уровень — это список узлов, следующий уровень — потомки по порядку слева направо.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "class Node:\n    def __init__(self, value):\n        self.value = value\n        self.left = None\n        self.right = None\n\n\ndef insert(node, value):\n    if node is None:\n        return Node(value)\n    if value < node.value:\n        node.left = insert(node.left, value)\n    elif value > node.value:\n        node.right = insert(node.right, value)\n    return node\n\n\ndef build(values):\n    root = None\n    for v in values:\n        root = insert(root, v)\n    return root\n\n\ndef by_levels(values):\n    root = build(values)\n    levels = []\n    current = [root] if root else []\n    while current:\n        levels.append([node.value for node in current])\n        nxt = []\n        for node in current:\n            if node.right:\n                nxt.append(node.right)\n            if node.left:\n                nxt.append(node.left)\n        current = nxt\n    return levels\n",
+      "why": "На каждом уровне правый потомок идёт перед левым."
+    },
+    {
+      "code": "class Node:\n    def __init__(self, value):\n        self.value = value\n        self.left = None\n        self.right = None\n\n\ndef insert(node, value):\n    if node is None:\n        return Node(value)\n    if value < node.value:\n        node.left = insert(node.left, value)\n    elif value > node.value:\n        node.right = insert(node.right, value)\n    return node\n\n\ndef build(values):\n    root = None\n    for v in values:\n        root = insert(root, v)\n    return root\n\n\ndef by_levels(values):\n    root = build(values)\n    return [[v for v in sorted(values)]] if root else []\n",
+      "why": "Все значения возвращены одним уровнем."
+    },
+    {
+      "code": "class Node:\n    def __init__(self, value):\n        self.value = value\n        self.left = None\n        self.right = None\n\n\ndef insert(node, value):\n    if node is None:\n        return Node(value)\n    if value < node.value:\n        node.left = insert(node.left, value)\n    elif value > node.value:\n        node.right = insert(node.right, value)\n    return node\n\n\ndef build(values):\n    root = None\n    for v in values:\n        root = insert(root, v)\n    return root\n\n\ndef by_levels(values):\n    root = build(values)\n    levels = []\n    current = [root] if root else []\n    while current:\n        levels.append([node.value for node in current])\n        nxt = []\n        for node in current:\n            if node.left:\n                nxt.append(node.left)\n        current = nxt\n    return levels\n",
+      "why": "Правые потомки не обходятся."
+    }
+  ]
+}

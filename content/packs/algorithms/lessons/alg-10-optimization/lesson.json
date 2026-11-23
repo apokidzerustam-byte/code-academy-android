@@ -1,0 +1,47 @@
+{
+  "id": "alg-10-optimization",
+  "title": "Оптимизация",
+  "goal": "Ускорять программы мемоизацией, динамическим программированием и предвычислением.",
+  "skills": [
+    "algo.opt.memo",
+    "algo.opt.dp",
+    "algo.opt.prefix"
+  ],
+  "prerequisites": [
+    "alg-09-graphs",
+    "alg-04-recursion"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-fib.json",
+    "assignments/a2-stairs.json",
+    "assignments/a3-coins.json",
+    "assignments/a4-prefix.json",
+    "assignments/a5-cache.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Оптимизируют до того, как измерили",
+      "fix": "Сначала найдите узкое место, потом улучшайте."
+    },
+    {
+      "mistake": "Кэшируют функции с побочными эффектами",
+      "fix": "Кэшируйте только «чистые» функции: одинаковые аргументы → одинаковый результат."
+    },
+    {
+      "mistake": "Передают в кэшируемую функцию список",
+      "fix": "Аргументы должны быть хешируемыми: используйте кортеж.",
+      "errorType": "TypeError"
+    },
+    {
+      "mistake": "Жадный выбор вместо динамического программирования",
+      "fix": "Проверяйте жадность на контрпримерах (монеты 1, 3, 4)."
+    }
+  ]
+}

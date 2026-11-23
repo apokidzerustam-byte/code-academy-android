@@ -1,0 +1,160 @@
+{
+  "id": "a4-prefix",
+  "type": "function",
+  "title": "Суммы на отрезках",
+  "statement": "Напишите `range_sums(nums, queries)`: `queries` — список пар `[l, r]` (индексы **включительно**, `0 <= l <= r < len(nums)`). Верните список сумм `nums[l..r]` по каждому запросу, используя префиксные суммы.\n\nПример: `range_sums([3, 1, 4, 1, 5], [[0, 2], [1, 1], [2, 4]])` → `[8, 1, 10]`.",
+  "goal": "Суммы на отрезках",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Построите один раз массив префиксных сумм.",
+    "prefix[i] — сумма первых i чисел, prefix[0] = 0.",
+    "Сумма на отрезке [l, r] — это prefix[r + 1] - prefix[l].",
+    "Отрезок включает правую границу — поэтому r + 1.",
+    "Ответ на каждый запрос считается за O(1)."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "range_sums",
+    "cases": [
+      {
+        "args": [
+          [
+            3,
+            1,
+            4,
+            1,
+            5
+          ],
+          [
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              4
+            ]
+          ]
+        ],
+        "id": "v1",
+        "expected": [
+          8,
+          1,
+          10
+        ]
+      },
+      {
+        "args": [
+          [
+            7
+          ],
+          [
+            [
+              0,
+              0
+            ]
+          ]
+        ],
+        "id": "v2",
+        "expected": [
+          7
+        ]
+      },
+      {
+        "args": [
+          [
+            1,
+            2,
+            3
+          ],
+          []
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            -1,
+            5,
+            -3,
+            2
+          ],
+          [
+            [
+              0,
+              3
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              3,
+              3
+            ]
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          3,
+          2,
+          2
+        ]
+      },
+      {
+        "args": [
+          [
+            2,
+            2,
+            2,
+            2
+          ],
+          [
+            [
+              0,
+              3
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          8,
+          2
+        ]
+      }
+    ]
+  },
+  "solution": "def range_sums(nums, queries):\n    prefix = [0]\n    for x in nums:\n        prefix.append(prefix[-1] + x)\n    return [prefix[r + 1] - prefix[l] for l, r in queries]\n",
+  "explanation": "Префиксные суммы превращают O(n) на запрос в O(1) после однократной подготовки O(n).",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def range_sums(nums, queries):\n    prefix = [0]\n    for x in nums:\n        prefix.append(prefix[-1] + x)\n    return [prefix[r] - prefix[l] for l, r in queries]\n",
+      "why": "Правая граница не включается: сумма короче на последний элемент."
+    },
+    {
+      "code": "def range_sums(nums, queries):\n    prefix = []\n    for x in nums:\n        prefix.append((prefix[-1] if prefix else 0) + x)\n    return [prefix[r] - prefix[l] for l, r in queries]\n",
+      "why": "Без нулевого элемента префиксов левая граница теряет первый элемент."
+    },
+    {
+      "code": "def range_sums(nums, queries):\n    return [nums[l] + nums[r] for l, r in queries]\n",
+      "why": "Суммируются только граничные элементы."
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "id": "a5-order",
+  "type": "predict",
+  "title": "BFS или DFS",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "BFS или DFS",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "graph = {\"A\": [\"B\", \"C\"], \"B\": [\"D\"], \"C\": [\"D\"], \"D\": []}\n\ndef dfs(node, seen):\n    seen.append(node)\n    for nxt in graph[node]:\n        if nxt not in seen:\n            dfs(nxt, seen)\n    return seen\n\nprint(dfs(\"A\", []))\n",
+  "hints": [
+    "DFS из A идёт к первому соседу — B.",
+    "Из B идём в D.",
+    "У D нет соседей — возвращаемся к A.",
+    "Следующий сосед A — C; D уже посещён.",
+    "Порядок: A, B, D, C."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "['A', 'B', 'D', 'C']\n"
+  },
+  "solution": "['A', 'B', 'D', 'C']\n",
+  "explanation": "Обход в глубину сначала доходит до конца ветви, а потом возвращается назад.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "['A', 'B', 'C', 'D']\n",
+      "answer": "['A', 'B', 'C', 'D']\n",
+      "why": "Это порядок обхода в ширину; DFS уходит вглубь: A → B → D, затем C."
+    },
+    {
+      "code": "['A', 'B', 'D']\n",
+      "answer": "['A', 'B', 'D']\n",
+      "why": "После возврата из ветви B обход продолжается: C тоже посещается."
+    }
+  ]
+}

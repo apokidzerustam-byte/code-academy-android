@@ -1,0 +1,47 @@
+{
+  "id": "alg-08-trees",
+  "title": "Деревья",
+  "goal": "Строить двоичные деревья поиска, обходить их и считать высоту.",
+  "skills": [
+    "algo.tree",
+    "algo.tree.bst",
+    "algo.tree.traversal"
+  ],
+  "prerequisites": [
+    "alg-07-hash",
+    "alg-04-recursion"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-sorted-unique.json",
+    "assignments/a2-height.json",
+    "assignments/a3-path.json",
+    "assignments/a4-levels.json",
+    "assignments/a5-bst.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Забывают базовый случай «узел пуст»",
+      "fix": "Первой строкой: if node is None: return ...",
+      "errorType": "AttributeError"
+    },
+    {
+      "mistake": "Путают порядок обхода",
+      "fix": "In-order: лево → узел → право (для BST — по возрастанию)."
+    },
+    {
+      "mistake": "Не присваивают результат рекурсивной вставки",
+      "fix": "node.left = insert(node.left, value)."
+    },
+    {
+      "mistake": "Строят дерево из отсортированных данных и получают цепочку",
+      "fix": "Перемешайте данные или применяйте сбалансированные деревья."
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+{
+  "id": "a3-anagrams",
+  "type": "function",
+  "title": "Группы анаграмм",
+  "statement": "Напишите `group_anagrams(words)`: сгруппируйте слова-анаграммы (одинаковый набор букв). Верните список групп; внутри группы слова по алфавиту, сами группы — по первому слову.\n\nПример: `group_anagrams([\"кот\", \"ток\", \"дом\", \"мод\", \"лес\"])` → `[[\"дом\", \"мод\"], [\"кот\", \"ток\"], [\"лес\"]]`.",
+  "goal": "Группы анаграмм",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Анаграммы состоят из одних и тех же букв.",
+    "Ключ группы — слово с отсортированными буквами.",
+    "Словарь «ключ → список слов»: groups.setdefault(key, []).append(word).",
+    "Отсортируйте слова в каждой группе.",
+    "Отсортируйте группы по первому слову."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "group_anagrams",
+    "cases": [
+      {
+        "args": [
+          [
+            "кот",
+            "ток",
+            "дом",
+            "мод",
+            "лес"
+          ]
+        ],
+        "id": "v1",
+        "expected": [
+          [
+            "дом",
+            "мод"
+          ],
+          [
+            "кот",
+            "ток"
+          ],
+          [
+            "лес"
+          ]
+        ]
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            "а"
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          [
+            "а"
+          ]
+        ]
+      },
+      {
+        "args": [
+          [
+            "рак",
+            "кар",
+            "арк",
+            "рок"
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          [
+            "арк",
+            "кар",
+            "рак"
+          ],
+          [
+            "рок"
+          ]
+        ]
+      },
+      {
+        "args": [
+          [
+            "б",
+            "а",
+            "б"
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          [
+            "а"
+          ],
+          [
+            "б",
+            "б"
+          ]
+        ]
+      }
+    ]
+  },
+  "solution": "def group_anagrams(words):\n    groups = {}\n    for word in words:\n        key = \"\".join(sorted(word))\n        groups.setdefault(key, []).append(word)\n    result = [sorted(group) for group in groups.values()]\n    return sorted(result, key=lambda g: g[0])\n",
+  "explanation": "Отсортированные буквы — одинаковый «отпечаток» всех анаграмм; словарь собирает слова с одним отпечатком.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def group_anagrams(words):\n    groups = {}\n    for word in words:\n        key = \"\".join(sorted(word))\n        groups.setdefault(key, []).append(word)\n    return list(groups.values())\n",
+      "why": "Группы и слова внутри групп не отсортированы."
+    },
+    {
+      "code": "def group_anagrams(words):\n    return [[w] for w in sorted(words)]\n",
+      "why": "Анаграммы не объединяются."
+    },
+    {
+      "code": "def group_anagrams(words):\n    groups = {}\n    for word in words:\n        key = len(word)\n        groups.setdefault(key, []).append(word)\n    result = [sorted(group) for group in groups.values()]\n    return sorted(result, key=lambda g: g[0])\n",
+      "why": "Ключ — длина слова, а не набор букв."
+    }
+  ]
+}

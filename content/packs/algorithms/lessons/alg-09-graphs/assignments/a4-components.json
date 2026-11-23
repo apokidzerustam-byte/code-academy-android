@@ -1,0 +1,155 @@
+{
+  "id": "a4-components",
+  "type": "function",
+  "title": "Сколько групп",
+  "statement": "Напишите `count_groups(n, edges)`: в графе вершины `0 … n-1` и рёбра `edges` (пары чисел). Верните число связных компонент (вершины без рёбер — отдельные компоненты).",
+  "goal": "Сколько групп",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Перебирайте вершины от 0 до n-1.",
+    "Если вершина ещё не посещена — это новая компонента.",
+    "От неё запустите обход (DFS или BFS), пометив все достижимые вершины.",
+    "Увеличивайте счётчик перед каждым запуском обхода.",
+    "Изолированная вершина тоже даёт компоненту."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "count_groups",
+    "cases": [
+      {
+        "args": [
+          5,
+          [
+            [
+              0,
+              1
+            ],
+            [
+              3,
+              4
+            ]
+          ]
+        ],
+        "id": "v1",
+        "expected": 3
+      },
+      {
+        "args": [
+          3,
+          []
+        ],
+        "id": "v2",
+        "expected": 3
+      },
+      {
+        "args": [
+          0,
+          []
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          4,
+          [
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              2,
+              3
+            ]
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 1
+      },
+      {
+        "args": [
+          6,
+          [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              1,
+              2
+            ]
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 2
+      },
+      {
+        "args": [
+          1,
+          []
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": 1
+      },
+      {
+        "args": [
+          3,
+          [
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              2,
+              0
+            ]
+          ]
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": 1
+      }
+    ]
+  },
+  "solution": "def count_groups(n, edges):\n    graph = {i: [] for i in range(n)}\n    for a, b in edges:\n        graph[a].append(b)\n        graph[b].append(a)\n    seen = set()\n    count = 0\n    for start in range(n):\n        if start in seen:\n            continue\n        count += 1\n        stack = [start]\n        seen.add(start)\n        while stack:\n            node = stack.pop()\n            for nxt in graph[node]:\n                if nxt not in seen:\n                    seen.add(nxt)\n                    stack.append(nxt)\n    return count\n",
+  "explanation": "Каждый запуск обхода «закрашивает» целую компоненту, поэтому число запусков равно числу компонент.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def count_groups(n, edges):\n    return n - len(edges)\n",
+      "why": "Формула верна только для лесов без циклов и дубликатов; на графах с циклами даёт неверный результат."
+    },
+    {
+      "code": "def count_groups(n, edges):\n    return len(edges)\n",
+      "why": "Возвращено число рёбер."
+    },
+    {
+      "code": "def count_groups(n, edges):\n    graph = {i: [] for i in range(n)}\n    for a, b in edges:\n        graph[a].append(b)\n        graph[b].append(a)\n    seen = set()\n    count = 0\n    for start in range(n):\n        if start in seen:\n            continue\n        count += 1\n        stack = [start]\n        while stack:\n            node = stack.pop()\n            if node in seen:\n                continue\n            seen.add(node)\n            stack.extend(graph[node])\n    return count - 1\n",
+      "why": "Результат уменьшен на единицу."
+    }
+  ]
+}

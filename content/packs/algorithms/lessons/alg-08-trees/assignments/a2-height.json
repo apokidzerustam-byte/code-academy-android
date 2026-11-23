@@ -1,0 +1,115 @@
+{
+  "id": "a2-height",
+  "type": "function",
+  "title": "Высота дерева",
+  "statement": "Используя `Node`, `insert`, `build`, напишите `tree_height(values)`: высота дерева, построенного вставкой значений по порядку (в узлах; пустое дерево — 0, один узел — 1).",
+  "goal": "Высота дерева",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Высота пустого дерева — 0.",
+    "Высота узла на единицу больше высоты более высокого поддерева.",
+    "Используйте max(height(left), height(right)).",
+    "Не забудьте прибавить единицу за сам узел.",
+    "return 1 + max(height(node.left), height(node.right))."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "tree_height",
+    "cases": [
+      {
+        "args": [
+          [
+            5,
+            3,
+            8,
+            1,
+            4,
+            9
+          ]
+        ],
+        "id": "v1",
+        "expected": 3
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": 0
+      },
+      {
+        "args": [
+          [
+            1
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 1
+      },
+      {
+        "args": [
+          [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 5
+      },
+      {
+        "args": [
+          [
+            3,
+            2,
+            1
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 3
+      },
+      {
+        "args": [
+          [
+            4,
+            2,
+            6,
+            1,
+            3,
+            5,
+            7
+          ]
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": 3
+      }
+    ]
+  },
+  "solution": "class Node:\n    def __init__(self, value):\n        self.value = value\n        self.left = None\n        self.right = None\n\n\ndef insert(node, value):\n    if node is None:\n        return Node(value)\n    if value < node.value:\n        node.left = insert(node.left, value)\n    elif value > node.value:\n        node.right = insert(node.right, value)\n    return node\n\n\ndef build(values):\n    root = None\n    for v in values:\n        root = insert(root, v)\n    return root\n\n\ndef height(node):\n    if node is None:\n        return 0\n    return 1 + max(height(node.left), height(node.right))\n\n\ndef tree_height(values):\n    return height(build(values))\n",
+  "explanation": "Рекурсия по поддеревьям: высота — единица плюс максимум из высот потомков.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "class Node:\n    def __init__(self, value):\n        self.value = value\n        self.left = None\n        self.right = None\n\n\ndef insert(node, value):\n    if node is None:\n        return Node(value)\n    if value < node.value:\n        node.left = insert(node.left, value)\n    elif value > node.value:\n        node.right = insert(node.right, value)\n    return node\n\n\ndef build(values):\n    root = None\n    for v in values:\n        root = insert(root, v)\n    return root\n\n\ndef height(node):\n    if node is None:\n        return 0\n    return 1 + height(node.left)\n\n\ndef tree_height(values):\n    return height(build(values))\n",
+      "why": "Учитывается только левая ветвь."
+    },
+    {
+      "code": "class Node:\n    def __init__(self, value):\n        self.value = value\n        self.left = None\n        self.right = None\n\n\ndef insert(node, value):\n    if node is None:\n        return Node(value)\n    if value < node.value:\n        node.left = insert(node.left, value)\n    elif value > node.value:\n        node.right = insert(node.right, value)\n    return node\n\n\ndef build(values):\n    root = None\n    for v in values:\n        root = insert(root, v)\n    return root\n\n\ndef height(node):\n    if node is None:\n        return 0\n    return height(node.left) + height(node.right)\n\n\ndef tree_height(values):\n    return height(build(values))\n",
+      "why": "Высоты сложены, а не выбран максимум (и базовый случай теряет единицу)."
+    },
+    {
+      "code": "class Node:\n    def __init__(self, value):\n        self.value = value\n        self.left = None\n        self.right = None\n\n\ndef insert(node, value):\n    if node is None:\n        return Node(value)\n    if value < node.value:\n        node.left = insert(node.left, value)\n    elif value > node.value:\n        node.right = insert(node.right, value)\n    return node\n\n\ndef build(values):\n    root = None\n    for v in values:\n        root = insert(root, v)\n    return root\n\n\ndef height(node):\n    if node is None:\n        return -1\n    return 1 + max(height(node.left), height(node.right))\n\n\ndef tree_height(values):\n    return height(build(values))\n",
+      "why": "Высота считается в рёбрах, а нужно в узлах."
+    }
+  ]
+}

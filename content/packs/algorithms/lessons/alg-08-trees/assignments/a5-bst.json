@@ -1,0 +1,41 @@
+{
+  "id": "a5-bst",
+  "type": "predict",
+  "title": "Что в дереве",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Что в дереве",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "class Node:\n    def __init__(self, value):\n        self.value = value\n        self.left = None\n        self.right = None\n\n\ndef insert(node, value):\n    if node is None:\n        return Node(value)\n    if value < node.value:\n        node.left = insert(node.left, value)\n    elif value > node.value:\n        node.right = insert(node.right, value)\n    return node\n\n\ndef build(values):\n    root = None\n    for v in values:\n        root = insert(root, v)\n    return root\n\n\nroot = build([6, 2, 9, 1, 4, 7])\nprint(root.left.right.value)\nprint(root.right.left.value, root.right.right)\nnode, steps = root, 0\nwhile node.left:\n    node = node.left\n    steps += 1\nprint(node.value, steps)\n",
+  "hints": [
+    "Вставляем 6, 2, 9, 1, 4, 7: корень 6.",
+    "2 < 6 — влево; 9 > 6 — вправо; 1 < 6, 1 < 2 — влево от 2; 4 < 6, 4 > 2 — вправо от 2; 7 > 6, 7 < 9 — влево от 9.",
+    "root.left.right — это 4.",
+    "У узла 9 нет правого потомка: None.",
+    "Ползём влево до конца: 6 → 2 → 1, два шага."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "4\n7 None\n1 2\n"
+  },
+  "solution": "4\n7 None\n1 2\n",
+  "explanation": "Дерево: 6 (лево 2 (лево 1, право 4), право 9 (лево 7)). Самое левое значение — минимум.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "4\n7 9\n1 2\n",
+      "answer": "4\n7 9\n1 2\n",
+      "why": "root.right.right — пустая ссылка: значение None, а не 9."
+    },
+    {
+      "code": "2\n7 None\n1 2\n",
+      "answer": "2\n7 None\n1 2\n",
+      "why": "Левый потомок 2 — это узел 2, а его правый потомок — 4."
+    }
+  ]
+}

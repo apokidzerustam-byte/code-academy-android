@@ -1,0 +1,142 @@
+{
+  "id": "a3-path",
+  "type": "function",
+  "title": "Путь поиска",
+  "statement": "Используя `Node`, `insert`, `build`, напишите `search_path(values, target)`: постройте дерево и верните список значений узлов, через которые проходит поиск `target` от корня (включая последний проверенный узел). Если `target` нет — путь всё равно возвращается до места, где поиск остановился.\n\nПример: для `[5, 3, 8, 1, 4, 9]` и `4` → `[5, 3, 4]`.",
+  "goal": "Путь поиска",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Начинайте с корня и спускайтесь вниз.",
+    "На каждом узле запишите его значение в путь.",
+    "Если искомое равно значению узла — остановитесь.",
+    "Меньше — идите влево, больше — вправо.",
+    "Цикл while node is not None завершится, когда дойдёте до пустого места."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "search_path",
+    "cases": [
+      {
+        "args": [
+          [
+            5,
+            3,
+            8,
+            1,
+            4,
+            9
+          ],
+          4
+        ],
+        "id": "v1",
+        "expected": [
+          5,
+          3,
+          4
+        ]
+      },
+      {
+        "args": [
+          [
+            5,
+            3,
+            8
+          ],
+          7
+        ],
+        "id": "v2",
+        "expected": [
+          5,
+          8
+        ]
+      },
+      {
+        "args": [
+          [],
+          1
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            5,
+            3,
+            8,
+            1,
+            4,
+            9
+          ],
+          5
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          5
+        ]
+      },
+      {
+        "args": [
+          [
+            1,
+            2,
+            3,
+            4
+          ],
+          4
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "args": [
+          [
+            5,
+            3,
+            8,
+            1,
+            4,
+            9
+          ],
+          0
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": [
+          5,
+          3,
+          1
+        ]
+      }
+    ]
+  },
+  "solution": "class Node:\n    def __init__(self, value):\n        self.value = value\n        self.left = None\n        self.right = None\n\n\ndef insert(node, value):\n    if node is None:\n        return Node(value)\n    if value < node.value:\n        node.left = insert(node.left, value)\n    elif value > node.value:\n        node.right = insert(node.right, value)\n    return node\n\n\ndef build(values):\n    root = None\n    for v in values:\n        root = insert(root, v)\n    return root\n\n\ndef search_path(values, target):\n    node = build(values)\n    path = []\n    while node is not None:\n        path.append(node.value)\n        if target == node.value:\n            break\n        node = node.left if target < node.value else node.right\n    return path\n",
+  "explanation": "Поиск в дереве проходит один путь от корня; длина пути не больше высоты дерева.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "class Node:\n    def __init__(self, value):\n        self.value = value\n        self.left = None\n        self.right = None\n\n\ndef insert(node, value):\n    if node is None:\n        return Node(value)\n    if value < node.value:\n        node.left = insert(node.left, value)\n    elif value > node.value:\n        node.right = insert(node.right, value)\n    return node\n\n\ndef build(values):\n    root = None\n    for v in values:\n        root = insert(root, v)\n    return root\n\n\ndef search_path(values, target):\n    node = build(values)\n    path = []\n    while node is not None:\n        if target == node.value:\n            break\n        path.append(node.value)\n        node = node.left if target < node.value else node.right\n    return path\n",
+      "why": "Найденный узел не включён в путь."
+    },
+    {
+      "code": "class Node:\n    def __init__(self, value):\n        self.value = value\n        self.left = None\n        self.right = None\n\n\ndef insert(node, value):\n    if node is None:\n        return Node(value)\n    if value < node.value:\n        node.left = insert(node.left, value)\n    elif value > node.value:\n        node.right = insert(node.right, value)\n    return node\n\n\ndef build(values):\n    root = None\n    for v in values:\n        root = insert(root, v)\n    return root\n\n\ndef search_path(values, target):\n    node = build(values)\n    path = []\n    while node is not None:\n        path.append(node.value)\n        if target == node.value:\n            break\n        node = node.right if target < node.value else node.left\n    return path\n",
+      "why": "Направление выбрано наоборот."
+    },
+    {
+      "code": "def search_path(values, target):\n    return [v for v in values if v <= target]\n",
+      "why": "Путь не строится по дереву."
+    }
+  ]
+}

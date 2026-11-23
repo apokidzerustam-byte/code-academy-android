@@ -1,0 +1,46 @@
+{
+  "id": "alg-07-hash",
+  "title": "Хеш-таблицы",
+  "goal": "Понимать устройство хеш-таблиц и использовать dict/set для подсчёта, группировки и поиска пар.",
+  "skills": [
+    "algo.hash",
+    "algo.hash.collision"
+  ],
+  "prerequisites": [
+    "alg-06-stack-queue"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-twosum.json",
+    "assignments/a2-unique.json",
+    "assignments/a3-anagrams.json",
+    "assignments/a4-table.json",
+    "assignments/a5-sets.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Кладут список в качестве ключа словаря",
+      "fix": "Замените на кортеж: список изменяем и не имеет хеша.",
+      "errorType": "TypeError"
+    },
+    {
+      "mistake": "Проверяют наличие через список в цикле, хотя нужен быстрый поиск",
+      "fix": "Превратите в set или dict: x in set — O(1)."
+    },
+    {
+      "mistake": "Обращаются к отсутствующему ключу dict[key]",
+      "fix": "Используйте dict.get(key, default).",
+      "errorType": "KeyError"
+    },
+    {
+      "mistake": "Рассчитывают на порядок элементов множества",
+      "fix": "У set нет порядка; для вывода используйте sorted."
+    }
+  ]
+}

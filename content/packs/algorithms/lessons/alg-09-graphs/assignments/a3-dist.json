@@ -1,0 +1,161 @@
+{
+  "id": "a3-dist",
+  "type": "function",
+  "title": "Расстояние между вершинами",
+  "statement": "Заготовлена `build_graph(edges)`. Напишите `dist(edges, a, b)`: минимальное число рёбер между `a` и `b`, либо `-1`, если пути нет или вершины нет в графе. `dist(edges, x, x)` для вершины графа равно `0`.",
+  "goal": "Расстояние между вершинами",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Кратчайший путь по числу рёбер ищет обход в ширину.",
+    "Храните в очереди пары (вершина, расстояние).",
+    "Старт имеет расстояние 0.",
+    "Когда сняли вершину b — верните её расстояние.",
+    "Если очередь опустела — путь не найден: -1."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "dist",
+    "cases": [
+      {
+        "args": [
+          [
+            [
+              "A",
+              "B"
+            ],
+            [
+              "B",
+              "C"
+            ],
+            [
+              "A",
+              "D"
+            ],
+            [
+              "D",
+              "C"
+            ],
+            [
+              "C",
+              "E"
+            ]
+          ],
+          "A",
+          "E"
+        ],
+        "id": "v1",
+        "expected": 3
+      },
+      {
+        "args": [
+          [
+            [
+              "A",
+              "B"
+            ],
+            [
+              "C",
+              "D"
+            ]
+          ],
+          "A",
+          "D"
+        ],
+        "id": "v2",
+        "expected": -1
+      },
+      {
+        "args": [
+          [
+            [
+              "A",
+              "B"
+            ]
+          ],
+          "A",
+          "A"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          [
+            [
+              "A",
+              "B"
+            ]
+          ],
+          "A",
+          "Z"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": -1
+      },
+      {
+        "args": [
+          [
+            [
+              "1",
+              "2"
+            ],
+            [
+              "2",
+              "3"
+            ],
+            [
+              "3",
+              "4"
+            ],
+            [
+              "4",
+              "5"
+            ],
+            [
+              "1",
+              "5"
+            ]
+          ],
+          "2",
+          "5"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 2
+      },
+      {
+        "args": [
+          [],
+          "A",
+          "B"
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": -1
+      }
+    ]
+  },
+  "solution": "def build_graph(edges):\n    graph = {}\n    for a, b in edges:\n        graph.setdefault(a, []).append(b)\n        graph.setdefault(b, []).append(a)\n    for node in graph:\n        graph[node].sort()\n    return graph\n\n\nfrom collections import deque\n\n\ndef dist(edges, a, b):\n    graph = build_graph(edges)\n    if a not in graph or b not in graph:\n        return -1\n    seen = {a}\n    queue = deque([(a, 0)])\n    while queue:\n        node, d = queue.popleft()\n        if node == b:\n            return d\n        for nxt in graph[node]:\n            if nxt not in seen:\n                seen.add(nxt)\n                queue.append((nxt, d + 1))\n    return -1\n",
+  "explanation": "BFS посещает вершины в порядке возрастания расстояния, поэтому первая найденная цель — ближайшая.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def build_graph(edges):\n    graph = {}\n    for a, b in edges:\n        graph.setdefault(a, []).append(b)\n        graph.setdefault(b, []).append(a)\n    for node in graph:\n        graph[node].sort()\n    return graph\n\n\nfrom collections import deque\n\n\ndef dist(edges, a, b):\n    graph = build_graph(edges)\n    if a not in graph or b not in graph:\n        return -1\n    seen = {a}\n    stack = [(a, 0)]\n    while stack:\n        node, d = stack.pop()\n        if node == b:\n            return d\n        for nxt in graph[node]:\n            if nxt not in seen:\n                seen.add(nxt)\n                stack.append((nxt, d + 1))\n    return -1\n",
+      "why": "Стек даёт обход в глубину: найденный путь не обязательно кратчайший."
+    },
+    {
+      "code": "def build_graph(edges):\n    graph = {}\n    for a, b in edges:\n        graph.setdefault(a, []).append(b)\n        graph.setdefault(b, []).append(a)\n    for node in graph:\n        graph[node].sort()\n    return graph\n\n\nfrom collections import deque\n\n\ndef dist(edges, a, b):\n    graph = build_graph(edges)\n    seen = {a}\n    queue = deque([(a, 0)])\n    while queue:\n        node, d = queue.popleft()\n        if node == b:\n            return d\n        for nxt in graph.get(node, []):\n            if nxt not in seen:\n                seen.add(nxt)\n                queue.append((nxt, d + 1))\n    return 0\n",
+      "why": "Если пути нет, возвращается 0 вместо -1."
+    },
+    {
+      "code": "def build_graph(edges):\n    graph = {}\n    for a, b in edges:\n        graph.setdefault(a, []).append(b)\n        graph.setdefault(b, []).append(a)\n    for node in graph:\n        graph[node].sort()\n    return graph\n\n\nfrom collections import deque\n\n\ndef dist(edges, a, b):\n    graph = build_graph(edges)\n    if a not in graph or b not in graph:\n        return -1\n    seen = {a}\n    queue = deque([(a, 1)])\n    while queue:\n        node, d = queue.popleft()\n        if node == b:\n            return d\n        for nxt in graph[node]:\n            if nxt not in seen:\n                seen.add(nxt)\n                queue.append((nxt, d + 1))\n    return -1\n",
+      "why": "Отсчёт начинается с 1, а не с 0."
+    }
+  ]
+}

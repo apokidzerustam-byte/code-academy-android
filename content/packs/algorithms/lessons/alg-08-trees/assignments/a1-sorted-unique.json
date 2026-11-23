@@ -1,0 +1,139 @@
+{
+  "id": "a1-sorted-unique",
+  "type": "complete",
+  "title": "Дерево как сортировщик",
+  "statement": "Заготовлены `Node`, `insert` и `build(values)` (построение дерева поиска). Напишите `sorted_unique(values)`: постройте дерево и верните значения симметричным обходом (по возрастанию, без повторов).",
+  "goal": "Дерево как сортировщик",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "class Node:\n    def __init__(self, value):\n        self.value = value\n        self.left = None\n        self.right = None\n\n\ndef insert(node, value):\n    if node is None:\n        return Node(value)\n    if value < node.value:\n        node.left = insert(node.left, value)\n    elif value > node.value:\n        node.right = insert(node.right, value)\n    return node\n\n\ndef build(values):\n    root = None\n    for v in values:\n        root = insert(root, v)\n    return root\n\n\ndef sorted_unique(values):\n    # постройте дерево и обойдите его симметрично\n    pass\n",
+  "hints": [
+    "Дерево поиска хранит меньшие значения слева, большие справа.",
+    "Обход «левое поддерево → узел → правое поддерево» называется симметричным.",
+    "Для пустого узла верните пустой список.",
+    "Результат: inorder(left) + [value] + inorder(right).",
+    "Не забудьте построить дерево: build(values)."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "sorted_unique",
+    "cases": [
+      {
+        "args": [
+          [
+            5,
+            3,
+            8,
+            1,
+            4,
+            9
+          ]
+        ],
+        "id": "v1",
+        "expected": [
+          1,
+          3,
+          4,
+          5,
+          8,
+          9
+        ]
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            2,
+            2,
+            2
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          2
+        ]
+      },
+      {
+        "args": [
+          [
+            5,
+            4,
+            3,
+            2,
+            1
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      {
+        "args": [
+          [
+            3,
+            1,
+            2,
+            3,
+            1
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "args": [
+          [
+            -1,
+            7,
+            0
+          ]
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": [
+          -1,
+          0,
+          7
+        ]
+      }
+    ]
+  },
+  "solution": "class Node:\n    def __init__(self, value):\n        self.value = value\n        self.left = None\n        self.right = None\n\n\ndef insert(node, value):\n    if node is None:\n        return Node(value)\n    if value < node.value:\n        node.left = insert(node.left, value)\n    elif value > node.value:\n        node.right = insert(node.right, value)\n    return node\n\n\ndef build(values):\n    root = None\n    for v in values:\n        root = insert(root, v)\n    return root\n\n\ndef inorder(node):\n    if node is None:\n        return []\n    return inorder(node.left) + [node.value] + inorder(node.right)\n\n\ndef sorted_unique(values):\n    return inorder(build(values))\n",
+  "explanation": "In-order обход дерева поиска выдаёт значения по возрастанию, а вставка игнорирует повторы.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "class Node:\n    def __init__(self, value):\n        self.value = value\n        self.left = None\n        self.right = None\n\n\ndef insert(node, value):\n    if node is None:\n        return Node(value)\n    if value < node.value:\n        node.left = insert(node.left, value)\n    elif value > node.value:\n        node.right = insert(node.right, value)\n    return node\n\n\ndef build(values):\n    root = None\n    for v in values:\n        root = insert(root, v)\n    return root\n\n\ndef preorder(node):\n    if node is None:\n        return []\n    return [node.value] + preorder(node.left) + preorder(node.right)\n\n\ndef sorted_unique(values):\n    return preorder(build(values))\n",
+      "why": "Прямой обход (узел-лево-право) не даёт отсортированного порядка."
+    },
+    {
+      "code": "class Node:\n    def __init__(self, value):\n        self.value = value\n        self.left = None\n        self.right = None\n\n\ndef insert(node, value):\n    if node is None:\n        return Node(value)\n    if value < node.value:\n        node.left = insert(node.left, value)\n    elif value > node.value:\n        node.right = insert(node.right, value)\n    return node\n\n\ndef build(values):\n    root = None\n    for v in values:\n        root = insert(root, v)\n    return root\n\n\ndef inorder(node):\n    if node is None:\n        return []\n    return inorder(node.right) + [node.value] + inorder(node.left)\n\n\ndef sorted_unique(values):\n    return inorder(build(values))\n",
+      "why": "Правое поддерево обходится раньше левого: порядок по убыванию."
+    },
+    {
+      "code": "def sorted_unique(values):\n    return sorted(values)\n",
+      "why": "Повторы не удалены."
+    }
+  ]
+}

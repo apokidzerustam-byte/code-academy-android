@@ -1,0 +1,200 @@
+{
+  "id": "a4-table",
+  "type": "function",
+  "title": "Своя хеш-таблица",
+  "statement": "Напишите `build_table(pairs, size)`: создайте таблицу из `size` пустых корзин (списков) и по очереди добавьте пары `[ключ, значение]` методом цепочек. Номер корзины — `сумма кодов символов ключа % size`. Если ключ уже есть в корзине, обновите значение. Верните список корзин, каждая — список пар `[ключ, значение]` в порядке добавления.",
+  "goal": "Своя хеш-таблица",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Таблица — список из size пустых списков.",
+    "Номер корзины: sum(ord(ch) for ch in key) % size.",
+    "Внутри корзины ищите ключ перед добавлением.",
+    "Нашли — обновите значение, не нашли — добавьте пару.",
+    "Конструкция for … else: else выполняется, если не было break."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "build_table",
+    "cases": [
+      {
+        "args": [
+          [
+            [
+              "Аня",
+              20
+            ],
+            [
+              "Борис",
+              25
+            ],
+            [
+              "Вера",
+              30
+            ],
+            [
+              "Аня",
+              21
+            ]
+          ],
+          3
+        ],
+        "id": "v1",
+        "expected": [
+          [
+            [
+              "Аня",
+              21
+            ]
+          ],
+          [
+            [
+              "Вера",
+              30
+            ]
+          ],
+          [
+            [
+              "Борис",
+              25
+            ]
+          ]
+        ]
+      },
+      {
+        "args": [
+          [],
+          2
+        ],
+        "id": "v2",
+        "expected": [
+          [],
+          []
+        ]
+      },
+      {
+        "args": [
+          [
+            [
+              "a",
+              1
+            ],
+            [
+              "b",
+              2
+            ]
+          ],
+          1
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          [
+            [
+              "a",
+              1
+            ],
+            [
+              "b",
+              2
+            ]
+          ]
+        ]
+      },
+      {
+        "args": [
+          [
+            [
+              "a",
+              1
+            ],
+            [
+              "a",
+              2
+            ],
+            [
+              "a",
+              3
+            ]
+          ],
+          4
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          [],
+          [
+            [
+              "a",
+              3
+            ]
+          ],
+          [],
+          []
+        ]
+      },
+      {
+        "args": [
+          [
+            [
+              "ab",
+              1
+            ],
+            [
+              "ba",
+              2
+            ],
+            [
+              "c",
+              3
+            ]
+          ],
+          5
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          [
+            [
+              "ab",
+              1
+            ],
+            [
+              "ba",
+              2
+            ]
+          ],
+          [],
+          [],
+          [],
+          [
+            [
+              "c",
+              3
+            ]
+          ]
+        ]
+      }
+    ]
+  },
+  "solution": "def build_table(pairs, size):\n    table = [[] for _ in range(size)]\n    for key, value in pairs:\n        chain = table[sum(ord(ch) for ch in key) % size]\n        for pair in chain:\n            if pair[0] == key:\n                pair[1] = value\n                break\n        else:\n            chain.append([key, value])\n    return table\n",
+  "explanation": "Цепочка защищает от потери данных при коллизиях; поиск по ключу внутри корзины перебирает короткий список.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def build_table(pairs, size):\n    table = [[] for _ in range(size)]\n    for key, value in pairs:\n        chain = table[sum(ord(ch) for ch in key) % size]\n        chain.append([key, value])\n    return table\n",
+      "why": "Повторяющийся ключ добавляется второй раз вместо обновления."
+    },
+    {
+      "code": "def build_table(pairs, size):\n    table = [[] for _ in range(size)]\n    for key, value in pairs:\n        table[sum(ord(ch) for ch in key) % size] = [[key, value]]\n    return table\n",
+      "why": "Коллизии затирают предыдущие пары: нет цепочки."
+    },
+    {
+      "code": "def build_table(pairs, size):\n    table = [[] for _ in range(size)]\n    for key, value in pairs:\n        chain = table[len(key) % size]\n        for pair in chain:\n            if pair[0] == key:\n                pair[1] = value\n                break\n        else:\n            chain.append([key, value])\n    return table\n",
+      "why": "Номер корзины считается по длине ключа, а не по сумме кодов."
+    }
+  ]
+}

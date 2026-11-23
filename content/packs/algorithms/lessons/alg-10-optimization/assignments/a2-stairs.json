@@ -1,0 +1,88 @@
+{
+  "id": "a2-stairs",
+  "type": "function",
+  "title": "Лестница",
+  "statement": "Напишите `ways(n)`: число способов подняться на ступеньку `n` шагами по 1 или 2 ступеньки (`n >= 0`, `ways(0) = 1`).\n\nПример: `ways(4)` → `5`.",
+  "goal": "Лестница",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "До ступеньки n можно добраться с n-1 или с n-2.",
+    "ways(n) = ways(n-1) + ways(n-2).",
+    "Базовые значения: ways(0) = 1, ways(1) = 1.",
+    "Заполняйте таблицу от меньшего к большему.",
+    "Верните table[n]."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "ways",
+    "cases": [
+      {
+        "args": [
+          4
+        ],
+        "id": "v1",
+        "expected": 5
+      },
+      {
+        "args": [
+          0
+        ],
+        "id": "v2",
+        "expected": 1
+      },
+      {
+        "args": [
+          1
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 1
+      },
+      {
+        "args": [
+          2
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 2
+      },
+      {
+        "args": [
+          10
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 89
+      },
+      {
+        "args": [
+          45
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": 1836311903
+      }
+    ]
+  },
+  "solution": "def ways(n):\n    table = [1, 1]\n    for i in range(2, n + 1):\n        table.append(table[i - 1] + table[i - 2])\n    return table[n]\n",
+  "explanation": "Это то же число Фибоначчи со сдвигом: таблица заполняется снизу вверх.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def ways(n):\n    table = [1, 1]\n    for i in range(2, n + 1):\n        table.append(table[i - 1] + table[i - 2])\n    return table[n - 1]\n",
+      "why": "Смещение на единицу: возвращается ответ для n - 1."
+    },
+    {
+      "code": "def ways(n):\n    table = [1, 2]\n    for i in range(2, n + 1):\n        table.append(table[i - 1] + table[i - 2])\n    return table[n]\n",
+      "why": "Неверные начальные значения таблицы."
+    },
+    {
+      "code": "def ways(n):\n    return n\n",
+      "why": "Количество способов не равно n."
+    }
+  ]
+}

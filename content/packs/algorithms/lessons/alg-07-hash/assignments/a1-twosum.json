@@ -1,0 +1,127 @@
+{
+  "id": "a1-twosum",
+  "type": "function",
+  "title": "Пара с заданной суммой",
+  "statement": "Напишите `two_sum(nums, target)`: верните индексы `[i, j]` (`i < j`) двух разных элементов с суммой `target`; в тестах такая пара ровно одна. Если пары нет — `None`.\n\nПример: `two_sum([2, 7, 11, 15], 9)` → `[0, 1]`.",
+  "goal": "Пара с заданной суммой",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Переберите числа и для каждого ищите «дополнение»: target - x.",
+    "Быстрый поиск дополнения — словарь «число → индекс».",
+    "Проверяйте дополнение до записи текущего числа в словарь.",
+    "Нашли дополнение — верните его индекс и текущий.",
+    "Иначе запомните seen[x] = i; в конце верните None."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "two_sum",
+    "cases": [
+      {
+        "args": [
+          [
+            2,
+            7,
+            11,
+            15
+          ],
+          9
+        ],
+        "id": "v1",
+        "expected": [
+          0,
+          1
+        ]
+      },
+      {
+        "args": [
+          [
+            3,
+            2,
+            4
+          ],
+          6
+        ],
+        "id": "v2",
+        "expected": [
+          1,
+          2
+        ]
+      },
+      {
+        "args": [
+          [
+            1,
+            2,
+            3
+          ],
+          100
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": null
+      },
+      {
+        "args": [
+          [
+            3,
+            3
+          ],
+          6
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          0,
+          1
+        ]
+      },
+      {
+        "args": [
+          [
+            5,
+            1,
+            8,
+            4
+          ],
+          12
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          2,
+          3
+        ]
+      },
+      {
+        "args": [
+          [],
+          1
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": null
+      }
+    ]
+  },
+  "solution": "def two_sum(nums, target):\n    seen = {}\n    for i, x in enumerate(nums):\n        if target - x in seen:\n            return [seen[target - x], i]\n        seen[x] = i\n    return None\n",
+  "explanation": "Словарь превращает поиск дополнения из O(n) в O(1), а всю задачу — в один проход.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def two_sum(nums, target):\n    for x in nums:\n        for y in nums:\n            if x + y == target:\n                return [x, y]\n    return None\n",
+      "why": "Возвращаются значения, а не индексы (и один элемент может быть взят дважды)."
+    },
+    {
+      "code": "def two_sum(nums, target):\n    seen = {}\n    for i, x in enumerate(nums):\n        seen[x] = i\n        if target - x in seen:\n            return [seen[target - x], i]\n    return None\n",
+      "why": "Число добавляется в словарь до проверки: может быть использовано само с собой."
+    },
+    {
+      "code": "def two_sum(nums, target):\n    seen = {}\n    for i, x in enumerate(nums):\n        if target - x in seen:\n            return [i, seen[target - x]]\n        seen[x] = i\n    return None\n",
+      "why": "Индексы возвращаются в обратном порядке."
+    }
+  ]
+}

@@ -1,0 +1,168 @@
+{
+  "id": "a1-build",
+  "type": "function",
+  "title": "Список смежности",
+  "statement": "Напишите `build_graph(edges)`: `edges` — список пар `[a, b]` (неориентированные рёбра). Верните словарь «вершина → **отсортированный** список соседей». Повторяющиеся рёбра не должны дублировать соседей.\n\nПример: `build_graph([[\"A\", \"B\"], [\"A\", \"C\"]])` → `{\"A\": [\"B\", \"C\"], \"B\": [\"A\"], \"C\": [\"A\"]}`.",
+  "goal": "Список смежности",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Для каждого ребра нужны две записи: a → b и b → a.",
+    "Для вершины заведите пустой набор соседей: graph.setdefault(a, set()).",
+    "Множество автоматически убирает дубликаты.",
+    "В конце превратите множества в отсортированные списки.",
+    "{node: sorted(neighbors) for node, neighbors in graph.items()}."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "build_graph",
+    "cases": [
+      {
+        "args": [
+          [
+            [
+              "A",
+              "B"
+            ],
+            [
+              "A",
+              "C"
+            ]
+          ]
+        ],
+        "id": "v1",
+        "expected": {
+          "A": [
+            "B",
+            "C"
+          ],
+          "B": [
+            "A"
+          ],
+          "C": [
+            "A"
+          ]
+        }
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": {}
+      },
+      {
+        "args": [
+          [
+            [
+              "A",
+              "B"
+            ],
+            [
+              "B",
+              "A"
+            ],
+            [
+              "A",
+              "B"
+            ]
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": {
+          "A": [
+            "B"
+          ],
+          "B": [
+            "A"
+          ]
+        }
+      },
+      {
+        "args": [
+          [
+            [
+              "Х",
+              "Ю"
+            ],
+            [
+              "Я",
+              "Х"
+            ]
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": {
+          "Х": [
+            "Ю",
+            "Я"
+          ],
+          "Ю": [
+            "Х"
+          ],
+          "Я": [
+            "Х"
+          ]
+        }
+      },
+      {
+        "args": [
+          [
+            [
+              "A",
+              "B"
+            ],
+            [
+              "C",
+              "D"
+            ],
+            [
+              "B",
+              "C"
+            ]
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": {
+          "A": [
+            "B"
+          ],
+          "B": [
+            "A",
+            "C"
+          ],
+          "C": [
+            "B",
+            "D"
+          ],
+          "D": [
+            "C"
+          ]
+        }
+      }
+    ]
+  },
+  "solution": "def build_graph(edges):\n    graph = {}\n    for a, b in edges:\n        graph.setdefault(a, set()).add(b)\n        graph.setdefault(b, set()).add(a)\n    return {node: sorted(neighbors) for node, neighbors in graph.items()}\n",
+  "explanation": "Словарь со множествами защищает от дубликатов; sorted делает результат предсказуемым.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def build_graph(edges):\n    graph = {}\n    for a, b in edges:\n        graph.setdefault(a, set()).add(b)\n    return {node: sorted(neighbors) for node, neighbors in graph.items()}\n",
+      "why": "Ребро добавлено только в одну сторону."
+    },
+    {
+      "code": "def build_graph(edges):\n    graph = {}\n    for a, b in edges:\n        graph.setdefault(a, []).append(b)\n        graph.setdefault(b, []).append(a)\n    return graph\n",
+      "why": "Соседи не отсортированы и дублируются при повторных рёбрах."
+    },
+    {
+      "code": "def build_graph(edges):\n    graph = {}\n    for a, b in edges:\n        graph[a] = [b]\n        graph[b] = [a]\n    return graph\n",
+      "why": "Каждое новое ребро затирает предыдущие."
+    }
+  ]
+}

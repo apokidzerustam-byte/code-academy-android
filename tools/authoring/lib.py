@@ -62,6 +62,7 @@ def S(id, title, narration, *steps, stress=None):
             else:
                 line = _error_line(res["stderr"])
                 assert line, (id, "код упал без сообщения", res)
+                print(f"  ! сцена {id}: код завершился ошибкой «{line}» (если это не демонстрация ошибки — исправьте сцену)")
                 actions.append(OUT(line + "\n", at=st[1], err=True))
         elif k == "n":
             actions.append(NOTE(st[1], at=st[2]))

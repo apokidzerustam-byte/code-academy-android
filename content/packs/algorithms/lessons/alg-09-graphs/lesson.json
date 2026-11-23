@@ -1,0 +1,46 @@
+{
+  "id": "alg-09-graphs",
+  "title": "Графы",
+  "goal": "Хранить граф списками смежности, обходить его в ширину и в глубину, искать кратчайшие пути и компоненты связности.",
+  "skills": [
+    "algo.graph",
+    "algo.graph.bfs",
+    "algo.graph.dfs"
+  ],
+  "prerequisites": [
+    "alg-08-trees",
+    "alg-06-stack-queue"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-build.json",
+    "assignments/a2-bfs.json",
+    "assignments/a3-dist.json",
+    "assignments/a4-components.json",
+    "assignments/a5-order.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Не ведут множество посещённых вершин",
+      "fix": "Иначе обход зацикливается на графе с циклами."
+    },
+    {
+      "mistake": "Добавляют ребро только в одну сторону в неориентированном графе",
+      "fix": "Добавляйте и a → b, и b → a."
+    },
+    {
+      "mistake": "Используют DFS для кратчайшего пути",
+      "fix": "Кратчайший путь по числу рёбер находит BFS."
+    },
+    {
+      "mistake": "Отмечают вершину посещённой при снятии из очереди",
+      "fix": "Отмечайте при постановке в очередь, чтобы не добавить её дважды."
+    }
+  ]
+}

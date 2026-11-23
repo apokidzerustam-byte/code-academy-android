@@ -15,7 +15,11 @@
     "alg-03-sorting",
     "alg-04-recursion",
     "alg-05-fast-sorts",
-    "alg-06-stack-queue"
+    "alg-06-stack-queue",
+    "alg-07-hash",
+    "alg-08-trees",
+    "alg-09-graphs",
+    "alg-10-optimization"
   ],
   "skills": {
     "algo.bigo": "Big O: рост числа шагов",
@@ -30,6 +34,17 @@
     "algo.sort.merge": "Сортировка слиянием",
     "algo.sort.quick": "Быстрая сортировка",
     "algo.stack": "Стек",
-    "algo.queue": "Очередь (deque)"
+    "algo.queue": "Очередь (deque)",
+    "algo.hash": "Хеш-таблицы",
+    "algo.hash.collision": "Коллизии и цепочки",
+    "algo.tree": "Бинарные деревья",
+    "algo.tree.bst": "Дерево поиска (BST)",
+    "algo.tree.traversal": "Обходы дерева",
+    "algo.graph": "Графы и списки смежности",
+    "algo.graph.bfs": "Обход в ширину",
+    "algo.graph.dfs": "Обход в глубину",
+    "algo.opt.memo": "Мемоизация и lru_cache",
+    "algo.opt.dp": "Динамическое программирование",
+    "algo.opt.prefix": "Префиксные суммы"
   }
 }

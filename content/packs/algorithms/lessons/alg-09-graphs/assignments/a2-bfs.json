@@ -1,0 +1,167 @@
+{
+  "id": "a2-bfs",
+  "type": "complete",
+  "title": "Порядок обхода в ширину",
+  "statement": "Заготовлена `build_graph(edges)` (соседи отсортированы). Напишите `bfs_order(edges, start)`: список вершин в порядке обхода в ширину от `start`, соседи — по алфавиту. Если вершины `start` нет в графе, верните `[start]`.\n\nВершины недостижимые из `start` не включаются.",
+  "goal": "Порядок обхода в ширину",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def build_graph(edges):\n    graph = {}\n    for a, b in edges:\n        graph.setdefault(a, []).append(b)\n        graph.setdefault(b, []).append(a)\n    for node in graph:\n        graph[node].sort()\n    return graph\n\n\ndef bfs_order(edges, start):\n    graph = build_graph(edges)\n    # обход в ширину от start\n    pass\n",
+  "hints": [
+    "Для обхода в ширину нужна очередь и множество посещённых.",
+    "Положите start в очередь и в seen.",
+    "Снимайте вершину слева, добавляйте её в порядок.",
+    "Каждого непосещённого соседа помечайте в seen сразу при добавлении в очередь.",
+    "Соседи уже отсортированы функцией build_graph."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "bfs_order",
+    "cases": [
+      {
+        "args": [
+          [
+            [
+              "A",
+              "B"
+            ],
+            [
+              "A",
+              "C"
+            ],
+            [
+              "B",
+              "D"
+            ],
+            [
+              "C",
+              "D"
+            ]
+          ],
+          "A"
+        ],
+        "id": "v1",
+        "expected": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ]
+      },
+      {
+        "args": [
+          [
+            [
+              "A",
+              "B"
+            ],
+            [
+              "C",
+              "D"
+            ]
+          ],
+          "A"
+        ],
+        "id": "v2",
+        "expected": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "args": [
+          [],
+          "X"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          "X"
+        ]
+      },
+      {
+        "args": [
+          [
+            [
+              "1",
+              "2"
+            ],
+            [
+              "2",
+              "3"
+            ],
+            [
+              "3",
+              "4"
+            ],
+            [
+              "1",
+              "4"
+            ]
+          ],
+          "3"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          "3",
+          "2",
+          "4",
+          "1"
+        ]
+      },
+      {
+        "args": [
+          [
+            [
+              "A",
+              "B"
+            ],
+            [
+              "A",
+              "C"
+            ],
+            [
+              "B",
+              "D"
+            ],
+            [
+              "C",
+              "E"
+            ]
+          ],
+          "B"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          "B",
+          "A",
+          "D",
+          "C",
+          "E"
+        ]
+      }
+    ]
+  },
+  "solution": "def build_graph(edges):\n    graph = {}\n    for a, b in edges:\n        graph.setdefault(a, []).append(b)\n        graph.setdefault(b, []).append(a)\n    for node in graph:\n        graph[node].sort()\n    return graph\n\n\nfrom collections import deque\n\n\ndef bfs_order(edges, start):\n    graph = build_graph(edges)\n    if start not in graph:\n        return [start]\n    seen = {start}\n    queue = deque([start])\n    order = []\n    while queue:\n        node = queue.popleft()\n        order.append(node)\n        for nxt in graph[node]:\n            if nxt not in seen:\n                seen.add(nxt)\n                queue.append(nxt)\n    return order\n",
+  "explanation": "Очередь гарантирует обход по слоям; пометка при постановке в очередь исключает повторы.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def build_graph(edges):\n    graph = {}\n    for a, b in edges:\n        graph.setdefault(a, []).append(b)\n        graph.setdefault(b, []).append(a)\n    for node in graph:\n        graph[node].sort()\n    return graph\n\n\ndef bfs_order(edges, start):\n    graph = build_graph(edges)\n    if start not in graph:\n        return [start]\n    order, stack, seen = [], [start], set()\n    while stack:\n        node = stack.pop()\n        if node in seen:\n            continue\n        seen.add(node)\n        order.append(node)\n        stack.extend(graph[node])\n    return order\n",
+      "why": "Используется стек: получается обход в глубину."
+    },
+    {
+      "code": "def build_graph(edges):\n    graph = {}\n    for a, b in edges:\n        graph.setdefault(a, []).append(b)\n        graph.setdefault(b, []).append(a)\n    for node in graph:\n        graph[node].sort()\n    return graph\n\n\ndef bfs_order(edges, start):\n    graph = build_graph(edges)\n    return sorted(graph) if start in graph else [start]\n",
+      "why": "Возвращены все вершины по алфавиту, а не обход."
+    },
+    {
+      "code": "def build_graph(edges):\n    graph = {}\n    for a, b in edges:\n        graph.setdefault(a, []).append(b)\n        graph.setdefault(b, []).append(a)\n    for node in graph:\n        graph[node].sort()\n    return graph\n\n\nfrom collections import deque\n\n\ndef bfs_order(edges, start):\n    graph = build_graph(edges)\n    if start not in graph:\n        return [start]\n    queue = deque([start])\n    order = []\n    while queue:\n        node = queue.popleft()\n        order.append(node)\n        for nxt in graph[node]:\n            if nxt not in order:\n                queue.append(nxt)\n    return order\n",
+      "why": "Вершины добавляются в очередь повторно: порядок содержит дубликаты или зацикливается."
+    }
+  ]
+}
