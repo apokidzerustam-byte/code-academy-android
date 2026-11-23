@@ -153,18 +153,18 @@
         {
           "type": "highlight",
           "lines": [
+            14
+          ],
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
             9,
             10,
             11
           ],
           "cue": 3
-        },
-        {
-          "type": "highlight",
-          "lines": [
-            14
-          ],
-          "cue": 1
         },
         {
           "type": "type",
