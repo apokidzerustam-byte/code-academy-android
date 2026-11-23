@@ -1,0 +1,92 @@
+{
+  "id": "a2-parse",
+  "type": "function",
+  "title": "Разбор строки",
+  "statement": "Напишите `parse_line(line)`: строка вида `название;сумма` → список `[название, сумма]` (сумма — целое число). Пробелы вокруг частей отбросьте. Если в строке нет `;` или сумма не число — возбудите `ValueError`.",
+  "goal": "Разбор строки",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Строку нужно разделить по точке с запятой.",
+    "Если разделителя нет — ValueError.",
+    "Название и сумму обработайте методом strip.",
+    "Сумму приведите к целому числу.",
+    "int() сам вызовет ValueError для нечисла."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "parse_line",
+    "cases": [
+      {
+        "args": [
+          "кофе;150"
+        ],
+        "id": "v1",
+        "expected": [
+          "кофе",
+          150
+        ]
+      },
+      {
+        "args": [
+          " такси ; 400 "
+        ],
+        "id": "v2",
+        "expected": [
+          "такси",
+          400
+        ]
+      },
+      {
+        "args": [
+          "без разделителя"
+        ],
+        "expected_error": "ValueError",
+        "id": "h3",
+        "hidden": true
+      },
+      {
+        "args": [
+          "кофе;много"
+        ],
+        "expected_error": "ValueError",
+        "id": "h4",
+        "hidden": true
+      },
+      {
+        "args": [
+          "чай;0"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          "чай",
+          0
+        ]
+      },
+      {
+        "args": [
+          "a;-5"
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": [
+          "a",
+          -5
+        ]
+      }
+    ]
+  },
+  "solution": "def parse_line(line):\n    if \";\" not in line:\n        raise ValueError(\"нет разделителя\")\n    name, amount = line.split(\";\", 1)\n    return [name.strip(), int(amount.strip())]\n",
+  "explanation": "Разбор — отдельная ответственность: функция превращает текст в данные и сообщает об ошибке формата.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def parse_line(line):\n    name, amount = line.split(\";\")\n    return [name, int(amount)]\n",
+      "why": "Пробелы не убираются; ошибка для строки без разделителя — не ValueError нужного вида."
+    }
+  ]
+}

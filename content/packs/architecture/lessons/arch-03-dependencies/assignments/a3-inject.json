@@ -1,0 +1,46 @@
+{
+  "id": "a3-inject",
+  "type": "fix",
+  "title": "Внедрите хранилище",
+  "statement": "Сервис сам создаёт список внутри, поэтому программа падает при выборе хранилища. Исправьте: пусть `Service` **принимает** хранилище в конструкторе и вызывает его методы. Хранилище выбирается входной строкой: `list` — обычный порядок, `sorted` — по возрастанию.",
+  "goal": "Внедрите хранилище",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "class ListRepo:\n    def __init__(self):\n        self.items = []\n\n    def add(self, item):\n        self.items.append(item)\n\n    def all(self):\n        return list(self.items)\n\n\nclass SortedRepo(ListRepo):\n    def all(self):\n        return sorted(self.items)\n\n\nclass Service:\n    def __init__(self):\n        self.repo = ListRepo()\n\n    def add(self, value):\n        self.repo.add(value)\n\n    def show(self):\n        print(self.repo.all())\n\n\nrepo = {\"list\": ListRepo, \"sorted\": SortedRepo}[input().strip()]()\nservice = Service(repo)\nfor v in (3, 1, 2):\n    service.add(v)\nservice.show()\n",
+  "hints": [
+    "Запустите программу: сообщение об ошибке укажет на создание Service.",
+    "Конструктор Service не принимает хранилище.",
+    "Добавьте параметр repo в __init__.",
+    "Сохраните его в self.repo.",
+    "Остальные методы уже обращаются к self.repo."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "list\n",
+        "expected_stdout": "[3, 1, 2]\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "sorted\n",
+        "expected_stdout": "[1, 2, 3]\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "class ListRepo:\n    def __init__(self):\n        self.items = []\n\n    def add(self, item):\n        self.items.append(item)\n\n    def all(self):\n        return list(self.items)\n\n\nclass SortedRepo(ListRepo):\n    def all(self):\n        return sorted(self.items)\n\n\nclass Service:\n    def __init__(self, repo):\n        self.repo = repo\n\n    def add(self, value):\n        self.repo.add(value)\n\n    def show(self):\n        print(self.repo.all())\n\n\nrepo = {\"list\": ListRepo, \"sorted\": SortedRepo}[input().strip()]()\nservice = Service(repo)\nfor v in (3, 1, 2):\n    service.add(v)\nservice.show()\n",
+  "explanation": "Хранилище, переданное в конструктор, определяет поведение сервиса: подменив его, мы поменяли результат без правок логики.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "class ListRepo:\n    def __init__(self):\n        self.items = []\n\n    def add(self, item):\n        self.items.append(item)\n\n    def all(self):\n        return list(self.items)\n\n\nclass SortedRepo(ListRepo):\n    def all(self):\n        return sorted(self.items)\n\n\nclass Service:\n    def __init__(self, repo):\n        self.repo = ListRepo()\n\n    def add(self, value):\n        self.repo.add(value)\n\n    def show(self):\n        print(self.repo.all())\n\n\nrepo = {\"list\": ListRepo, \"sorted\": SortedRepo}[input().strip()]()\nservice = Service(repo)\nfor v in (3, 1, 2):\n    service.add(v)\nservice.show()\n",
+      "why": "Переданное хранилище игнорируется: всегда используется список."
+    }
+  ]
+}

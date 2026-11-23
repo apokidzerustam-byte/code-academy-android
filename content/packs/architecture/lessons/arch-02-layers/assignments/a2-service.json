@@ -1,0 +1,62 @@
+{
+  "id": "a2-service",
+  "type": "complete",
+  "title": "Допишите слой логики",
+  "statement": "Интерфейс и хранилище готовы. Допишите методы `add` и `balance` сервиса: `add(kind, amount)` проверяет, что `kind` — `income` или `expense` (иначе `ValueError(\"неизвестный тип\")`) и что `amount` больше нуля (иначе `ValueError(\"сумма должна быть положительной\")`), затем сохраняет пару `(kind, amount)` в хранилище; `balance()` возвращает доходы минус расходы.",
+  "goal": "Допишите слой логики",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "class ListRepo:\n    def __init__(self):\n        self.items = []\n\n    def add(self, item):\n        self.items.append(item)\n\n    def all(self):\n        return list(self.items)\n\n\nclass FinanceService:\n    def __init__(self, repo):\n        self.repo = repo\n\n    def add(self, kind, amount):\n        pass\n    def balance(self):\n        return 0\n\nservice = FinanceService(ListRepo())\nfor _ in range(int(input())):\n    parts = input().split()\n    try:\n        if parts[0] == \"balance\":\n            print(\"баланс:\", service.balance())\n        else:\n            service.add(parts[0], int(parts[1]))\n    except ValueError as e:\n        print(\"ошибка:\", e)\n",
+  "hints": [
+    "Метод add сначала проверяет, потом сохраняет.",
+    "Допустимые типы: income и expense.",
+    "Нарушение правила — raise ValueError с нужным текстом.",
+    "Сохранение — через self.repo.add.",
+    "Баланс: доход прибавляется, расход вычитается."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "5\nincome 500\nexpense 120\nbalance\nexpense 0\nbalance\n",
+        "expected_stdout": "баланс: 380\nошибка: сумма должна быть положительной\nбаланс: 380\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "3\nincome 10\nincome 20\nbalance\n",
+        "expected_stdout": "баланс: 30\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "2\ngift 5\nbalance\n",
+        "expected_stdout": "ошибка: неизвестный тип\nбаланс: 0\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "3\nexpense 40\nexpense -1\nbalance\n",
+        "expected_stdout": "ошибка: сумма должна быть положительной\nбаланс: -40\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "class ListRepo:\n    def __init__(self):\n        self.items = []\n\n    def add(self, item):\n        self.items.append(item)\n\n    def all(self):\n        return list(self.items)\n\n\nclass FinanceService:\n    def __init__(self, repo):\n        self.repo = repo\n\n    def add(self, kind, amount):\n        if kind not in (\"income\", \"expense\"):\n            raise ValueError(\"неизвестный тип\")\n        if amount <= 0:\n            raise ValueError(\"сумма должна быть положительной\")\n        self.repo.add((kind, amount))\n    def balance(self):\n        return sum(a if k == \"income\" else -a for k, a in self.repo.all())\n\nservice = FinanceService(ListRepo())\nfor _ in range(int(input())):\n    parts = input().split()\n    try:\n        if parts[0] == \"balance\":\n            print(\"баланс:\", service.balance())\n        else:\n            service.add(parts[0], int(parts[1]))\n    except ValueError as e:\n        print(\"ошибка:\", e)\n",
+  "explanation": "Все правила — в одном слое. Интерфейс лишь печатает сообщение об ошибке, а хранилище ничего не проверяет.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "class ListRepo:\n    def __init__(self):\n        self.items = []\n\n    def add(self, item):\n        self.items.append(item)\n\n    def all(self):\n        return list(self.items)\n\n\nclass FinanceService:\n    def __init__(self, repo):\n        self.repo = repo\n\n    def add(self, kind, amount):\n        self.repo.add((kind, amount))\n    def balance(self):\n        return sum(a if k == \"income\" else -a for k, a in self.repo.all())\n\nservice = FinanceService(ListRepo())\nfor _ in range(int(input())):\n    parts = input().split()\n    try:\n        if parts[0] == \"balance\":\n            print(\"баланс:\", service.balance())\n        else:\n            service.add(parts[0], int(parts[1]))\n    except ValueError as e:\n        print(\"ошибка:\", e)\n",
+      "why": "Правила не проверяются."
+    },
+    {
+      "code": "class ListRepo:\n    def __init__(self):\n        self.items = []\n\n    def add(self, item):\n        self.items.append(item)\n\n    def all(self):\n        return list(self.items)\n\n\nclass FinanceService:\n    def __init__(self, repo):\n        self.repo = repo\n\n    def add(self, kind, amount):\n        if kind not in (\"income\", \"expense\"):\n            raise ValueError(\"неизвестный тип\")\n        if amount <= 0:\n            raise ValueError(\"сумма должна быть положительной\")\n        self.repo.add((kind, amount))\n    def balance(self):\n        return sum(a for k, a in self.repo.all())\n\nservice = FinanceService(ListRepo())\nfor _ in range(int(input())):\n    parts = input().split()\n    try:\n        if parts[0] == \"balance\":\n            print(\"баланс:\", service.balance())\n        else:\n            service.add(parts[0], int(parts[1]))\n    except ValueError as e:\n        print(\"ошибка:\", e)\n",
+      "why": "Расходы прибавляются к балансу."
+    }
+  ]
+}

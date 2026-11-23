@@ -1,0 +1,45 @@
+{
+  "id": "arch-02-layers",
+  "title": "Слои приложения",
+  "goal": "Разделять приложение на интерфейс, логику и данные.",
+  "skills": [
+    "arch.layers",
+    "arch.repo",
+    "arch.service"
+  ],
+  "prerequisites": [
+    "arch-01-responsibility"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-layers.json",
+    "assignments/a2-service.json",
+    "assignments/a3-validate.json",
+    "assignments/a4-balance.json",
+    "assignments/a5-swap.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Правила проверки пишут прямо в интерфейсе",
+      "fix": "Вынесите их в сервис: тогда они одни для любого интерфейса."
+    },
+    {
+      "mistake": "Интерфейс обращается к хранилищу напрямую",
+      "fix": "Только через сервис."
+    },
+    {
+      "mistake": "Хранилище содержит бизнес-правила",
+      "fix": "Хранилище только сохраняет и отдаёт."
+    },
+    {
+      "mistake": "Слишком много слоёв для маленькой программы",
+      "fix": "Слои вводят, когда есть что разделять; начните с функций."
+    }
+  ]
+}

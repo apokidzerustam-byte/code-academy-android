@@ -1,0 +1,43 @@
+{
+  "id": "arch-01-responsibility",
+  "title": "Единая ответственность",
+  "goal": "Делить программу на разбор, вычисления и вывод; писать чистые функции.",
+  "skills": [
+    "arch.srp",
+    "arch.pure",
+    "arch.naming"
+  ],
+  "prerequisites": [],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-pure.json",
+    "assignments/a2-parse.json",
+    "assignments/a3-totals.json",
+    "assignments/a4-format.json",
+    "assignments/a5-glue.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Одна функция читает, считает и печатает",
+      "fix": "Разделите на разбор, вычисление и вывод."
+    },
+    {
+      "mistake": "Функции меняют глобальные переменные",
+      "fix": "Передавайте данные аргументами и возвращайте результат."
+    },
+    {
+      "mistake": "Имена вроде do_it, process, data2",
+      "fix": "Имя — глагол, говорящий, что делает функция."
+    },
+    {
+      "mistake": "Слишком длинные функции",
+      "fix": "Если функция не умещается на экран, найдите в ней самостоятельные шаги."
+    }
+  ]
+}

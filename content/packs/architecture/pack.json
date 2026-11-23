@@ -1,0 +1,32 @@
+{
+  "id": "architecture",
+  "version": "0.1.0",
+  "stage": 10,
+  "title": "Архитектура ПО",
+  "description": "Разделение ответственности, слои, зависимости, SOLID и тестируемый код на небольших Python-проектах.",
+  "language": "python",
+  "minAppVersion": 1,
+  "requiresPacks": [
+    "python-core"
+  ],
+  "lessons": [
+    "arch-01-responsibility",
+    "arch-02-layers",
+    "arch-03-dependencies",
+    "arch-04-solid"
+  ],
+  "skills": {
+    "arch.srp": "Принцип единственной ответственности",
+    "arch.pure": "Чистые функции",
+    "arch.naming": "Имена функций",
+    "arch.layers": "Слои приложения",
+    "arch.repo": "Репозиторий",
+    "arch.service": "Сервис",
+    "arch.di": "Внедрение зависимостей",
+    "arch.fake": "Поддельные реализации",
+    "arch.root": "Корень композиции",
+    "arch.solid": "Принципы SOLID",
+    "arch.strategy": "Паттерн «Стратегия»",
+    "arch.observer": "Паттерн «Наблюдатель»"
+  }
+}

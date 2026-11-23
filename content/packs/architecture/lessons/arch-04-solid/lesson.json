@@ -1,0 +1,45 @@
+{
+  "id": "arch-04-solid",
+  "title": "SOLID и приёмы проектирования",
+  "goal": "Применять принципы открытости, подстановки и приёмы «стратегия» и «наблюдатель».",
+  "skills": [
+    "arch.solid",
+    "arch.strategy",
+    "arch.observer"
+  ],
+  "prerequisites": [
+    "arch-03-dependencies"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-strategy.json",
+    "assignments/a2-discounts.json",
+    "assignments/a3-shipping.json",
+    "assignments/a4-bus.json",
+    "assignments/a5-liskov.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Каждый новый вариант — ещё одна ветка if в той же функции",
+      "fix": "Словарь стратегий: новый вариант — новая запись."
+    },
+    {
+      "mistake": "Подкласс бросает NotImplementedError в унаследованном методе",
+      "fix": "Не наследуйте то, что подкласс не умеет."
+    },
+    {
+      "mistake": "Источник события вызывает конкретных получателей",
+      "fix": "Публикуйте событие, подписчики регистрируются сами."
+    },
+    {
+      "mistake": "Применяют все приёмы сразу «на вырост»",
+      "fix": "Начинайте просто, усложняйте, когда появится причина."
+    }
+  ]
+}

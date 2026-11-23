@@ -1,0 +1,41 @@
+{
+  "id": "a5-liskov",
+  "type": "predict",
+  "title": "Подстановка не сработала",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Подстановка не сработала",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "class Shape:\n    def area(self):\n        return 0\n\n\nclass Square(Shape):\n    def __init__(self, side):\n        self.side = side\n\n    def area(self):\n        return self.side ** 2\n\n\nclass Broken(Shape):\n    def area(self):\n        raise NotImplementedError\n\n\ntotal = 0\nfor shape in [Square(2), Shape(), Broken(), Square(3)]:\n    try:\n        total += shape.area()\n    except NotImplementedError:\n        print(\"пропущена фигура\")\nprint(total)\n",
+  "hints": [
+    "Для каждой фигуры вызывается area().",
+    "Square(2): 4.",
+    "Shape(): 0.",
+    "Broken(): исключение — печатается «пропущена фигура».",
+    "Square(3): 9. Сумма: 4 + 0 + 9."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "пропущена фигура\n13\n"
+  },
+  "solution": "пропущена фигура\n13\n",
+  "explanation": "Подкласс Broken нарушает контракт Shape (метод area обязан вернуть число), поэтому коду приходится его обходить.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "13",
+      "answer": "13",
+      "why": "Сообщение о пропущенной фигуре тоже печатается."
+    },
+    {
+      "code": "пропущена фигура\n9",
+      "answer": "пропущена фигура\n9",
+      "why": "Квадрат со стороной 2 даёт 4, со стороной 3 — 9: всего 13."
+    }
+  ]
+}

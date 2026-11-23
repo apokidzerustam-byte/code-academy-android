@@ -1,0 +1,90 @@
+{
+  "id": "a2-discounts",
+  "type": "function",
+  "title": "Скидки таблицей",
+  "statement": "Напишите `price_with(kind, price)`: `none` — цена без изменений; `percent10` — цена минус 10 % (целое: `price * 9 // 10`); `minus50` — цена минус 50, но не ниже 0. Для другого названия — `ValueError`. Реализуйте через **словарь функций**.",
+  "goal": "Скидки таблицей",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Каждый вид скидки — маленькая функция.",
+    "Соберите их в словарь: название → функция.",
+    "Для минус 50 используйте max, чтобы не уйти ниже нуля.",
+    "Если названия нет в словаре — ValueError.",
+    "Иначе вызовите функцию из словаря."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "price_with",
+    "cases": [
+      {
+        "args": [
+          "none",
+          200
+        ],
+        "id": "v1",
+        "expected": 200
+      },
+      {
+        "args": [
+          "percent10",
+          200
+        ],
+        "id": "v2",
+        "expected": 180
+      },
+      {
+        "args": [
+          "minus50",
+          200
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 150
+      },
+      {
+        "args": [
+          "minus50",
+          30
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          "vip",
+          100
+        ],
+        "expected_error": "ValueError",
+        "id": "h5",
+        "hidden": true
+      },
+      {
+        "args": [
+          "percent10",
+          99
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": 89
+      }
+    ]
+  },
+  "solution": "DISCOUNTS = {\n    \"none\": lambda price: price,\n    \"percent10\": lambda price: price * 9 // 10,\n    \"minus50\": lambda price: max(0, price - 50),\n}\n\n\ndef price_with(kind, price):\n    if kind not in DISCOUNTS:\n        raise ValueError(\"неизвестная скидка\")\n    return DISCOUNTS[kind](price)\n",
+  "explanation": "Новая скидка = новая запись в словаре. Код выбора не меняется: он закрыт для изменения и открыт для расширения.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def price_with(kind, price):\n    if kind == \"none\":\n        return price\n    if kind == \"percent10\":\n        return price * 9 // 10\n    raise ValueError(\"неизвестная скидка\")\n",
+      "why": "Нет скидки minus50."
+    },
+    {
+      "code": "DISCOUNTS = {\"none\": lambda p: p, \"percent10\": lambda p: p * 9 // 10, \"minus50\": lambda p: p - 50}\n\n\ndef price_with(kind, price):\n    if kind not in DISCOUNTS:\n        raise ValueError(\"неизвестная скидка\")\n    return DISCOUNTS[kind](price)\n",
+      "why": "Цена может стать отрицательной."
+    }
+  ]
+}

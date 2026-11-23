@@ -1,0 +1,91 @@
+{
+  "id": "a3-shipping",
+  "type": "complete",
+  "title": "Добавьте вариант доставки",
+  "statement": "Функция `shipping(kind, weight)` считает стоимость: `standard` — `5 + вес`, `fast` — `10 + 2 × вес`. Нужно **добавить** `express` — `20 + 3 × вес`, не ломая остальные. Для неизвестного вида — `ValueError`.",
+  "goal": "Добавьте вариант доставки",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def shipping(kind, weight):\n    if kind == \"standard\":\n        return 5 + weight\n    if kind == \"fast\":\n        return 10 + 2 * weight\n    raise ValueError(\"неизвестная доставка\")\n",
+  "hints": [
+    "Сейчас вид доставки выбирается цепочкой условий.",
+    "Соберите тарифы в словарь: вид → функция от веса.",
+    "Для express: 20 + 3 × вес.",
+    "Неизвестный вид — ValueError.",
+    "Тариф вызывается как RATES[kind](weight)."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "shipping",
+    "cases": [
+      {
+        "args": [
+          "standard",
+          3
+        ],
+        "id": "v1",
+        "expected": 8
+      },
+      {
+        "args": [
+          "express",
+          2
+        ],
+        "id": "v2",
+        "expected": 26
+      },
+      {
+        "args": [
+          "fast",
+          4
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 18
+      },
+      {
+        "args": [
+          "express",
+          0
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 20
+      },
+      {
+        "args": [
+          "drone",
+          1
+        ],
+        "expected_error": "ValueError",
+        "id": "h5",
+        "hidden": true
+      },
+      {
+        "args": [
+          "standard",
+          0
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": 5
+      }
+    ]
+  },
+  "solution": "RATES = {\n    \"standard\": lambda weight: 5 + weight,\n    \"fast\": lambda weight: 10 + 2 * weight,\n    \"express\": lambda weight: 20 + 3 * weight,\n}\n\n\ndef shipping(kind, weight):\n    if kind not in RATES:\n        raise ValueError(\"неизвестная доставка\")\n    return RATES[kind](weight)\n",
+  "explanation": "Тарифы лежат в таблице, поэтому новый вариант — одна новая запись.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def shipping(kind, weight):\n    if kind == \"standard\":\n        return 5 + weight\n    if kind == \"fast\":\n        return 10 + 2 * weight\n    raise ValueError(\"неизвестная доставка\")\n",
+      "why": "Express не добавлен."
+    },
+    {
+      "code": "def shipping(kind, weight):\n    if kind == \"standard\":\n        return 5 + weight\n    if kind == \"fast\":\n        return 10 + 2 * weight\n    if kind == \"express\":\n        return 20 + 2 * weight\n    raise ValueError(\"неизвестная доставка\")\n",
+      "why": "Неверный коэффициент express."
+    }
+  ]
+}

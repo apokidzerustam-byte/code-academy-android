@@ -1,0 +1,88 @@
+{
+  "id": "a4-format",
+  "type": "function",
+  "title": "Оформление отчёта",
+  "statement": "Напишите `format_report(totals)`: по словарю `{название: сумма}` верните текст, где каждая строка — `название: сумма`, строки отсортированы по названию и разделены символом `\\n`. Для пустого словаря верните пустую строку.",
+  "goal": "Оформление отчёта",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Каждая строка формируется из названия и суммы.",
+    "Названия берите в отсортированном порядке.",
+    "Формат строки: название, двоеточие, пробел, сумма.",
+    "Строки склеивает метод join.",
+    "Разделитель строк — символ новой строки."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "format_report",
+    "cases": [
+      {
+        "args": [
+          {
+            "кофе": 240,
+            "такси": 400
+          }
+        ],
+        "id": "v1",
+        "expected": "кофе: 240\nтакси: 400"
+      },
+      {
+        "args": [
+          {}
+        ],
+        "id": "v2",
+        "expected": ""
+      },
+      {
+        "args": [
+          {
+            "б": 1,
+            "а": 2
+          }
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "а: 2\nб: 1"
+      },
+      {
+        "args": [
+          {
+            "x": -5
+          }
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "x: -5"
+      },
+      {
+        "args": [
+          {
+            "яблоко": 10,
+            "арбуз": 20,
+            "банан": 5
+          }
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": "арбуз: 20\nбанан: 5\nяблоко: 10"
+      }
+    ]
+  },
+  "solution": "def format_report(totals):\n    return \"\\n\".join(f\"{name}: {totals[name]}\" for name in sorted(totals))\n",
+  "explanation": "Оформление отделено от вычислений: поменять формат отчёта можно, не трогая суммирование.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def format_report(totals):\n    return \"\\n\".join(f\"{name}: {totals[name]}\" for name in totals)\n",
+      "why": "Порядок строк не отсортирован."
+    },
+    {
+      "code": "def format_report(totals):\n    return \"\\n\".join(f\"{name} - {totals[name]}\" for name in sorted(totals))\n",
+      "why": "Другой разделитель."
+    }
+  ]
+}

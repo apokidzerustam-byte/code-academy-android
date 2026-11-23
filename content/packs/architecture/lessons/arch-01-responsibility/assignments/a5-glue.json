@@ -1,0 +1,58 @@
+{
+  "id": "a5-glue",
+  "type": "complete",
+  "title": "Соберите программу из частей",
+  "statement": "Три функции уже написаны. В первой строке ввода — число `n`, затем `n` строк `название;сумма`. Допишите **главную часть**: разберите строки через `parse_line`, посчитайте `totals_by_name` и напечатайте `format_report(...)`.",
+  "goal": "Соберите программу из частей",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "def parse_line(line):\n    name, amount = line.split(\";\")\n    return name.strip(), int(amount)\n\n\ndef totals_by_name(rows):\n    totals = {}\n    for name, amount in rows:\n        totals[name] = totals.get(name, 0) + amount\n    return totals\n\n\ndef format_report(totals):\n    return \"\\n\".join(f\"{name}: {totals[name]}\" for name in sorted(totals))\n\n\nn = int(input())\n# соедините функции\n",
+  "hints": [
+    "Главная часть соединяет готовые функции.",
+    "Сначала прочитайте n строк и разберите каждую.",
+    "Список пар передайте в totals_by_name.",
+    "Результат передайте в format_report.",
+    "Напечатайте полученный текст."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "3\nкофе;150\nтакси;400\nкофе;90\n",
+        "expected_stdout": "кофе: 240\nтакси: 400\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "1\nчай;50\n",
+        "expected_stdout": "чай: 50\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "2\nб;1\nа;2\n",
+        "expected_stdout": "а: 2\nб: 1\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "4\nx;1\nx;2\nx;3\ny;4\n",
+        "expected_stdout": "x: 6\ny: 4\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "def parse_line(line):\n    name, amount = line.split(\";\")\n    return name.strip(), int(amount)\n\n\ndef totals_by_name(rows):\n    totals = {}\n    for name, amount in rows:\n        totals[name] = totals.get(name, 0) + amount\n    return totals\n\n\ndef format_report(totals):\n    return \"\\n\".join(f\"{name}: {totals[name]}\" for name in sorted(totals))\n\n\nn = int(input())\nrows = [parse_line(input()) for _ in range(n)]\nprint(format_report(totals_by_name(rows)))\n",
+  "explanation": "Главная часть программы — «клей»: она только вызывает функции в нужном порядке и выводит результат.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def parse_line(line):\n    name, amount = line.split(\";\")\n    return name.strip(), int(amount)\n\n\ndef totals_by_name(rows):\n    totals = {}\n    for name, amount in rows:\n        totals[name] = totals.get(name, 0) + amount\n    return totals\n\n\ndef format_report(totals):\n    return \"\\n\".join(f\"{name}: {totals[name]}\" for name in sorted(totals))\n\n\nn = int(input())\nrows = [parse_line(input()) for _ in range(n)]\nprint(format_report(rows))\n",
+      "why": "Суммы по категориям не посчитаны: в отчёт попали отдельные строки."
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "id": "a4-balance",
+  "type": "function",
+  "title": "Баланс по записям",
+  "statement": "Напишите `balance_of(records)`: `records` — список пар `[kind, amount]`. Доходы (`income`) прибавляются, расходы (`expense`) вычитаются. Верните итог.",
+  "goal": "Баланс по записям",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Каждая запись — пара: тип и сумма.",
+    "Доход прибавляется.",
+    "Расход вычитается.",
+    "Можно сделать сумму по генератору.",
+    "Для пустого списка — 0."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "balance_of",
+    "cases": [
+      {
+        "args": [
+          [
+            [
+              "income",
+              500
+            ],
+            [
+              "expense",
+              120
+            ]
+          ]
+        ],
+        "id": "v1",
+        "expected": 380
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": 0
+      },
+      {
+        "args": [
+          [
+            [
+              "expense",
+              10
+            ]
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": -10
+      },
+      {
+        "args": [
+          [
+            [
+              "income",
+              1
+            ],
+            [
+              "income",
+              2
+            ],
+            [
+              "expense",
+              3
+            ]
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 0
+      }
+    ]
+  },
+  "solution": "def balance_of(records):\n    return sum(a if k == \"income\" else -a for k, a in records)\n",
+  "explanation": "Вычисление баланса — логика предметной области, поэтому оно живёт в сервисе, а не в интерфейсе.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def balance_of(records):\n    return sum(a for k, a in records)\n",
+      "why": "Расходы не вычитаются."
+    }
+  ]
+}

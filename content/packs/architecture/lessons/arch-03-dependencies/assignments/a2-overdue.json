@@ -1,0 +1,119 @@
+{
+  "id": "a2-overdue",
+  "type": "function",
+  "title": "Просроченные задачи",
+  "statement": "Напишите `overdue(tasks, today)`: `tasks` — список пар `[название, срок]` (срок и `today` — номера дней). Верните названия задач, срок которых **строго меньше** `today`, отсортированные по алфавиту. Текущую дату вы не вызываете — она приходит параметром.",
+  "goal": "Просроченные задачи",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Для каждой задачи сравните срок с today.",
+    "Просрочена — срок меньше сегодняшнего дня.",
+    "Из пар нужны только названия.",
+    "Отсортируйте результат.",
+    "Строгое сравнение: срок равен today — не просрочено."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "overdue",
+    "cases": [
+      {
+        "args": [
+          [
+            [
+              "сдать отчёт",
+              5
+            ],
+            [
+              "позвонить",
+              12
+            ],
+            [
+              "оплатить",
+              8
+            ]
+          ],
+          10
+        ],
+        "id": "v1",
+        "expected": [
+          "оплатить",
+          "сдать отчёт"
+        ]
+      },
+      {
+        "args": [
+          [],
+          3
+        ],
+        "id": "v2",
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            [
+              "а",
+              5
+            ]
+          ],
+          5
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            [
+              "б",
+              4
+            ],
+            [
+              "а",
+              1
+            ]
+          ],
+          9
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          "а",
+          "б"
+        ]
+      },
+      {
+        "args": [
+          [
+            [
+              "x",
+              10
+            ]
+          ],
+          9
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": []
+      }
+    ]
+  },
+  "solution": "def overdue(tasks, today):\n    return sorted(name for name, due in tasks if due < today)\n",
+  "explanation": "Функция зависит только от аргументов: подставив любое `today`, мы получаем предсказуемый результат.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def overdue(tasks, today):\n    return sorted(name for name, due in tasks if due <= today)\n",
+      "why": "Задача со сроком «сегодня» ещё не просрочена."
+    },
+    {
+      "code": "def overdue(tasks, today):\n    return [name for name, due in tasks if due < today]\n",
+      "why": "Результат не отсортирован."
+    }
+  ]
+}

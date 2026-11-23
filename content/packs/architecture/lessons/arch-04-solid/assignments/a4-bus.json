@@ -1,0 +1,62 @@
+{
+  "id": "a4-bus",
+  "type": "complete",
+  "title": "Шина событий",
+  "statement": "Подписчики уже зарегистрированы. Допишите функцию `publish(event, payload)`: она вызывает **все** обработчики, подписанные на событие `event`, передавая им `payload`. Если подписчиков нет — ничего не происходит. Во входных данных `n` строк `событие предмет`.",
+  "goal": "Шина событий",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "handlers = {}\n\n\ndef subscribe(event, handler):\n    handlers.setdefault(event, []).append(handler)\n\n\ndef publish(event, payload):\n    pass\n\n\ndef on_added(item):\n    print(\"добавлено:\", item)\n\n\ndef on_any_change(item):\n    print(\"журнал:\", item)\n\n\nsubscribe(\"added\", on_added)\nsubscribe(\"added\", on_any_change)\nsubscribe(\"removed\", on_any_change)\nfor _ in range(int(input())):\n    event, item = input().split()\n    publish(event, item)\n",
+  "hints": [
+    "Подписчики лежат в словаре handlers: событие → список функций.",
+    "Если событие не зарегистрировано, списка нет.",
+    "Метод get с пустым списком по умолчанию решает вопрос.",
+    "Обойдите список в цикле.",
+    "Каждому обработчику передайте payload."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "3\nadded молоко\nremoved хлеб\nupdated чай\n",
+        "expected_stdout": "добавлено: молоко\nжурнал: молоко\nжурнал: хлеб\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "1\nadded сыр\n",
+        "expected_stdout": "добавлено: сыр\nжурнал: сыр\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "2\nremoved a\nremoved b\n",
+        "expected_stdout": "журнал: a\nжурнал: b\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "0\n",
+        "expected_stdout": "",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "handlers = {}\n\n\ndef subscribe(event, handler):\n    handlers.setdefault(event, []).append(handler)\n\n\ndef publish(event, payload):\n    for handler in handlers.get(event, []):\n        handler(payload)\n\n\ndef on_added(item):\n    print(\"добавлено:\", item)\n\n\ndef on_any_change(item):\n    print(\"журнал:\", item)\n\n\nsubscribe(\"added\", on_added)\nsubscribe(\"added\", on_any_change)\nsubscribe(\"removed\", on_any_change)\nfor _ in range(int(input())):\n    event, item = input().split()\n    publish(event, item)\n",
+  "explanation": "Источник события не знает подписчиков: он лишь обходит список и вызывает каждого.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "handlers = {}\n\n\ndef subscribe(event, handler):\n    handlers.setdefault(event, []).append(handler)\n\n\ndef publish(event, payload):\n    for handler in handlers.get(event, [])[:1]:\n        handler(payload)\n\n\ndef on_added(item):\n    print(\"добавлено:\", item)\n\n\ndef on_any_change(item):\n    print(\"журнал:\", item)\n\n\nsubscribe(\"added\", on_added)\nsubscribe(\"added\", on_any_change)\nsubscribe(\"removed\", on_any_change)\nfor _ in range(int(input())):\n    event, item = input().split()\n    publish(event, item)\n",
+      "why": "Вызывается только первый подписчик."
+    },
+    {
+      "code": "handlers = {}\n\n\ndef subscribe(event, handler):\n    handlers.setdefault(event, []).append(handler)\n\n\ndef publish(event, payload):\n    handlers[event](payload)\n\n\ndef on_added(item):\n    print(\"добавлено:\", item)\n\n\ndef on_any_change(item):\n    print(\"журнал:\", item)\n\n\nsubscribe(\"added\", on_added)\nsubscribe(\"added\", on_any_change)\nsubscribe(\"removed\", on_any_change)\nfor _ in range(int(input())):\n    event, item = input().split()\n    publish(event, item)\n",
+      "why": "Событие без подписчиков вызывает KeyError; несколько подписчиков не поддерживаются."
+    }
+  ]
+}

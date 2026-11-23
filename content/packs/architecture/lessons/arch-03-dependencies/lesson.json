@@ -1,0 +1,45 @@
+{
+  "id": "arch-03-dependencies",
+  "title": "Внедрение зависимостей",
+  "goal": "Принимать зависимости снаружи, подменять их в проверках и собирать программу в корне композиции.",
+  "skills": [
+    "arch.di",
+    "arch.fake",
+    "arch.root"
+  ],
+  "prerequisites": [
+    "arch-02-layers"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-fake.json",
+    "assignments/a2-overdue.json",
+    "assignments/a3-inject.json",
+    "assignments/a4-greeting.json",
+    "assignments/a5-sender.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Создают хранилище или соединение внутри логики",
+      "fix": "Принимайте его параметром."
+    },
+    {
+      "mistake": "Вызывают текущее время внутри функций",
+      "fix": "Передавайте дату или час аргументом."
+    },
+    {
+      "mistake": "Подменяют зависимости «магически» в тестах",
+      "fix": "Явная передача проще и надёжнее."
+    },
+    {
+      "mistake": "Передают зависимость слишком глубоко через много слоёв",
+      "fix": "Собирайте объекты в корне композиции."
+    }
+  ]
+}

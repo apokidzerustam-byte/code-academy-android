@@ -1,0 +1,41 @@
+{
+  "id": "a1-fake",
+  "type": "predict",
+  "title": "Поддельное хранилище",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Поддельное хранилище",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "class Service:\n    def __init__(self, repo):\n        self.repo = repo\n\n    def add(self, name):\n        if name.strip():\n            self.repo.add(name.strip().title())\n\n\nclass FakeRepo:\n    def __init__(self):\n        self.saved = []\n\n    def add(self, item):\n        self.saved.append(item)\n\n\nfake = FakeRepo()\nservice = Service(fake)\nfor name in [\"анна\", \"  \", \" борис  \", \"\"]:\n    service.add(name)\nprint(fake.saved)\nprint(len(fake.saved))\n",
+  "hints": [
+    "Сервис пропускает пустые имена.",
+    "Для остальных вызывает strip и title.",
+    "«анна» → «Анна», « борис  » → «Борис».",
+    "Пробельная и пустая строки не сохраняются.",
+    "Сохранено два имени."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "['Анна', 'Борис']\n2\n"
+  },
+  "solution": "['Анна', 'Борис']\n2\n",
+  "explanation": "Поддельное хранилище запоминает вызовы, поэтому по его содержимому видно, что именно сделал сервис.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "['Анна', 'Борис']\n4",
+      "answer": "['Анна', 'Борис']\n4",
+      "why": "Пустые имена не сохраняются: всего два."
+    },
+    {
+      "code": "['анна', 'борис']\n2",
+      "answer": "['анна', 'борис']\n2",
+      "why": "Имена приводятся к виду с заглавной буквы."
+    }
+  ]
+}

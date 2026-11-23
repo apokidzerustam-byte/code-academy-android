@@ -1,0 +1,41 @@
+{
+  "id": "a1-strategy",
+  "type": "predict",
+  "title": "Таблица стратегий",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Таблица стратегий",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "RULES = {\n    \"double\": lambda x: x * 2,\n    \"square\": lambda x: x * x,\n    \"neg\": lambda x: -x,\n}\n\nfor name in [\"square\", \"neg\", \"double\", \"cube\"]:\n    action = RULES.get(name)\n    print(name, action(7) if action else \"нет такой\")\n",
+  "hints": [
+    "Таблица связывает название с функцией.",
+    "square(7) = 49.",
+    "neg(7) = −7.",
+    "double(7) = 14.",
+    "cube в таблице нет: get вернёт None."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "square 49\nneg -7\ndouble 14\ncube нет такой\n"
+  },
+  "solution": "square 49\nneg -7\ndouble 14\ncube нет такой\n",
+  "explanation": "Выбор по таблице заменяет цепочку if: .get вернул None для неизвестного названия, и мы вывели запасной текст.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "square 14\nneg -7\ndouble 49\ncube нет такой",
+      "answer": "square 14\nneg -7\ndouble 49\ncube нет такой",
+      "why": "Квадрат семи — 49, а удвоение — 14."
+    },
+    {
+      "code": "square 49\nneg -7\ndouble 14\ncube 343",
+      "answer": "square 49\nneg -7\ndouble 14\ncube 343",
+      "why": "Ключа cube в таблице нет."
+    }
+  ]
+}

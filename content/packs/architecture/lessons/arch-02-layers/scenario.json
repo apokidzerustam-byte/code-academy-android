@@ -1,0 +1,128 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Слои приложения",
+      "narration": "Когда программа вырастает, функций становится слишком много, чтобы держать их в голове. Тогда их группируют в слои. Обычно выделяют три. Верхний слой — интерфейс: то, что видит и делает пользователь. Средний — логика: правила предметной области, например что нельзя потратить отрицательную сумму. Нижний — данные: хранение в списке, файле или базе. Главное правило: верхние слои знают о нижних, но не наоборот, и интерфейс не лезет напрямую в хранилище.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "Интерфейс → логика → данные · зависимости направлены **вниз**",
+          "cue": 6
+        }
+      ]
+    },
+    {
+      "id": "data",
+      "title": "Слой данных",
+      "narration": "Начнём снизу. Хранилище, которое по-английски называют репозиторием, умеет только сохранять и отдавать записи. Никаких правил, никаких проверок. Наше хранилище держит записи в списке в памяти, но снаружи это неважно: позже его можно заменить файлом или базой данных, и остальная программа ничего не заметит.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "class ListRepo:\n    def __init__(self):\n        self.items = []\n\n    def add(self, item):\n        self.items.append(item)\n\n    def all(self):\n        return list(self.items)\n\n\n",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "repo = ListRepo()\nrepo.add((\"income\", 1000))\nprint(repo.all())\n",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "[('income', 1000)]\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "service",
+      "title": "Слой логики",
+      "narration": "Над хранилищем строится сервис. Он знает правила: допустимые типы операций, положительные суммы, как считать баланс. Сервис получает хранилище при создании и обращается к нему только через два метода. Если правило нарушено, он возбуждает ошибку и ничего не сохраняет. Всё, что касается денег и их смысла, живёт здесь, а не в интерфейсе.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "class ListRepo:\n    def __init__(self):\n        self.items = []\n\n    def add(self, item):\n        self.items.append(item)\n\n    def all(self):\n        return list(self.items)\n\n\nclass FinanceService:\n    def __init__(self, repo):\n        self.repo = repo\n\n    def add(self, kind, amount):\n        if kind not in (\"income\", \"expense\"):\n            raise ValueError(\"неизвестный тип\")\n        if amount <= 0:\n            raise ValueError(\"сумма должна быть положительной\")\n        self.repo.add((kind, amount))\n\n    def balance(self):\n        return sum(a if k == \"income\" else -a for k, a in self.repo.all())\n\n\n",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "service = FinanceService(ListRepo())\nservice.add(\"income\", 1000)\nservice.add(\"expense\", 300)\nprint(service.balance())\ntry:\n    service.add(\"expense\", -5)\nexcept ValueError as e:\n    print(\"ошибка:\", e)\n",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "700\nошибка: сумма должна быть положительной\n",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "ui",
+      "title": "Слой интерфейса",
+      "narration": "Интерфейс принимает команды пользователя, вызывает сервис и показывает результат. Он не считает баланс сам и не трогает список записей. Здесь это цикл, читающий команды из заготовленного списка. Обратите внимание, что при ошибке интерфейс просто показывает сообщение, а решение о том, что ошибка — это логика сервиса.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "class ListRepo:\n    def __init__(self):\n        self.items = []\n\n    def add(self, item):\n        self.items.append(item)\n\n    def all(self):\n        return list(self.items)\n\n\nclass FinanceService:\n    def __init__(self, repo):\n        self.repo = repo\n\n    def add(self, kind, amount):\n        if kind not in (\"income\", \"expense\"):\n            raise ValueError(\"неизвестный тип\")\n        if amount <= 0:\n            raise ValueError(\"сумма должна быть положительной\")\n        self.repo.add((kind, amount))\n\n    def balance(self):\n        return sum(a if k == \"income\" else -a for k, a in self.repo.all())\n\n\n",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "service = FinanceService(ListRepo())\ncommands = [\"income 500\", \"expense 120\", \"balance\", \"expense 0\"]\nfor command in commands:\n    parts = command.split()\n    try:\n        if parts[0] == \"balance\":\n            print(\"баланс:\", service.balance())\n        else:\n            service.add(parts[0], int(parts[1]))\n    except ValueError as e:\n        print(\"ошибка:\", e)\n",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "баланс: 380\nошибка: сумма должна быть положительной\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "patterns",
+      "title": "MVC, MVVM, чистая архитектура",
+      "narration": "У слоёв есть известные названия. В схеме модель, представление и контроллер — MVC — модель хранит данные и правила, представление рисует, а контроллер связывает их. В Android чаще используют схему MVVM: представление наблюдает за моделью представления, а та работает с данными. В чистой архитектуре зависимости направлены к центру: логика ничего не знает ни об интерфейсе, ни о базе данных. Идея везде одна — разделить ответственности и направить зависимости.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "**MVC:** модель — представление — контроллер · **MVVM:** View ← ViewModel ← Model · **Clean:** зависимости к центру",
+          "cue": 1
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. Приложение делят на интерфейс, логику и данные. Логика хранится в сервисе и не знает, как устроен интерфейс. Хранилище умеет лишь сохранять и отдавать. Зависимости направлены вниз, поэтому любой слой можно заменить, не ломая остальные. В следующем уроке разберём, как передавать зависимости и благодаря этому легко тестировать логику.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "UI → сервис → хранилище · правила — в сервисе · хранилище заменяемо",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}

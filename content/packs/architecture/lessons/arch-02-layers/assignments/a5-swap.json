@@ -1,0 +1,41 @@
+{
+  "id": "a5-swap",
+  "type": "predict",
+  "title": "Замена хранилища",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Замена хранилища",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "class ListRepo:\n    def __init__(self):\n        self.items = []\n\n    def add(self, item):\n        self.items.append(item)\n\n    def all(self):\n        return list(self.items)\n\n\nclass SortedRepo(ListRepo):\n    def all(self):\n        return sorted(self.items)\n\n\nclass Service:\n    def __init__(self, repo):\n        self.repo = repo\n\n    def add(self, value):\n        self.repo.add(value)\n\n    def values(self):\n        return self.repo.all()\n\n\nfor repo in (ListRepo(), SortedRepo()):\n    service = Service(repo)\n    for v in (3, 1, 2):\n        service.add(v)\n    print(service.values())\n",
+  "hints": [
+    "Сервис одинаков для обоих хранилищ.",
+    "Добавляются значения 3, 1, 2.",
+    "ListRepo отдаёт в порядке добавления: 3, 1, 2.",
+    "SortedRepo отдаёт отсортированными.",
+    "Результаты двух циклов разные."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "[3, 1, 2]\n[1, 2, 3]\n"
+  },
+  "solution": "[3, 1, 2]\n[1, 2, 3]\n",
+  "explanation": "Сервис работает с любым хранилищем, у которого есть add и all: заменив хранилище, мы изменили поведение, не трогая сервис.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "[1, 2, 3]\n[1, 2, 3]",
+      "answer": "[1, 2, 3]\n[1, 2, 3]",
+      "why": "ListRepo возвращает записи в порядке добавления."
+    },
+    {
+      "code": "[3, 1, 2]\n[3, 1, 2]",
+      "answer": "[3, 1, 2]\n[3, 1, 2]",
+      "why": "SortedRepo сортирует при выдаче."
+    }
+  ]
+}

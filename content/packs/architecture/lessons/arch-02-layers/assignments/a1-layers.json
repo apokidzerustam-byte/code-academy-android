@@ -1,0 +1,41 @@
+{
+  "id": "a1-layers",
+  "type": "predict",
+  "title": "Что напечатает интерфейс",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Что напечатает интерфейс",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "class ListRepo:\n    def __init__(self):\n        self.items = []\n\n    def add(self, item):\n        self.items.append(item)\n\n    def all(self):\n        return list(self.items)\n\n\nclass FinanceService:\n    def __init__(self, repo):\n        self.repo = repo\n\n    def add(self, kind, amount):\n        if kind not in (\"income\", \"expense\"):\n            raise ValueError(\"неизвестный тип\")\n        if amount <= 0:\n            raise ValueError(\"сумма должна быть положительной\")\n        self.repo.add((kind, amount))\n\n    def balance(self):\n        return sum(a if k == \"income\" else -a for k, a in self.repo.all())\n\n\nservice = FinanceService(ListRepo())\nfor kind, amount in [(\"income\", 100), (\"expense\", 30), (\"gift\", 10), (\"expense\", 0), (\"expense\", 20)]:\n    try:\n        service.add(kind, amount)\n    except ValueError as e:\n        print(\"ошибка:\", e)\nprint(service.balance())\n",
+  "hints": [
+    "Для каждой операции сервис проверяет тип, затем сумму.",
+    "(\"gift\", 10): тип неизвестен — первая ошибка.",
+    "(\"expense\", 0): тип верный, сумма не положительна — вторая ошибка.",
+    "Остальные три операции сохраняются.",
+    "Баланс: доход минус два расхода."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "ошибка: неизвестный тип\nошибка: сумма должна быть положительной\n50\n"
+  },
+  "solution": "ошибка: неизвестный тип\nошибка: сумма должна быть положительной\n50\n",
+  "explanation": "Сервис сначала проверяет тип, потом сумму; неверные операции не сохраняются, поэтому баланс считается только по принятым.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "ошибка: неизвестный тип\nошибка: неизвестный тип\n50",
+      "answer": "ошибка: неизвестный тип\nошибка: неизвестный тип\n50",
+      "why": "Для нулевой суммы выдаётся другое сообщение."
+    },
+    {
+      "code": "ошибка: неизвестный тип\nошибка: сумма должна быть положительной\n40",
+      "answer": "ошибка: неизвестный тип\nошибка: сумма должна быть положительной\n40",
+      "why": "Баланс считается как 100 − 30 − 20 = 50."
+    }
+  ]
+}

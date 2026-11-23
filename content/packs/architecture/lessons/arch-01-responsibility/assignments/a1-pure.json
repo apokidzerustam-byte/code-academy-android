@@ -1,0 +1,41 @@
+{
+  "id": "a1-pure",
+  "type": "predict",
+  "title": "Чистая или нет",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Чистая или нет",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "total = 0\n\n\ndef add_global(x):\n    global total\n    total += x\n    return total\n\n\ndef add_pure(x, current):\n    return current + x\n\n\nprint(add_global(3), add_global(3))\nprint(add_pure(3, 0), add_pure(3, 0))\nprint(total)\n",
+  "hints": [
+    "Функция add_global меняет переменную total снаружи.",
+    "Первый вызов даёт 3, второй — 6.",
+    "add_pure не меняет ничего: оба вызова возвращают 3.",
+    "total после двух вызовов add_global равен 6.",
+    "Печатаются три строки."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "3 6\n3 3\n6\n"
+  },
+  "solution": "3 6\n3 3\n6\n",
+  "explanation": "Чистая функция зависит только от аргументов; функция с побочным эффектом накапливает состояние между вызовами.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "3 3\n3 3\n0",
+      "answer": "3 3\n3 3\n0",
+      "why": "Глобальная переменная накапливается: вторая сумма — 6."
+    },
+    {
+      "code": "3 6\n3 6\n6",
+      "answer": "3 6\n3 6\n6",
+      "why": "Чистая функция не накапливает: оба вызова дают 3."
+    }
+  ]
+}
