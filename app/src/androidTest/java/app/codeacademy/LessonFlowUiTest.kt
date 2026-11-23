@@ -33,8 +33,7 @@ class LessonFlowUiTest {
 
     @Test fun solveFirstAssignmentEndToEnd() {
         rule.onNodeWithTag("open-program").performScrollTo().performClick()
-        rule.waitUntil(10_000) { rule.onAllNodes(hasTestTag("lesson-py-01-print")).fetchSemanticsNodes().isNotEmpty() }
-        rule.onNodeWithTag("lesson-py-01-print").performScrollTo().performClick()
+        rule.openLessonInProgram("py-01-print")
         rule.onNodeWithTag("tab-1").performClick()
         rule.waitUntil(10_000) { rule.onAllNodes(hasText("Текст берут в", substring = true)).fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("tab-2").performClick()
@@ -71,8 +70,7 @@ class LessonFlowUiTest {
 
     @Test fun draftSurvivesActivityRecreation() {
         rule.onNodeWithTag("open-program").performScrollTo().performClick()
-        rule.waitUntil(10_000) { rule.onAllNodes(hasTestTag("lesson-py-01-print")).fetchSemanticsNodes().isNotEmpty() }
-        rule.onNodeWithTag("lesson-py-01-print").performScrollTo().performClick()
+        rule.openLessonInProgram("py-01-print")
         rule.onNodeWithTag("tab-2").performClick()
         rule.waitUntil(10_000) { rule.onAllNodes(hasTestTag("assignment-0")).fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("assignment-0").performClick()

@@ -207,7 +207,7 @@ fun AssignmentScreen(
                 OutlinedTextField(
                     value = code,
                     onValueChange = { code = it },
-                    label = { Text("Ваш ответ (каждая строка вывода — с новой строки)") },
+                    label = { Text(if (asg.type == "predict" || asg.type == "review") "Ваш ответ (каждая строка вывода — с новой строки)" else "Ваш ответ (команда — как в терминале)") },
                     textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
                     modifier = Modifier.fillMaxWidth().heightIn(min = 140.dp).testTag("code"),
                 )

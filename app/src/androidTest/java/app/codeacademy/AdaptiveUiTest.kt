@@ -13,6 +13,8 @@ import app.codeacademy.data.LessonStatus
 import app.codeacademy.data.ReviewItemEntity
 import app.codeacademy.data.SkillStateEntity
 import app.codeacademy.data.SkillStatus
+import app.codeacademy.ui.loadCourse
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -45,34 +47,40 @@ class AdaptiveUiTest {
         rule.waitUntil(ms) { rule.onAllNodes(hasText(t, substring = true)).fetchSemanticsNodes().isNotEmpty() }
 
     @Test fun diagnosticConfirmsPrefixAndSchedulesReview() {
+        // Курс читается так же, как в приложении: первый урок подтвердим верным ответом, второй — неверным.
+        val course = runBlocking { loadCourse(app.container) }
+        val first = course.lessons[0]
+        val second = course.lessons[1]
+        val expected = (first.assignments.first { it.type == "predict" }.tests["expected_answer"] as JsonPrimitive).content
+        val firstSkill = first.lesson.skills.first()
         waitTag("start-choice")
         rule.onNodeWithTag("start-diagnostic").performClick()
         waitTag("diag-answer")
         waitText("Вопрос 1 из ")
         // Урок 1 — верно (лишние пробелы в конце строк не мешают), урок 2 — неверно.
-        rule.onNodeWithTag("diag-answer").performTextReplacement("10 - 4  \n6\nГотово\n")
+        rule.onNodeWithTag("diag-answer").performTextReplacement(expected.trim().lines().joinToString("  \n") + "  \n")
         rule.onNodeWithTag("diag-submit").performClick()
         waitText("Вопрос 2 из ")
-        rule.onNodeWithTag("diag-answer").performTextReplacement("5\n10")
+        rule.onNodeWithTag("diag-answer").performTextReplacement("ответ, которого нет ни в одном задании 7391")
         rule.onNodeWithTag("diag-submit").performClick()
         waitText("Подтверждено уроков: 1 из ")
         rule.waitUntil(5_000) {
             runBlocking {
-                app.container.db.progress().get("python-basics/py-01-print")?.status == LessonStatus.TESTED_OUT &&
+                app.container.db.progress().get(first.ref.key)?.status == LessonStatus.TESTED_OUT &&
                     app.container.settings.settings.first().onboardingDone
             }
         }
         runBlocking {
-            assertEquals(null, app.container.db.progress().get("python-basics/py-02-variables")?.status?.takeIf { it == LessonStatus.TESTED_OUT })
-            val review = app.container.db.reviews().get("python.print")!!
+            assertEquals(null, app.container.db.progress().get(second.ref.key)?.status?.takeIf { it == LessonStatus.TESTED_OUT })
+            val review = app.container.db.reviews().get(firstSkill)!!
             assertEquals(LocalDate.now().toEpochDay() + 1, review.dueEpochDay)
-            assertEquals(SkillStatus.LEARNING, app.container.db.skills().get("python.print")!!.status)
+            assertEquals(SkillStatus.LEARNING, app.container.db.skills().get(firstSkill)!!.status)
             assertTrue(app.container.settings.settings.first().onboardingDone)
         }
         rule.waitUntil(5_000) { rule.onAllNodes(hasTestTag("diag-done") and isEnabled()).fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("diag-done").performClick()
         // Главная: карточка выбора скрыта, следующий урок — второй.
-        waitText("Переменные")
+        waitText(second.lesson.title)
         assertTrue(rule.onAllNodes(hasTestTag("start-choice")).fetchSemanticsNodes().isEmpty())
     }
 

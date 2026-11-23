@@ -37,7 +37,7 @@ fun ProgramScreen(onBack: () -> Unit, openLesson: (LessonRef) -> Unit) {
     val byStage = lessons.groupBy { it.first.stage }
 
     Screen("Программа", onBack) { padding ->
-        LazyColumn(Modifier.padding(padding), contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+        LazyColumn(Modifier.padding(padding).testTag("program-list"), contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)) {
             items(Curriculum.stages, key = { it.number }) { stage ->
                 val stageLessons = byStage[stage.number].orEmpty()

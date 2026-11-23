@@ -27,8 +27,12 @@ data class TaskContext(
     val solutionFiles: Map<String, String>,
     /** Для «предскажи результат»: верный ответ (его тоже нельзя выдавать). */
     val expectedAnswer: String? = null,
+    /** Задание с проверкой `answer` любого вида (например, команда терминала): ответ вводят текстом. */
+    val answerOnly: Boolean = false,
 ) {
-    val isAnswerTask: Boolean get() = type == "predict" || type == "review"
+    val isAnswerTask: Boolean get() = type == "predict" || type == "review" || answerOnly
+    /** Нужно проследить выполнение кода (а не вспомнить команду): «предскажи» и разбор кода. */
+    val isTrace: Boolean get() = type == "predict" || type == "review"
 }
 
 /** Ссылка на урок курса. */

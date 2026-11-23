@@ -36,6 +36,7 @@ object MentorContent {
             },
             solutionFiles = if (a.isAnswerTask) emptyMap() else mapOf(file to a.solution),
             expectedAnswer = expected,
+            answerOnly = a.isAnswerTask,
         )
     }
 

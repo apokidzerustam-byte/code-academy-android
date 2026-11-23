@@ -34,8 +34,7 @@ class LessonPlayerUiTest {
 
     private fun openLesson() {
         rule.onNodeWithTag("open-program").performScrollTo().performClick()
-        rule.waitUntil(10_000) { rule.onAllNodes(hasTestTag("lesson-py-01-print")).fetchSemanticsNodes().isNotEmpty() }
-        rule.onNodeWithTag("lesson-py-01-print").performScrollTo().performClick()
+        rule.openLessonInProgram("py-01-print")
         rule.waitUntil(10_000) { rule.onAllNodes(hasTestTag("lesson-player")).fetchSemanticsNodes().isNotEmpty() }
     }
 
@@ -80,8 +79,7 @@ class LessonPlayerUiTest {
 
         // Позиция сохраняется: после выхода и возврата — та же сцена.
         rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
-        rule.waitUntil(5_000) { rule.onAllNodes(hasTestTag("lesson-py-01-print")).fetchSemanticsNodes().isNotEmpty() }
-        rule.onNodeWithTag("lesson-py-01-print").performScrollTo().performClick()
+        rule.openLessonInProgram("py-01-print")
         rule.waitUntil(10_000) { sceneIs(6) || sceneIs(7) }
     }
 

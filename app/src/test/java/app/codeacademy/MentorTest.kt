@@ -160,7 +160,10 @@ class MentorTest {
                 val withoutCode = prompt.replace(ctx.code, "")
                 if (item.task.isAnswerTask) {
                     val ans = item.task.expectedAnswer!!.trim()
-                    if (ans.length >= 6 && ans !in item.task.statement) assertFalse("${item.task.id}: ответ в промпте", withoutCode.contains(ans))
+                    // Команды терминала (не «предскажи») входят в конспект урока как примеры — ученик видит их и так;
+                    // вывод программы в конспекте появляться не должен.
+                    val inNotes = !item.task.isTrace && Corpus.kb.lessons.any { l -> l.notes.contains(ans) }
+                    if (ans.length >= 6 && ans !in item.task.statement && !inNotes) assertFalse("${item.task.id}: ответ в промпте", withoutCode.contains(ans))
                 } else {
                     // Конспекты курса ученик видит и так; эталон в промпт не передаётся.
                     val notes = Corpus.kb.lessons.joinToString("\n") { l -> l.notes + l.commonMistakes.joinToString("\n") { "${it.mistake}\n${it.fix}" } }

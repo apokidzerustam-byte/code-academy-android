@@ -79,8 +79,7 @@ class MentorOnDeviceTest {
     /** Панель наставника в задании: подсказка открывает ступень лестницы, просьба о решении — без решения. */
     @Test fun mentorPanelInAssignment() {
         rule.onNodeWithTag("open-program").performScrollTo().performClick()
-        rule.waitUntil(10_000) { rule.onAllNodes(hasTestTag("lesson-py-03-input")).fetchSemanticsNodes().isNotEmpty() }
-        rule.onNodeWithTag("lesson-py-03-input").performScrollTo().performClick()
+        rule.openLessonInProgram("py-03-input")
         rule.onNodeWithTag("tab-2").performClick()
         rule.waitUntil(10_000) { rule.onAllNodes(hasTestTag("assignment-0")).fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("assignment-0").performClick()

@@ -140,8 +140,12 @@ data class Assignment(
     /** Типовые неверные решения (для автопроверки контента). */
     val wrongSolutions: List<WrongSolution> = emptyList(),
 ) {
-    /** «Предскажи результат»: ученик вводит текст, код не выполняется. */
-    val isAnswerTask: Boolean get() = type == "predict" || type == "review"
+    /**
+     * Ответ вводят текстом, код не выполняется: «предскажи результат», разбор кода и вопросы с проверкой `answer`
+     * (например, команда терминала, которую ученик записывает как ответ).
+     */
+    val isAnswerTask: Boolean
+        get() = type == "predict" || type == "review" || (tests["kind"] as? kotlinx.serialization.json.JsonPrimitive)?.content == "answer"
 }
 
 /** Урок вместе с путями его файлов внутри пакета. */
