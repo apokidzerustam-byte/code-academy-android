@@ -164,6 +164,18 @@ def find_kotlinc():
 _KT_CACHE = {}
 
 
+# Заглушки API Android (Compose, ViewModel/StateFlow, корутины, Room): настоящих библиотек у kotlinc нет, поэтому код
+# с импортом androidx.* / kotlinx.* компилируется вместе с упрощёнными заглушками из tools/kotlin-stubs/android.
+# Заглушки проверяют синтаксис, типы и логику построения интерфейса «за один проход» (без перекомпозиции и настоящей
+# многопоточности); поведение настоящих библиотек они не доказывают.
+KT_STUBS = pathlib.Path(__file__).resolve().parent / "kotlin-stubs" / "android"
+KT_STUB_IMPORT = re.compile(r"^\s*import\s+(androidx|kotlinx)\.", re.M)
+
+
+def kotlin_stub_files(code):
+    return sorted(str(p) for p in KT_STUBS.glob("*.kt")) if KT_STUB_IMPORT.search(code) else []
+
+
 def run_kotlin(code, compile_only=False):
     """Компиляция (и запуск, если есть main) настоящим kotlinc. None — kotlinc не найден."""
     kotlinc = find_kotlinc()
@@ -177,7 +189,7 @@ def run_kotlin(code, compile_only=False):
         src.write_text(code, "utf-8")
         out = pathlib.Path(d, "out")
         try:
-            c = subprocess.run([kotlinc, str(src), "-d", str(out), "-nowarn"], capture_output=True, text=True, timeout=300)
+            c = subprocess.run([kotlinc, *kotlin_stub_files(code), str(src), "-d", str(out), "-nowarn"], capture_output=True, text=True, timeout=300)
         except subprocess.TimeoutExpired:
             return {"status": "TIMEOUT", "stdout": "", "stderr": "kotlinc: превышено время"}
         if c.returncode != 0:

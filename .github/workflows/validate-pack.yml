@@ -1,0 +1,42 @@
+name: Validate pack
+
+# Быстрая проверка выбранных пакетов контента (≈5 минут вместо ≈35 у полного прогона «Android»):
+# те же исполнители (настоящий kotlinc, SQLite-воркер, FastAPI TestClient, Chrome для веб-раннера), только без Gradle.
+# Запуск: gh workflow run validate-pack.yml --ref <ветка> -f packs="content/packs/kotlin-basics"
+on:
+  workflow_dispatch:
+    inputs:
+      packs:
+        description: "Пути пакетов через пробел (по умолчанию — все)"
+        default: "content/packs"
+        required: true
+
+env:
+  KOTLIN_VERSION: "2.1.20"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Валидатор (${{ inputs.packs }})
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.13" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "17" }
+      - run: pip install jsonschema "fastapi==0.125.0" "pydantic==1.10.27" "httpx==0.28.1"
+      - name: Компилятор Kotlin
+        run: |
+          curl -sSLo /tmp/kotlinc.zip "https://github.com/JetBrains/kotlin/releases/download/v${KOTLIN_VERSION}/kotlin-compiler-${KOTLIN_VERSION}.zip"
+          unzip -q /tmp/kotlinc.zip -d /opt
+          echo "KOTLINC=/opt/kotlinc/bin/kotlinc" >> "$GITHUB_ENV"
+      - name: Веб-раннер (сборка)
+        working-directory: web-runner
+        run: npm install --no-audit --no-fund && npm run build
+      - name: Проверка пакетов
+        run: python tools/validate_content.py ${{ inputs.packs }} --require-kotlinc
