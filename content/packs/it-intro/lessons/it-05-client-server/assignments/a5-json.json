@@ -1,0 +1,41 @@
+{
+  "id": "a5-json",
+  "type": "predict",
+  "title": "JSON и Python",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "JSON и Python",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "import json\n\ntext = '{\"items\": [{\"price\": 10}, {\"price\": 25}], \"tax\": 0.2}'\ndata = json.loads(text)\ntotal = sum(i[\"price\"] for i in data[\"items\"])\nprint(total)\nprint(total * (1 + data[\"tax\"]))\nprint(type(data[\"items\"]).__name__)\n",
+  "hints": [
+    "loads превращает текст в объекты Python.",
+    "data[\"items\"] — список из двух словарей.",
+    "Сумма цен: 10 + 25.",
+    "Налог 20 % увеличивает сумму в 1.2 раза.",
+    "Массив JSON — это list."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "35\n42.0\nlist\n"
+  },
+  "solution": "35\n42.0\nlist\n",
+  "explanation": "JSON-объект становится словарём, массив — списком; числа и вложенность сохраняются.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "35\n35.2\nlist",
+      "answer": "35\n35.2\nlist",
+      "why": "Налог 0.2 — это 20 %, а не 0.2 единицы."
+    },
+    {
+      "code": "35\n42.0\ndict",
+      "answer": "35\n42.0\ndict",
+      "why": "Массив JSON превращается в список Python."
+    }
+  ]
+}

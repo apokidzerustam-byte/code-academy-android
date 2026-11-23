@@ -1,0 +1,99 @@
+{
+  "id": "a2-shift",
+  "type": "function",
+  "title": "Сдвиг букв",
+  "statement": "Напишите `shift(text, k)`: каждую **строчную латинскую** букву замените на букву на `k` позиций дальше по алфавиту (после `z` снова `a`). Остальные символы оставьте без изменений.",
+  "goal": "Сдвиг букв",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Работайте с кодами символов.",
+    "Код буквы минус код a — номер в алфавите.",
+    "Прибавьте k и возьмите остаток от деления на 26.",
+    "Верните к коду a.",
+    "Не буквы нужно добавить как есть."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "shift",
+    "cases": [
+      {
+        "args": [
+          "abc",
+          1
+        ],
+        "id": "v1",
+        "expected": "bcd"
+      },
+      {
+        "args": [
+          "xyz",
+          3
+        ],
+        "id": "v2",
+        "expected": "abc"
+      },
+      {
+        "args": [
+          "hello, world!",
+          5
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "mjqqt, btwqi!"
+      },
+      {
+        "args": [
+          "abc",
+          26
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "abc"
+      },
+      {
+        "args": [
+          "abc",
+          0
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": "abc"
+      },
+      {
+        "args": [
+          "ABC def",
+          2
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": "ABC fgh"
+      },
+      {
+        "args": [
+          "z",
+          1
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": "a"
+      }
+    ]
+  },
+  "solution": "def shift(text, k):\n    result = \"\"\n    for ch in text:\n        if \"a\" <= ch <= \"z\":\n            result += chr((ord(ch) - ord(\"a\") + k) % 26 + ord(\"a\"))\n        else:\n            result += ch\n    return result\n",
+  "explanation": "Остаток от деления на 26 замыкает алфавит в кольцо; остальные знаки пропускаются без изменений.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def shift(text, k):\n    return \"\".join(chr(ord(ch) + k) for ch in text)\n",
+      "why": "Сдвиг без замыкания алфавита и для всех символов."
+    },
+    {
+      "code": "def shift(text, k):\n    result = \"\"\n    for ch in text:\n        if \"a\" <= ch <= \"z\":\n            result += chr((ord(ch) - ord(\"a\") + k) % 26 + ord(\"a\"))\n    return result\n",
+      "why": "Остальные символы пропадают."
+    }
+  ]
+}

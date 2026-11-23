@@ -1,0 +1,64 @@
+{
+  "id": "a4-ext",
+  "type": "complete",
+  "title": "Расширение файла",
+  "statement": "Ввод — имя файла. Выведите его расширение (часть после **последней** точки). Если точки нет — выведите `нет`.",
+  "goal": "Расширение файла",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "name = input().strip()\n# напечатайте расширение или «нет»\n",
+  "hints": [
+    "Расширение — после последней точки.",
+    "Разделите имя справа один раз.",
+    "Метод rsplit с лимитом 1.",
+    "Последний элемент — расширение.",
+    "Нет точки — «нет»."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "фото.png\n",
+        "expected_stdout": "png\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "README\n",
+        "expected_stdout": "нет\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "отчёт.final.pdf\n",
+        "expected_stdout": "pdf\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "archive.tar.gz\n",
+        "expected_stdout": "gz\n",
+        "hidden": true
+      },
+      {
+        "id": "h5",
+        "stdin": "noext.\n",
+        "expected_stdout": "\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "name = input().strip()\nprint(name.rsplit(\".\", 1)[-1] if \".\" in name else \"нет\")\n",
+  "explanation": "rsplit(\".\", 1) делит имя по последней точке: так «archive.tar.gz» даёт «gz».",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "name = input().strip()\nprint(name.split(\".\")[1] if \".\" in name else \"нет\")\n",
+      "why": "Берётся часть после первой точки; для имён без второй части — ошибка."
+    }
+  ]
+}

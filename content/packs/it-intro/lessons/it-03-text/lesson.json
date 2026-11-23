@@ -1,0 +1,45 @@
+{
+  "id": "it-03-text",
+  "title": "Текст, кодировки и файлы",
+  "goal": "Объяснять, как хранятся знаки, и работать с кодами символов и байтами.",
+  "skills": [
+    "it.unicode",
+    "it.utf8",
+    "it.files"
+  ],
+  "prerequisites": [
+    "it-02-binary"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-ord.json",
+    "assignments/a2-shift.json",
+    "assignments/a3-bytes.json",
+    "assignments/a4-ext.json",
+    "assignments/a5-len.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Считают, что один символ — всегда один байт",
+      "fix": "В UTF-8 размер символа от 1 до 4 байт."
+    },
+    {
+      "mistake": "Открывают файл без указания кодировки",
+      "fix": "Указывайте encoding=\"utf-8\"."
+    },
+    {
+      "mistake": "Думают, что расширение определяет содержимое",
+      "fix": "Расширение — подсказка; формат — это структура байтов."
+    },
+    {
+      "mistake": "Сдвигают буквы без замыкания алфавита",
+      "fix": "Используйте остаток от деления на 26."
+    }
+  ]
+}

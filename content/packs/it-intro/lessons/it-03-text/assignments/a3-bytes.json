@@ -1,0 +1,80 @@
+{
+  "id": "a3-bytes",
+  "type": "function",
+  "title": "Размер в байтах",
+  "statement": "Напишите `size_in_bytes(text)`: размер строки в байтах в кодировке UTF-8.",
+  "goal": "Размер в байтах",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Размер в байтах не равен длине строки.",
+    "Строку нужно превратить в байты.",
+    "Метод encode с названием кодировки.",
+    "Кодировка — utf-8.",
+    "Длину байтов получите через len."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "size_in_bytes",
+    "cases": [
+      {
+        "args": [
+          "abc"
+        ],
+        "id": "v1",
+        "expected": 3
+      },
+      {
+        "args": [
+          "Привет"
+        ],
+        "id": "v2",
+        "expected": 12
+      },
+      {
+        "args": [
+          ""
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          "a я"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 4
+      },
+      {
+        "args": [
+          "😀"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 4
+      },
+      {
+        "args": [
+          "Hello, мир!"
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": 14
+      }
+    ]
+  },
+  "solution": "def size_in_bytes(text):\n    return len(text.encode(\"utf-8\"))\n",
+  "explanation": "len(text) считает знаки, len(text.encode(\"utf-8\")) — байты: русская буква занимает два байта.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def size_in_bytes(text):\n    return len(text)\n",
+      "why": "Длина в знаках, а не в байтах."
+    }
+  ]
+}

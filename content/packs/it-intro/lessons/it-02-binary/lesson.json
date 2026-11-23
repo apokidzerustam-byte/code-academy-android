@@ -1,0 +1,45 @@
+{
+  "id": "it-02-binary",
+  "title": "Двоичная система",
+  "goal": "Переводить числа между двоичной и десятичной системами и оценивать число значений в n битах.",
+  "skills": [
+    "it.binary",
+    "it.hex",
+    "it.bits"
+  ],
+  "prerequisites": [
+    "it-01-computer"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-bin.json",
+    "assignments/a2-to-binary.json",
+    "assignments/a3-from-binary.json",
+    "assignments/a4-bits-values.json",
+    "assignments/a5-ones.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Читают двоичное число как десятичное",
+      "fix": "Позиции — степени двойки: 1, 2, 4, 8…"
+    },
+    {
+      "mistake": "Забывают, что 8 бит — это 256 значений, а максимум — 255",
+      "fix": "Значения от 0 до 2ⁿ − 1."
+    },
+    {
+      "mistake": "Остатки пишут в прямом порядке",
+      "fix": "Читайте остатки снизу вверх."
+    },
+    {
+      "mistake": "Путают bin() с строкой без приставки",
+      "fix": "bin() возвращает «0b…»; format(n, \"b\") — без неё."
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "id": "a5-process",
+  "type": "predict",
+  "title": "Программа и процесс",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Программа и процесс",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "programs = [\"браузер\", \"музыка\", \"игра\"]\nrunning = []\nfor name in programs:\n    running.append(name)\n    running.append(name)\nprint(len(programs))\nprint(len(running))\nprint(running.count(\"игра\"))\n",
+  "hints": [
+    "В списке programs три названия.",
+    "Каждое добавляется в running дважды.",
+    "В running шесть записей.",
+    "Сколько раз встречается «игра»?",
+    "Дважды."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "3\n6\n2\n"
+  },
+  "solution": "3\n6\n2\n",
+  "explanation": "Одну программу можно запустить несколько раз: список programs — это файлы, а список running — процессы.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "3\n3\n1",
+      "answer": "3\n3\n1",
+      "why": "Каждая программа запущена дважды."
+    },
+    {
+      "code": "3\n6\n1",
+      "answer": "3\n6\n1",
+      "why": "Игра запущена два раза."
+    }
+  ]
+}

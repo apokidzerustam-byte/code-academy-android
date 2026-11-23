@@ -1,0 +1,33 @@
+{
+  "id": "it-intro",
+  "version": "0.1.0",
+  "stage": 1,
+  "title": "Введение в IT",
+  "description": "Как устроены компьютеры, двоичная система, текст и файлы, алгоритмы, исходный код, frontend и backend — с проверкой на Python.",
+  "language": "python",
+  "minAppVersion": 1,
+  "lessons": [
+    "it-01-computer",
+    "it-02-binary",
+    "it-03-text",
+    "it-04-algorithms",
+    "it-05-client-server"
+  ],
+  "skills": {
+    "it.hardware": "Устройство компьютера",
+    "it.units": "Единицы измерения данных",
+    "it.os": "Операционная система",
+    "it.binary": "Двоичная система",
+    "it.hex": "Шестнадцатеричная запись",
+    "it.bits": "Биты и байты",
+    "it.unicode": "Юникод и кодировки",
+    "it.utf8": "UTF-8 и размер в байтах",
+    "it.files": "Файлы и форматы",
+    "it.algorithm": "Алгоритм",
+    "it.source": "Исходный код",
+    "it.constructs": "Последовательность, условие, цикл",
+    "it.http": "HTTP и URL",
+    "it.client-server": "Клиент и сервер",
+    "it.json": "Формат JSON"
+  }
+}

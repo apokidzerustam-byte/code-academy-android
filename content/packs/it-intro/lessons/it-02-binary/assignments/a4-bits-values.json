@@ -1,0 +1,64 @@
+{
+  "id": "a4-bits-values",
+  "type": "complete",
+  "title": "Сколько значений в n битах",
+  "statement": "Ввод — целое `n`. Выведите, сколько различных значений можно записать в `n` битах.",
+  "goal": "Сколько значений в n битах",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "n = int(input())\n# выведите количество значений\n",
+  "hints": [
+    "Каждый добавленный бит удваивает число вариантов.",
+    "Один бит: 2 значения.",
+    "Два бита: 4 значения.",
+    "n бит: 2 в степени n.",
+    "Степень в Python — **."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "8\n",
+        "expected_stdout": "256\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "1\n",
+        "expected_stdout": "2\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "16\n",
+        "expected_stdout": "65536\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "0\n",
+        "expected_stdout": "1\n",
+        "hidden": true
+      },
+      {
+        "id": "h5",
+        "stdin": "32\n",
+        "expected_stdout": "4294967296\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "n = int(input())\nprint(2 ** n)\n",
+  "explanation": "n битов вмещают 2ⁿ комбинаций: поэтому 8 бит дают 256 значений.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "n = int(input())\nprint(n * 2)\n",
+      "why": "Количество значений растёт как степень двойки."
+    }
+  ]
+}

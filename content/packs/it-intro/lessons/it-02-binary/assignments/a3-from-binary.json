@@ -1,0 +1,80 @@
+{
+  "id": "a3-from-binary",
+  "type": "function",
+  "title": "Из двоичной в десятичную",
+  "statement": "Напишите `from_binary(s)`: по строке из нулей и единиц верните число. Использовать `int(s, 2)` нельзя: перемножайте позиции вручную.",
+  "goal": "Из двоичной в десятичную",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Идите по цифрам слева направо.",
+    "Каждая новая цифра сдвигает накопленное число на разряд.",
+    "Сдвиг на один разряд в двоичной системе — умножение на 2.",
+    "К результату прибавьте новую цифру.",
+    "Начальное значение — 0."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "from_binary",
+    "cases": [
+      {
+        "args": [
+          "1011"
+        ],
+        "id": "v1",
+        "expected": 11
+      },
+      {
+        "args": [
+          "0"
+        ],
+        "id": "v2",
+        "expected": 0
+      },
+      {
+        "args": [
+          "1"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 1
+      },
+      {
+        "args": [
+          "11111111"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 255
+      },
+      {
+        "args": [
+          "100000"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 32
+      },
+      {
+        "args": [
+          "00101"
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": 5
+      }
+    ]
+  },
+  "solution": "def from_binary(s):\n    value = 0\n    for ch in s:\n        value = value * 2 + int(ch)\n    return value\n",
+  "explanation": "Схема Горнера: value * 2 + цифра. Так читается число слева направо без степеней.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def from_binary(s):\n    value = 0\n    for i, ch in enumerate(s):\n        value += int(ch) * 2 ** i\n    return value\n",
+      "why": "Позиции нумеруются слева, а младший разряд справа."
+    }
+  ]
+}

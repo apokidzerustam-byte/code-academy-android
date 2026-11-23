@@ -1,0 +1,41 @@
+{
+  "id": "a1-url",
+  "type": "predict",
+  "title": "Части адреса",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Части адреса",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "from urllib.parse import urlparse\n\np = urlparse(\"https://shop.example.org/items/42?color=red\")\nprint(p.scheme)\nprint(p.netloc)\nprint(p.path)\nprint(p.query)\n",
+  "hints": [
+    "Адрес делится на схему, хост, путь и параметры.",
+    "Схема — всё до двоеточия.",
+    "Хост идёт после двух слешей.",
+    "Путь заканчивается перед знаком вопроса.",
+    "Параметры — после знака вопроса, без самого знака."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "https\nshop.example.org\n/items/42\ncolor=red\n"
+  },
+  "solution": "https\nshop.example.org\n/items/42\ncolor=red\n",
+  "explanation": "urlparse раскладывает адрес: схема https, хост shop.example.org, путь /items/42, запрос color=red.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "https\nshop.example.org\n/items/42?color=red\ncolor=red",
+      "answer": "https\nshop.example.org\n/items/42?color=red\ncolor=red",
+      "why": "Путь не включает параметры после знака вопроса."
+    },
+    {
+      "code": "http\nshop.example.org\n/items/42\ncolor=red",
+      "answer": "http\nshop.example.org\n/items/42\ncolor=red",
+      "why": "Схема здесь https."
+    }
+  ]
+}

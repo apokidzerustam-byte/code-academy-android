@@ -1,0 +1,87 @@
+{
+  "id": "a3-parse-request",
+  "type": "function",
+  "title": "Разбор запроса",
+  "statement": "Напишите `parse_request(line)`: по строке вида `\"GET /users/7 HTTP/1.1\"` верните кортеж `(method, path)`.",
+  "goal": "Разбор запроса",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Строка запроса — три слова через пробел.",
+    "Разделите её по пробелам.",
+    "Метод — первое слово, путь — второе.",
+    "Версия протокола в ответ не нужна.",
+    "Верните кортеж из двух элементов."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "parse_request",
+    "cases": [
+      {
+        "args": [
+          "GET /users/7 HTTP/1.1"
+        ],
+        "id": "v1",
+        "expected": [
+          "GET",
+          "/users/7"
+        ]
+      },
+      {
+        "args": [
+          "POST /login HTTP/1.1"
+        ],
+        "id": "v2",
+        "expected": [
+          "POST",
+          "/login"
+        ]
+      },
+      {
+        "args": [
+          "DELETE /items/3 HTTP/1.1"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          "DELETE",
+          "/items/3"
+        ]
+      },
+      {
+        "args": [
+          "GET / HTTP/1.1"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          "GET",
+          "/"
+        ]
+      },
+      {
+        "args": [
+          "PUT /a/b/c HTTP/2"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          "PUT",
+          "/a/b/c"
+        ]
+      }
+    ]
+  },
+  "solution": "def parse_request(line):\n    method, path, _ = line.split()\n    return (method, path)\n",
+  "explanation": "split() по пробелам делит строку запроса на метод, путь и версию протокола.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def parse_request(line):\n    parts = line.split()\n    return (parts[0], parts[1], parts[2])\n",
+      "why": "Возвращается лишний элемент — версия протокола."
+    }
+  ]
+}

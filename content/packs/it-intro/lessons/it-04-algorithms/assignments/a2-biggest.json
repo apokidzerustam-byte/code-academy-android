@@ -1,0 +1,102 @@
+{
+  "id": "a2-biggest",
+  "type": "function",
+  "title": "Наибольшее из трёх",
+  "statement": "Напишите `biggest(a, b, c)`: верните наибольшее из трёх чисел. Функцию `max` использовать нельзя — запишите шаги сами.",
+  "goal": "Наибольшее из трёх",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Сначала считайте наибольшим первое число.",
+    "Сравните со вторым.",
+    "Если второе больше — запомните его.",
+    "Повторите для третьего.",
+    "В конце верните запомненное."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "biggest",
+    "cases": [
+      {
+        "args": [
+          3,
+          9,
+          5
+        ],
+        "id": "v1",
+        "expected": 9
+      },
+      {
+        "args": [
+          7,
+          2,
+          4
+        ],
+        "id": "v2",
+        "expected": 7
+      },
+      {
+        "args": [
+          5,
+          2,
+          9
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 9
+      },
+      {
+        "args": [
+          1,
+          1,
+          1
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 1
+      },
+      {
+        "args": [
+          -5,
+          -2,
+          -9
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": -2
+      },
+      {
+        "args": [
+          0,
+          0,
+          1
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": 1
+      },
+      {
+        "args": [
+          8,
+          8,
+          3
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": 8
+      }
+    ]
+  },
+  "solution": "def biggest(a, b, c):\n    best = a\n    if b > best:\n        best = b\n    if c > best:\n        best = c\n    return best\n",
+  "explanation": "Алгоритм «текущий рекордсмен»: запоминаем лучший на данный момент и обновляем его при встрече большего.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def biggest(a, b, c):\n    if a > b:\n        return a\n    return c if c > b else b\n",
+      "why": "Первое число возвращается, даже если третье больше."
+    }
+  ]
+}

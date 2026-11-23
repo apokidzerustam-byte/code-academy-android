@@ -1,0 +1,77 @@
+{
+  "id": "a4-query",
+  "type": "function",
+  "title": "Параметры запроса",
+  "statement": "Напишите `get_param(url, name)`: верните значение параметра `name` из адреса `url` (первое, если их несколько) или `None`, если такого параметра нет. Используйте `urllib.parse`.",
+  "goal": "Параметры запроса",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Параметры лежат в части запроса адреса.",
+    "Часть запроса получите из разобранного адреса.",
+    "Превратите её в словарь специальной функцией из того же модуля.",
+    "Значения в словаре — списки.",
+    "Если параметра нет, верните None."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "get_param",
+    "cases": [
+      {
+        "args": [
+          "https://a.com/s?q=python&page=2",
+          "q"
+        ],
+        "id": "v1",
+        "expected": "python"
+      },
+      {
+        "args": [
+          "https://a.com/s?q=python&page=2",
+          "page"
+        ],
+        "id": "v2",
+        "expected": "2"
+      },
+      {
+        "args": [
+          "https://a.com/s",
+          "q"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": null
+      },
+      {
+        "args": [
+          "https://a.com/s?x=1&x=2",
+          "x"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "1"
+      },
+      {
+        "args": [
+          "https://a.com/s?q=a",
+          "z"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": null
+      }
+    ]
+  },
+  "solution": "from urllib.parse import urlparse, parse_qs\n\n\ndef get_param(url, name):\n    values = parse_qs(urlparse(url).query).get(name)\n    return values[0] if values else None\n",
+  "explanation": "parse_qs возвращает словарь «имя → список значений»: нужное значение — первый элемент списка.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from urllib.parse import urlparse, parse_qs\n\n\ndef get_param(url, name):\n    return parse_qs(urlparse(url).query).get(name)\n",
+      "why": "Возвращается список, а не строка."
+    }
+  ]
+}

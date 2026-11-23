@@ -1,0 +1,43 @@
+{
+  "id": "it-01-computer",
+  "title": "Как устроен компьютер",
+  "goal": "Назвать главные части компьютера и вычислять размеры данных.",
+  "skills": [
+    "it.hardware",
+    "it.units",
+    "it.os"
+  ],
+  "prerequisites": [],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-sizes.json",
+    "assignments/a2-photos.json",
+    "assignments/a3-gb.json",
+    "assignments/a4-fit.json",
+    "assignments/a5-process.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Путают оперативную память и накопитель",
+      "fix": "Память быстрая и временная; накопитель медленнее и постоянный."
+    },
+    {
+      "mistake": "Считают килобайт тысячей байт",
+      "fix": "В программировании 1 КБ = 1024 байта."
+    },
+    {
+      "mistake": "Путают программу и процесс",
+      "fix": "Программа — файл, процесс — её запущенный экземпляр."
+    },
+    {
+      "mistake": "Забывают сохранить данные",
+      "fix": "Память очищается при выключении: нужно записать результат на накопитель."
+    }
+  ]
+}

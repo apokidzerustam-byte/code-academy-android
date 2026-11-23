@@ -1,0 +1,45 @@
+{
+  "id": "it-05-client-server",
+  "title": "Клиент, сервер и HTTP",
+  "goal": "Объяснять, как клиент и сервер обмениваются данными, и разбирать адреса, запросы и JSON.",
+  "skills": [
+    "it.http",
+    "it.client-server",
+    "it.json"
+  ],
+  "prerequisites": [
+    "it-04-algorithms"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-url.json",
+    "assignments/a2-status-kind.json",
+    "assignments/a3-parse-request.json",
+    "assignments/a4-query.json",
+    "assignments/a5-json.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Путают клиента и сервер",
+      "fix": "Клиент отправляет запрос, сервер отвечает."
+    },
+    {
+      "mistake": "Считают, что значение параметра в parse_qs — строка",
+      "fix": "Это список строк."
+    },
+    {
+      "mistake": "Не различают коды 4xx и 5xx",
+      "fix": "4xx — ошибка клиента, 5xx — сервера."
+    },
+    {
+      "mistake": "Пишут JSON с одинарными кавычками",
+      "fix": "В JSON — только двойные."
+    }
+  ]
+}

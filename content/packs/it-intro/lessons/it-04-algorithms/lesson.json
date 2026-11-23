@@ -1,0 +1,45 @@
+{
+  "id": "it-04-algorithms",
+  "title": "Алгоритмы и исходный код",
+  "goal": "Описывать решение алгоритмом и записывать его кодом.",
+  "skills": [
+    "it.algorithm",
+    "it.source",
+    "it.constructs"
+  ],
+  "prerequisites": [
+    "it-03-text"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-steps.json",
+    "assignments/a2-biggest.json",
+    "assignments/a3-digit-sum.json",
+    "assignments/a4-fizz.json",
+    "assignments/a5-gcd.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Сразу пишут код без плана",
+      "fix": "Сначала опишите шаги словами."
+    },
+    {
+      "mistake": "Забывают, что алгоритм должен завершаться",
+      "fix": "Убедитесь, что цикл приближается к условию выхода."
+    },
+    {
+      "mistake": "Ставят общее условие раньше частного",
+      "fix": "Проверяйте самые специфичные случаи первыми."
+    },
+    {
+      "mistake": "Путают компиляцию и интерпретацию",
+      "fix": "Компилятор переводит заранее, интерпретатор выполняет по ходу."
+    }
+  ]
+}
