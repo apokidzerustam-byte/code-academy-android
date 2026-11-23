@@ -116,18 +116,22 @@ class MentorModelTest {
         // Пустые ответы сделали бы проверку ниже вхолостую; короткий, но полный ответ слабой модели допустим (сравнивается весь текст).
         assertTrue("модель вернула пустой ответ: $raw", raw.size == 4 && raw.all { it.trim().length >= 5 })
         assertTrue("кэш ни разу не сработал: $stats", stats.size == 4 && stats.drop(1).any { it.cached > 0 })
-        // При кэше числа с плавающей точкой считаются в другом порядке, и близкие по вероятности слова могут поменяться
-        // («Просто: …» / «Просто говори: …» — пример из CI). Испорченный кэш даёт другой текст, а не тот же с перестановкой слов:
-        // поэтому, кроме общего начала, принимается и большое пересечение слов обоих ответов.
+        // Числа с плавающей точкой считаются в другом порядке при разном объёме кэша, и близкие по вероятности слова могут
+        // поменяться местами («Просто: …» / «Просто говори: …» — пример из CI; повтор подряд мог совпасть с ответом без кэша,
+        // а не с предыдущим). Испорченный кэш даёт другой текст, а не тот же с перестановкой слов: поэтому, кроме общего начала,
+        // принимается и большое пересечение слов обоих ответов.
         val wordsOf = { t: String -> t.lowercase().split(Regex("[^\\p{L}\\d]+")).filter { it.length >= 3 }.toSet() }
-        val wa = wordsOf(raw[0])
-        val wb = wordsOf(raw[2])
-        val overlap = wa.intersect(wb).size.toDouble() / maxOf(1, wa.union(wb).size)
-        assertTrue(
-            "после кэша ответ расходится ($common симв. общего начала, сходство слов ${"%.2f".format(overlap)}):\n${raw[0]}\n---\n${raw[2]}",
-            common >= minOf(20, raw[0].length) || overlap >= 0.4,
-        )
-        assertTrue("повторный запрос подряд дал другой ответ:\n${raw[2]}\n---\n${raw[3]}", raw[2].commonPrefixWith(raw[3]).length >= minOf(20, raw[2].length))
+        val similar = { x: String, y: String ->
+            val wx = wordsOf(x)
+            val wy = wordsOf(y)
+            val overlap = wx.intersect(wy).size.toDouble() / maxOf(1, wx.union(wy).size)
+            val prefix = x.commonPrefixWith(y).length
+            Pair(prefix >= minOf(20, x.length) || overlap >= 0.4, "общее начало $prefix симв., сходство слов ${"%.2f".format(overlap)}")
+        }
+        val (okCache, whyCache) = similar(raw[0], raw[2])
+        assertTrue("после кэша ответ расходится ($whyCache):\n${raw[0]}\n---\n${raw[2]}", okCache)
+        val (okRepeat, whyRepeat) = similar(raw[2], raw[3])
+        assertTrue("повторный запрос подряд дал другой ответ ($whyRepeat):\n${raw[2]}\n---\n${raw[3]}", okRepeat)
     }
 
     /**
