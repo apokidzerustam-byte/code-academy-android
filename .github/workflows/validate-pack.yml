@@ -2,13 +2,13 @@ name: Validate pack
 
 # Быстрая проверка выбранных пакетов контента (≈5 минут вместо ≈35 у полного прогона «Android»):
 # те же исполнители (настоящий kotlinc, SQLite-воркер, FastAPI TestClient, Chrome для веб-раннера), только без Gradle.
-# Запуск: gh workflow run validate-pack.yml --ref <ветка> -f packs="content/packs/kotlin-basics"
+# Запуск: gh workflow run validate-pack.yml --ref <ветка> -f packs="kotlin-basics api-backend"  (имена папок в content/packs; "all" — все)
 on:
   workflow_dispatch:
     inputs:
       packs:
-        description: "Пути пакетов через пробел (по умолчанию — все)"
-        default: "content/packs"
+        description: "Имена пакетов из content/packs через пробел (all — все)"
+        default: "all"
         required: true
 
 env:
@@ -39,4 +39,17 @@ jobs:
         working-directory: web-runner
         run: npm install --no-audit --no-fund && npm run build
       - name: Проверка пакетов
-        run: python tools/validate_content.py ${{ inputs.packs }} --require-kotlinc
+        env:
+          PACKS: ${{ inputs.packs }}
+        run: |
+          if [ "$PACKS" = "all" ]; then
+            SRC=content/packs
+          else
+            SRC=$(mktemp -d)
+            for p in $PACKS; do
+              case "$p" in */*|.*) echo "недопустимое имя пакета: $p"; exit 2;; esac
+              test -f "content/packs/$p/pack.json" || { echo "нет пакета $p"; exit 2; }
+              ln -s "$PWD/content/packs/$p" "$SRC/$p"
+            done
+          fi
+          python tools/validate_content.py "$SRC" --require-kotlinc
