@@ -38,6 +38,7 @@
     "web.contrast": "Контрастность и настройки пользователя"
   },
   "projects": [
-    "card"
+    "card",
+    "portfolio"
   ]
 }

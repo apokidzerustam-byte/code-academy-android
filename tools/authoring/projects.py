@@ -477,8 +477,9 @@ vizitka = {"id": "card", "kind": "mini", "title": "Визитка",
                 (dict(v_sol, **{"index.html": V_HTML.replace("    <li>Фотография</li>\n", "")}), "В списке только 2 увлечения.")],
                starter={"index.html": V_START_HTML, "style.css": "/* Оформление */\n", "script.js": "// Кнопка «Контакты»\n"})]}
 
-write_project("python-basics", finance)
-write_project("python-basics", thermo)
-write_project("python-basics", quiz)
-write_project("python-basics", shopping)
-write_project("web-basics", vizitka)
+if __name__ == "__main__":
+    write_project("python-basics", finance)
+    write_project("python-basics", thermo)
+    write_project("python-basics", quiz)
+    write_project("python-basics", shopping)
+    write_project("web-basics", vizitka)
