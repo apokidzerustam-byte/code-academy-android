@@ -1,0 +1,124 @@
+{
+  "id": "a2-login",
+  "type": "fix",
+  "title": "Тест на неверный пароль",
+  "statement": "Тесты счастливого пути проходят, но тест «неверный пароль» падает: `POST /login` выдаёт токен **любому**, кто назвал существующее имя. Исправьте маршрут: если пара «имя — пароль» не совпадает с `USERS` (или имени нет), ответьте **401** и `{\"detail\": \"Неверный логин или пароль\"}`.",
+  "goal": "Исправить маршрут по падающему тесту на отказ.",
+  "input": "POST-запросы с разными логинами и паролями.",
+  "expectedResult": "401 при неверной паре, токен при верной.",
+  "constraints": [
+    "Не меняйте словарь USERS и модель Login."
+  ],
+  "starterCode": "from fastapi import FastAPI, HTTPException\nfrom pydantic import BaseModel\n\napp = FastAPI()\nUSERS = {\"anna\": \"secret1\", \"boris\": \"qwerty\"}\n\n\nclass Login(BaseModel):\n    user: str\n    password: str\n\n\n@app.post(\"/login\")\ndef login(data: Login):\n    return {\"token\": \"t-\" + data.user}\n",
+  "hints": [
+    "Сначала запустите тесты: какой из них падает?",
+    "Тест счастливого пути проходит, потому что токен выдаётся всегда.",
+    "Нужно сравнить пароль из запроса с паролем из USERS.",
+    "Для неизвестного имени USERS.get вернёт None, а None не равно строке.",
+    "Если не совпало — raise HTTPException(status_code=401, detail=…), иначе верните токен."
+  ],
+  "tests": {
+    "kind": "fastapi",
+    "cases": [
+      {
+        "id": "v1",
+        "method": "POST",
+        "path": "/login",
+        "json": {
+          "user": "anna",
+          "password": "secret1"
+        },
+        "expected_json": {
+          "token": "t-anna"
+        }
+      },
+      {
+        "id": "v2",
+        "method": "POST",
+        "path": "/login",
+        "json": {
+          "user": "anna",
+          "password": "wrong"
+        },
+        "expected_status": 401,
+        "expected_json": {
+          "detail": "Неверный логин или пароль"
+        },
+        "hint": "Тест на неверный пароль падает: сервер пускает любого"
+      },
+      {
+        "id": "h1",
+        "hidden": true,
+        "method": "POST",
+        "path": "/login",
+        "json": {
+          "user": "nobody",
+          "password": "x"
+        },
+        "expected_status": 401,
+        "expected_json": {
+          "detail": "Неверный логин или пароль"
+        },
+        "hint": "Неизвестный пользователь тоже должен получать 401"
+      },
+      {
+        "id": "h2",
+        "hidden": true,
+        "method": "POST",
+        "path": "/login",
+        "json": {
+          "user": "boris",
+          "password": "qwerty"
+        },
+        "expected_json": {
+          "token": "t-boris"
+        }
+      },
+      {
+        "id": "h3",
+        "hidden": true,
+        "method": "POST",
+        "path": "/login",
+        "json": {
+          "user": "anna",
+          "password": ""
+        },
+        "expected_status": 401,
+        "hint": "Пустой пароль не подходит"
+      },
+      {
+        "id": "h4",
+        "hidden": true,
+        "method": "POST",
+        "path": "/login",
+        "json": {
+          "user": "boris",
+          "password": "secret1"
+        },
+        "expected_status": 401,
+        "hint": "Пароль другого пользователя не подходит"
+      }
+    ]
+  },
+  "solution": "from fastapi import FastAPI, HTTPException\nfrom pydantic import BaseModel\n\napp = FastAPI()\nUSERS = {\"anna\": \"secret1\", \"boris\": \"qwerty\"}\n\n\nclass Login(BaseModel):\n    user: str\n    password: str\n\n\n@app.post(\"/login\")\ndef login(data: Login):\n    if USERS.get(data.user) != data.password:\n        raise HTTPException(status_code=401, detail=\"Неверный логин или пароль\")\n    return {\"token\": \"t-\" + data.user}\n",
+  "explanation": "Тесты только счастливого пути не заметили бы ошибку: она видна лишь на тесте с неверным паролем. Поэтому ошибочные случаи тоже нужно проверять.",
+  "criteria": [
+    "Верная пара даёт токен.",
+    "Неверный пароль даёт 401.",
+    "Неизвестный пользователь даёт 401."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from fastapi import FastAPI, HTTPException\nfrom pydantic import BaseModel\n\napp = FastAPI()\nUSERS = {\"anna\": \"secret1\", \"boris\": \"qwerty\"}\n\n\nclass Login(BaseModel):\n    user: str\n    password: str\n\n\n@app.post(\"/login\")\ndef login(data: Login):\n    if data.user not in USERS:\n        raise HTTPException(status_code=401, detail=\"Неверный логин или пароль\")\n    return {\"token\": \"t-\" + data.user}\n",
+      "why": "Проверяется только имя: любой пароль всё ещё подходит."
+    },
+    {
+      "code": "from fastapi import FastAPI, HTTPException\nfrom pydantic import BaseModel\n\napp = FastAPI()\nUSERS = {\"anna\": \"secret1\", \"boris\": \"qwerty\"}\n\n\nclass Login(BaseModel):\n    user: str\n    password: str\n\n\n@app.post(\"/login\")\ndef login(data: Login):\n    if USERS.get(data.user) != data.password:\n        raise HTTPException(status_code=403, detail=\"Неверный логин или пароль\")\n    return {\"token\": \"t-\" + data.user}\n",
+      "why": "Неверный пароль — это 401 («не удалось подтвердить личность»), а не 403."
+    },
+    {
+      "code": "from fastapi import FastAPI, HTTPException\nfrom pydantic import BaseModel\n\napp = FastAPI()\nUSERS = {\"anna\": \"secret1\", \"boris\": \"qwerty\"}\n\n\nclass Login(BaseModel):\n    user: str\n    password: str\n\n\n@app.post(\"/login\")\ndef login(data: Login):\n    if data.password not in USERS.values():\n        raise HTTPException(status_code=401, detail=\"Неверный логин или пароль\")\n    return {\"token\": \"t-\" + data.user}\n",
+      "why": "Пароль ищется среди всех паролей: пароль другого пользователя тоже подходит."
+    }
+  ]
+}

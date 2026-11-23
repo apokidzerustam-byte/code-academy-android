@@ -1,0 +1,136 @@
+{
+  "id": "a1-products",
+  "type": "write",
+  "title": "API по описанию тестов",
+  "statement": "Тест-план: `POST /products` с телом `{\"name\": \"Чай\", \"price\": 5}` отвечает **201** и возвращает `{\"id\": 1, \"name\": \"Чай\", \"price\": 5.0}`; `GET /products/1` возвращает тот же товар; `GET /products/99` — **404** и `{\"detail\": \"Товар не найден\"}`; товар без цены или с ценой не больше нуля — **422**. Номера выдаются по порядку, начиная с 1. Напишите приложение `app`, которое проходит этот тест-план.",
+  "goal": "Написать API по описанию тестов.",
+  "input": "Запросы из тест-плана.",
+  "expectedResult": "Коды и тело ответов, как в тест-плане.",
+  "constraints": [
+    "Хранилище — словарь PRODUCTS: он уже создан."
+  ],
+  "starterCode": "from fastapi import FastAPI, HTTPException\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\nPRODUCTS = {}\n\n\n# Здесь опишите модель Product и два маршрута: POST /products и GET /products/{product_id}\n",
+  "hints": [
+    "Сначала опишите модель товара: название — строка, цена — число больше нуля.",
+    "Ограничение для числа задают так: price: float = Field(..., gt=0).",
+    "Создание — POST с параметром status_code=201 в декораторе; номер на единицу больше количества товаров.",
+    "Несуществующий номер — raise HTTPException(status_code=404, detail=…).",
+    "Верните словарь с id и полями товара: {\"id\": new_id, **product.dict()}."
+  ],
+  "tests": {
+    "kind": "fastapi",
+    "cases": [
+      {
+        "id": "v1",
+        "method": "POST",
+        "path": "/products",
+        "json": {
+          "name": "Чай",
+          "price": 5
+        },
+        "expected_status": 201,
+        "expected_json": {
+          "id": 1,
+          "name": "Чай",
+          "price": 5.0
+        },
+        "hint": "Создание отвечает кодом 201 и возвращает товар с номером"
+      },
+      {
+        "id": "v2",
+        "path": "/products/1",
+        "expected_json": {
+          "id": 1,
+          "name": "Чай",
+          "price": 5.0
+        }
+      },
+      {
+        "id": "h1",
+        "hidden": true,
+        "path": "/products/99",
+        "expected_status": 404,
+        "expected_json": {
+          "detail": "Товар не найден"
+        },
+        "hint": "Несуществующий товар — ошибка 404 с текстом «Товар не найден»"
+      },
+      {
+        "id": "h2",
+        "hidden": true,
+        "method": "POST",
+        "path": "/products",
+        "json": {
+          "name": "Яд",
+          "price": -1
+        },
+        "expected_status": 422,
+        "hint": "Цена должна быть больше нуля"
+      },
+      {
+        "id": "h3",
+        "hidden": true,
+        "method": "POST",
+        "path": "/products",
+        "json": {
+          "name": "Кофе"
+        },
+        "expected_status": 422,
+        "hint": "Цена обязательна"
+      },
+      {
+        "id": "h4",
+        "hidden": true,
+        "method": "POST",
+        "path": "/products",
+        "json": {
+          "name": "Кофе",
+          "price": 8
+        },
+        "expected_status": 201,
+        "expected_json": {
+          "id": 2,
+          "name": "Кофе",
+          "price": 8.0
+        },
+        "hint": "Номер растёт: второй товар получает id 2"
+      },
+      {
+        "id": "h5",
+        "hidden": true,
+        "path": "/products/2",
+        "expected_json": {
+          "id": 2,
+          "name": "Кофе",
+          "price": 8.0
+        }
+      }
+    ]
+  },
+  "solution": "from fastapi import FastAPI, HTTPException\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\nPRODUCTS = {}\n\n\nclass Product(BaseModel):\n    name: str\n    price: float = Field(..., gt=0)\n\n\n@app.post(\"/products\", status_code=201)\ndef create_product(product: Product):\n    new_id = len(PRODUCTS) + 1\n    PRODUCTS[new_id] = product.dict()\n    return {\"id\": new_id, **product.dict()}\n\n\n@app.get(\"/products/{product_id}\")\ndef read_product(product_id: int):\n    if product_id not in PRODUCTS:\n        raise HTTPException(status_code=404, detail=\"Товар не найден\")\n    return {\"id\": product_id, **PRODUCTS[product_id]}\n",
+  "explanation": "Тест-план задаёт контракт: коды 201, 404 и 422 и форму тела. Сначала записывают ожидания, потом пишут код, который их выполняет.",
+  "criteria": [
+    "POST отвечает 201.",
+    "GET возвращает товар или 404.",
+    "Плохая цена даёт 422.",
+    "Номера растут."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from fastapi import FastAPI, HTTPException\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\nPRODUCTS = {}\n\n\nclass Product(BaseModel):\n    name: str\n    price: float = Field(..., gt=0)\n\n\n@app.post(\"/products\", status_code=200)\ndef create_product(product: Product):\n    new_id = len(PRODUCTS) + 1\n    PRODUCTS[new_id] = product.dict()\n    return {\"id\": new_id, **product.dict()}\n\n\n@app.get(\"/products/{product_id}\")\ndef read_product(product_id: int):\n    if product_id not in PRODUCTS:\n        raise HTTPException(status_code=404, detail=\"Товар не найден\")\n    return {\"id\": product_id, **PRODUCTS[product_id]}\n",
+      "why": "Создание должно отвечать кодом 201, а не 200."
+    },
+    {
+      "code": "from fastapi import FastAPI, HTTPException\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\nPRODUCTS = {}\n\n\nclass Product(BaseModel):\n    name: str\n    price: float = Field(..., gt=0)\n\n\n@app.post(\"/products\", status_code=201)\ndef create_product(product: Product):\n    new_id = len(PRODUCTS) + 1\n    PRODUCTS[new_id] = product.dict()\n    return {\"id\": new_id, **product.dict()}\n\n\n@app.get(\"/products/{product_id}\")\ndef read_product(product_id: int):\n    if product_id not in PRODUCTS:\n        return {\"detail\": \"Товар не найден\"}\n    return {\"id\": product_id, **PRODUCTS[product_id]}\n",
+      "why": "Для несуществующего товара нужна ошибка 404, а не код 200 с текстом."
+    },
+    {
+      "code": "from fastapi import FastAPI, HTTPException\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\nPRODUCTS = {}\n\n\nclass Product(BaseModel):\n    name: str\n    price: float = Field(...)\n\n\n@app.post(\"/products\", status_code=201)\ndef create_product(product: Product):\n    new_id = len(PRODUCTS) + 1\n    PRODUCTS[new_id] = product.dict()\n    return {\"id\": new_id, **product.dict()}\n\n\n@app.get(\"/products/{product_id}\")\ndef read_product(product_id: int):\n    if product_id not in PRODUCTS:\n        raise HTTPException(status_code=404, detail=\"Товар не найден\")\n    return {\"id\": product_id, **PRODUCTS[product_id]}\n",
+      "why": "Цена не ограничена: товар с отрицательной ценой принимается, а должен давать 422."
+    },
+    {
+      "code": "from fastapi import FastAPI, HTTPException\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\nPRODUCTS = {}\n\n\nclass Product(BaseModel):\n    name: str\n    price: float = Field(..., gt=0)\n\n\n@app.post(\"/products\", status_code=201)\ndef create_product(product: Product):\n    new_id = 1\n    PRODUCTS[new_id] = product.dict()\n    return {\"id\": new_id, **product.dict()}\n\n\n@app.get(\"/products/{product_id}\")\ndef read_product(product_id: int):\n    if product_id not in PRODUCTS:\n        raise HTTPException(status_code=404, detail=\"Товар не найден\")\n    return {\"id\": product_id, **PRODUCTS[product_id]}\n",
+      "why": "Номер всегда 1: второй товар затирает первый."
+    }
+  ]
+}

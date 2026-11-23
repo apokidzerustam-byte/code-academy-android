@@ -11,7 +11,8 @@
     "api-02-crud",
     "api-03-validation",
     "api-04-middleware",
-    "api-05-auth"
+    "api-05-auth",
+    "api-06-testing"
   ],
   "skills": {
     "api.http": "HTTP: методы, пути, коды ответа",
@@ -29,6 +30,9 @@
     "api.apikey": "Проверка ключа API",
     "api.password": "Хеш пароля с солью",
     "api.token": "Токен JWT (HS256)",
-    "api.auth": "Защита маршрутов: Depends, 401 и 403"
+    "api.auth": "Защита маршрутов: Depends, 401 и 403",
+    "api.test-client": "TestClient: запросы и проверки",
+    "api.test-errors": "Тесты ошибочных случаев и авторизации",
+    "api.test-isolation": "Независимые тесты и подмена зависимостей"
   }
 }

@@ -1,0 +1,80 @@
+{
+  "id": "a4-override",
+  "type": "complete",
+  "title": "Подмена курса",
+  "statement": "Маршрут `/convert/{eur}` умножает сумму на курс из зависимости `get_rate` (в жизни — запрос к банку). В тесте курс должен быть **фиксированным**: 5.0. Допишите одну строку, которая подменяет зависимость `get_rate` через `dependency_overrides`.",
+  "goal": "Подменить внешнюю зависимость на время теста.",
+  "input": "Запросы к /convert с разными суммами.",
+  "expectedResult": "Результат умножения на курс 5.0.",
+  "constraints": [
+    "Сам маршрут и функцию get_rate менять не нужно."
+  ],
+  "starterCode": "from fastapi import Depends, FastAPI\n\napp = FastAPI()\n\n\ndef get_rate():\n    return 4.3  # в жизни — запрос к банку\n\n\n@app.get(\"/convert/{eur}\")\ndef convert(eur: float, rate: float = Depends(get_rate)):\n    return {\"pln\": round(eur * rate, 2)}\n\n\n# Подмените get_rate так, чтобы курс всегда равнялся 5.0\n",
+  "hints": [
+    "Подмены зависимостей хранит словарь app.dependency_overrides.",
+    "Ключ в нём — сама функция-зависимость, а не её имя в кавычках.",
+    "Значение — функция без параметров, которая вернёт нужное число.",
+    "Короткую функцию удобно записать через lambda.",
+    "app.dependency_overrides[get_rate] = lambda: 5.0"
+  ],
+  "tests": {
+    "kind": "fastapi",
+    "cases": [
+      {
+        "id": "v1",
+        "path": "/convert/10",
+        "expected_json": {
+          "pln": 50.0
+        },
+        "hint": "Курс в этом тесте должен быть 5.0"
+      },
+      {
+        "id": "v2",
+        "path": "/convert/0",
+        "expected_json": {
+          "pln": 0.0
+        }
+      },
+      {
+        "id": "h1",
+        "hidden": true,
+        "path": "/convert/2.5",
+        "expected_json": {
+          "pln": 12.5
+        }
+      },
+      {
+        "id": "h2",
+        "hidden": true,
+        "path": "/convert/100",
+        "expected_json": {
+          "pln": 500.0
+        }
+      },
+      {
+        "id": "h3",
+        "hidden": true,
+        "path": "/convert/abc",
+        "expected_status": 422,
+        "hint": "Не число — 422"
+      }
+    ]
+  },
+  "solution": "from fastapi import Depends, FastAPI\n\napp = FastAPI()\n\n\ndef get_rate():\n    return 4.3  # в жизни — запрос к банку\n\n\n@app.get(\"/convert/{eur}\")\ndef convert(eur: float, rate: float = Depends(get_rate)):\n    return {\"pln\": round(eur * rate, 2)}\n\n\napp.dependency_overrides[get_rate] = lambda: 5.0\n",
+  "explanation": "dependency_overrides заменяет зависимость целиком: ключ — оригинальная функция, значение — подставная. Так внешние службы убирают из тестов.",
+  "criteria": [
+    "Подмена задана через dependency_overrides.",
+    "Ключ — функция get_rate.",
+    "Курс равен 5.0."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from fastapi import Depends, FastAPI\n\napp = FastAPI()\n\n\ndef get_rate():\n    return 4.3  # в жизни — запрос к банку\n\n\n@app.get(\"/convert/{eur}\")\ndef convert(eur: float, rate: float = Depends(get_rate)):\n    return {\"pln\": round(eur * rate, 2)}\n\n\napp.dependency_overrides[\"get_rate\"] = lambda: 5.0\n",
+      "why": "Ключ — сама функция, а не строка с её именем: подмена не срабатывает."
+    },
+    {
+      "code": "from fastapi import Depends, FastAPI\n\napp = FastAPI()\n\n\ndef get_rate():\n    return 4.3  # в жизни — запрос к банку\n\n\n@app.get(\"/convert/{eur}\")\ndef convert(eur: float, rate: float = Depends(get_rate)):\n    return {\"pln\": round(eur * rate, 2)}\n\n\napp.dependency_overrides[get_rate] = lambda: 4.0\n",
+      "why": "Подставной курс должен быть 5.0."
+    }
+  ]
+}

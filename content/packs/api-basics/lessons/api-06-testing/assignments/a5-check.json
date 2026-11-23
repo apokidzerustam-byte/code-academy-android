@@ -1,0 +1,78 @@
+{
+  "id": "a5-check",
+  "type": "write",
+  "title": "Тест, который ловит три ошибки",
+  "statement": "Функция `make_shop_app(variant)` строит магазин: вариант `\"ok\"` работает верно, а в вариантах `\"no404\"`, `\"no422\"`, `\"wrong_code\"` спрятана по одной ошибке. Допишите `check(variant)`: создайте `TestClient` для `make_shop_app(variant)`, проверьте создание товара (код **201**), чтение (**200**), отсутствующий товар (**404**) и товар с ценой `-1` (**422**). Верните `True`, если все проверки прошли, и `False`, если хоть одна не сошлась. Хороший тест вернёт `True` только для `\"ok\"`.",
+  "goal": "Написать тест, различающий верный и три ошибочных варианта.",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel, Field\n\n\nclass Product(BaseModel):\n    name: str\n    price: float = Field(..., gt=0)\n\n\nclass LooseProduct(BaseModel):\n    name: str\n    price: float\n\n\ndef make_shop_app(variant):\n    \"\"\"Магазин; в вариантах no404, no422, wrong_code спрятана одна ошибка, в варианте ok её нет.\"\"\"\n    app = FastAPI()\n    items = {}\n    model = LooseProduct if variant == \"no422\" else Product\n    created = 200 if variant == \"wrong_code\" else 201\n\n    @app.post(\"/products\", status_code=created)\n    def create(product: model):\n        items[len(items) + 1] = product.dict()\n        return {\"id\": len(items), **product.dict()}\n\n    @app.get(\"/products/{product_id}\")\n    def read(product_id: int):\n        if product_id not in items:\n            if variant == \"no404\":\n                return {\"detail\": \"нет такого\"}\n            raise HTTPException(status_code=404, detail=\"Товар не найден\")\n        return {\"id\": product_id, **items[product_id]}\n\n    return app\n\n\ndef check(variant):\n    # Создайте клиент для make_shop_app(variant), выполните проверки и верните True, если все прошли, иначе False\n    return True\n",
+  "hints": [
+    "Клиент создаётся так: TestClient(make_shop_app(variant)).",
+    "Каждая проверка — assert на код ответа; все assert оборачивают в try … except AssertionError.",
+    "Нужны четыре запроса: создание, чтение, несуществующий номер, плохая цена.",
+    "Ожидаемые коды: создание 201, чтение 200, несуществующий товар 404, цена -1 — 422.",
+    "except AssertionError: return False; в конце функции — return True."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "check",
+    "cases": [
+      {
+        "args": [
+          "ok"
+        ],
+        "id": "v1",
+        "expected": true
+      },
+      {
+        "args": [
+          "no404"
+        ],
+        "id": "v2",
+        "expected": false
+      },
+      {
+        "args": [
+          "no422"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          "wrong_code"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": false
+      }
+    ]
+  },
+  "solution": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel, Field\n\n\nclass Product(BaseModel):\n    name: str\n    price: float = Field(..., gt=0)\n\n\nclass LooseProduct(BaseModel):\n    name: str\n    price: float\n\n\ndef make_shop_app(variant):\n    \"\"\"Магазин; в вариантах no404, no422, wrong_code спрятана одна ошибка, в варианте ok её нет.\"\"\"\n    app = FastAPI()\n    items = {}\n    model = LooseProduct if variant == \"no422\" else Product\n    created = 200 if variant == \"wrong_code\" else 201\n\n    @app.post(\"/products\", status_code=created)\n    def create(product: model):\n        items[len(items) + 1] = product.dict()\n        return {\"id\": len(items), **product.dict()}\n\n    @app.get(\"/products/{product_id}\")\n    def read(product_id: int):\n        if product_id not in items:\n            if variant == \"no404\":\n                return {\"detail\": \"нет такого\"}\n            raise HTTPException(status_code=404, detail=\"Товар не найден\")\n        return {\"id\": product_id, **items[product_id]}\n\n    return app\n\n\ndef check(variant):\n    client = TestClient(make_shop_app(variant))\n    try:\n        assert client.post(\"/products\", json={\"name\": \"Чай\", \"price\": 5}).status_code == 201\n        assert client.get(\"/products/1\").status_code == 200\n        assert client.get(\"/products/99\").status_code == 404\n        assert client.post(\"/products\", json={\"name\": \"Яд\", \"price\": -1}).status_code == 422\n    except AssertionError:\n        return False\n    return True\n",
+  "explanation": "Каждая ошибка ломает свою проверку: no404 — чтение отсутствующего товара, no422 — плохую цену, wrong_code — код создания. Поэтому нужны все четыре проверки; пропущенная пропускает и свою ошибку.",
+  "criteria": [
+    "Для «ok» возвращается True.",
+    "Для каждого из трёх ошибочных вариантов — False."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel, Field\n\n\nclass Product(BaseModel):\n    name: str\n    price: float = Field(..., gt=0)\n\n\nclass LooseProduct(BaseModel):\n    name: str\n    price: float\n\n\ndef make_shop_app(variant):\n    \"\"\"Магазин; в вариантах no404, no422, wrong_code спрятана одна ошибка, в варианте ok её нет.\"\"\"\n    app = FastAPI()\n    items = {}\n    model = LooseProduct if variant == \"no422\" else Product\n    created = 200 if variant == \"wrong_code\" else 201\n\n    @app.post(\"/products\", status_code=created)\n    def create(product: model):\n        items[len(items) + 1] = product.dict()\n        return {\"id\": len(items), **product.dict()}\n\n    @app.get(\"/products/{product_id}\")\n    def read(product_id: int):\n        if product_id not in items:\n            if variant == \"no404\":\n                return {\"detail\": \"нет такого\"}\n            raise HTTPException(status_code=404, detail=\"Товар не найден\")\n        return {\"id\": product_id, **items[product_id]}\n\n    return app\n\n\ndef check(variant):\n    client = TestClient(make_shop_app(variant))\n    try:\n        assert client.post(\"/products\", json={\"name\": \"Чай\", \"price\": 5}).status_code in (200, 201)\n        assert client.get(\"/products/1\").status_code == 200\n        assert client.get(\"/products/99\").status_code == 404\n        assert client.post(\"/products\", json={\"name\": \"Яд\", \"price\": -1}).status_code == 422\n    except AssertionError:\n        return False\n    return True\n",
+      "why": "Код создания принимается любой: ошибка wrong_code не поймана."
+    },
+    {
+      "code": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel, Field\n\n\nclass Product(BaseModel):\n    name: str\n    price: float = Field(..., gt=0)\n\n\nclass LooseProduct(BaseModel):\n    name: str\n    price: float\n\n\ndef make_shop_app(variant):\n    \"\"\"Магазин; в вариантах no404, no422, wrong_code спрятана одна ошибка, в варианте ok её нет.\"\"\"\n    app = FastAPI()\n    items = {}\n    model = LooseProduct if variant == \"no422\" else Product\n    created = 200 if variant == \"wrong_code\" else 201\n\n    @app.post(\"/products\", status_code=created)\n    def create(product: model):\n        items[len(items) + 1] = product.dict()\n        return {\"id\": len(items), **product.dict()}\n\n    @app.get(\"/products/{product_id}\")\n    def read(product_id: int):\n        if product_id not in items:\n            if variant == \"no404\":\n                return {\"detail\": \"нет такого\"}\n            raise HTTPException(status_code=404, detail=\"Товар не найден\")\n        return {\"id\": product_id, **items[product_id]}\n\n    return app\n\n\ndef check(variant):\n    client = TestClient(make_shop_app(variant))\n    try:\n        assert client.post(\"/products\", json={\"name\": \"Чай\", \"price\": 5}).status_code == 201\n        assert client.get(\"/products/1\").status_code == 200\n        assert client.get(\"/products/99\").status_code == 404\n    except AssertionError:\n        return False\n    return True\n",
+      "why": "Нет проверки плохой цены: вариант no422 проходит."
+    },
+    {
+      "code": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel, Field\n\n\nclass Product(BaseModel):\n    name: str\n    price: float = Field(..., gt=0)\n\n\nclass LooseProduct(BaseModel):\n    name: str\n    price: float\n\n\ndef make_shop_app(variant):\n    \"\"\"Магазин; в вариантах no404, no422, wrong_code спрятана одна ошибка, в варианте ok её нет.\"\"\"\n    app = FastAPI()\n    items = {}\n    model = LooseProduct if variant == \"no422\" else Product\n    created = 200 if variant == \"wrong_code\" else 201\n\n    @app.post(\"/products\", status_code=created)\n    def create(product: model):\n        items[len(items) + 1] = product.dict()\n        return {\"id\": len(items), **product.dict()}\n\n    @app.get(\"/products/{product_id}\")\n    def read(product_id: int):\n        if product_id not in items:\n            if variant == \"no404\":\n                return {\"detail\": \"нет такого\"}\n            raise HTTPException(status_code=404, detail=\"Товар не найден\")\n        return {\"id\": product_id, **items[product_id]}\n\n    return app\n\n\ndef check(variant):\n    client = TestClient(make_shop_app(variant))\n    try:\n        assert client.post(\"/products\", json={\"name\": \"Чай\", \"price\": 5}).status_code == 201\n        assert client.get(\"/products/1\").status_code == 200\n        assert client.post(\"/products\", json={\"name\": \"Яд\", \"price\": -1}).status_code == 422\n    except AssertionError:\n        return False\n    return True\n",
+      "why": "Нет проверки отсутствующего товара: вариант no404 проходит."
+    },
+    {
+      "code": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel, Field\n\n\nclass Product(BaseModel):\n    name: str\n    price: float = Field(..., gt=0)\n\n\nclass LooseProduct(BaseModel):\n    name: str\n    price: float\n\n\ndef make_shop_app(variant):\n    \"\"\"Магазин; в вариантах no404, no422, wrong_code спрятана одна ошибка, в варианте ok её нет.\"\"\"\n    app = FastAPI()\n    items = {}\n    model = LooseProduct if variant == \"no422\" else Product\n    created = 200 if variant == \"wrong_code\" else 201\n\n    @app.post(\"/products\", status_code=created)\n    def create(product: model):\n        items[len(items) + 1] = product.dict()\n        return {\"id\": len(items), **product.dict()}\n\n    @app.get(\"/products/{product_id}\")\n    def read(product_id: int):\n        if product_id not in items:\n            if variant == \"no404\":\n                return {\"detail\": \"нет такого\"}\n            raise HTTPException(status_code=404, detail=\"Товар не найден\")\n        return {\"id\": product_id, **items[product_id]}\n\n    return app\n\n\ndef check(variant):\n    return True\n    client = TestClient(make_shop_app(variant))\n    try:\n        assert client.post(\"/products\", json={\"name\": \"Чай\", \"price\": 5}).status_code == 201\n        assert client.get(\"/products/1\").status_code == 200\n        assert client.get(\"/products/99\").status_code == 404\n        assert client.post(\"/products\", json={\"name\": \"Яд\", \"price\": -1}).status_code == 422\n    except AssertionError:\n        return False\n    return True\n",
+      "why": "Функция всегда возвращает True: ошибки не ловятся."
+    }
+  ]
+}

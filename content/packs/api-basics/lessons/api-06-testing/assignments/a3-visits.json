@@ -1,0 +1,41 @@
+{
+  "id": "a3-visits",
+  "type": "predict",
+  "title": "Счётчик и свежие приложения",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Предсказать работу независимых приложений.",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "from fastapi import FastAPI\nfrom fastapi.testclient import TestClient\n\n\ndef make_app():\n    app = FastAPI()\n    visits = {\"n\": 0}\n\n    @app.get(\"/visit\")\n    def visit():\n        visits[\"n\"] += 1\n        return {\"n\": visits[\"n\"]}\n\n    return app\n\n\na = TestClient(make_app())\nb = TestClient(make_app())\n\nprint(a.get(\"/visit\").json()[\"n\"])\nprint(a.get(\"/visit\").json()[\"n\"])\nprint(b.get(\"/visit\").json()[\"n\"])\nprint(a.get(\"/visit\").json()[\"n\"])\n",
+  "hints": [
+    "Функция make_app создаёт новое приложение со своим счётчиком при каждом вызове.",
+    "Клиенты a и b работают с разными приложениями.",
+    "Счётчик клиента a растёт: первые два запроса дают 1 и 2.",
+    "Клиент b считает с нуля: его первый запрос даёт 1.",
+    "Четвёртый запрос снова идёт к приложению a, где уже было два запроса, и даёт 3."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "1\n2\n1\n3"
+  },
+  "solution": "1\n2\n1\n3",
+  "explanation": "Каждый вызов make_app() создаёт отдельное приложение с отдельным счётчиком. Приложение a посчитало 1, 2, затем 3, а b считало отдельно и ответило 1.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "1\n2\n3\n4",
+      "answer": "1\n2\n3\n4",
+      "why": "Приложения независимы: у клиента b свой счётчик, он начинает с единицы."
+    },
+    {
+      "code": "1\n1\n1\n1",
+      "answer": "1\n1\n1\n1",
+      "why": "Счётчик внутри одного приложения растёт между запросами."
+    }
+  ]
+}

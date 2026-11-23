@@ -1,0 +1,45 @@
+{
+  "id": "api-06-testing",
+  "title": "FastAPI: тестирование API",
+  "goal": "Проверять API тестовым клиентом: коды и тело ответов, ошибочные запросы, заголовки, независимость тестов и подмена зависимостей.",
+  "skills": [
+    "api.test-client",
+    "api.test-errors",
+    "api.test-isolation"
+  ],
+  "prerequisites": [
+    "api-05-auth"
+  ],
+  "runner": "A",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-products.json",
+    "assignments/a2-login.json",
+    "assignments/a3-visits.json",
+    "assignments/a4-override.json",
+    "assignments/a5-check.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Проверен только успешный запрос",
+      "fix": "Тестируйте плохие данные, отсутствие авторизации и несуществующие объекты."
+    },
+    {
+      "mistake": "Проверен код, но не тело ответа",
+      "fix": "Сверяйте и код, и тело: код 200 с неверным телом тоже ошибка."
+    },
+    {
+      "mistake": "Тесты зависят друг от друга через общее состояние",
+      "fix": "Создавайте приложение заново для каждого теста (make_app())."
+    },
+    {
+      "mistake": "В тесте настоящая сеть или внешняя служба",
+      "fix": "Подменяйте зависимости через dependency_overrides или моки."
+    }
+  ]
+}
