@@ -1,0 +1,71 @@
+{
+  "id": "a1-route",
+  "type": "write",
+  "title": "Функция маршрута",
+  "statement": "Напишите функцию `detailRoute(id: Int): String`, которая возвращает маршрут экрана подробностей: `detail/` и номер. Например, `detailRoute(7)` возвращает `detail/7`.",
+  "goal": "Собирать маршрут в одном месте.",
+  "input": "id: Int",
+  "expectedResult": "detailRoute(7) → detail/7.",
+  "constraints": [],
+  "starterCode": "// Напишите функцию detailRoute\n",
+  "hints": [
+    "Маршрут — обычная строка: слово detail, слэш и номер.",
+    "Функция принимает Int и возвращает String.",
+    "Номер можно подставить в строку шаблоном со знаком доллара.",
+    "Шаблон: в кавычках detail, слэш, затем знак доллара и имя параметра.",
+    "fun detailRoute(id: Int): String = \"detail/$id\""
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "detailRoute",
+        "paramTypes": [
+          "Int"
+        ],
+        "returns": "String"
+      },
+      {
+        "id": "tpl",
+        "raw": true,
+        "type": "contains",
+        "pattern": "\"detail/\\$\\{?id\\}?\"|\"detail/\"\\s*\\+\\s*id\\b",
+        "message": "Маршрут — «detail/» и номер: \"detail/$id\""
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    println(detailRoute(7))\n    println(detailRoute(42))\n}",
+      "expected_stdout": "detail/7\ndetail/42"
+    }
+  },
+  "solution": "fun detailRoute(id: Int): String = \"detail/$id\"\n",
+  "explanation": "Строковый шаблон подставляет номер в строку. Если маршрут собирает одна функция, опечатку можно сделать только в ней.",
+  "criteria": [
+    "Параметр Int, результат String.",
+    "Строка вида detail/номер."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "fun detailRoute(id: Int): String = \"detail/id\"\n",
+      "why": "Вместо номера подставлено слово id: нужен шаблон со знаком доллара."
+    },
+    {
+      "code": "fun detailRoute(id: Int): String = \"detail/\"\n",
+      "why": "Номер потерялся: маршрут должен заканчиваться номером."
+    },
+    {
+      "code": "fun detailRoute(id: Int): String = \"details/$id\"\n",
+      "why": "В слове detail лишняя буква."
+    },
+    {
+      "code": "fun detailRoute(id: String): String = \"detail/$id\"\n",
+      "why": "Параметр должен быть Int."
+    }
+  ]
+}

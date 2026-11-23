@@ -1,0 +1,45 @@
+{
+  "id": "kt-09-navigation",
+  "title": "Kotlin: навигация между экранами",
+  "goal": "Описывать экраны маршрутами, собирать NavHost с аргументами, переходить между экранами и понимать стопку экранов.",
+  "skills": [
+    "kt.nav.routes",
+    "kt.nav.args",
+    "kt.nav.backstack"
+  ],
+  "prerequisites": [
+    "kt-08-room"
+  ],
+  "runner": "kotlin",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-route.json",
+    "assignments/a2-parse.json",
+    "assignments/a3-navhost.json",
+    "assignments/a4-typo.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Опечатка в маршруте",
+      "fix": "Собирайте маршруты функциями или выносите в константы; при падении «экран не найден» сравните navigate и composable."
+    },
+    {
+      "mistake": "Большие объекты в маршруте",
+      "fix": "Передавайте номер и достаньте данные из базы через ViewModel."
+    },
+    {
+      "mistake": "Контроллер создан заново на каждом экране",
+      "fix": "Контроллер один на приложение; экрану передавайте функцию-колбэк."
+    },
+    {
+      "mistake": "Экран входа остался в стопке",
+      "fix": "Используйте popUpTo с inclusive = true."
+    }
+  ]
+}

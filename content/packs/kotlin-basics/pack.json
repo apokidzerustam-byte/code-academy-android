@@ -14,7 +14,8 @@
     "kt-05-compose-basics",
     "kt-06-state",
     "kt-07-viewmodel",
-    "kt-08-room"
+    "kt-08-room",
+    "kt-09-navigation"
   ],
   "skills": {
     "kt.basics": "Kotlin: main, val и var",
@@ -43,6 +44,9 @@
     "kt.collect": "Подписка экрана на состояние",
     "kt.room.entity": "Room: Entity и PrimaryKey",
     "kt.room.dao": "Room: Dao и запросы",
-    "kt.room.db": "Room: база, версии и миграции"
+    "kt.room.db": "Room: база, версии и миграции",
+    "kt.nav.routes": "Навигация: маршруты и NavHost",
+    "kt.nav.args": "Навигация: аргументы маршрутов",
+    "kt.nav.backstack": "Навигация: стопка экранов"
   }
 }

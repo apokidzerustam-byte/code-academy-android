@@ -1,0 +1,44 @@
+{
+  "id": "a5-predict",
+  "type": "predict",
+  "title": "Стопка экранов",
+  "statement": "Стопка моделируется списком: `go` кладёт маршрут сверху, `back` снимает верхний, если экранов больше одного. Что выведет программа?",
+  "goal": "Проследить состояние стопки.",
+  "input": "—",
+  "expectedResult": "Пять строк.",
+  "constraints": [],
+  "code": "fun main() {\n    val stack = mutableListOf(\"list\")\n    fun go(route: String) { stack.add(route) }\n    fun back(): Boolean {\n        if (stack.size == 1) return false\n        stack.removeAt(stack.size - 1)\n        return true\n    }\n    go(\"detail/1\")\n    go(\"detail/2\")\n    back()\n    go(\"settings\")\n    println(stack)\n    println(back())\n    println(back())\n    println(back())\n    println(stack.last())\n}\n",
+  "hints": [
+    "Следите за списком по шагам: сначала один экран list.",
+    "После двух go и одного back в стопке list и detail/1.",
+    "Затем go(\"settings\") кладёт настройки сверху: [list, detail/1, settings].",
+    "Каждый back снимает верхний экран и возвращает true, пока экранов больше одного.",
+    "Три вызова back: true, true, затем false (остался один list). Последняя строка — верхний экран, то есть list."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "[list, detail/1, settings]\ntrue\ntrue\nfalse\nlist"
+  },
+  "solution": "[list, detail/1, settings]\ntrue\ntrue\nfalse\nlist",
+  "explanation": "После go, go, back и go в стопке [list, detail/1, settings]. Два back снимают settings и detail/1 (true, true), третий не может снять последний экран (false), поэтому наверху остаётся list.",
+  "criteria": [
+    "Все пять строк верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "[list, detail/1, detail/2, settings]\ntrue\ntrue\ntrue\nlist",
+      "answer": "[list, detail/1, detail/2, settings]\ntrue\ntrue\ntrue\nlist",
+      "why": "Вызов back между двумя go снимает detail/2."
+    },
+    {
+      "code": "[list, detail/1, settings]\ntrue\ntrue\ntrue\nlist",
+      "answer": "[list, detail/1, settings]\ntrue\ntrue\ntrue\nlist",
+      "why": "Последний экран снять нельзя: третий back возвращает false."
+    },
+    {
+      "code": "[list, detail/1, settings]\ntrue\ntrue\nfalse\nsettings",
+      "answer": "[list, detail/1, settings]\ntrue\ntrue\nfalse\nsettings",
+      "why": "Верхний экран после трёх back — list: остальные сняты."
+    }
+  ]
+}

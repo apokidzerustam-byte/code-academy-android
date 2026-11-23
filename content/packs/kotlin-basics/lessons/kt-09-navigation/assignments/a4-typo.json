@@ -1,0 +1,82 @@
+{
+  "id": "a4-typo",
+  "type": "fix",
+  "title": "Опечатка в маршруте",
+  "statement": "По нажатию кнопки приложение падает: переход ведёт на маршрут `details/7`, а в графе есть только `detail/{id}`. Исправьте переход. Карту экранов (`NavHost`) менять не нужно.",
+  "goal": "Находить опечатки в маршрутах.",
+  "input": "—",
+  "expectedResult": "После нажатия показывается «Задача 7».",
+  "constraints": [
+    "Граф NavHost не менять."
+  ],
+  "starterCode": "import androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.navigation.NavHostController\nimport androidx.navigation.compose.NavHost\nimport androidx.navigation.compose.composable\n\n@Composable\nfun ListScreen(navController: NavHostController) {\n    Button(onClick = { navController.navigate(\"details/7\") }) { Text(\"Открыть\") }\n}\n\n@Composable\nfun AppNav(navController: NavHostController) {\n    NavHost(navController = navController, startDestination = \"list\") {\n        composable(\"list\") { ListScreen(navController) }\n        composable(\"detail/{id}\") { entry ->\n            val id = entry.arguments?.getString(\"id\")\n            Text(\"Задача $id\")\n        }\n    }\n}\n",
+  "hints": [
+    "Сообщение об ошибке: экран с таким маршрутом не найден.",
+    "Сравните маршрут в navigate с маршрутом в composable.",
+    "В графе слово detail, а в переходе — details.",
+    "Маршрут перехода должен подходить под шаблон detail/{id}.",
+    "Замените navigate(\"details/7\") на navigate(\"detail/7\")."
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "go",
+        "raw": true,
+        "type": "contains",
+        "pattern": "navigate\\s*\\(\\s*\"detail/7\"\\s*\\)",
+        "message": "Переход должен вести на маршрут из графа: navigate(\"detail/7\")",
+        "hint": "Приложение упадёт: «Navigation destination … cannot be found»"
+      },
+      {
+        "id": "typo",
+        "raw": true,
+        "type": "not_contains",
+        "pattern": "\"details",
+        "message": "Осталась опечатка details"
+      },
+      {
+        "id": "graph",
+        "raw": true,
+        "type": "contains",
+        "pattern": "composable\\s*\\(\\s*\"detail/\\{id\\}\"\\s*\\)",
+        "message": "Маршрут в графе менять не нужно: исправьте переход"
+      },
+      {
+        "id": "btn",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "\\bButton\\s*\\(",
+        "message": "Кнопку убирать не нужно"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    val nav = NavHostController()\n    println(stubs.ComposeLog.render { AppNav(nav) })\n    stubs.ComposeLog.click(0)\n    println(stubs.ComposeLog.render { AppNav(nav) })\n}",
+      "expected_stdout": "Button\n  Text(Открыть)\nText(Задача 7)"
+    }
+  },
+  "solution": "import androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.navigation.NavHostController\nimport androidx.navigation.compose.NavHost\nimport androidx.navigation.compose.composable\n\n@Composable\nfun ListScreen(navController: NavHostController) {\n    Button(onClick = { navController.navigate(\"detail/7\") }) { Text(\"Открыть\") }\n}\n\n@Composable\nfun AppNav(navController: NavHostController) {\n    NavHost(navController = navController, startDestination = \"list\") {\n        composable(\"list\") { ListScreen(navController) }\n        composable(\"detail/{id}\") { entry ->\n            val id = entry.arguments?.getString(\"id\")\n            Text(\"Задача $id\")\n        }\n    }\n}\n",
+  "explanation": "NavHost ищет в графе маршрут, подходящий под адрес. Для «details/7» подходящего нет, поэтому приложение падает; после исправления адрес detail/7 совпадает с шаблоном detail/{id}.",
+  "criteria": [
+    "Переход на detail/7.",
+    "Граф не изменён."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.navigation.NavHostController\nimport androidx.navigation.compose.NavHost\nimport androidx.navigation.compose.composable\n\n@Composable\nfun ListScreen(navController: NavHostController) {\n    Button(onClick = { navController.navigate(\"details/7\") }) { Text(\"Открыть\") }\n}\n\n@Composable\nfun AppNav(navController: NavHostController) {\n    NavHost(navController = navController, startDestination = \"list\") {\n        composable(\"list\") { ListScreen(navController) }\n        composable(\"detail/{id}\") { entry ->\n            val id = entry.arguments?.getString(\"id\")\n            Text(\"Задача $id\")\n        }\n    }\n}\n",
+      "why": "Опечатка осталась: details вместо detail."
+    },
+    {
+      "code": "import androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.navigation.NavHostController\nimport androidx.navigation.compose.NavHost\nimport androidx.navigation.compose.composable\n\n@Composable\nfun ListScreen(navController: NavHostController) {\n    Button(onClick = { navController.navigate(\"details/7\") }) { Text(\"Открыть\") }\n}\n\n@Composable\nfun AppNav(navController: NavHostController) {\n    NavHost(navController = navController, startDestination = \"list\") {\n        composable(\"list\") { ListScreen(navController) }\n        composable(\"details/{id}\") { entry ->\n            val id = entry.arguments?.getString(\"id\")\n            Text(\"Задача $id\")\n        }\n    }\n}\n",
+      "why": "Изменён граф, а нужно исправить переход."
+    },
+    {
+      "code": "import androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.navigation.NavHostController\nimport androidx.navigation.compose.NavHost\nimport androidx.navigation.compose.composable\n\n@Composable\nfun ListScreen(navController: NavHostController) {\n    Button(onClick = { navController.navigate(\"detail/{id}\") }) { Text(\"Открыть\") }\n}\n\n@Composable\nfun AppNav(navController: NavHostController) {\n    NavHost(navController = navController, startDestination = \"list\") {\n        composable(\"list\") { ListScreen(navController) }\n        composable(\"detail/{id}\") { entry ->\n            val id = entry.arguments?.getString(\"id\")\n            Text(\"Задача $id\")\n        }\n    }\n}\n",
+      "why": "В переходе нужен конкретный адрес detail/7, а не шаблон."
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "id": "a2-parse",
+  "type": "complete",
+  "title": "Номер из маршрута",
+  "statement": "Допишите функцию `parseId(route: String): Int?`: если маршрут имеет вид `detail/<число>`, верните число, иначе `null`. Например, `detail/7` → 7; `detail/abc`, `list`, `detail/1/2`, `settings/5` → `null`. Маршрут уже разбит на части по `/`.",
+  "goal": "Безопасно разбирать маршрут.",
+  "input": "route: String",
+  "expectedResult": "Int? — число или null.",
+  "constraints": [
+    "Не используйте toInt(): он падает на нечисловой строке."
+  ],
+  "starterCode": "fun parseId(route: String): Int? {\n    val parts = route.split(\"/\")\n    // Допишите: вернуть номер, если маршрут вида detail/<число>, иначе null\n}\n",
+  "hints": [
+    "Маршрут разбит на части: parts[0] — первое слово, parts[1] — второе.",
+    "Сначала проверьте, что частей две и первая из них — detail; иначе вернуть null.",
+    "Из текста число достаёт toIntOrNull(): для «abc» он вернёт null, а не упадёт.",
+    "Условие отказа: parts.size != 2 или parts[0] != \"detail\".",
+    "if (parts.size != 2 || parts[0] != \"detail\") return null; return parts[1].toIntOrNull()"
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "parseId",
+        "paramTypes": [
+          "String"
+        ],
+        "returns": "Int?"
+      },
+      {
+        "id": "safe",
+        "type": "contains",
+        "pattern": "toIntOrNull\\s*\\(\\s*\\)",
+        "message": "Число из строки безопасно достаёт toIntOrNull()",
+        "hint": "toInt() упадёт на строке «abc», а toIntOrNull() вернёт null"
+      },
+      {
+        "id": "nothrow",
+        "type": "not_contains",
+        "pattern": "\\.toInt\\s*\\(\\s*\\)",
+        "message": "toInt() падает на нечисловой строке: используйте toIntOrNull()"
+      },
+      {
+        "id": "prefix",
+        "raw": true,
+        "type": "contains",
+        "pattern": "\"detail/?\"",
+        "message": "Нужно проверить, что первая часть маршрута — detail"
+      },
+      {
+        "id": "size",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "size\\s*(!=|==|<|>|<=|>=)\\s*\\d|removePrefix|substringAfter|Regex|matches",
+        "message": "Проверьте, что в маршруте ровно две части: detail/1/2 не подходит"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    println(parseId(\"detail/7\"))\n    println(parseId(\"detail/abc\"))\n    println(parseId(\"list\"))\n    println(parseId(\"detail/1/2\"))\n    println(parseId(\"settings/5\"))\n}",
+      "expected_stdout": "7\nnull\nnull\nnull\nnull"
+    }
+  },
+  "solution": "fun parseId(route: String): Int? {\n    val parts = route.split(\"/\")\n    if (parts.size != 2 || parts[0] != \"detail\") return null\n    return parts[1].toIntOrNull()\n}\n",
+  "explanation": "Проверка формы маршрута отсекает чужие адреса, а toIntOrNull() превращает нечисловую часть в null вместо исключения.",
+  "criteria": [
+    "Сигнатура Int?.",
+    "Проверка префикса detail.",
+    "Безопасный разбор числа."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "fun parseId(route: String): Int? {\n    val parts = route.split(\"/\")\n    if (parts.size != 2 || parts[0] != \"detail\") return null\n    return parts[1].toInt()\n}\n",
+      "why": "toInt() падает на «detail/abc»: нужно toIntOrNull()."
+    },
+    {
+      "code": "fun parseId(route: String): Int? {\n    val parts = route.split(\"/\")\n    if (parts.size != 2) return null\n    return parts[1].toIntOrNull()\n}\n",
+      "why": "Не проверено слово detail: settings/5 вернёт число."
+    },
+    {
+      "code": "fun parseId(route: String): Int? {\n    val parts = route.split(\"/\")\n    if (parts[0] != \"detail\") return null\n    return parts[1].toIntOrNull()\n}\n",
+      "why": "Не проверено число частей: detail/1/2 вернёт 1, а при маршруте «detail» программа упадёт."
+    }
+  ]
+}

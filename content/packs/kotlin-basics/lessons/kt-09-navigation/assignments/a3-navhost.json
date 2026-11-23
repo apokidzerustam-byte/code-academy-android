@@ -1,0 +1,94 @@
+{
+  "id": "a3-navhost",
+  "type": "complete",
+  "title": "Второй экран",
+  "statement": "В `AppNav` уже есть экран `list`. Добавьте экран подробностей: маршрут `detail/{id}`, в нём `Text` с надписью «Задача » и номером из аргумента `id` (`entry.arguments?.getString(\"id\")`). Например, по адресу `detail/7` экран показывает «Задача 7».",
+  "goal": "Добавить экран с аргументом в NavHost.",
+  "input": "—",
+  "expectedResult": "Для detail/7 — Text(Задача 7).",
+  "constraints": [
+    "Экран list не менять."
+  ],
+  "starterCode": "import androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.navigation.NavHostController\nimport androidx.navigation.compose.NavHost\nimport androidx.navigation.compose.composable\n\n@Composable\nfun AppNav(navController: NavHostController) {\n    NavHost(navController = navController, startDestination = \"list\") {\n        composable(\"list\") { Text(\"Список задач\") }\n        // Добавьте экран подробностей: маршрут detail/{id}, текст «Задача <номер>»\n    }\n}\n",
+  "hints": [
+    "Каждый экран описывается вызовом composable внутри блока NavHost.",
+    "Первый аргумент composable — маршрут; часть в фигурных скобках — аргумент: detail/{id}.",
+    "Лямбда экрана получает запись стопки: composable(\"…\") { entry -> … }.",
+    "Номер лежит в entry.arguments?.getString(\"id\").",
+    "composable(\"detail/{id}\") { entry -> val id = entry.arguments?.getString(\"id\"); Text(\"Задача $id\") }"
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "AppNav",
+        "paramTypes": [
+          "NavHostController"
+        ]
+      },
+      {
+        "id": "list",
+        "raw": true,
+        "type": "contains",
+        "pattern": "composable\\s*\\(\\s*\"list\"\\s*\\)",
+        "message": "Экран списка менять не нужно"
+      },
+      {
+        "id": "route",
+        "raw": true,
+        "type": "contains",
+        "pattern": "composable\\s*\\(\\s*\"detail/\\{id\\}\"\\s*\\)",
+        "message": "Добавьте composable(\"detail/{id}\") { … }"
+      },
+      {
+        "id": "arg",
+        "raw": true,
+        "type": "contains",
+        "pattern": "getString\\s*\\(\\s*\"id\"\\s*\\)",
+        "message": "Номер берётся из аргумента: entry.arguments?.getString(\"id\")"
+      },
+      {
+        "id": "text",
+        "raw": true,
+        "type": "contains",
+        "pattern": "Text\\s*\\(\\s*\"Задача\\s*(\\$|\"\\s*\\+)",
+        "message": "Текст экрана — «Задача» и номер из аргумента, например \"Задача $id\""
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    val nav = NavHostController()\n    println(stubs.ComposeLog.render { AppNav(nav) })\n    nav.navigate(\"detail/7\")\n    println(stubs.ComposeLog.render { AppNav(nav) })\n    nav.navigate(\"detail/12\")\n    println(stubs.ComposeLog.render { AppNav(nav) })\n}",
+      "expected_stdout": "Text(Список задач)\nText(Задача 7)\nText(Задача 12)"
+    }
+  },
+  "solution": "import androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.navigation.NavHostController\nimport androidx.navigation.compose.NavHost\nimport androidx.navigation.compose.composable\n\n@Composable\nfun AppNav(navController: NavHostController) {\n    NavHost(navController = navController, startDestination = \"list\") {\n        composable(\"list\") { Text(\"Список задач\") }\n        composable(\"detail/{id}\") { entry ->\n            val id = entry.arguments?.getString(\"id\")\n            Text(\"Задача $id\")\n        }\n    }\n}\n",
+  "explanation": "Маршрут detail/{id} подходит к любому адресу detail/<что угодно>, а значение в скобках попадает в аргументы записи стопки.",
+  "criteria": [
+    "Маршрут detail/{id}.",
+    "Аргумент из записи.",
+    "Текст «Задача <номер>»."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.navigation.NavHostController\nimport androidx.navigation.compose.NavHost\nimport androidx.navigation.compose.composable\n\n@Composable\nfun AppNav(navController: NavHostController) {\n    NavHost(navController = navController, startDestination = \"list\") {\n        composable(\"list\") { Text(\"Список задач\") }\n        // Добавьте экран подробностей: маршрут detail/{id}, текст «Задача <номер>»\n    }\n}\n",
+      "why": "Экран подробностей не добавлен."
+    },
+    {
+      "code": "import androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.navigation.NavHostController\nimport androidx.navigation.compose.NavHost\nimport androidx.navigation.compose.composable\n\n@Composable\nfun AppNav(navController: NavHostController) {\n    NavHost(navController = navController, startDestination = \"list\") {\n        composable(\"list\") { Text(\"Список задач\") }\n        composable(\"detail\") { entry ->\n            val id = entry.arguments?.getString(\"id\")\n            Text(\"Задача $id\")\n        }\n    }\n}\n",
+      "why": "У маршрута нет части с аргументом: detail/7 не подойдёт."
+    },
+    {
+      "code": "import androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.navigation.NavHostController\nimport androidx.navigation.compose.NavHost\nimport androidx.navigation.compose.composable\n\n@Composable\nfun AppNav(navController: NavHostController) {\n    NavHost(navController = navController, startDestination = \"list\") {\n        composable(\"list\") { Text(\"Список задач\") }\n        composable(\"detail/{id}\") { entry ->\n            val id = entry.arguments?.getString(\"id\")\n            Text(\"Задача 7\")\n        }\n    }\n}\n",
+      "why": "Номер зашит в текст: он должен браться из аргумента."
+    },
+    {
+      "code": "import androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.navigation.NavHostController\nimport androidx.navigation.compose.NavHost\nimport androidx.navigation.compose.composable\n\n@Composable\nfun AppNav(navController: NavHostController) {\n    NavHost(navController = navController, startDestination = \"list\") {\n        composable(\"list\") { Text(\"Список задач\") }\n        composable(\"details/{id}\") { entry ->\n            val id = entry.arguments?.getString(\"id\")\n            Text(\"Задача $id\")\n        }\n    }\n}\n",
+      "why": "В слове detail лишняя буква."
+    }
+  ]
+}
