@@ -1,0 +1,44 @@
+{
+  "id": "a5-predict",
+  "type": "predict",
+  "title": "Что напечатает программа?",
+  "statement": "Что выведет программа? Каждая строка вывода — с новой строки.",
+  "goal": "Читать класс и проверку на null.",
+  "input": "—",
+  "expectedResult": "Три строки.",
+  "constraints": [],
+  "code": "class Box(var items: Int) {\n    fun add(n: Int) {\n        items += n\n    }\n}\n\nfun label(x: Int?): String {\n    if (x == null) return \"пусто\"\n    return \"значение $x\"\n}\n\nfun main() {\n    val b = Box(2)\n    b.add(3)\n    println(b.items)\n    println(label(b.items))\n    println(label(null))\n}\n",
+  "hints": [
+    "Сначала создаётся Box с двумя предметами.",
+    "b.add(3) прибавляет три к items — получается пять.",
+    "Первая строка — просто 5.",
+    "label(5): число не null, значит «значение 5».",
+    "label(null) возвращает «пусто»."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "5\nзначение 5\nпусто"
+  },
+  "solution": "5\nзначение 5\nпусто",
+  "explanation": "add меняет items с 2 до 5. label для числа возвращает «значение 5», а для null — «пусто».",
+  "criteria": [
+    "Все три строки верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "2\nзначение 2\nпусто",
+      "answer": "2\nзначение 2\nпусто",
+      "why": "b.add(3) увеличивает items: теперь их 5."
+    },
+    {
+      "code": "5\nзначение 5\nnull",
+      "answer": "5\nзначение 5\nnull",
+      "why": "Для null функция возвращает строку «пусто»."
+    },
+    {
+      "code": "5\n5\nпусто",
+      "answer": "5\n5\nпусто",
+      "why": "label добавляет слово «значение»."
+    }
+  ]
+}

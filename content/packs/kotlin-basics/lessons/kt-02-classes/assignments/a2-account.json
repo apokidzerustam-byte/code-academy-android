@@ -1,0 +1,101 @@
+{
+  "id": "a2-account",
+  "type": "write",
+  "title": "Счёт в банке",
+  "statement": "Напишите класс `Account` с главным конструктором `(val owner: String, var balance: Int)`, методом `deposit(amount: Int)` (добавляет к балансу) и методом `describe(): String`, который возвращает строку вида `Аня: 175` (владелец, двоеточие, пробел, баланс).",
+  "goal": "Описывать свойства в главном конструкторе.",
+  "input": "—",
+  "expectedResult": "Класс Account.",
+  "constraints": [
+    "Строка собирается шаблоном: \"$owner: $balance\"."
+  ],
+  "starterCode": "// Класс Account\n",
+  "hints": [
+    "Свойства объявляют в скобках после имени класса: class Account(val owner: String, var balance: Int).",
+    "deposit ничего не возвращает: fun deposit(amount: Int) { … }.",
+    "Прибавить: balance += amount.",
+    "describe возвращает String: fun describe(): String = …",
+    "\"$owner: $balance\" — шаблон подставляет значения."
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "cls",
+        "type": "class",
+        "name": "Account",
+        "kind": "class"
+      },
+      {
+        "id": "dep",
+        "type": "function",
+        "name": "deposit",
+        "paramTypes": [
+          "Int"
+        ],
+        "returns": "Unit"
+      },
+      {
+        "id": "desc",
+        "type": "function",
+        "name": "describe",
+        "paramTypes": [],
+        "returns": "String"
+      },
+      {
+        "id": "ctor",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "class\\s+Account\\s*\\(\\s*val\\s+owner\\s*:\\s*String\\s*,\\s*var\\s+balance\\s*:\\s*Int\\s*\\)",
+        "message": "Конструктор: (val owner: String, var balance: Int)"
+      },
+      {
+        "id": "add",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "balance\\s*(\\+=|=\\s*balance\\s*\\+)\\s*amount",
+        "message": "deposit прибавляет amount к balance"
+      },
+      {
+        "id": "str",
+        "hidden": true,
+        "type": "contains",
+        "raw": true,
+        "pattern": "\\$\\{?owner\\}?[\\s\\S]*\\$\\{?balance\\}?",
+        "message": "describe собирает строку из owner и balance"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    val a = Account(\"Аня\", 100)\n    a.deposit(50)\n    a.deposit(25)\n    println(a.describe())\n    println(Account(\"Боря\", 0).describe())\n}",
+      "expected_stdout": "Аня: 175\nБоря: 0"
+    }
+  },
+  "solution": "class Account(val owner: String, var balance: Int) {\n    fun deposit(amount: Int) {\n        balance += amount\n    }\n\n    fun describe(): String = \"$owner: $balance\"\n}\n",
+  "explanation": "Свойства, объявленные в главном конструкторе, доступны в методах по имени; шаблон строки подставляет их значения.",
+  "criteria": [
+    "Конструктор с двумя свойствами.",
+    "deposit и describe работают."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "class Account(val owner: String, val balance: Int) {\n    fun deposit(amount: Int) {\n        balance += amount\n    }\n\n    fun describe(): String = \"$owner: $balance\"\n}\n",
+      "why": "balance должен быть изменяемым (var)."
+    },
+    {
+      "code": "class Account(val owner: String, var balance: Int) {\n    fun deposit(amount: Int) {\n        balance = amount\n    }\n\n    fun describe(): String = \"$owner: $balance\"\n}\n",
+      "why": "deposit должен прибавлять, а не заменять баланс."
+    },
+    {
+      "code": "class Account(val owner: String, var balance: Int) {\n    fun deposit(amount: Int) {\n        balance += amount\n    }\n\n    fun describe(): String = \"$balance\"\n}\n",
+      "why": "В строке нет владельца."
+    },
+    {
+      "code": "class Account(val owner: String, var balance: Int) {\n    fun deposit(amount: Int) {\n        balance += amount\n    }\n\n    fun describe() = \"$owner: $balance\"\n}\n",
+      "why": "Нет типа результата String."
+    }
+  ]
+}

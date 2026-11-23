@@ -1,0 +1,45 @@
+{
+  "id": "kt-03-collections",
+  "title": "Kotlin: коллекции и лямбды",
+  "goal": "Работать со списками и словарями, преобразовывать их методами map и filter и передавать функции в параметрах.",
+  "skills": [
+    "kt.collections",
+    "kt.lambdas",
+    "kt.hof"
+  ],
+  "prerequisites": [
+    "kt-02-classes"
+  ],
+  "runner": "kotlin",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-evens.json",
+    "assignments/a2-total.json",
+    "assignments/a3-twice.json",
+    "assignments/a4-top3.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "listOf нельзя менять",
+      "fix": "Чтобы добавлять и удалять, создайте mutableListOf."
+    },
+    {
+      "mistake": "Забыли, что m[ключ] может вернуть null",
+      "fix": "Результат допускает null: используйте ?: или getOrDefault."
+    },
+    {
+      "mistake": "sorted() вместо sortedDescending()",
+      "fix": "sorted() — по возрастанию, наибольшие в конце."
+    },
+    {
+      "mistake": "map вместо filter",
+      "fix": "map преобразует каждый элемент, filter отбирает подходящие."
+    }
+  ]
+}

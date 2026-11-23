@@ -1,0 +1,103 @@
+{
+  "id": "a1-counter",
+  "type": "write",
+  "title": "Счётчик",
+  "statement": "Напишите класс `Counter` со свойством `value` (целое, сначала 0, **изменяемое**) и двумя методами без параметров: `inc()` увеличивает `value` на 1, `reset()` сбрасывает его в 0.",
+  "goal": "Описывать класс со свойством и методами.",
+  "input": "—",
+  "expectedResult": "Класс Counter.",
+  "constraints": [
+    "Функция main не нужна.",
+    "На телефоне проверяются синтаксис и устройство кода."
+  ],
+  "starterCode": "// Класс Counter\n",
+  "hints": [
+    "Класс объявляют словом class: class Counter { … }.",
+    "Свойство внутри класса: var value = 0 — var, потому что значение меняется.",
+    "Метод — обычная fun внутри класса: fun inc() { … }.",
+    "Увеличить: value++ (или value += 1).",
+    "fun reset() { value = 0 }"
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "cls",
+        "type": "class",
+        "name": "Counter",
+        "kind": "class"
+      },
+      {
+        "id": "inc",
+        "type": "function",
+        "name": "inc",
+        "paramTypes": [],
+        "returns": "Unit"
+      },
+      {
+        "id": "reset",
+        "type": "function",
+        "name": "reset",
+        "paramTypes": [],
+        "returns": "Unit"
+      },
+      {
+        "id": "var",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "\\bvar\\s+value\\b",
+        "message": "value должно быть изменяемым: var"
+      },
+      {
+        "id": "plus",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "value\\s*(\\+\\+|\\+=\\s*1|=\\s*value\\s*\\+\\s*1)",
+        "message": "inc увеличивает value на 1"
+      },
+      {
+        "id": "zero",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "fun\\s+reset\\s*\\(\\s*\\)\\s*\\{[^}]*value\\s*=\\s*0",
+        "message": "reset присваивает value = 0"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    val c = Counter()\n    c.inc()\n    c.inc()\n    c.inc()\n    println(c.value)\n    c.reset()\n    println(c.value)\n}",
+      "expected_stdout": "3\n0"
+    }
+  },
+  "solution": "class Counter {\n    var value = 0\n\n    fun inc() {\n        value++\n    }\n\n    fun reset() {\n        value = 0\n    }\n}\n",
+  "explanation": "Свойство var value хранит число, методы inc и reset меняют его; внутри класса к свойству обращаются по имени.",
+  "criteria": [
+    "Класс Counter с var value.",
+    "Методы inc() и reset()."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "class Counter {\n    val value = 0\n\n    fun inc() {\n        value++\n    }\n\n    fun reset() {\n        value = 0\n    }\n}\n",
+      "why": "val нельзя изменить: нужен var."
+    },
+    {
+      "code": "class Counter {\n    var value = 0\n\n    fun reset() {\n        value = 0\n    }\n}\n",
+      "why": "Нет метода inc."
+    },
+    {
+      "code": "class Counter {\n    var value = 0\n\n    fun inc() {\n        value++\n    }\n\n    fun reset() {\n        value = 1\n    }\n}\n",
+      "why": "reset должен сбрасывать в 0, а не в 1."
+    },
+    {
+      "code": "class Counter {\n    var value = 0\n\n    fun inc(): Int {\n        value++\n        return value\n    }\n\n    fun reset() {\n        value = 0\n    }\n}\n",
+      "why": "inc ничего не возвращает: тип результата Unit."
+    },
+    {
+      "code": "fun Counter() {\n    var value = 0\n}\n",
+      "why": "Это функция, а не класс."
+    }
+  ]
+}

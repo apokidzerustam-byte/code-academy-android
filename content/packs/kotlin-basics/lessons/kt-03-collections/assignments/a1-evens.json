@@ -1,0 +1,80 @@
+{
+  "id": "a1-evens",
+  "type": "write",
+  "title": "Только чётные",
+  "statement": "Напишите функцию `evens(nums: List<Int>): List<Int>`, которая возвращает **только чётные** числа списка в прежнем порядке.",
+  "goal": "Фильтровать список.",
+  "input": "Список целых.",
+  "expectedResult": "Новый список.",
+  "constraints": [
+    "Тип результата укажите явно."
+  ],
+  "starterCode": "// Функция evens\n",
+  "hints": [
+    "Заголовок: fun evens(nums: List<Int>): List<Int>.",
+    "Метод filter оставляет элементы, для которых условие истинно.",
+    "Условие пишут в фигурных скобках; текущий элемент — it.",
+    "Число чётное, если остаток от деления на 2 равен нулю: it % 2 == 0.",
+    "nums.filter { it % 2 == 0 }"
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "evens",
+        "paramTypes": [
+          "List<Int>"
+        ],
+        "returns": "List<Int>"
+      },
+      {
+        "id": "sel",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "\\bfilter\\b|\\bfor\\b",
+        "message": "Отберите элементы: filter или цикл for"
+      },
+      {
+        "id": "even",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "%\\s*2\\s*==\\s*0",
+        "message": "Чётное число: n % 2 == 0"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    println(evens(listOf(1, 2, 3, 4, 5, 6)))\n    println(evens(listOf(1, 3)))\n    println(evens(listOf()))\n}",
+      "expected_stdout": "[2, 4, 6]\n[]\n[]"
+    }
+  },
+  "solution": "fun evens(nums: List<Int>): List<Int> = nums.filter { it % 2 == 0 }\n",
+  "explanation": "filter { it % 2 == 0 } создаёт новый список из чётных элементов; исходный не меняется.",
+  "criteria": [
+    "Сигнатура evens(List<Int>): List<Int>.",
+    "Условие остатка от деления на 2."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "fun evens(nums: List<Int>): List<Int> = nums.filter { it % 2 == 1 }\n",
+      "why": "Здесь отбираются нечётные, а нужны чётные."
+    },
+    {
+      "code": "fun evens(nums: List<Int>): List<Int> = nums\n",
+      "why": "Список не фильтруется."
+    },
+    {
+      "code": "fun evens(nums: List<Int>) = nums.filter { it % 2 == 0 }\n",
+      "why": "Не указан тип результата List<Int>."
+    },
+    {
+      "code": "fun evens(nums: List<Int>): List<Int> = nums.map { it % 2 == 0 }\n",
+      "why": "map превращает числа в true/false, а не отбирает."
+    }
+  ]
+}

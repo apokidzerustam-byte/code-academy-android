@@ -1,0 +1,70 @@
+{
+  "id": "a3-twice",
+  "type": "write",
+  "title": "Дважды",
+  "statement": "Напишите функцию `applyTwice(x: Int, op: (Int) -> Int): Int`, которая применяет функцию `op` к `x` **два раза** подряд и возвращает результат: `op(op(x))`.",
+  "goal": "Принимать функцию в параметре.",
+  "input": "Число и функция.",
+  "expectedResult": "Результат двойного применения.",
+  "constraints": [
+    "Тип параметра op — (Int) -> Int."
+  ],
+  "starterCode": "// Функция applyTwice\n",
+  "hints": [
+    "Заголовок: fun applyTwice(x: Int, op: (Int) -> Int): Int.",
+    "Параметр op — это функция; её вызывают как обычную: op(…).",
+    "Первое применение: op(x).",
+    "Второе применяется к результату первого.",
+    "return op(op(x))"
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "applyTwice",
+        "paramTypes": [
+          "Int",
+          "(Int) -> Int"
+        ],
+        "returns": "Int"
+      },
+      {
+        "id": "twice",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "op\\s*\\(\\s*op\\s*\\(",
+        "message": "Примените op два раза: op(op(x))"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    println(applyTwice(3) { it * 2 })\n    println(applyTwice(5) { it + 10 })\n    println(applyTwice(2) { it * it })\n}",
+      "expected_stdout": "12\n25\n16"
+    }
+  },
+  "solution": "fun applyTwice(x: Int, op: (Int) -> Int): Int {\n    return op(op(x))\n}\n",
+  "explanation": "op — параметр-функция. Результат первого вызова op(x) подаётся в op ещё раз.",
+  "criteria": [
+    "Сигнатура с параметром (Int) -> Int.",
+    "op вызывается дважды."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "fun applyTwice(x: Int, op: (Int) -> Int): Int {\n    return op(x)\n}\n",
+      "why": "op применяется один раз."
+    },
+    {
+      "code": "fun applyTwice(x: Int, op: (Int) -> Unit): Int {\n    return x\n}\n",
+      "why": "Тип op — (Int) -> Int, а не (Int) -> Unit."
+    },
+    {
+      "code": "fun applyTwice(x: Int, op: (Int) -> Int): Int {\n    return x\n}\n",
+      "why": "Функция op не вызывается."
+    }
+  ]
+}

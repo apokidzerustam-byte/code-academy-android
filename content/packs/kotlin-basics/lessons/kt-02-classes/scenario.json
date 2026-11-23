@@ -1,0 +1,184 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Классы и пустые значения",
+      "narration": "Программы на Котлине описывают мир через классы. Класс — шаблон: какие у предмета свойства и что он умеет делать. А ещё Котлин борется с самой частой ошибкой в программировании — обращением к пустому значению, которое называется нулл. Сегодня разберём и то, и другое.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "класс = свойства + функции · `String?` = строка, которая может быть `null`",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "class",
+      "title": "Класс со свойствами и методами",
+      "narration": "Объявим счёт в банке. После имени класса в скобках идёт главный конструктор: val owner — владелец, его менять нельзя, var balance — баланс, он меняется. Внутри фигурных скобок — функции класса, их называют методами. Метод deposit добавляет деньги, метод describe собирает строку. Объект создают, вызывая класс как функцию. Внесём пятьдесят и напечатаем описание.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "Main.kt"
+        },
+        {
+          "type": "type",
+          "text": "class Account(val owner: String, var balance: Int) {\n    fun deposit(amount: Int) {\n        balance += amount\n    }\n\n    fun describe(): String = \"$owner: $balance\"\n}\n\nfun main() {\n    val acc = Account(\"Аня\", 100)\n    acc.deposit(50)\n    println(acc.describe())\n}\n",
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            1
+          ],
+          "file": "Main.kt",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            2,
+            3,
+            4
+          ],
+          "file": "Main.kt",
+          "cue": 3
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            6
+          ],
+          "file": "Main.kt",
+          "cue": 3
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            10
+          ],
+          "file": "Main.kt",
+          "cue": 4
+        },
+        {
+          "type": "run",
+          "file": "Main.kt",
+          "cue": 5
+        },
+        {
+          "type": "output",
+          "text": "Аня: 150\n",
+          "cue": 5
+        }
+      ]
+    },
+    {
+      "id": "null",
+      "title": "Тип со знаком вопроса",
+      "narration": "Теперь нулл. Обычная строка нуллом быть не может — компилятор не позволит. Если значения может не быть, к типу добавляют вопросительный знак: String со знаком вопроса. Обратиться к свойству такого значения напрямую нельзя. Запись «вопрос и точка» — безопасный вызов: если внутри нулл, то и весь результат нулл. А элвис — вопрос и двоеточие — подставляет запасное значение. Длина слова «Привет» — шесть, длина нулла — ноль, а вместо нулла напечатаем «пусто».",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "Main.kt"
+        },
+        {
+          "type": "type",
+          "text": "fun safeLength(text: String?): Int {\n    return text?.length ?: 0\n}\n\nfun main() {\n    val a: String? = \"Привет\"\n    val b: String? = null\n    println(safeLength(a))\n    println(safeLength(b))\n    println(b ?: \"пусто\")\n}\n",
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            1
+          ],
+          "file": "Main.kt",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            2
+          ],
+          "file": "Main.kt",
+          "cue": 4
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            2
+          ],
+          "file": "Main.kt",
+          "cue": 5
+        },
+        {
+          "type": "run",
+          "file": "Main.kt",
+          "cue": 6
+        },
+        {
+          "type": "output",
+          "text": "6\n0\nпусто\n",
+          "cue": 6
+        }
+      ]
+    },
+    {
+      "id": "smart",
+      "title": "Проверка на null",
+      "narration": "Пустоту можно проверить и обычным if. После проверки компилятор уже знает, что дальше значение не пустое, и разрешает работать с ним как с обычным числом. Это называется умным приведением типа. Для четвёрки получим «значение пять», для нулла — «пусто».",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "Main.kt"
+        },
+        {
+          "type": "type",
+          "text": "fun label(x: Int?): String {\n    if (x == null) return \"пусто\"\n    return \"значение ${x + 1}\"\n}\n\nfun main() {\n    println(label(4))\n    println(label(null))\n}\n",
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            2
+          ],
+          "file": "Main.kt",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            3
+          ],
+          "file": "Main.kt",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "Main.kt",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "значение 5\nпусто\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Итак. Класс — шаблон со свойствами и методами. Свойства объявляют прямо в главном конструкторе: val — неизменяемое, var — изменяемое. Тип со знаком вопроса допускает нулл, а безопасный вызов и элвис защищают программу от падения. Двойной восклицательный знак обещает, что нулла нет, и роняет программу, если это не так, — лучше им не пользоваться.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`class A(val x: Int)` · `String?` · `a?.b` · `a ?: запас` · `if (a == null) …`",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}

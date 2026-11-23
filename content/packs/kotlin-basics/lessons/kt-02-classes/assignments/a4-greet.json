@@ -1,0 +1,84 @@
+{
+  "id": "a4-greet",
+  "type": "fix",
+  "title": "«Привет, null»",
+  "statement": "Для `greet(null)` программа печатает `Привет, null`, а нужно **`Привет, гость`**. Для обычного имени вывод тот же: `Привет, Аня`. Исправьте функцию `greet`; `!!` не применяйте.",
+  "goal": "Не выводить null пользователю.",
+  "input": "—",
+  "expectedResult": "Привет, гость.",
+  "constraints": [
+    "Заголовок функции менять не нужно."
+  ],
+  "starterCode": "fun greet(name: String?): String = \"Привет, \" + name\n\nfun main() {\n    println(greet(\"Аня\"))\n    println(greet(null))\n}\n",
+  "hints": [
+    "Запустите программу в GitHub Actions или прочитайте код: что склеивается со строкой, если name равен null?",
+    "Строка + null даёт слово null — компилятор это разрешает.",
+    "Нужен запасной вариант для null.",
+    "Элвис: name ?: \"гость\".",
+    "\"Привет, \" + (name ?: \"гость\")"
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "greet",
+        "paramTypes": [
+          "String?"
+        ],
+        "returns": "String"
+      },
+      {
+        "id": "null",
+        "type": "contains",
+        "pattern": "\\?:|[=!]=\\s*null",
+        "message": "Проверьте name на null: ?: или if (name == null)",
+        "hint": "Для null нужна своя ветка"
+      },
+      {
+        "id": "guest",
+        "hidden": true,
+        "type": "contains",
+        "raw": true,
+        "pattern": "гость",
+        "message": "Для null выводите «гость»"
+      },
+      {
+        "id": "nobang",
+        "hidden": true,
+        "type": "not_contains",
+        "pattern": "!!",
+        "message": "Не используйте !!"
+      }
+    ],
+    "jvm": {
+      "main": "",
+      "expected_stdout": "Привет, Аня\nПривет, гость"
+    }
+  },
+  "solution": "fun greet(name: String?): String = \"Привет, \" + (name ?: \"гость\")\n\nfun main() {\n    println(greet(\"Аня\"))\n    println(greet(null))\n}\n",
+  "explanation": "Склейка строки с null не падает, а печатает «null». Элвис подставляет «гость», когда имени нет.",
+  "criteria": [
+    "greet(null) даёт «Привет, гость».",
+    "greet(\"Аня\") не изменилось."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "fun greet(name: String?): String = \"Привет, \" + name\n\nfun main() {\n    println(greet(\"Аня\"))\n    println(greet(null))\n}\n",
+      "why": "Ошибка осталась: для null по-прежнему «null»."
+    },
+    {
+      "code": "fun greet(name: String?): String = \"Привет, \" + name!!\n\nfun main() {\n    println(greet(\"Аня\"))\n}\n",
+      "why": "!! роняет программу на null."
+    },
+    {
+      "code": "fun greet(name: String?): String = \"Привет, гость\"\n\nfun main() {\n    println(greet(\"Аня\"))\n}\n",
+      "why": "Для имени всегда «гость»: проверки на null нет."
+    }
+  ]
+}

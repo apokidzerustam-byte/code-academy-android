@@ -1,0 +1,87 @@
+{
+  "id": "a3-safe",
+  "type": "write",
+  "title": "Длина или ноль",
+  "statement": "Напишите функцию `lengthOrZero(text: String?): Int`: длина строки, а для `null` — **0**. Используйте безопасный вызов `?.` и элвис `?:`; `!!` не применяйте.",
+  "goal": "Работать с типом, допускающим null.",
+  "input": "Строка или null.",
+  "expectedResult": "Целое число.",
+  "constraints": [
+    "!! запрещён."
+  ],
+  "starterCode": "// Функция lengthOrZero\n",
+  "hints": [
+    "Тип параметра со знаком вопроса: String?.",
+    "Обратиться к длине безопасно: text?.length.",
+    "Если text равен null, результат тоже null — это Int?, а нужен Int.",
+    "Запасное значение подставляет элвис: … ?: 0.",
+    "return text?.length ?: 0"
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "lengthOrZero",
+        "paramTypes": [
+          "String?"
+        ],
+        "returns": "Int"
+      },
+      {
+        "id": "safe",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "\\?\\.",
+        "message": "Безопасный вызов: text?.length"
+      },
+      {
+        "id": "elvis",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "\\?:",
+        "message": "Запасное значение через ?: (элвис)"
+      },
+      {
+        "id": "nobang",
+        "hidden": true,
+        "type": "not_contains",
+        "pattern": "!!",
+        "message": "Не используйте !!"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    println(lengthOrZero(\"Привет\"))\n    println(lengthOrZero(null))\n    println(lengthOrZero(\"\"))\n}",
+      "expected_stdout": "6\n0\n0"
+    }
+  },
+  "solution": "fun lengthOrZero(text: String?): Int {\n    return text?.length ?: 0\n}\n",
+  "explanation": "text?.length даёт длину или null; ?: 0 заменяет null нулём, и результат становится обычным Int.",
+  "criteria": [
+    "Параметр String?.",
+    "Используются ?. и ?:."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "fun lengthOrZero(text: String): Int {\n    return text.length\n}\n",
+      "why": "Тип параметра должен допускать null: String?."
+    },
+    {
+      "code": "fun lengthOrZero(text: String?): Int {\n    return text!!.length\n}\n",
+      "why": "!! роняет программу на null."
+    },
+    {
+      "code": "fun lengthOrZero(text: String?): Int? {\n    return text?.length\n}\n",
+      "why": "Результат должен быть Int (для null — 0)."
+    },
+    {
+      "code": "fun lengthOrZero(text: String?): Int {\n    return 0\n}\n",
+      "why": "Длина не считается."
+    }
+  ]
+}

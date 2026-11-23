@@ -1,0 +1,76 @@
+{
+  "id": "a4-top3",
+  "type": "fix",
+  "title": "Три лучших результата",
+  "statement": "Функция `top3` должна вернуть **три наибольших** результата от большего к меньшему, а возвращает три наименьших. Для `[5, 1, 9, 7, 3]` ожидается `[9, 7, 5]`. Исправьте.",
+  "goal": "Различать порядок сортировки.",
+  "input": "—",
+  "expectedResult": "Три наибольших.",
+  "constraints": [
+    "Тип результата не меняйте."
+  ],
+  "starterCode": "fun top3(scores: List<Int>): List<Int> = scores.sorted().take(3)\n",
+  "hints": [
+    "Для [5, 1, 9, 7, 3] функция вернёт [1, 3, 5]. Что это за числа?",
+    "sorted() сортирует по возрастанию — сначала самые маленькие.",
+    "take(3) берёт первые три из отсортированного.",
+    "Нужен обратный порядок.",
+    "sortedDescending() вместо sorted()"
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "top3",
+        "paramTypes": [
+          "List<Int>"
+        ],
+        "returns": "List<Int>"
+      },
+      {
+        "id": "desc",
+        "type": "contains",
+        "pattern": "sortedDescending|sortedByDescending|reversed",
+        "message": "Нужен порядок от большего к меньшему",
+        "hint": "sorted() сортирует по возрастанию"
+      },
+      {
+        "id": "take",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "\\btake\\s*\\(\\s*3\\s*\\)",
+        "message": "Возьмите три первых: take(3)"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    println(top3(listOf(5, 1, 9, 7, 3)))\n    println(top3(listOf(4, 2)))\n}",
+      "expected_stdout": "[9, 7, 5]\n[4, 2]"
+    }
+  },
+  "solution": "fun top3(scores: List<Int>): List<Int> = scores.sortedDescending().take(3)\n",
+  "explanation": "sorted() ставит наименьшие первыми, и take(3) берёт именно их. sortedDescending() расставляет от большего к меньшему.",
+  "criteria": [
+    "Сортировка по убыванию.",
+    "Берутся три элемента."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "fun top3(scores: List<Int>): List<Int> = scores.sorted().take(3)\n",
+      "why": "Ошибка осталась: возвращаются три наименьших."
+    },
+    {
+      "code": "fun top3(scores: List<Int>): List<Int> = scores.sorted().takeLast(3)\n",
+      "why": "Это три наибольших, но по возрастанию: [5, 7, 9], а нужно [9, 7, 5]."
+    },
+    {
+      "code": "fun top3(scores: List<Int>): List<Int> = scores.sortedDescending().take(2)\n",
+      "why": "Берутся два элемента вместо трёх."
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "id": "a2-total",
+  "type": "write",
+  "title": "Сумма цен",
+  "statement": "Напишите функцию `total(prices: Map<String, Int>): Int`, которая возвращает **сумму значений** словаря (цен). Для пустого словаря — 0.",
+  "goal": "Работать со словарём.",
+  "input": "Словарь «товар → цена».",
+  "expectedResult": "Сумма цен.",
+  "constraints": [
+    "Тип результата укажите явно."
+  ],
+  "starterCode": "// Функция total\n",
+  "hints": [
+    "Заголовок: fun total(prices: Map<String, Int>): Int.",
+    "У словаря есть свойство values — все значения без ключей.",
+    "Числа складывает метод sum().",
+    "Для пустого списка sum() вернёт 0.",
+    "prices.values.sum()"
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "total",
+        "paramTypes": [
+          "Map<String, Int>"
+        ],
+        "returns": "Int"
+      },
+      {
+        "id": "sum",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "\\.values\\b|\\bsumOf\\b|\\bfor\\b",
+        "message": "Сложите значения словаря: prices.values.sum()"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    println(total(mapOf(\"чай\" to 120, \"кофе\" to 200)))\n    println(total(emptyMap()))\n    println(total(mapOf(\"сок\" to 150)))\n}",
+      "expected_stdout": "320\n0\n150"
+    }
+  },
+  "solution": "fun total(prices: Map<String, Int>): Int = prices.values.sum()\n",
+  "explanation": "prices.values — коллекция цен; sum() складывает их, а для пустой даёт 0.",
+  "criteria": [
+    "Сигнатура total(Map<String, Int>): Int.",
+    "Складываются значения."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "fun total(prices: List<Int>): Int = prices.sum()\n",
+      "why": "Параметр должен быть словарём Map<String, Int>."
+    },
+    {
+      "code": "fun total(prices: Map<String, Int>) = prices.values.sum()\n",
+      "why": "Не указан тип результата Int."
+    },
+    {
+      "code": "fun total(prices: Map<String, Int>): Int = prices.size\n",
+      "why": "size — число товаров, а не сумма цен."
+    }
+  ]
+}

@@ -3,17 +3,26 @@
   "version": "0.1.0",
   "stage": 13,
   "title": "Kotlin для Андроида",
-  "description": "Язык Андроида: типы, функции, when, data class. На телефоне — проверка синтаксиса и структуры, запуск — в GitHub Actions. Пилот этапа 12.",
+  "description": "Язык Андроида: типы, функции, when, классы, null-безопасность, коллекции и лямбды. На телефоне — проверка синтаксиса и структуры, запуск — в GitHub Actions.",
   "language": "kotlin",
   "minAppVersion": 1,
   "lessons": [
-    "kt-01-basics"
+    "kt-01-basics",
+    "kt-02-classes",
+    "kt-03-collections"
   ],
   "skills": {
     "kt.basics": "Kotlin: main, val и var",
     "kt.functions": "Функции и типы",
     "kt.when": "when и циклы",
     "kt.data": "data class и списки",
-    "kt.syntax": "Синтаксические ошибки"
+    "kt.syntax": "Синтаксические ошибки",
+    "kt.class": "Классы: свойства и методы",
+    "kt.ctor": "Главный конструктор",
+    "kt.null": "Типы с null и безопасный вызов",
+    "kt.smartcast": "Проверка на null",
+    "kt.collections": "Списки, множества, словари",
+    "kt.lambdas": "Лямбды и функции-параметры",
+    "kt.hof": "map, filter, sorted и sum"
   }
 }

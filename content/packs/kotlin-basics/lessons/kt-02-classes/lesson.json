@@ -1,0 +1,46 @@
+{
+  "id": "kt-02-classes",
+  "title": "Kotlin: классы и null",
+  "goal": "Описывать классы со свойствами и методами и безопасно работать со значениями, которые могут быть пустыми.",
+  "skills": [
+    "kt.class",
+    "kt.ctor",
+    "kt.null",
+    "kt.smartcast"
+  ],
+  "prerequisites": [
+    "kt-01-basics"
+  ],
+  "runner": "kotlin",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-counter.json",
+    "assignments/a2-account.json",
+    "assignments/a3-safe.json",
+    "assignments/a4-greet.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Обращение к String? напрямую",
+      "fix": "Используйте text?.length и запасное значение ?: …"
+    },
+    {
+      "mistake": "!! вместо проверки",
+      "fix": "!! роняет программу, если значение пустое."
+    },
+    {
+      "mistake": "val вместо var в свойстве, которое меняется",
+      "fix": "val присваивают один раз, var — можно менять."
+    },
+    {
+      "mistake": "Склейка строки с null",
+      "fix": "Получится слово «null»: подставьте запасное значение элвисом."
+    }
+  ]
+}
