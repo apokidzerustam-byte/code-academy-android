@@ -1,0 +1,83 @@
+{
+  "id": "a2-key",
+  "type": "write",
+  "title": "Проверка ключа",
+  "statement": "Напишите middleware: все пути, кроме `/health`, требуют заголовок `X-API-Key` со значением из `API_KEY`. Если ключа нет или он неверный, ответьте кодом **401** и `{\"detail\": \"Нужен ключ API\"}` (класс `JSONResponse` импортирован), не вызывая обработчик. Иначе пропустите запрос дальше.",
+  "goal": "Остановить запрос в слое, не вызывая call_next.",
+  "input": "Запросы с ключом и без.",
+  "expectedResult": "401 без верного ключа, ответ обработчика — с верным.",
+  "constraints": [
+    "Ключ в коде — только учебный; в проекте его читают из переменной окружения."
+  ],
+  "starterCode": "from fastapi import FastAPI, Request\nfrom fastapi.responses import JSONResponse\n\napp = FastAPI()\nAPI_KEY = \"academy-key\"\n\n\n# Здесь напишите middleware\n\n\n@app.get(\"/health\")\ndef health():\n    return {\"status\": \"ok\"}\n\n\n@app.get(\"/secret\")\ndef secret():\n    return {\"data\": 42}\n",
+  "hints": [
+    "Слой — это @app.middleware(\"http\") async def …(request, call_next).",
+    "Значение заголовка: request.headers.get(\"x-api-key\").",
+    "Если путь не /health и ключ не равен API_KEY — верните JSONResponse(…, status_code=401), call_next не вызывайте.",
+    "Для остальных запросов: return await call_next(request).",
+    "Условие: request.url.path != \"/health\" and request.headers.get(\"x-api-key\") != API_KEY."
+  ],
+  "tests": {
+    "kind": "fastapi",
+    "cases": [
+      {
+        "id": "v1",
+        "path": "/health",
+        "expected_json": {
+          "status": "ok"
+        }
+      },
+      {
+        "id": "v2",
+        "path": "/secret",
+        "expected_status": 401,
+        "expected_json": {
+          "detail": "Нужен ключ API"
+        },
+        "hint": "Без заголовка X-API-Key закрытые пути недоступны"
+      },
+      {
+        "id": "h1",
+        "hidden": true,
+        "path": "/secret",
+        "headers": {
+          "X-API-Key": "wrong"
+        },
+        "expected_status": 401,
+        "hint": "Нужно сравнивать значение ключа, а не только наличие заголовка"
+      },
+      {
+        "id": "h2",
+        "hidden": true,
+        "path": "/secret",
+        "headers": {
+          "X-API-Key": "academy-key"
+        },
+        "expected_json": {
+          "data": 42
+        }
+      }
+    ]
+  },
+  "solution": "from fastapi import FastAPI, Request\nfrom fastapi.responses import JSONResponse\n\napp = FastAPI()\nAPI_KEY = \"academy-key\"\n\n\n@app.middleware(\"http\")\nasync def require_key(request: Request, call_next):\n    if request.url.path != \"/health\" and request.headers.get(\"x-api-key\") != API_KEY:\n        return JSONResponse({\"detail\": \"Нужен ключ API\"}, status_code=401)\n    return await call_next(request)\n\n\n@app.get(\"/health\")\ndef health():\n    return {\"status\": \"ok\"}\n\n\n@app.get(\"/secret\")\ndef secret():\n    return {\"data\": 42}\n",
+  "explanation": "Слой возвращает ответ сам и не вызывает call_next, поэтому обработчик защищённых путей не выполняется. Публичный /health пропускается дальше.",
+  "criteria": [
+    "Закрытые пути требуют верный ключ.",
+    "/health открыт.",
+    "Запрос без ключа не доходит до обработчика."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from fastapi import FastAPI, Request\nfrom fastapi.responses import JSONResponse\n\napp = FastAPI()\nAPI_KEY = \"academy-key\"\n\n\n@app.middleware(\"http\")\nasync def require_key(request: Request, call_next):\n    if request.headers.get(\"x-api-key\") != API_KEY:\n        return JSONResponse({\"detail\": \"Нужен ключ API\"}, status_code=401)\n    return await call_next(request)\n\n\n@app.get(\"/health\")\ndef health():\n    return {\"status\": \"ok\"}\n\n\n@app.get(\"/secret\")\ndef secret():\n    return {\"data\": 42}\n",
+      "why": "Проверка идёт и для /health: публичный путь тоже закрыт."
+    },
+    {
+      "code": "from fastapi import FastAPI, Request\nfrom fastapi.responses import JSONResponse\n\napp = FastAPI()\nAPI_KEY = \"academy-key\"\n\n\n@app.middleware(\"http\")\nasync def require_key(request: Request, call_next):\n    if request.url.path != \"/health\" and \"x-api-key\" not in request.headers:\n        return JSONResponse({\"detail\": \"Нужен ключ API\"}, status_code=401)\n    return await call_next(request)\n\n\n@app.get(\"/health\")\ndef health():\n    return {\"status\": \"ok\"}\n\n\n@app.get(\"/secret\")\ndef secret():\n    return {\"data\": 42}\n",
+      "why": "Проверяется только наличие заголовка, а не значение ключа."
+    },
+    {
+      "code": "from fastapi import FastAPI, Request\nfrom fastapi.responses import JSONResponse\n\napp = FastAPI()\nAPI_KEY = \"academy-key\"\n\n\n@app.middleware(\"http\")\nasync def require_key(request: Request, call_next):\n    if request.url.path != \"/health\" and request.headers.get(\"x-api-key\") != API_KEY:\n        return JSONResponse({\"detail\": \"Нужен ключ API\"}, status_code=403)\n    return await call_next(request)\n\n\n@app.get(\"/health\")\ndef health():\n    return {\"status\": \"ok\"}\n\n\n@app.get(\"/secret\")\ndef secret():\n    return {\"data\": 42}\n",
+      "why": "Нет ключа — это 401 (не авторизован), а не 403."
+    }
+  ]
+}

@@ -1,0 +1,278 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Кто вы и что вам можно",
+      "narration": "Два похожих слова, которые нельзя путать. Аутентификация отвечает на вопрос «кто вы»: сервер проверяет, что вы действительно Анна. Авторизация отвечает на вопрос «что вам можно»: может ли Анна открыть панель администратора. Типичная схема такая. Пользователь присылает логин и пароль. Сервер проверяет пароль и выдаёт токен: короткую строку, подписанную сервером. С этого момента клиент прикладывает токен к каждому запросу в заголовке Authorization, а сервер проверяет подпись и срок действия. Пароль больше нигде не путешествует. Сегодня мы разберём каждый шаг: как хранить пароли, как устроен токен и как защитить маршрут.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "**Аутентификация** — кто вы · **авторизация** — что вам можно",
+          "cue": 0
+        },
+        {
+          "type": "note",
+          "md": "логин + пароль → токен → `Authorization: Bearer <токен>` → проверка подписи и срока",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "hash",
+      "title": "Хранение паролей",
+      "narration": "Первое правило: пароль нельзя хранить как есть. Если базу украдут, все пароли окажутся у злоумышленника. Вместо пароля хранят хеш, результат необратимого преобразования. Но обычный быстрый хеш не годится: перебрать миллионы паролей получится за секунды. Поэтому нужны две вещи. Первая: соль, это случайная строка у каждого пользователя, чтобы одинаковые пароли давали разные хеши. Вторая: медленная функция, например PBKDF2, которая повторяет вычисление много раз. Вот функция: пароль, соль, алгоритм SHA256 и число повторений. В учебном примере их тысяча, чтобы код работал быстро, а в настоящих проектах счёт идёт на сотни тысяч, а то и берут готовые библиотеки argon2 или bcrypt. Проверим: хеш всегда одной длины, одинаковые входные данные дают одинаковый результат, а соль или регистр меняют его полностью.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "import hashlib\n\n\ndef hash_password(password: str, salt: str) -> str:\n    return hashlib.pbkdf2_hmac(\"sha256\", password.encode(), salt.encode(), 1000).hex()\n\n\nstored = hash_password(\"qwerty\", \"s1\")\nprint(len(stored))\nprint(stored == hash_password(\"qwerty\", \"s1\"))\nprint(stored == hash_password(\"qwerty\", \"s2\"))\nprint(stored == hash_password(\"Qwerty\", \"s1\"))\n",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            4
+          ],
+          "cue": 7
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            5
+          ],
+          "cue": 7
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            8
+          ],
+          "cue": 9
+        },
+        {
+          "type": "run",
+          "cue": 9
+        },
+        {
+          "type": "output",
+          "text": "64\nTrue\nFalse\nFalse\n",
+          "cue": 9
+        }
+      ]
+    },
+    {
+      "id": "token",
+      "title": "Токен: подписанная строка",
+      "narration": "Теперь токен. Его формат называется JWT, и устроен он просто: три части через точку. Заголовок говорит, каким алгоритмом подписано. Содержимое хранит данные, например имя пользователя и срок действия под именем exp. Подпись вычисляется из первых двух частей и секретного ключа сервера. Заметьте: содержимое не зашифровано, его может прочитать любой, поэтому секретные данные туда класть нельзя. Защита другая: подделать содержимое не получится, подпись перестанет сходиться. Функция make token собирает три части. Функция read token делает обратное: сверяет подпись, причём через compare digest, чтобы время сравнения не выдавало информацию, а потом проверяет срок. Любая проблема даёт None. Запустим: токен с двумя точками читается, просроченный нет, с подпорченной подписью нет, с другим ключом тоже нет.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "import base64\nimport hashlib\nimport hmac\nimport json\n\n\ndef b64(data: bytes) -> str:\n    return base64.urlsafe_b64encode(data).rstrip(b\"=\").decode()\n\n\ndef unb64(text: str) -> bytes:\n    return base64.urlsafe_b64decode(text + \"=\" * (-len(text) % 4))\n\n\ndef sign(text: str, secret: str) -> str:\n    return b64(hmac.new(secret.encode(), text.encode(), hashlib.sha256).digest())\n\n\ndef make_token(payload: dict, secret: str) -> str:\n    header = b64(json.dumps({\"alg\": \"HS256\", \"typ\": \"JWT\"}, separators=(\",\", \":\")).encode())\n    body = b64(json.dumps(payload, separators=(\",\", \":\")).encode())\n    return header + \".\" + body + \".\" + sign(header + \".\" + body, secret)\n\n\ndef read_token(token: str, secret: str, now: int):\n    parts = token.split(\".\")\n    if len(parts) != 3:\n        return None\n    if not hmac.compare_digest(parts[2].encode(), sign(parts[0] + \".\" + parts[1], secret).encode()):\n        return None\n    payload = json.loads(unb64(parts[1]))\n    if payload.get(\"exp\", 0) < now:\n        return None\n    return payload\n\n\nSECRET = \"lesson-secret\"\ntoken = make_token({\"sub\": \"anna\", \"exp\": 100}, SECRET)\nprint(token.count(\".\"))\nprint(read_token(token, SECRET, 50))\nprint(read_token(token, SECRET, 150))\nprint(read_token(token + \"x\", SECRET, 50))\nprint(read_token(token, \"other\", 50))\n",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            15
+          ],
+          "cue": 4
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            19,
+            20,
+            21,
+            22
+          ],
+          "cue": 7
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34
+          ],
+          "cue": 8
+        },
+        {
+          "type": "run",
+          "cue": 10
+        },
+        {
+          "type": "output",
+          "text": "2\n{'sub': 'anna', 'exp': 100}\nNone\nNone\nNone\n",
+          "cue": 10
+        }
+      ]
+    },
+    {
+      "id": "depends",
+      "title": "Защита маршрута через Depends",
+      "narration": "Как проверять токен в каждом защищённом маршруте, не копируя код? В FastAPI для этого есть зависимости. Это обычная функция, которую маршрут подключает через Depends. Наша функция current user читает заголовок Authorization. Если заголовка нет или он не начинается со слова Bearer, отвечаем четыреста один с понятным сообщением. Иначе проверяем токен. Подпись или срок не сошлись, снова четыреста один. Если всё хорошо, возвращаем данные токена. Маршрут me просто просит зависимость в параметре и получает уже проверенного пользователя. Проверим три случая: без токена, с верным токеном и с мусором вместо токена.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "import base64\nimport hashlib\nimport hmac\nimport json\nimport time\n\nfrom fastapi import Depends, FastAPI, Header, HTTPException\nfrom fastapi.testclient import TestClient\n\nSECRET = \"lesson-secret\"\n\n\ndef b64(data: bytes) -> str:\n    return base64.urlsafe_b64encode(data).rstrip(b\"=\").decode()\n\n\ndef unb64(text: str) -> bytes:\n    return base64.urlsafe_b64decode(text + \"=\" * (-len(text) % 4))\n\n\ndef sign(text: str, secret: str) -> str:\n    return b64(hmac.new(secret.encode(), text.encode(), hashlib.sha256).digest())\n\n\ndef make_token(payload: dict, secret: str) -> str:\n    header = b64(json.dumps({\"alg\": \"HS256\", \"typ\": \"JWT\"}, separators=(\",\", \":\")).encode())\n    body = b64(json.dumps(payload, separators=(\",\", \":\")).encode())\n    return header + \".\" + body + \".\" + sign(header + \".\" + body, secret)\n\n\ndef read_token(token: str, secret: str, now: int):\n    parts = token.split(\".\")\n    if len(parts) != 3:\n        return None\n    if not hmac.compare_digest(parts[2].encode(), sign(parts[0] + \".\" + parts[1], secret).encode()):\n        return None\n    payload = json.loads(unb64(parts[1]))\n    if payload.get(\"exp\", 0) < now:\n        return None\n    return payload\n\n\napp = FastAPI()\n\n\ndef current_user(authorization: str = Header(None)) -> dict:\n    if not authorization or not authorization.startswith(\"Bearer \"):\n        raise HTTPException(status_code=401, detail=\"Нужен токен\")\n    payload = read_token(authorization[7:], SECRET, int(time.time()))\n    if payload is None:\n        raise HTTPException(status_code=401, detail=\"Неверный токен\")\n    return payload\n\n\n@app.get(\"/me\")\ndef me(user: dict = Depends(current_user)):\n    return {\"user\": user[\"sub\"]}\n\n\nclient = TestClient(app)\ntoken = make_token({\"sub\": \"anna\", \"exp\": 9999999999}, SECRET)\nprint(client.get(\"/me\").status_code)\nprint(client.get(\"/me\", headers={\"Authorization\": \"Bearer \" + token}).json())\nprint(client.get(\"/me\", headers={\"Authorization\": \"Bearer abc\"}).json())\n",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            46
+          ],
+          "cue": 3
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            48
+          ],
+          "cue": 4
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            49
+          ],
+          "cue": 5
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            56
+          ],
+          "cue": 8
+        },
+        {
+          "type": "run",
+          "cue": 9
+        },
+        {
+          "type": "output",
+          "text": "401\n{'user': 'anna'}\n{'detail': 'Неверный токен'}\n",
+          "cue": 9
+        }
+      ]
+    },
+    {
+      "id": "roles",
+      "title": "Авторизация: роли и код 403",
+      "narration": "Теперь авторизация. Допустим, панель управления доступна только администраторам. Добавим вторую зависимость. Она опирается на первую: сначала current user проверит токен, а затем require admin посмотрит на поле role. Если роли нет, это уже не четыреста один, а четыреста три: вы известны серверу, но вам нельзя. Запомните различие. Четыреста один значит «я не знаю, кто вы», четыреста три значит «знаю, но нельзя». Проверим: обычный пользователь Анна получает отказ, а администратор попадает в панель.",
+      "actions": [
+        {
+          "type": "type",
+          "text": "\n\ndef require_admin(user: dict = Depends(current_user)) -> dict:\n    if user.get(\"role\") != \"admin\":\n        raise HTTPException(status_code=403, detail=\"Недостаточно прав\")\n    return user\n\n\n@app.get(\"/admin\")\ndef admin_panel(user: dict = Depends(require_admin)):\n    return {\"hello\": user[\"sub\"]}\n\n\nadmin_token = make_token({\"sub\": \"boss\", \"role\": \"admin\", \"exp\": 9999999999}, SECRET)\nprint(client.get(\"/admin\", headers={\"Authorization\": \"Bearer \" + token}).status_code)\nprint(client.get(\"/admin\", headers={\"Authorization\": \"Bearer \" + admin_token}).json())\n",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            67,
+            68,
+            69,
+            70
+          ],
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            69
+          ],
+          "cue": 4
+        },
+        {
+          "type": "run",
+          "cue": 7
+        },
+        {
+          "type": "output",
+          "text": "401\n{'user': 'anna'}\n{'detail': 'Неверный токен'}\n403\n{'hello': 'boss'}\n",
+          "cue": 7
+        }
+      ]
+    },
+    {
+      "id": "practice",
+      "title": "Правила безопасной работы",
+      "narration": "Несколько правил, которые важнее любого кода. Секретный ключ подписи читают из переменной окружения, а не пишут в коде и не кладут в репозиторий: тот, кто знает ключ, может выпускать токены от чужого имени. Токены живут недолго, обычно минуты или часы. Сайт работает только по HTTPS, иначе токен можно подсмотреть по дороге. При неверном входе пишите одно и то же сообщение, не уточняя, что неверно, логин или пароль, иначе злоумышленник узнает, какие логины существуют. Ограничивайте число попыток входа. Не пишите токены и пароли в журнал. И последнее: в настоящих проектах не изобретают защиту сами, а берут проверенные библиотеки. Мы разбирали устройство, чтобы понимать, что они делают.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "note",
+          "md": "Ключ подписи — из переменной окружения, не из кода и не из репозитория",
+          "cue": 1
+        },
+        {
+          "type": "note",
+          "md": "Токены живут недолго · только HTTPS · одно сообщение об ошибке входа · лимит попыток",
+          "cue": 2
+        },
+        {
+          "type": "note",
+          "md": "Не пишите токены и пароли в журнал; в настоящем проекте — проверенные библиотеки (argon2/bcrypt, PyJWT)",
+          "cue": 6
+        }
+      ]
+    },
+    {
+      "id": "mistakes",
+      "title": "Типичные ошибки",
+      "narration": "Четыре типичные ошибки. Первая: хранить пароль как есть или обычным быстрым хешем без соли. Вторая: читать содержимое токена, не проверив подпись. Тогда любой сам напишет себе роль администратора. Третья: не проверять срок действия, и украденный токен работает вечно. Четвёртая: путать коды. Нет токена или он плохой, это четыреста один. Токен хороший, но прав мало, это четыреста три. Ещё одна частая ошибка: сравнивать подписи обычным равенством. Правильнее compare digest.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "Ошибка 1: пароль открытым текстом или быстрый хеш без соли.",
+          "cue": 1
+        },
+        {
+          "type": "note",
+          "md": "Ошибка 2: токен прочитан без проверки подписи.",
+          "cue": 2
+        },
+        {
+          "type": "note",
+          "md": "Ошибка 3: не проверен срок `exp`.",
+          "cue": 4
+        },
+        {
+          "type": "note",
+          "md": "Ошибка 4: путаница 401 и 403.",
+          "cue": 5
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. Пароль хранят только в виде хеша с солью, который считает медленная функция вроде PBKDF2. Токен состоит из трёх частей, и его подпись защищает содержимое от подделки. Зависимость current user проверяет подпись и срок, а require admin добавляет проверку роли. Нет или плох токен, это четыреста один, нет прав, это четыреста три. В заданиях вы напишете функцию хеширования и функцию выпуска токена, зависимость для защиты маршрута, исправите зависимость, которая не проверяет подпись, и предскажете результат проверки токена. Критерий прохождения: решить не меньше трёх заданий из пяти. Всё проверяется тестовым клиентом без сети.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`pbkdf2_hmac` + соль · токен `заголовок.содержимое.подпись` · `Depends(current_user)` · 401 — кто вы? · 403 — нельзя",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}

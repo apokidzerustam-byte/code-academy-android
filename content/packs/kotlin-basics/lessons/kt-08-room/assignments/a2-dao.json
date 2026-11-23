@@ -1,0 +1,79 @@
+{
+  "id": "a2-dao",
+  "type": "write",
+  "title": "Dao задач",
+  "statement": "Напишите интерфейс `TaskDao` с аннотацией `@Dao` и тремя функциями. `observeAll(): Flow<List<Task>>` — запрос `SELECT * FROM tasks ORDER BY id`. `suspend fun insert(task: Task)` — вставка с заменой при конфликте ключей (`onConflict = OnConflictStrategy.REPLACE`). `suspend fun delete(task: Task)` — удаление. Класс `Task` и импорты уже есть.",
+  "goal": "Описать Dao: запрос, вставку и удаление.",
+  "input": "—",
+  "expectedResult": "Интерфейс из трёх функций; в проверке он реализуется в памяти.",
+  "constraints": [
+    "Не добавляйте других функций."
+  ],
+  "starterCode": "import androidx.room.Dao\nimport androidx.room.Delete\nimport androidx.room.Insert\nimport androidx.room.OnConflictStrategy\nimport androidx.room.Query\nimport kotlinx.coroutines.flow.Flow\n\ndata class Task(val id: Int = 0, val title: String, val done: Boolean = false)\n\n// Напишите интерфейс TaskDao\n",
+  "hints": [
+    "Dao — интерфейс с аннотацией @Dao; реализацию Room напишет сама.",
+    "Запрос чтения — аннотация @Query с SQL; чтение удобно отдавать потоком Flow, он присылает новые списки при изменении таблицы.",
+    "@Insert принимает параметр onConflict: стратегия REPLACE заменит строку с тем же ключом.",
+    "Запись в базу не разрешена из главного потока, поэтому insert и delete объявляют suspend.",
+    "@Delete suspend fun delete(task: Task) — и по такому же образцу insert; чтение — fun observeAll(): Flow<List<Task>>."
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "dao",
+        "type": "contains",
+        "pattern": "@Dao\\s+interface\\s+TaskDao\\b",
+        "message": "Над интерфейсом TaskDao нужна аннотация @Dao"
+      },
+      {
+        "id": "q",
+        "raw": true,
+        "type": "contains",
+        "pattern": "@Query\\s*\\(\\s*\"SELECT\\s+\\*\\s+FROM\\s+tasks[^\"]*\"\\s*\\)\\s*fun\\s+observeAll\\s*\\(\\s*\\)\\s*:\\s*Flow\\s*<\\s*List\\s*<\\s*Task\\s*>\\s*>",
+        "message": "Чтение: @Query(\"SELECT * FROM tasks …\") fun observeAll(): Flow<List<Task>>"
+      },
+      {
+        "id": "ins",
+        "type": "contains",
+        "pattern": "@Insert\\s*\\(\\s*onConflict\\s*=\\s*OnConflictStrategy\\.REPLACE\\s*\\)\\s*suspend\\s+fun\\s+insert\\s*\\(\\s*task\\s*:\\s*Task\\s*\\)",
+        "message": "Вставка: @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insert(task: Task)"
+      },
+      {
+        "id": "del",
+        "type": "contains",
+        "pattern": "@Delete\\s*suspend\\s+fun\\s+delete\\s*\\(\\s*task\\s*:\\s*Task\\s*\\)",
+        "message": "Удаление: @Delete suspend fun delete(task: Task)"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() = kotlinx.coroutines.runBlocking {\n    val table = kotlinx.coroutines.flow.MutableStateFlow(emptyList<Task>())\n    val dao = object : TaskDao {\n        override fun observeAll(): Flow<List<Task>> = table\n        override suspend fun insert(task: Task) { table.value = table.value.filter { it.id != task.id } + task }\n        override suspend fun delete(task: Task) { table.value = table.value - task }\n    }\n    dao.insert(Task(1, \"хлеб\"))\n    dao.insert(Task(2, \"сыр\"))\n    dao.delete(Task(1, \"хлеб\"))\n    println(table.value)\n}",
+      "expected_stdout": "[Task(id=2, title=сыр, done=false)]"
+    }
+  },
+  "solution": "import androidx.room.Dao\nimport androidx.room.Delete\nimport androidx.room.Insert\nimport androidx.room.OnConflictStrategy\nimport androidx.room.Query\nimport kotlinx.coroutines.flow.Flow\n\ndata class Task(val id: Int = 0, val title: String, val done: Boolean = false)\n\n@Dao\ninterface TaskDao {\n    @Query(\"SELECT * FROM tasks ORDER BY id\")\n    fun observeAll(): Flow<List<Task>>\n\n    @Insert(onConflict = OnConflictStrategy.REPLACE)\n    suspend fun insert(task: Task)\n\n    @Delete\n    suspend fun delete(task: Task)\n}\n",
+  "explanation": "@Query описывает чтение (в виде Flow, чтобы экран обновлялся), @Insert и @Delete — запись; их объявляют suspend, чтобы вызывать из корутин, а не из главного потока.",
+  "criteria": [
+    "@Dao interface TaskDao.",
+    "Запрос с Flow.",
+    "Insert с REPLACE и Delete."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import androidx.room.Dao\nimport androidx.room.Delete\nimport androidx.room.Insert\nimport androidx.room.OnConflictStrategy\nimport androidx.room.Query\nimport kotlinx.coroutines.flow.Flow\n\ndata class Task(val id: Int = 0, val title: String, val done: Boolean = false)\n\n@Dao\ninterface TaskDao {\n    @Query(\"SELECT * FROM tasks ORDER BY id\")\n    fun observeAll(): Flow<List<Task>>\n\n    @Insert\n    suspend fun insert(task: Task)\n\n    @Delete\n    suspend fun delete(task: Task)\n}\n",
+      "why": "У @Insert не задана стратегия конфликта: нужна REPLACE."
+    },
+    {
+      "code": "import androidx.room.Dao\nimport androidx.room.Delete\nimport androidx.room.Insert\nimport androidx.room.OnConflictStrategy\nimport androidx.room.Query\nimport kotlinx.coroutines.flow.Flow\n\ndata class Task(val id: Int = 0, val title: String, val done: Boolean = false)\n\n@Dao\ninterface TaskDao {\n    @Query(\"SELECT * FROM tasks ORDER BY id\")\n    fun observeAll(): List<Task>\n\n    @Insert(onConflict = OnConflictStrategy.REPLACE)\n    suspend fun insert(task: Task)\n\n    @Delete\n    suspend fun delete(task: Task)\n}\n",
+      "why": "Чтение должно возвращать Flow<List<Task>>."
+    },
+    {
+      "code": "import androidx.room.Dao\nimport androidx.room.Delete\nimport androidx.room.Insert\nimport androidx.room.OnConflictStrategy\nimport androidx.room.Query\nimport kotlinx.coroutines.flow.Flow\n\ndata class Task(val id: Int = 0, val title: String, val done: Boolean = false)\n\ninterface TaskDao {\n    @Query(\"SELECT * FROM tasks ORDER BY id\")\n    fun observeAll(): Flow<List<Task>>\n\n    @Insert(onConflict = OnConflictStrategy.REPLACE)\n    suspend fun insert(task: Task)\n\n    @Delete\n    suspend fun delete(task: Task)\n}\n",
+      "why": "Нет аннотации @Dao над интерфейсом."
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "id": "a1-hash",
+  "type": "write",
+  "title": "Хеш пароля",
+  "statement": "Напишите функцию `hash_password(password: str, salt: str) -> str`: хеш **PBKDF2-HMAC-SHA256** (`hashlib.pbkdf2_hmac`) от пароля с данной солью, **1000** повторений, результат — строка в шестнадцатеричном виде (`.hex()`). Пароль и соль нужно перевести в байты методом `encode()`.",
+  "goal": "Хешировать пароль с солью медленной функцией.",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "import hashlib\n\n# Напишите функцию hash_password(password, salt)\n",
+  "hints": [
+    "Нужна готовая функция из hashlib: pbkdf2_hmac.",
+    "Её аргументы: имя алгоритма, пароль в байтах, соль в байтах, число повторений.",
+    "Строку переводят в байты методом encode().",
+    "Результат — байты; в строку из шестнадцатеричных цифр их превращает метод hex().",
+    "return hashlib.pbkdf2_hmac(\"sha256\", password.encode(), salt.encode(), 1000).hex()"
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "hash_password",
+    "cases": [
+      {
+        "args": [
+          "qwerty",
+          "s1"
+        ],
+        "id": "v1",
+        "expected": "76a8b3cb167f3ca61b6ef66c33596041e3e5ba4beba0facec1a03f82d63a6535"
+      },
+      {
+        "args": [
+          "qwerty",
+          "s2"
+        ],
+        "id": "v2",
+        "expected": "14e46c2033e8d70a23472f4893b52d940fdeb6ff3de0c5b36e1c4a7c46da60f4"
+      },
+      {
+        "args": [
+          "Qwerty",
+          "s1"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "b2584c27f0eb19b6b564a66dad19025ed97a5b35ab74ba4b62115b9be6782bfa"
+      },
+      {
+        "args": [
+          "пароль",
+          "соль"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "0746286eb900e3c447fee13b65c735667682e19125526e7931d14e92c775428b"
+      },
+      {
+        "args": [
+          "",
+          "x"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": "f51cfcf687851827d5c8e0d4865f147b7a71f512a7f8bd50ada82fe5a3214c8f"
+      }
+    ]
+  },
+  "solution": "import hashlib\n\n\ndef hash_password(password: str, salt: str) -> str:\n    return hashlib.pbkdf2_hmac(\"sha256\", password.encode(), salt.encode(), 1000).hex()\n",
+  "explanation": "PBKDF2 повторяет HMAC-SHA256 много раз, поэтому подбор паролей замедляется; соль делает хеши разными у разных пользователей. hex() превращает байты в строку.",
+  "criteria": [
+    "Используется pbkdf2_hmac.",
+    "1000 повторений.",
+    "Соль участвует в хеше.",
+    "Результат — строка hex."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import hashlib\n\n\ndef hash_password(password: str, salt: str) -> str:\n    return hashlib.sha256((salt + password).encode()).hexdigest()\n",
+      "why": "Одиночный быстрый хеш: пароли перебираются слишком быстро — нужна медленная функция PBKDF2."
+    },
+    {
+      "code": "import hashlib\n\n\ndef hash_password(password: str, salt: str) -> str:\n    return hashlib.pbkdf2_hmac(\"sha256\", password.encode(), salt.encode(), 1).hex()\n",
+      "why": "Одно повторение: функция почти не замедляет подбор. Нужно 1000."
+    },
+    {
+      "code": "import hashlib\n\n\ndef hash_password(password: str, salt: str) -> str:\n    return hashlib.pbkdf2_hmac(\"sha256\", password.encode(), b\"fixed\", 1000).hex()\n",
+      "why": "Соль игнорируется: одинаковые пароли получают одинаковые хеши у всех пользователей."
+    },
+    {
+      "code": "import hashlib\n\n\ndef hash_password(password: str, salt: str) -> str:\n    return hashlib.pbkdf2_hmac(\"sha256\", password.encode(), salt.encode(), 1000)\n",
+      "why": "Возвращаются байты, а нужна строка: добавьте .hex()."
+    }
+  ]
+}

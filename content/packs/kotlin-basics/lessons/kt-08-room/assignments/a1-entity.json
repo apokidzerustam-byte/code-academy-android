@@ -1,0 +1,84 @@
+{
+  "id": "a1-entity",
+  "type": "write",
+  "title": "Таблица задач",
+  "statement": "Опишите сущность Room: `data class Task` с аннотацией `@Entity(tableName = \"tasks\")`. Поля: `id: Int` (первичный ключ с автогенерацией, значение по умолчанию 0), `title: String` и `done: Boolean` (по умолчанию `false`). Все поля — `val`.",
+  "goal": "Описать таблицу Room классом.",
+  "input": "—",
+  "expectedResult": "Task(title = «хлеб») → Task(id=0, title=хлеб, done=false).",
+  "constraints": [
+    "Импорты Entity и PrimaryKey уже в шаблоне."
+  ],
+  "starterCode": "import androidx.room.Entity\nimport androidx.room.PrimaryKey\n\n// Опишите сущность Task\n",
+  "hints": [
+    "Каждая строка таблицы — объект класса, каждый столбец — поле.",
+    "Класс данных помечается аннотацией @Entity; имя таблицы задаёт tableName.",
+    "У первичного ключа аннотация @PrimaryKey; параметр autoGenerate = true просит базу выдавать номера.",
+    "Поле id имеет тип Int и значение по умолчанию 0, чтобы при вставке не указывать номер.",
+    "Поля title и done: String и Boolean (по умолчанию false). Всё в круглых скобках после имени класса, через запятую."
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "cls",
+        "type": "class",
+        "name": "Task"
+      },
+      {
+        "id": "ent",
+        "raw": true,
+        "type": "contains",
+        "pattern": "@Entity\\s*\\(\\s*tableName\\s*=\\s*\"tasks\"\\s*\\)\\s*data\\s+class\\s+Task\\b",
+        "message": "Над классом: @Entity(tableName = \"tasks\"), класс — data class Task"
+      },
+      {
+        "id": "pk",
+        "type": "contains",
+        "pattern": "@PrimaryKey\\s*\\(\\s*autoGenerate\\s*=\\s*true\\s*\\)\\s*val\\s+id\\s*:\\s*Int\\s*=\\s*0",
+        "message": "Ключ: @PrimaryKey(autoGenerate = true) val id: Int = 0"
+      },
+      {
+        "id": "title",
+        "type": "contains",
+        "pattern": "\\bval\\s+title\\s*:\\s*String\\b",
+        "message": "Нужно поле val title: String"
+      },
+      {
+        "id": "done",
+        "type": "contains",
+        "pattern": "\\bval\\s+done\\s*:\\s*Boolean\\s*=\\s*false\\b",
+        "message": "Нужно поле val done: Boolean = false"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    println(Task(title = \"хлеб\"))\n    println(Task(7, \"сыр\", true))\n}",
+      "expected_stdout": "Task(id=0, title=хлеб, done=false)\nTask(id=7, title=сыр, done=true)"
+    }
+  },
+  "solution": "import androidx.room.Entity\nimport androidx.room.PrimaryKey\n\n@Entity(tableName = \"tasks\")\ndata class Task(\n    @PrimaryKey(autoGenerate = true) val id: Int = 0,\n    val title: String,\n    val done: Boolean = false\n)\n",
+  "explanation": "Entity превращает класс в таблицу tasks. PrimaryKey с autoGenerate позволяет базе выдавать номера, а значения по умолчанию удобны при создании новых задач.",
+  "criteria": [
+    "@Entity с tableName.",
+    "Ключ с autoGenerate.",
+    "Поля title и done."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import androidx.room.Entity\nimport androidx.room.PrimaryKey\n\n@Entity(tableName = \"tasks\")\ndata class Task(\n    val id: Int = 0,\n    val title: String,\n    val done: Boolean = false\n)\n",
+      "why": "Нет @PrimaryKey: у таблицы не будет ключа."
+    },
+    {
+      "code": "import androidx.room.Entity\nimport androidx.room.PrimaryKey\n\ndata class Task(\n    @PrimaryKey(autoGenerate = true) val id: Int = 0,\n    val title: String,\n    val done: Boolean = false\n)\n",
+      "why": "Нет @Entity: класс не станет таблицей."
+    },
+    {
+      "code": "import androidx.room.Entity\nimport androidx.room.PrimaryKey\n\n@Entity(tableName = \"tasks\")\ndata class Task(\n    @PrimaryKey(autoGenerate = true) val id: Int = 0,\n    val title: String\n)\n",
+      "why": "Нет поля done."
+    }
+  ]
+}

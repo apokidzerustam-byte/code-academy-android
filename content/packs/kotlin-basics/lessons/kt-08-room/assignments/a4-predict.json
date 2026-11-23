@@ -1,0 +1,44 @@
+{
+  "id": "a4-predict",
+  "type": "predict",
+  "title": "Конфликт ключей",
+  "statement": "Таблица моделируется словарём: ключ — `id`. `insertReplace` работает как `OnConflictStrategy.REPLACE`, а `insertIgnore` — как `IGNORE` (строка с занятым ключом не добавляется). Что выведет программа?",
+  "goal": "Понять стратегии конфликта при вставке.",
+  "input": "—",
+  "expectedResult": "Две строки.",
+  "constraints": [],
+  "code": "data class Task(val id: Int, val title: String)\n\nfun main() {\n    val table = mutableMapOf<Int, Task>()\n    fun insertReplace(t: Task) { table[t.id] = t }\n    fun insertIgnore(t: Task) { table.putIfAbsent(t.id, t) }\n    insertReplace(Task(1, \"хлеб\"))\n    insertReplace(Task(1, \"сыр\"))\n    insertIgnore(Task(1, \"мёд\"))\n    insertIgnore(Task(2, \"чай\"))\n    println(table.values.map { it.title })\n    println(table.size)\n}\n",
+  "hints": [
+    "Ключ в словаре — id: две вставки с одним id дают одну строку.",
+    "insertReplace записывает значение по ключу, прежнее исчезает.",
+    "После двух insertReplace для ключа 1 лежит «сыр».",
+    "insertIgnore не меняет занятый ключ, но добавляет свободный.",
+    "Первая строка — названия по порядку вставки ключей, вторая — число строк."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "[сыр, чай]\n2"
+  },
+  "solution": "[сыр, чай]\n2",
+  "explanation": "Для ключа 1 вторая замена оставляет «сыр»; insertIgnore с ключом 1 ничего не меняет, а с ключом 2 добавляет «чай». Итого два элемента: [сыр, чай].",
+  "criteria": [
+    "Обе строки верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "[хлеб, сыр, мёд, чай]\n4",
+      "answer": "[хлеб, сыр, мёд, чай]\n4",
+      "why": "Ключ 1 один: строки с тем же id заменяют друг друга или игнорируются."
+    },
+    {
+      "code": "[хлеб, чай]\n2",
+      "answer": "[хлеб, чай]\n2",
+      "why": "REPLACE заменяет прежнюю строку: для ключа 1 остаётся «сыр»."
+    },
+    {
+      "code": "[сыр, мёд, чай]\n3",
+      "answer": "[сыр, мёд, чай]\n3",
+      "why": "IGNORE не добавляет строку, если ключ занят."
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "id": "a3-await",
+  "type": "fix",
+  "title": "Слой без await",
+  "statement": "Сервер падает на любом запросе: middleware считает запросы, но не получает ответ обработчика как нужно. Исправьте слой, чтобы `/ping` отвечал, а `/stats` показывал число запросов, включая собственный.",
+  "goal": "Находить пропущенный await.",
+  "input": "—",
+  "expectedResult": "После двух /ping и одного /stats: {\"requests\": 3}.",
+  "constraints": [
+    "Счёт увеличивается до вызова обработчика — так и оставьте."
+  ],
+  "starterCode": "from fastapi import FastAPI, Request\n\napp = FastAPI()\nCOUNT = {\"requests\": 0}\n\n\n@app.middleware(\"http\")\nasync def count_requests(request: Request, call_next):\n    COUNT[\"requests\"] += 1\n    response = call_next(request)\n    return response\n\n\n@app.get(\"/ping\")\ndef ping():\n    return {\"pong\": True}\n\n\n@app.get(\"/stats\")\ndef stats():\n    return COUNT\n",
+  "hints": [
+    "Исключение говорит об объекте coroutine: функция вернула не ответ.",
+    "call_next — асинхронная функция.",
+    "Результат асинхронного вызова нужно дождаться.",
+    "Перед вызовом поставьте await.",
+    "response = await call_next(request)."
+  ],
+  "tests": {
+    "kind": "fastapi",
+    "cases": [
+      {
+        "id": "v1",
+        "path": "/ping",
+        "expected_json": {
+          "pong": true
+        },
+        "hint": "Слой должен вернуть ответ обработчика, а не незавершённую задачу"
+      },
+      {
+        "id": "v2",
+        "path": "/ping",
+        "expected_json": {
+          "pong": true
+        }
+      },
+      {
+        "id": "h1",
+        "hidden": true,
+        "path": "/stats",
+        "expected_json": {
+          "requests": 3
+        },
+        "hint": "Счётчик увеличивается до обработчика: /stats видит и свой запрос"
+      }
+    ]
+  },
+  "solution": "from fastapi import FastAPI, Request\n\napp = FastAPI()\nCOUNT = {\"requests\": 0}\n\n\n@app.middleware(\"http\")\nasync def count_requests(request: Request, call_next):\n    COUNT[\"requests\"] += 1\n    response = await call_next(request)\n    return response\n\n\n@app.get(\"/ping\")\ndef ping():\n    return {\"pong\": True}\n\n\n@app.get(\"/stats\")\ndef stats():\n    return COUNT\n",
+  "explanation": "call_next асинхронная: без await в response лежит незавершённая задача, а не ответ. После await слой получает настоящий ответ.",
+  "criteria": [
+    "Перед call_next стоит await.",
+    "Счётчик считает запросы."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from fastapi import FastAPI, Request\n\napp = FastAPI()\nCOUNT = {\"requests\": 0}\n\n\n@app.middleware(\"http\")\nasync def count_requests(request: Request, call_next):\n    COUNT[\"requests\"] += 1\n    response = call_next(request)\n    return response\n\n\n@app.get(\"/ping\")\ndef ping():\n    return {\"pong\": True}\n\n\n@app.get(\"/stats\")\ndef stats():\n    return COUNT\n",
+      "why": "Ошибка осталась: нет await."
+    },
+    {
+      "code": "from fastapi import FastAPI, Request\n\napp = FastAPI()\nCOUNT = {\"requests\": 0}\n\n\n@app.middleware(\"http\")\nasync def count_requests(request: Request, call_next):\n    response = await call_next(request)\n    COUNT[\"requests\"] += 1\n    return response\n\n\n@app.get(\"/ping\")\ndef ping():\n    return {\"pong\": True}\n\n\n@app.get(\"/stats\")\ndef stats():\n    return COUNT\n",
+      "why": "Счёт увеличивается после обработчика: /stats не видит собственный запрос."
+    },
+    {
+      "code": "from fastapi import FastAPI, Request\n\napp = FastAPI()\nCOUNT = {\"requests\": 0}\n\n\n@app.middleware(\"http\")\nasync def count_requests(request: Request, call_next):\n    COUNT[\"requests\"] += 1\n    response = await call_next(request)\n\n\n@app.get(\"/ping\")\ndef ping():\n    return {\"pong\": True}\n\n\n@app.get(\"/stats\")\ndef stats():\n    return COUNT\n",
+      "why": "Слой не возвращает response."
+    }
+  ]
+}

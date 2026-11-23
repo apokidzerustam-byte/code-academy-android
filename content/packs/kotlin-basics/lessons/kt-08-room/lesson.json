@@ -1,0 +1,44 @@
+{
+  "id": "kt-08-room",
+  "title": "Kotlin: Room — локальная база данных",
+  "goal": "Описывать таблицы классами Entity, писать Dao с запросами и понимать роль Database, версии схемы и миграций.",
+  "skills": [
+    "kt.room.entity",
+    "kt.room.dao",
+    "kt.room.db"
+  ],
+  "prerequisites": [
+    "kt-07-viewmodel"
+  ],
+  "runner": "kotlin",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-entity.json",
+    "assignments/a2-dao.json",
+    "assignments/a3-bind.json",
+    "assignments/a4-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Нет @PrimaryKey",
+      "fix": "У каждой сущности должен быть первичный ключ."
+    },
+    {
+      "mistake": "Запись без suspend из главного потока",
+      "fix": "Объявляйте функции записи suspend и вызывайте из корутины; чтение отдавайте Flow."
+    },
+    {
+      "mistake": "Имя параметра в SQL не совпадает с параметром функции",
+      "fix": "Ссылка :имя должна совпадать с именем параметра функции."
+    },
+    {
+      "mistake": "Изменили сущность без миграции",
+      "fix": "Увеличьте версию базы и опишите миграцию."
+    }
+  ]
+}

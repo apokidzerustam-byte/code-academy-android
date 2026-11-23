@@ -1,0 +1,41 @@
+{
+  "id": "a5-predict",
+  "type": "predict",
+  "title": "Проверка токена",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Предсказать проверку подписи и срока.",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "import base64\nimport hashlib\nimport hmac\nimport json\n\n\ndef b64(data: bytes) -> str:\n    return base64.urlsafe_b64encode(data).rstrip(b\"=\").decode()\n\n\ndef unb64(text: str) -> bytes:\n    return base64.urlsafe_b64decode(text + \"=\" * (-len(text) % 4))\n\n\ndef sign(text: str, secret: str) -> str:\n    return b64(hmac.new(secret.encode(), text.encode(), hashlib.sha256).digest())\n\n\ndef make_token(payload: dict, secret: str) -> str:\n    header = b64(json.dumps({\"alg\": \"HS256\", \"typ\": \"JWT\"}, separators=(\",\", \":\")).encode())\n    body = b64(json.dumps(payload, separators=(\",\", \":\")).encode())\n    return header + \".\" + body + \".\" + sign(header + \".\" + body, secret)\n\n\ndef read_token(token: str, secret: str, now: int):\n    parts = token.split(\".\")\n    if len(parts) != 3:\n        return None\n    if not hmac.compare_digest(parts[2].encode(), sign(parts[0] + \".\" + parts[1], secret).encode()):\n        return None\n    payload = json.loads(unb64(parts[1]))\n    if payload.get(\"exp\", 0) < now:\n        return None\n    return payload\n\n\nSECRET = \"k1\"\nt = make_token({\"sub\": \"a\", \"exp\": 10}, SECRET)\nprint(read_token(t, SECRET, 10) is not None)\nprint(read_token(t, SECRET, 11) is not None)\nparts = t.split(\".\")\nforged = parts[0] + \".\" + b64(b'{\"sub\":\"b\",\"exp\":10}') + \".\" + parts[2]\nprint(read_token(forged, SECRET, 5))\nprint(hmac.compare_digest(b\"abc\", b\"abc\"))\n",
+  "hints": [
+    "Начните с чтения сроков: токен просрочен, если exp меньше now.",
+    "При now = 10 и exp = 10 условие exp < now ложно: токен ещё действует.",
+    "При now = 11: 10 < 11, токен просрочен — read_token вернёт None, а выражение is not None даст False.",
+    "У подделанного токена подпись от другого содержимого.",
+    "Подпись не сойдётся: read_token вернёт None. Последняя строка — равные байты: True."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "True\nFalse\nNone\nTrue\n"
+  },
+  "solution": "True\nFalse\nNone\nTrue\n",
+  "explanation": "exp = 10 действует при now = 10 и просрочен при now = 11. У подделанного токена подмена содержимого ломает подпись, поэтому результат None.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "True\nTrue\nNone\nTrue",
+      "answer": "True\nTrue\nNone\nTrue",
+      "why": "Срок: условие exp < now; при now = 11 токен с exp = 10 уже просрочен."
+    },
+    {
+      "code": "True\nFalse\n{'sub': 'b', 'exp': 10}\nTrue",
+      "answer": "True\nFalse\n{'sub': 'b', 'exp': 10}\nTrue",
+      "why": "Подпись остаётся старой, а содержимое подменено: подпись не сойдётся и read_token вернёт None."
+    }
+  ]
+}

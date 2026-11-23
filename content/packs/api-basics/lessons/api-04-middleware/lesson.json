@@ -1,0 +1,44 @@
+{
+  "id": "api-04-middleware",
+  "title": "FastAPI: middleware и журнал",
+  "goal": "Писать middleware: журнал запросов и проверка ключа, понимать порядок слоёв и не писать секреты в журнал.",
+  "skills": [
+    "api.middleware",
+    "api.logging",
+    "api.apikey"
+  ],
+  "prerequisites": [
+    "api-03-validation"
+  ],
+  "runner": "A",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-log.json",
+    "assignments/a2-key.json",
+    "assignments/a3-await.json",
+    "assignments/a4-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Нет await перед call_next",
+      "fix": "call_next асинхронная: response = await call_next(request)."
+    },
+    {
+      "mistake": "Слой не возвращает response",
+      "fix": "Всегда возвращайте ответ: return response."
+    },
+    {
+      "mistake": "Проверка доступа после call_next",
+      "fix": "Проверяйте до call_next: иначе обработчик уже выполнится."
+    },
+    {
+      "mistake": "Секреты в журнале",
+      "fix": "Не пишите пароли, токены и ключи; пишите номер пользователя."
+    }
+  ]
+}

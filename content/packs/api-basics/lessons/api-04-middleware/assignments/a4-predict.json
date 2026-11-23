@@ -1,0 +1,39 @@
+{
+  "id": "a4-predict",
+  "type": "predict",
+  "title": "Порядок слоёв",
+  "statement": "Два слоя записывают в список `ORDER` до и после обработчика. Что напечатает программа? Запишите вывод одной строкой.",
+  "goal": "Понимать вложенность слоёв.",
+  "input": "—",
+  "expectedResult": "Одна строка со списком.",
+  "constraints": [],
+  "code": "from fastapi import FastAPI, Request\nfrom fastapi.testclient import TestClient\n\napp = FastAPI()\nORDER = []\n\n\n@app.middleware(\"http\")\nasync def first(request: Request, call_next):\n    ORDER.append(\"first-in\")\n    response = await call_next(request)\n    ORDER.append(\"first-out\")\n    return response\n\n\n@app.middleware(\"http\")\nasync def second(request: Request, call_next):\n    ORDER.append(\"second-in\")\n    response = await call_next(request)\n    ORDER.append(\"second-out\")\n    return response\n\n\n@app.get(\"/\")\ndef root():\n    ORDER.append(\"handler\")\n    return {}\n\n\nclient = TestClient(app)\nclient.get(\"/\")\nprint(ORDER)\n",
+  "hints": [
+    "Слои вкладываются как матрёшка.",
+    "Слой, объявленный последним, самый внешний.",
+    "Сначала срабатывает самый внешний слой, потом более внутренний, потом обработчик.",
+    "На обратном пути порядок обратный: сначала внутренний, потом внешний.",
+    "Внешний — second, внутренний — first."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "['second-in', 'first-in', 'handler', 'first-out', 'second-out']"
+  },
+  "solution": "['second-in', 'first-in', 'handler', 'first-out', 'second-out']",
+  "explanation": "Последний объявленный слой second самый внешний: second-in, first-in, handler, затем на обратном пути first-out и second-out.",
+  "criteria": [
+    "Порядок верный."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "['first-in', 'second-in', 'handler', 'second-out', 'first-out']",
+      "answer": "['first-in', 'second-in', 'handler', 'second-out', 'first-out']",
+      "why": "Последний объявленный слой — самый внешний, поэтому первым срабатывает second."
+    },
+    {
+      "code": "['second-in', 'first-in', 'handler', 'second-out', 'first-out']",
+      "answer": "['second-in', 'first-in', 'handler', 'second-out', 'first-out']",
+      "why": "На обратном пути сначала выходит внутренний слой first."
+    }
+  ]
+}

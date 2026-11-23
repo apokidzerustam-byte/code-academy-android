@@ -1,0 +1,45 @@
+{
+  "id": "api-05-auth",
+  "title": "FastAPI: пароли, токены и защита маршрутов",
+  "goal": "Хранить пароли хешем с солью, выпускать и проверять подписанный токен и защищать маршруты зависимостью, различая 401 и 403.",
+  "skills": [
+    "api.password",
+    "api.token",
+    "api.auth"
+  ],
+  "prerequisites": [
+    "api-04-middleware"
+  ],
+  "runner": "A",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-hash.json",
+    "assignments/a2-token.json",
+    "assignments/a3-depends.json",
+    "assignments/a4-forged.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Пароль открытым текстом или быстрый хеш без соли",
+      "fix": "Хешируйте медленной функцией (PBKDF2, argon2, bcrypt) с солью."
+    },
+    {
+      "mistake": "Токен прочитан без проверки подписи",
+      "fix": "Содержимое токена доверенно только после проверки подписи и срока: используйте read_token."
+    },
+    {
+      "mistake": "Не проверен срок exp",
+      "fix": "Сравнивайте exp с текущим временем: украденный токен не должен жить вечно."
+    },
+    {
+      "mistake": "401 и 403 перепутаны",
+      "fix": "401 — токена нет или он плохой; 403 — токен хороший, но прав недостаточно."
+    }
+  ]
+}

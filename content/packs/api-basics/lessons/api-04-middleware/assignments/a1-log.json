@@ -1,0 +1,77 @@
+{
+  "id": "a1-log",
+  "type": "write",
+  "title": "Журнал запросов",
+  "statement": "Напишите middleware: после каждого ответа добавляйте в список `LOG` строку вида `GET /hello -> 200` (метод, путь, код ответа). Маршруты `/hello` и `/log` уже есть. Слой должен вернуть ответ обработчика без изменений.",
+  "goal": "Написать middleware с call_next.",
+  "input": "Запросы к /hello, /missing, /log.",
+  "expectedResult": "LOG с записями по порядку запросов.",
+  "constraints": [
+    "Используйте @app.middleware(\"http\")."
+  ],
+  "starterCode": "from fastapi import FastAPI, Request\n\napp = FastAPI()\nLOG = []\n\n\n# Здесь напишите middleware\n\n\n@app.get(\"/hello\")\ndef hello():\n    return {\"msg\": \"привет\"}\n\n\n@app.get(\"/log\")\ndef show_log():\n    return LOG\n",
+  "hints": [
+    "Слой объявляется декоратором @app.middleware(\"http\") над async-функцией.",
+    "Функция получает request и call_next.",
+    "Ответ получают так: response = await call_next(request).",
+    "Строку для журнала собирайте после получения ответа: нужен response.status_code.",
+    "В конце верните response; запись: LOG.append(f\"{request.method} {request.url.path} -> {response.status_code}\")."
+  ],
+  "tests": {
+    "kind": "fastapi",
+    "cases": [
+      {
+        "id": "v1",
+        "path": "/hello",
+        "expected_json": {
+          "msg": "привет"
+        }
+      },
+      {
+        "id": "v2",
+        "path": "/missing",
+        "expected_status": 404
+      },
+      {
+        "id": "v3",
+        "path": "/log",
+        "expected_json": [
+          "GET /hello -> 200",
+          "GET /missing -> 404"
+        ],
+        "hint": "Запись делают после ответа: в ней метод, путь и код ответа"
+      },
+      {
+        "id": "h1",
+        "hidden": true,
+        "path": "/log",
+        "expected_json": [
+          "GET /hello -> 200",
+          "GET /missing -> 404",
+          "GET /log -> 200"
+        ]
+      }
+    ]
+  },
+  "solution": "from fastapi import FastAPI, Request\n\napp = FastAPI()\nLOG = []\n\n\n@app.middleware(\"http\")\nasync def log_requests(request: Request, call_next):\n    response = await call_next(request)\n    LOG.append(f\"{request.method} {request.url.path} -> {response.status_code}\")\n    return response\n\n\n@app.get(\"/hello\")\ndef hello():\n    return {\"msg\": \"привет\"}\n\n\n@app.get(\"/log\")\ndef show_log():\n    return LOG\n",
+  "explanation": "call_next вызывает обработчик и возвращает ответ; после этого код слоя знает код ответа и может записать его в журнал.",
+  "criteria": [
+    "Есть слой с @app.middleware.",
+    "Запись после ответа.",
+    "Ответ возвращается."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from fastapi import FastAPI, Request\n\napp = FastAPI()\nLOG = []\n\n\n@app.middleware(\"http\")\nasync def log_requests(request: Request, call_next):\n    LOG.append(f\"{request.method} {request.url.path}\")\n    return await call_next(request)\n\n\n@app.get(\"/hello\")\ndef hello():\n    return {\"msg\": \"привет\"}\n\n\n@app.get(\"/log\")\ndef show_log():\n    return LOG\n",
+      "why": "В записи нет кода ответа: он известен только после call_next."
+    },
+    {
+      "code": "from fastapi import FastAPI, Request\n\napp = FastAPI()\nLOG = []\n\n\n@app.middleware(\"http\")\nasync def log_requests(request: Request, call_next):\n    response = await call_next(request)\n    LOG.append(f\"{request.method} {request.url.path} -> 200\")\n    return response\n\n\n@app.get(\"/hello\")\ndef hello():\n    return {\"msg\": \"привет\"}\n\n\n@app.get(\"/log\")\ndef show_log():\n    return LOG\n",
+      "why": "Код ответа записан числом 200 вместо response.status_code."
+    },
+    {
+      "code": "from fastapi import FastAPI, Request\n\napp = FastAPI()\nLOG = []\n\n\n@app.middleware(\"http\")\nasync def log_requests(request: Request, call_next):\n    response = await call_next(request)\n    LOG.append(f\"{request.method} {request.url.path} -> {response.status_code}\")\n\n\n@app.get(\"/hello\")\ndef hello():\n    return {\"msg\": \"привет\"}\n\n\n@app.get(\"/log\")\ndef show_log():\n    return LOG\n",
+      "why": "Слой не вернул response: клиент не получит ответ."
+    }
+  ]
+}

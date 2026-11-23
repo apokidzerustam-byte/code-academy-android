@@ -1,0 +1,115 @@
+{
+  "id": "a4-forged",
+  "type": "fix",
+  "title": "Подделанный токен",
+  "statement": "Любой может выпустить себе токен администратора: зависимость `current_user` **читает** содержимое токена, но не проверяет подпись и срок. Исправьте её: проверяйте токен функцией `read_token(token, SECRET, int(time.time()))`; если она вернула `None` — **401** и `{\"detail\": \"Неверный токен\"}`.",
+  "goal": "Не доверять непроверенному токену.",
+  "input": "Токены: верный, поддельный, с подменённым содержимым, просроченный.",
+  "expectedResult": "401 для всего, кроме верного токена.",
+  "constraints": [
+    "Сообщения об ошибках не меняйте."
+  ],
+  "starterCode": "import base64\nimport hashlib\nimport hmac\nimport json\nimport time\n\nfrom fastapi import Depends, FastAPI, Header, HTTPException\n\nSECRET = \"lesson-secret\"\n\n\ndef b64(data: bytes) -> str:\n    return base64.urlsafe_b64encode(data).rstrip(b\"=\").decode()\n\n\ndef unb64(text: str) -> bytes:\n    return base64.urlsafe_b64decode(text + \"=\" * (-len(text) % 4))\n\n\ndef sign(text: str, secret: str) -> str:\n    return b64(hmac.new(secret.encode(), text.encode(), hashlib.sha256).digest())\n\n\ndef make_token(payload: dict, secret: str) -> str:\n    header = b64(json.dumps({\"alg\": \"HS256\", \"typ\": \"JWT\"}, separators=(\",\", \":\")).encode())\n    body = b64(json.dumps(payload, separators=(\",\", \":\")).encode())\n    return header + \".\" + body + \".\" + sign(header + \".\" + body, secret)\n\n\ndef read_token(token: str, secret: str, now: int):\n    parts = token.split(\".\")\n    if len(parts) != 3:\n        return None\n    if not hmac.compare_digest(parts[2].encode(), sign(parts[0] + \".\" + parts[1], secret).encode()):\n        return None\n    payload = json.loads(unb64(parts[1]))\n    if payload.get(\"exp\", 0) < now:\n        return None\n    return payload\n\n\napp = FastAPI()\n\n\ndef current_user(authorization: str = Header(None)) -> dict:\n    if not authorization or not authorization.startswith(\"Bearer \"):\n        raise HTTPException(status_code=401, detail=\"Нужен токен\")\n    token = authorization[7:]\n    try:\n        payload = json.loads(unb64(token.split(\".\")[1]))\n    except Exception:\n        raise HTTPException(status_code=401, detail=\"Неверный токен\")\n    return payload\n\n\n@app.get(\"/me\")\ndef me(user: dict = Depends(current_user)):\n    return {\"user\": user[\"sub\"]}\n",
+  "hints": [
+    "Сейчас содержимое читается как есть: любой токен, похожий по форме, принимается.",
+    "Подпись защищает содержимое только тогда, когда её проверяют.",
+    "Проверку подписи и срока уже делает read_token.",
+    "Если read_token вернула None — токен плохой.",
+    "payload = read_token(token, SECRET, int(time.time())); if payload is None: raise HTTPException(401, …)."
+  ],
+  "tests": {
+    "kind": "fastapi",
+    "cases": [
+      {
+        "id": "v1",
+        "path": "/me",
+        "headers": {
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbm5hIiwiZXhwIjo5OTk5OTk5OTk5fQ.9spJA-QpewKB52saG4PlfNfEKRlB01uQToPAMae_E9c"
+        },
+        "expected_json": {
+          "user": "anna"
+        }
+      },
+      {
+        "id": "v2",
+        "path": "/me",
+        "headers": {
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJib3NzIiwiZXhwIjo5OTk5OTk5OTk5fQ.hnqBPNTQbU34AXPo-wKAodLBQAOIcMGb8OeXzY1iGr4"
+        },
+        "expected_status": 401,
+        "expected_json": {
+          "detail": "Неверный токен"
+        },
+        "hint": "Токен подписан чужим ключом, но содержимое читается: подпись не проверяется"
+      },
+      {
+        "id": "h1",
+        "hidden": true,
+        "path": "/me",
+        "headers": {
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJib3NzIiwiZXhwIjo5OTk5OTk5OTk5fQ.9spJA-QpewKB52saG4PlfNfEKRlB01uQToPAMae_E9c"
+        },
+        "expected_status": 401,
+        "expected_json": {
+          "detail": "Неверный токен"
+        },
+        "hint": "Содержимое подменили, а подпись осталась старой"
+      },
+      {
+        "id": "h2",
+        "hidden": true,
+        "path": "/me",
+        "headers": {
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbm5hIiwiZXhwIjoxfQ.KeSM_AlKhJD0YzGLgUOTGD2Z4Wzm5V3uDM4RXj1zlqs"
+        },
+        "expected_status": 401,
+        "expected_json": {
+          "detail": "Неверный токен"
+        },
+        "hint": "Срок действия вышел"
+      },
+      {
+        "id": "h3",
+        "hidden": true,
+        "path": "/me",
+        "headers": {
+          "Authorization": "Bearer abc"
+        },
+        "expected_status": 401,
+        "expected_json": {
+          "detail": "Неверный токен"
+        }
+      },
+      {
+        "id": "h4",
+        "hidden": true,
+        "path": "/me",
+        "expected_status": 401,
+        "expected_json": {
+          "detail": "Нужен токен"
+        }
+      }
+    ]
+  },
+  "solution": "import base64\nimport hashlib\nimport hmac\nimport json\nimport time\n\nfrom fastapi import Depends, FastAPI, Header, HTTPException\n\nSECRET = \"lesson-secret\"\n\n\ndef b64(data: bytes) -> str:\n    return base64.urlsafe_b64encode(data).rstrip(b\"=\").decode()\n\n\ndef unb64(text: str) -> bytes:\n    return base64.urlsafe_b64decode(text + \"=\" * (-len(text) % 4))\n\n\ndef sign(text: str, secret: str) -> str:\n    return b64(hmac.new(secret.encode(), text.encode(), hashlib.sha256).digest())\n\n\ndef make_token(payload: dict, secret: str) -> str:\n    header = b64(json.dumps({\"alg\": \"HS256\", \"typ\": \"JWT\"}, separators=(\",\", \":\")).encode())\n    body = b64(json.dumps(payload, separators=(\",\", \":\")).encode())\n    return header + \".\" + body + \".\" + sign(header + \".\" + body, secret)\n\n\ndef read_token(token: str, secret: str, now: int):\n    parts = token.split(\".\")\n    if len(parts) != 3:\n        return None\n    if not hmac.compare_digest(parts[2].encode(), sign(parts[0] + \".\" + parts[1], secret).encode()):\n        return None\n    payload = json.loads(unb64(parts[1]))\n    if payload.get(\"exp\", 0) < now:\n        return None\n    return payload\n\n\napp = FastAPI()\n\n\ndef current_user(authorization: str = Header(None)) -> dict:\n    if not authorization or not authorization.startswith(\"Bearer \"):\n        raise HTTPException(status_code=401, detail=\"Нужен токен\")\n    payload = read_token(authorization[7:], SECRET, int(time.time()))\n    if payload is None:\n        raise HTTPException(status_code=401, detail=\"Неверный токен\")\n    return payload\n\n\n@app.get(\"/me\")\ndef me(user: dict = Depends(current_user)):\n    return {\"user\": user[\"sub\"]}\n",
+  "explanation": "Содержимое токена читает кто угодно, и поэтому верить ему можно только после проверки подписи и срока. read_token возвращает данные лишь для верного и не просроченного токена.",
+  "criteria": [
+    "Подпись проверяется.",
+    "Срок проверяется.",
+    "Поддельные токены → 401."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import base64\nimport hashlib\nimport hmac\nimport json\nimport time\n\nfrom fastapi import Depends, FastAPI, Header, HTTPException\n\nSECRET = \"lesson-secret\"\n\n\ndef b64(data: bytes) -> str:\n    return base64.urlsafe_b64encode(data).rstrip(b\"=\").decode()\n\n\ndef unb64(text: str) -> bytes:\n    return base64.urlsafe_b64decode(text + \"=\" * (-len(text) % 4))\n\n\ndef sign(text: str, secret: str) -> str:\n    return b64(hmac.new(secret.encode(), text.encode(), hashlib.sha256).digest())\n\n\ndef make_token(payload: dict, secret: str) -> str:\n    header = b64(json.dumps({\"alg\": \"HS256\", \"typ\": \"JWT\"}, separators=(\",\", \":\")).encode())\n    body = b64(json.dumps(payload, separators=(\",\", \":\")).encode())\n    return header + \".\" + body + \".\" + sign(header + \".\" + body, secret)\n\n\ndef read_token(token: str, secret: str, now: int):\n    parts = token.split(\".\")\n    if len(parts) != 3:\n        return None\n    if not hmac.compare_digest(parts[2].encode(), sign(parts[0] + \".\" + parts[1], secret).encode()):\n        return None\n    payload = json.loads(unb64(parts[1]))\n    if payload.get(\"exp\", 0) < now:\n        return None\n    return payload\n\n\napp = FastAPI()\n\n\ndef current_user(authorization: str = Header(None)) -> dict:\n    if not authorization or not authorization.startswith(\"Bearer \"):\n        raise HTTPException(status_code=401, detail=\"Нужен токен\")\n    token = authorization[7:]\n    try:\n        payload = json.loads(unb64(token.split(\".\")[1]))\n    except Exception:\n        raise HTTPException(status_code=401, detail=\"Неверный токен\")\n    return payload\n\n\n@app.get(\"/me\")\ndef me(user: dict = Depends(current_user)):\n    return {\"user\": user[\"sub\"]}\n",
+      "why": "Ошибка осталась: подпись не проверяется."
+    },
+    {
+      "code": "import base64\nimport hashlib\nimport hmac\nimport json\nimport time\n\nfrom fastapi import Depends, FastAPI, Header, HTTPException\n\nSECRET = \"lesson-secret\"\n\n\ndef b64(data: bytes) -> str:\n    return base64.urlsafe_b64encode(data).rstrip(b\"=\").decode()\n\n\ndef unb64(text: str) -> bytes:\n    return base64.urlsafe_b64decode(text + \"=\" * (-len(text) % 4))\n\n\ndef sign(text: str, secret: str) -> str:\n    return b64(hmac.new(secret.encode(), text.encode(), hashlib.sha256).digest())\n\n\ndef make_token(payload: dict, secret: str) -> str:\n    header = b64(json.dumps({\"alg\": \"HS256\", \"typ\": \"JWT\"}, separators=(\",\", \":\")).encode())\n    body = b64(json.dumps(payload, separators=(\",\", \":\")).encode())\n    return header + \".\" + body + \".\" + sign(header + \".\" + body, secret)\n\n\ndef read_token(token: str, secret: str, now: int):\n    parts = token.split(\".\")\n    if len(parts) != 3:\n        return None\n    if not hmac.compare_digest(parts[2].encode(), sign(parts[0] + \".\" + parts[1], secret).encode()):\n        return None\n    payload = json.loads(unb64(parts[1]))\n    if payload.get(\"exp\", 0) < now:\n        return None\n    return payload\n\n\napp = FastAPI()\n\n\ndef current_user(authorization: str = Header(None)) -> dict:\n    if not authorization or not authorization.startswith(\"Bearer \"):\n        raise HTTPException(status_code=401, detail=\"Нужен токен\")\n    payload = read_token(authorization[7:], SECRET, 0)\n    if payload is None:\n        raise HTTPException(status_code=401, detail=\"Неверный токен\")\n    return payload\n\n\n@app.get(\"/me\")\ndef me(user: dict = Depends(current_user)):\n    return {\"user\": user[\"sub\"]}\n",
+      "why": "Подпись проверяется, но срок нет (now = 0): просроченный токен проходит."
+    },
+    {
+      "code": "import base64\nimport hashlib\nimport hmac\nimport json\nimport time\n\nfrom fastapi import Depends, FastAPI, Header, HTTPException\n\nSECRET = \"lesson-secret\"\n\n\ndef b64(data: bytes) -> str:\n    return base64.urlsafe_b64encode(data).rstrip(b\"=\").decode()\n\n\ndef unb64(text: str) -> bytes:\n    return base64.urlsafe_b64decode(text + \"=\" * (-len(text) % 4))\n\n\ndef sign(text: str, secret: str) -> str:\n    return b64(hmac.new(secret.encode(), text.encode(), hashlib.sha256).digest())\n\n\ndef make_token(payload: dict, secret: str) -> str:\n    header = b64(json.dumps({\"alg\": \"HS256\", \"typ\": \"JWT\"}, separators=(\",\", \":\")).encode())\n    body = b64(json.dumps(payload, separators=(\",\", \":\")).encode())\n    return header + \".\" + body + \".\" + sign(header + \".\" + body, secret)\n\n\ndef read_token(token: str, secret: str, now: int):\n    parts = token.split(\".\")\n    if len(parts) != 3:\n        return None\n    if not hmac.compare_digest(parts[2].encode(), sign(parts[0] + \".\" + parts[1], secret).encode()):\n        return None\n    payload = json.loads(unb64(parts[1]))\n    if payload.get(\"exp\", 0) < now:\n        return None\n    return payload\n\n\napp = FastAPI()\n\n\ndef current_user(authorization: str = Header(None)) -> dict:\n    if not authorization or not authorization.startswith(\"Bearer \"):\n        raise HTTPException(status_code=401, detail=\"Нужен токен\")\n    payload = read_token(authorization[7:], SECRET, int(time.time()))\n    if payload is None:\n        raise HTTPException(status_code=403, detail=\"Неверный токен\")\n    return payload\n\n\n@app.get(\"/me\")\ndef me(user: dict = Depends(current_user)):\n    return {\"user\": user[\"sub\"]}\n",
+      "why": "Плохой токен — 401, а не 403."
+    }
+  ]
+}

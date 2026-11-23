@@ -1,0 +1,104 @@
+{
+  "id": "a2-token",
+  "type": "write",
+  "title": "Выпуск токена",
+  "statement": "Функции `b64` (base64url без `=`) и `sign` (подпись HMAC-SHA256) уже написаны. Допишите `make_token(payload: dict, secret: str) -> str`: заголовок — JSON `{\"alg\": \"HS256\", \"typ\": \"JWT\"}`, содержимое — JSON из `payload` (в обоих `json.dumps(..., separators=(\",\", \":\"))`, порядок ключей как в словаре), обе части кодируются через `b64`. Результат — `заголовок.содержимое.подпись`, подпись — `sign(заголовок + \".\" + содержимое, secret)`.",
+  "goal": "Собрать токен формата JWT.",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "import base64\nimport hashlib\nimport hmac\nimport json\n\n\ndef b64(data: bytes) -> str:\n    return base64.urlsafe_b64encode(data).rstrip(b\"=\").decode()\n\n\ndef sign(text: str, secret: str) -> str:\n    return b64(hmac.new(secret.encode(), text.encode(), hashlib.sha256).digest())\n\n\n# Напишите функцию make_token(payload, secret)\n",
+  "hints": [
+    "Токен — три строки через точку: заголовок, содержимое, подпись.",
+    "Заголовок и содержимое — JSON, превращённый в байты и закодированный функцией b64.",
+    "json.dumps(...) возвращает строку, у неё есть метод encode(); аргумент separators=(\",\", \":\") убирает пробелы.",
+    "Подпись считает готовая sign от строки «заголовок.содержимое».",
+    "header = b64(json.dumps({...}, separators=...).encode()); body = b64(json.dumps(payload, separators=...).encode()); return header + \".\" + body + \".\" + sign(header + \".\" + body, secret)"
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "make_token",
+    "cases": [
+      {
+        "args": [
+          {
+            "sub": "1234567890",
+            "name": "John Doe",
+            "iat": 1516239022
+          },
+          "your-256-bit-secret"
+        ],
+        "id": "v1",
+        "expected": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+      },
+      {
+        "args": [
+          {
+            "sub": "anna",
+            "exp": 100
+          },
+          "k"
+        ],
+        "id": "v2",
+        "expected": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbm5hIiwiZXhwIjoxMDB9.pEgUaBL6JAdN7OHsCCEC-NkOyaTfNOnCRAY8L0kGtwU"
+      },
+      {
+        "args": [
+          {
+            "role": "admin",
+            "sub": "boss"
+          },
+          "k2"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJzdWIiOiJib3NzIn0.scrWIpMcfs1GOVq-gHI4yMj4wbDHVhrEPN9skMsyy4w"
+      },
+      {
+        "args": [
+          {
+            "sub": "Аня"
+          },
+          "k"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJcdTA0MTBcdTA0M2RcdTA0NGYifQ.ruCyseWMh10js7xiguy7THnnChG9lNEu_ttDUfOfiu8"
+      },
+      {
+        "args": [
+          {},
+          "k"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.sdq8hlcnGupCQofW8T3WXS8lMHPKjY78f7plDHoTsoI"
+      }
+    ]
+  },
+  "solution": "import base64\nimport hashlib\nimport hmac\nimport json\n\n\ndef b64(data: bytes) -> str:\n    return base64.urlsafe_b64encode(data).rstrip(b\"=\").decode()\n\n\ndef sign(text: str, secret: str) -> str:\n    return b64(hmac.new(secret.encode(), text.encode(), hashlib.sha256).digest())\n\n\ndef make_token(payload: dict, secret: str) -> str:\n    header = b64(json.dumps({\"alg\": \"HS256\", \"typ\": \"JWT\"}, separators=(\",\", \":\")).encode())\n    body = b64(json.dumps(payload, separators=(\",\", \":\")).encode())\n    return header + \".\" + body + \".\" + sign(header + \".\" + body, secret)\n",
+  "explanation": "Токен HS256: base64url от заголовка и содержимого и подпись HMAC-SHA256 от их склейки через точку. Первый тест совпадает с общеизвестным примером jwt.io.",
+  "criteria": [
+    "Заголовок HS256/JWT.",
+    "Содержимое в компактном JSON.",
+    "Подпись от заголовок.содержимое."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import base64\nimport hashlib\nimport hmac\nimport json\n\n\ndef b64(data: bytes) -> str:\n    return base64.urlsafe_b64encode(data).rstrip(b\"=\").decode()\n\n\ndef sign(text: str, secret: str) -> str:\n    return b64(hmac.new(secret.encode(), text.encode(), hashlib.sha256).digest())\n\n\ndef make_token(payload: dict, secret: str) -> str:\n    header = b64(json.dumps({\"alg\": \"HS256\", \"typ\": \"JWT\"}, separators=(\",\", \":\"), sort_keys=True).encode())\n    body = b64(json.dumps(payload, separators=(\",\", \":\"), sort_keys=True).encode())\n    return header + \".\" + body + \".\" + sign(header + \".\" + body, secret)\n",
+      "why": "Ключи отсортированы: порядок должен остаться как в словаре."
+    },
+    {
+      "code": "import base64\nimport hashlib\nimport hmac\nimport json\n\n\ndef b64(data: bytes) -> str:\n    return base64.urlsafe_b64encode(data).rstrip(b\"=\").decode()\n\n\ndef sign(text: str, secret: str) -> str:\n    return b64(hmac.new(secret.encode(), text.encode(), hashlib.sha256).digest())\n\n\ndef make_token(payload: dict, secret: str) -> str:\n    header = b64(json.dumps({\"alg\": \"none\", \"typ\": \"JWT\"}, separators=(\",\", \":\")).encode())\n    body = b64(json.dumps(payload, separators=(\",\", \":\")).encode())\n    return header + \".\" + body + \".\" + sign(header + \".\" + body, secret)\n",
+      "why": "В заголовке должен быть алгоритм HS256."
+    },
+    {
+      "code": "import base64\nimport hashlib\nimport hmac\nimport json\n\n\ndef b64(data: bytes) -> str:\n    return base64.urlsafe_b64encode(data).rstrip(b\"=\").decode()\n\n\ndef sign(text: str, secret: str) -> str:\n    return b64(hmac.new(secret.encode(), text.encode(), hashlib.sha256).digest())\n\n\ndef make_token(payload: dict, secret: str) -> str:\n    header = b64(json.dumps({\"alg\": \"HS256\", \"typ\": \"JWT\"}, separators=(\",\", \":\")).encode())\n    body = b64(json.dumps(payload, separators=(\",\", \":\")).encode())\n    return header + \".\" + body + \".\" + sign(body, secret)\n",
+      "why": "Подписывается только содержимое: нужно «заголовок.содержимое»."
+    },
+    {
+      "code": "import base64\nimport hashlib\nimport hmac\nimport json\n\n\ndef b64(data: bytes) -> str:\n    return base64.urlsafe_b64encode(data).rstrip(b\"=\").decode()\n\n\ndef sign(text: str, secret: str) -> str:\n    return b64(hmac.new(secret.encode(), text.encode(), hashlib.sha256).digest())\n\n\ndef make_token(payload: dict, secret: str) -> str:\n    header = b64(json.dumps({\"alg\": \"HS256\", \"typ\": \"JWT\"}, separators=(\",\", \":\")).encode())\n    body = b64(json.dumps(payload, separators=(\",\", \":\")).encode())\n    return header + \".\" + body + sign(header + \".\" + body, secret)\n",
+      "why": "Между частями токена должны быть точки."
+    }
+  ]
+}

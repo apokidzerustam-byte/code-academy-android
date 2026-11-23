@@ -1,0 +1,75 @@
+{
+  "id": "a3-bind",
+  "type": "fix",
+  "title": "Запрос с параметром",
+  "statement": "Room не соберёт этот Dao: в SQL стоит ссылка `:isDone`, а параметр функции называется `done`. Исправьте запрос так, чтобы имена совпадали. Сигнатуру функции `byDone(done: Boolean): List<Task>` менять не нужно.",
+  "goal": "Передавать параметры в запросы Room.",
+  "input": "—",
+  "expectedResult": "Запрос выбирает задачи по отметке done.",
+  "constraints": [
+    "Не склеивайте SQL из строк."
+  ],
+  "starterCode": "import androidx.room.Dao\nimport androidx.room.Query\n\ndata class Task(val id: Int = 0, val title: String, val done: Boolean = false)\n\n@Dao\ninterface TaskDao {\n    @Query(\"SELECT * FROM tasks WHERE done = :isDone ORDER BY id\")\n    suspend fun byDone(done: Boolean): List<Task>\n}\n",
+  "hints": [
+    "Room связывает параметры запроса с параметрами функции по имени.",
+    "В запросе ссылка на параметр пишется с двоеточием.",
+    "Сейчас в запросе :isDone, а у функции параметр done.",
+    "Имена должны совпадать посимвольно.",
+    "Замените :isDone на :done."
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "contains",
+        "pattern": "suspend\\s+fun\\s+byDone\\s*\\(\\s*done\\s*:\\s*Boolean\\s*\\)\\s*:\\s*List\\s*<\\s*Task\\s*>",
+        "message": "Функция: suspend fun byDone(done: Boolean): List<Task> (имя параметра done)"
+      },
+      {
+        "id": "bind",
+        "raw": true,
+        "type": "contains",
+        "pattern": "WHERE\\s+done\\s*=\\s*:done\\b",
+        "message": "В SQL ссылка на параметр должна называться так же, как параметр функции: :done",
+        "hint": "Room: «Query method parameters should be bound… :isDone is not found»"
+      },
+      {
+        "id": "nonconcat",
+        "hidden": true,
+        "raw": true,
+        "type": "not_contains",
+        "pattern": "\"\\s*\\+|\\+\\s*\"",
+        "message": "Не склеивайте SQL из строк: используйте параметр запроса"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() = kotlinx.coroutines.runBlocking {\n    val all = listOf(Task(1, \"хлеб\", true), Task(2, \"сыр\", false))\n    val dao = object : TaskDao {\n        override suspend fun byDone(done: Boolean): List<Task> = all.filter { it.done == done }\n    }\n    println(dao.byDone(false))\n}",
+      "expected_stdout": "[Task(id=2, title=сыр, done=false)]"
+    }
+  },
+  "solution": "import androidx.room.Dao\nimport androidx.room.Query\n\ndata class Task(val id: Int = 0, val title: String, val done: Boolean = false)\n\n@Dao\ninterface TaskDao {\n    @Query(\"SELECT * FROM tasks WHERE done = :done ORDER BY id\")\n    suspend fun byDone(done: Boolean): List<Task>\n}\n",
+  "explanation": "Двоеточие и имя в SQL связывают значение с параметром функции. Имена должны совпадать, иначе Room выдаст ошибку при сборке.",
+  "criteria": [
+    "Ссылка :done в запросе.",
+    "Сигнатура не изменилась."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import androidx.room.Dao\nimport androidx.room.Query\n\ndata class Task(val id: Int = 0, val title: String, val done: Boolean = false)\n\n@Dao\ninterface TaskDao {\n    @Query(\"SELECT * FROM tasks WHERE done = :isDone ORDER BY id\")\n    suspend fun byDone(done: Boolean): List<Task>\n}\n",
+      "why": "Ошибка осталась: :isDone не совпадает с именем параметра done."
+    },
+    {
+      "code": "import androidx.room.Dao\nimport androidx.room.Query\n\ndata class Task(val id: Int = 0, val title: String, val done: Boolean = false)\n\n@Dao\ninterface TaskDao {\n    @Query(\"SELECT * FROM tasks WHERE done = :done ORDER BY id\")\n    suspend fun byDone(isDone: Boolean): List<Task>\n}\n",
+      "why": "Теперь не совпадает имя параметра функции: он должен остаться done."
+    },
+    {
+      "code": "import androidx.room.Dao\nimport androidx.room.Query\n\ndata class Task(val id: Int = 0, val title: String, val done: Boolean = false)\n\n@Dao\ninterface TaskDao {\n    @Query(\"SELECT * FROM tasks WHERE done = \" + \"true\")\n    suspend fun byDone(done: Boolean): List<Task>\n}\n",
+      "why": "Значение зашито в строку SQL: параметр не используется."
+    }
+  ]
+}

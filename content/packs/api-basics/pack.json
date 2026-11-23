@@ -9,7 +9,9 @@
   "lessons": [
     "api-01-fastapi",
     "api-02-crud",
-    "api-03-validation"
+    "api-03-validation",
+    "api-04-middleware",
+    "api-05-auth"
   ],
   "skills": {
     "api.http": "HTTP: методы, пути, коды ответа",
@@ -21,6 +23,12 @@
     "api.state": "Данные в памяти сервера",
     "api.filter": "Необязательные параметры запроса",
     "api.validation": "Проверка данных: Field и код 422",
-    "api.paging": "Постраничный вывод: limit и offset"
+    "api.paging": "Постраничный вывод: limit и offset",
+    "api.middleware": "Middleware: слой вокруг запроса",
+    "api.logging": "Журнал запросов",
+    "api.apikey": "Проверка ключа API",
+    "api.password": "Хеш пароля с солью",
+    "api.token": "Токен JWT (HS256)",
+    "api.auth": "Защита маршрутов: Depends, 401 и 403"
   }
 }
