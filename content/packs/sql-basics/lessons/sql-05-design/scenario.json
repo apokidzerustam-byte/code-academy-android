@@ -40,6 +40,10 @@
       "narration": "Теперь свяжем заметки с задачами. В таблице notes добавляем столбец task_id и пишем слово REFERENCES: оно говорит, что значение должно совпадать с номером существующей строки в таблице tasks. Это и есть внешний ключ. В таблице две задачи и три заметки: у второй задачи две заметки. Такая связь называется «один ко многим».",
       "actions": [
         {
+          "type": "clear",
+          "file": "schema.sql"
+        },
+        {
           "type": "type",
           "text": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL\n);\n\nCREATE TABLE notes (\n  id INTEGER PRIMARY KEY,\n  task_id INTEGER NOT NULL REFERENCES tasks(id),\n  text TEXT NOT NULL\n);\n\nINSERT INTO tasks (title) VALUES ('Купить молоко'), ('Написать отчёт');\nINSERT INTO notes (task_id, text) VALUES (1, 'Два литра'), (2, 'К пятнице'), (2, 'Согласовать с Ольгой');\n",
           "file": "schema.sql",

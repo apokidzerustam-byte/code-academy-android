@@ -2,7 +2,7 @@
 
 ```bash
 git merge feature            # CONFLICT (content): ...
-git status -s                # UU greeting.txt
+git status -s                # у файла в списке пометка UU
 cat greeting.txt             # метки <<<<<<<, =======, >>>>>>>
 # правим файл: оставляем нужное, метки убираем
 git add greeting.txt

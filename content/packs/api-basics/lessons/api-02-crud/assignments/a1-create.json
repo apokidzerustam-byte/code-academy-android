@@ -14,7 +14,7 @@
   "hints": [
     "POST-обработчик получает параметр с типом модели: task: TaskIn.",
     "Код 201 задаёт параметр декоратора: status_code=201.",
-    "Чтобы изменить NEXT_ID, объявите global NEXT_ID.",
+    "Переменную модуля внутри функции меняют, только если объявить её словом global.",
     "Положите в TASKS[NEXT_ID] словарь с id, title и done; затем увеличьте NEXT_ID.",
     "GET /tasks — return list(TASKS.values())."
   ],
