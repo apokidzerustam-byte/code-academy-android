@@ -9,7 +9,8 @@
   "lessons": [
     "kt-01-basics",
     "kt-02-classes",
-    "kt-03-collections"
+    "kt-03-collections",
+    "kt-04-coroutines"
   ],
   "skills": {
     "kt.basics": "Kotlin: main, val и var",
@@ -23,6 +24,9 @@
     "kt.smartcast": "Проверка на null",
     "kt.collections": "Списки, множества, словари",
     "kt.lambdas": "Лямбды и функции-параметры",
-    "kt.hof": "map, filter, sorted и sum"
+    "kt.hof": "map, filter, sorted и sum",
+    "kt.suspend": "Функции suspend",
+    "kt.async": "async, await и launch",
+    "kt.scope": "Области и диспетчеры корутин"
   }
 }

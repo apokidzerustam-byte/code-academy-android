@@ -1,0 +1,88 @@
+{
+  "id": "a2-parallel",
+  "type": "write",
+  "title": "Загрузки одновременно",
+  "statement": "Загрузка цены хлеба и сыра не зависит друг от друга. Напишите `suspend fun totalParallel(): Int`, которая запускает **обе загрузки параллельно** через `async` внутри `coroutineScope { … }` и возвращает сумму цен (`await()` для каждой). Функция `loadPrice` уже есть.",
+  "goal": "Запускать независимые загрузки параллельно.",
+  "input": "—",
+  "expectedResult": "Сумма цен: 70.",
+  "constraints": [
+    "Используйте async и await, а не последовательные вызовы."
+  ],
+  "starterCode": "import kotlinx.coroutines.*\n\nsuspend fun loadPrice(name: String): Int {\n    delay(10)\n    return name.length * 10\n}\n\n// Допишите suspend fun totalParallel(): Int\n",
+  "hints": [
+    "Заголовок: suspend fun totalParallel(): Int = coroutineScope { … }.",
+    "async { … } запускает корутину и сразу возвращает Deferred.",
+    "Запустите две корутины: val bread = async { loadPrice(\"хлеб\") } и такую же для сыра.",
+    "Значение достают методом await().",
+    "Последняя строка блока: bread.await() + cheese.await()."
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "totalParallel",
+        "paramTypes": [],
+        "returns": "Int"
+      },
+      {
+        "id": "susp",
+        "type": "contains",
+        "pattern": "\\bsuspend\\s+fun\\s+totalParallel\\b",
+        "message": "Функция должна быть suspend"
+      },
+      {
+        "id": "async",
+        "type": "contains",
+        "pattern": "\\basync\\b[\\s\\S]*\\basync\\b",
+        "message": "Запустите обе загрузки через async, чтобы они шли параллельно",
+        "hint": "Каждая загрузка — отдельный async { … }"
+      },
+      {
+        "id": "await",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "\\bawait\\s*\\(\\s*\\)[\\s\\S]*\\bawait\\s*\\(\\s*\\)",
+        "message": "Результат каждого async достают вызовом await()"
+      },
+      {
+        "id": "scope",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "\\bcoroutineScope\\b",
+        "message": "async запускают внутри области: coroutineScope { … }"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() = runBlocking {\n    println(totalParallel())\n}",
+      "expected_stdout": "70"
+    }
+  },
+  "solution": "import kotlinx.coroutines.*\n\nsuspend fun loadPrice(name: String): Int {\n    delay(10)\n    return name.length * 10\n}\n\nsuspend fun totalParallel(): Int = coroutineScope {\n    val bread = async { loadPrice(\"хлеб\") }\n    val cheese = async { loadPrice(\"сыр\") }\n    bread.await() + cheese.await()\n}\n",
+  "explanation": "Обе корутины стартуют сразу, и ждать приходится только самую долгую. Результат каждой достаётся через await.",
+  "criteria": [
+    "suspend fun totalParallel(): Int.",
+    "Обе загрузки через async.",
+    "Результаты через await и сложены."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import kotlinx.coroutines.*\n\nsuspend fun loadPrice(name: String): Int {\n    delay(10)\n    return name.length * 10\n}\n\nsuspend fun totalParallel(): Int = coroutineScope {\n    loadPrice(\"хлеб\") + loadPrice(\"сыр\")\n}\n",
+      "why": "Загрузки идут по очереди — async не использован."
+    },
+    {
+      "code": "import kotlinx.coroutines.*\n\nsuspend fun loadPrice(name: String): Int {\n    delay(10)\n    return name.length * 10\n}\n\nsuspend fun totalParallel(): Int = coroutineScope {\n    val bread = async { loadPrice(\"хлеб\") }\n    bread.await() + loadPrice(\"сыр\")\n}\n",
+      "why": "Параллельно запущена только одна загрузка."
+    },
+    {
+      "code": "import kotlinx.coroutines.*\n\nsuspend fun loadPrice(name: String): Int {\n    delay(10)\n    return name.length * 10\n}\n\nsuspend fun totalParallel(): Int {\n    val bread = async { loadPrice(\"хлеб\") }\n    val cheese = async { loadPrice(\"сыр\") }\n    return bread.await() + cheese.await()\n}\n",
+      "why": "async нужна область: оберните тело в coroutineScope { … }."
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "id": "kt-04-coroutines",
+  "title": "Kotlin: корутины",
+  "goal": "Писать suspend-функции, запускать независимые загрузки параллельно через async и ловить ошибки в корутинах.",
+  "skills": [
+    "kt.suspend",
+    "kt.async",
+    "kt.scope"
+  ],
+  "prerequisites": [
+    "kt-03-collections"
+  ],
+  "runner": "kotlin",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-total.json",
+    "assignments/a2-parallel.json",
+    "assignments/a3-suspend-call.json",
+    "assignments/a4-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Вызов suspend-функции из обычной функции",
+      "fix": "Пометьте вызывающую функцию словом suspend или запустите корутину (launch, async)."
+    },
+    {
+      "mistake": "Две независимые загрузки идут по очереди",
+      "fix": "Запустите обе через async и вызовите await: ждать придётся только самую долгую."
+    },
+    {
+      "mistake": "runBlocking в обработчике экрана",
+      "fix": "Он блокирует главный поток; запускайте корутину в viewModelScope через launch."
+    },
+    {
+      "mistake": "async без области",
+      "fix": "async вызывают внутри coroutineScope { … } или в области вроде viewModelScope."
+    }
+  ]
+}

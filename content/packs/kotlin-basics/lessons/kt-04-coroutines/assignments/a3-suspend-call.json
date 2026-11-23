@@ -1,0 +1,74 @@
+{
+  "id": "a3-suspend-call",
+  "type": "fix",
+  "title": "Вызов suspend-функции",
+  "statement": "Код не компилируется: обычная функция `greeting` вызывает suspend-функцию `loadName`. Исправьте так, чтобы программа собиралась и функция `greeting()` возвращала `Привет, Аня`. Не используйте `runBlocking`: он блокирует поток.",
+  "goal": "Понимать, где можно вызывать suspend-функции.",
+  "input": "—",
+  "expectedResult": "Строка «Привет, Аня».",
+  "constraints": [
+    "Тип результата String не меняйте."
+  ],
+  "starterCode": "import kotlinx.coroutines.*\n\nsuspend fun loadName(): String {\n    delay(10)\n    return \"Аня\"\n}\n\nfun greeting(): String = \"Привет, \" + loadName()\n",
+  "hints": [
+    "Компилятор говорит: suspend-функцию можно вызвать только из корутины или другой suspend-функции.",
+    "У функции greeting нет слова suspend.",
+    "Пометьте greeting словом suspend: тогда она тоже сможет приостанавливаться.",
+    "runBlocking заставил бы поток ждать — на Андроиде главный поток блокировать нельзя.",
+    "Слово suspend ставят перед fun: suspend fun greeting()."
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "greeting",
+        "paramTypes": [],
+        "returns": "String"
+      },
+      {
+        "id": "susp",
+        "type": "contains",
+        "pattern": "\\bsuspend\\s+fun\\s+greeting\\b",
+        "message": "Функция, вызывающая suspend-функцию, должна быть suspend",
+        "hint": "Компилятор: «Suspend function can be called only from a coroutine or another suspend function»"
+      },
+      {
+        "id": "noblock",
+        "hidden": true,
+        "type": "not_contains",
+        "pattern": "\\brunBlocking\\b",
+        "message": "runBlocking блокирует поток — на Андроиде так не делают"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() = runBlocking {\n    println(greeting())\n}",
+      "expected_stdout": "Привет, Аня"
+    }
+  },
+  "solution": "import kotlinx.coroutines.*\n\nsuspend fun loadName(): String {\n    delay(10)\n    return \"Аня\"\n}\n\nsuspend fun greeting(): String = \"Привет, \" + loadName()\n",
+  "explanation": "Вызвать suspend-функцию можно только из suspend-функции или корутины. Значит, greeting тоже должна быть suspend; вызывающий код запустит её в корутине.",
+  "criteria": [
+    "Функция помечена suspend.",
+    "runBlocking не используется."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import kotlinx.coroutines.*\n\nsuspend fun loadName(): String {\n    delay(10)\n    return \"Аня\"\n}\n\nfun greeting(): String = \"Привет, \" + loadName()\n",
+      "why": "Ошибка осталась: обычная функция вызывает suspend-функцию."
+    },
+    {
+      "code": "import kotlinx.coroutines.*\n\nsuspend fun loadName(): String {\n    delay(10)\n    return \"Аня\"\n}\n\nfun greeting(): String = runBlocking { \"Привет, \" + loadName() }\n",
+      "why": "Компилируется, но runBlocking блокирует поток; в Андроиде функция должна быть suspend."
+    },
+    {
+      "code": "import kotlinx.coroutines.*\n\nsuspend fun loadName(): String {\n    delay(10)\n    return \"Аня\"\n}\n\nfun greeting(): String = \"Привет, Аня\"\n",
+      "why": "Загрузка имени убрана вместо исправления вызова."
+    }
+  ]
+}

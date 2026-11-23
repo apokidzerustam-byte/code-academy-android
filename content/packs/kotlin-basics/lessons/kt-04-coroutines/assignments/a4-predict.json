@@ -1,0 +1,44 @@
+{
+  "id": "a4-predict",
+  "type": "predict",
+  "title": "Что напечатает программа?",
+  "statement": "Что выведет программа? Каждая строка вывода — с новой строки.",
+  "goal": "Проследить цепочку suspend-вызовов и исключение.",
+  "input": "—",
+  "expectedResult": "Две строки.",
+  "constraints": [],
+  "code": "import kotlinx.coroutines.*\n\nsuspend fun step(n: Int): Int {\n    delay(10)\n    return n * 2\n}\n\nfun main() = runBlocking {\n    val first = step(1)\n    val second = async { step(first) }\n    val third = step(second.await())\n    println(\"$first $third\")\n    try {\n        check(third > 10) { \"мало\" }\n    } catch (e: IllegalStateException) {\n        println(\"Ошибка: ${e.message}\")\n    }\n}\n",
+  "hints": [
+    "Сначала first = step(1): функция удваивает число.",
+    "second запускает step(first), то есть step(2).",
+    "third = step(second.await()) — удвоение результата второй загрузки.",
+    "Первая строка печатает first и third через пробел.",
+    "check(third > 10) падает, если условие ложно: сравните третье число с десятью."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "2 8\nОшибка: мало"
+  },
+  "solution": "2 8\nОшибка: мало",
+  "explanation": "first = 2, second = step(2) = 4, third = step(4) = 8. Первая строка — «2 8». Проверка 8 > 10 ложна, check бросает IllegalStateException с сообщением «мало», и catch печатает вторую строку.",
+  "criteria": [
+    "Обе строки верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "2 8",
+      "answer": "2 8",
+      "why": "Условие check(third > 10) ложно, поэтому исключение сработает и напечатается вторая строка."
+    },
+    {
+      "code": "2 4\nОшибка: мало",
+      "answer": "2 4\nОшибка: мало",
+      "why": "Третье число — результат step(second.await()), то есть 8, а не 4."
+    },
+    {
+      "code": "1 4\nОшибка: мало",
+      "answer": "1 4\nОшибка: мало",
+      "why": "first = step(1) = 2, а не 1."
+    }
+  ]
+}
