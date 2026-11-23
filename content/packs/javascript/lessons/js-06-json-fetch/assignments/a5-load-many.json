@@ -1,0 +1,111 @@
+{
+  "id": "a5-load-many",
+  "type": "write",
+  "title": "Много пользователей сразу",
+  "statement": "Дана функция `getUser(id)`: возвращает обещание с пользователем или `null`, если такого нет. Напишите **async**-функцию `loadMany(ids)`: загрузите всех пользователей из списка идентификаторов **одновременно** (через `Promise.all`) и верните массив имён **в порядке `ids`**. Для несуществующего пользователя в массив кладите `\"?\"`.",
+  "goal": "Запускать запросы параллельно и сохранять порядок.",
+  "input": "Список идентификаторов.",
+  "expectedResult": "Возвращаемое значение.",
+  "constraints": [],
+  "starterCode": "const users = {\n  1: { id: 1, name: \"Аня\", age: 30 },\n  2: { id: 2, name: \"Борис\", age: 25 },\n  3: { id: 3, name: \"Вера\", age: 41 },\n};\n\nasync function fakeFetch(url) {\n  if (url === \"/offline\") throw new TypeError(\"Failed to fetch\");\n  if (url === \"/broken\") return new Response(\"<html>oops\", { status: 200 });\n  if (url === \"/users\") return new Response(JSON.stringify(Object.values(users)), { status: 200 });\n  const m = /^\\/users\\/(\\d+)$/.exec(url);\n  if (m && users[m[1]]) return new Response(JSON.stringify(users[m[1]]), { status: 200 });\n  return new Response(JSON.stringify({ error: \"not found\" }), { status: 404 });\n}\n\nasync function getUser(id) {\n  const res = await fakeFetch(\"/users/\" + id);\n  return res.ok ? res.json() : null;\n}\n\nasync function loadMany(ids) {\n  // ваш код\n}\n",
+  "hints": [
+    "Сначала превратите список идентификаторов в список обещаний: ids.map(getUser).",
+    "Дождитесь всех сразу: await Promise.all(...).",
+    "Promise.all сохраняет порядок: результат на i-м месте соответствует i-му идентификатору.",
+    "Для null в результате нужен знак вопроса, иначе имя.",
+    "list.map((u) => (u ? u.name : \"?\"))"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "loadMany",
+        "args": [
+          [
+            1,
+            2
+          ]
+        ],
+        "expected": [
+          "Аня",
+          "Борис"
+        ]
+      },
+      {
+        "id": "v2",
+        "function": "loadMany",
+        "args": [
+          [
+            3,
+            99,
+            1
+          ]
+        ],
+        "expected": [
+          "Вера",
+          "?",
+          "Аня"
+        ]
+      },
+      {
+        "id": "h3",
+        "function": "loadMany",
+        "args": [
+          []
+        ],
+        "expected": [],
+        "hidden": true,
+        "hint": "Пустой список"
+      },
+      {
+        "id": "h4",
+        "function": "loadMany",
+        "args": [
+          [
+            2,
+            2
+          ]
+        ],
+        "expected": [
+          "Борис",
+          "Борис"
+        ],
+        "hidden": true
+      },
+      {
+        "id": "h5",
+        "function": "loadMany",
+        "args": [
+          [
+            99
+          ]
+        ],
+        "expected": [
+          "?"
+        ],
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "const users = {\n  1: { id: 1, name: \"Аня\", age: 30 },\n  2: { id: 2, name: \"Борис\", age: 25 },\n  3: { id: 3, name: \"Вера\", age: 41 },\n};\n\nasync function fakeFetch(url) {\n  if (url === \"/offline\") throw new TypeError(\"Failed to fetch\");\n  if (url === \"/broken\") return new Response(\"<html>oops\", { status: 200 });\n  if (url === \"/users\") return new Response(JSON.stringify(Object.values(users)), { status: 200 });\n  const m = /^\\/users\\/(\\d+)$/.exec(url);\n  if (m && users[m[1]]) return new Response(JSON.stringify(users[m[1]]), { status: 200 });\n  return new Response(JSON.stringify({ error: \"not found\" }), { status: 404 });\n}\n\nasync function getUser(id) {\n  const res = await fakeFetch(\"/users/\" + id);\n  return res.ok ? res.json() : null;\n}\n\nasync function loadMany(ids) {\n  const list = await Promise.all(ids.map(getUser));\n  return list.map((u) => (u ? u.name : \"?\"));\n}\n",
+  "explanation": "Promise.all запускает запросы одновременно и возвращает результаты в порядке исходного списка. forEach с async внутри не дожидается обещаний.",
+  "criteria": [
+    "Результат верен на всех наборах, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "const users = {\n  1: { id: 1, name: \"Аня\", age: 30 },\n  2: { id: 2, name: \"Борис\", age: 25 },\n  3: { id: 3, name: \"Вера\", age: 41 },\n};\n\nasync function fakeFetch(url) {\n  if (url === \"/offline\") throw new TypeError(\"Failed to fetch\");\n  if (url === \"/broken\") return new Response(\"<html>oops\", { status: 200 });\n  if (url === \"/users\") return new Response(JSON.stringify(Object.values(users)), { status: 200 });\n  const m = /^\\/users\\/(\\d+)$/.exec(url);\n  if (m && users[m[1]]) return new Response(JSON.stringify(users[m[1]]), { status: 200 });\n  return new Response(JSON.stringify({ error: \"not found\" }), { status: 404 });\n}\n\nasync function getUser(id) {\n  const res = await fakeFetch(\"/users/\" + id);\n  return res.ok ? res.json() : null;\n}\n\nasync function loadMany(ids) {\n  const names = [];\n  ids.forEach(async (id) => {\n    const u = await getUser(id);\n    names.push(u ? u.name : \"?\");\n  });\n  return names;\n}\n",
+      "why": "forEach не дожидается async-функций: массив возвращается пустым."
+    },
+    {
+      "code": "const users = {\n  1: { id: 1, name: \"Аня\", age: 30 },\n  2: { id: 2, name: \"Борис\", age: 25 },\n  3: { id: 3, name: \"Вера\", age: 41 },\n};\n\nasync function fakeFetch(url) {\n  if (url === \"/offline\") throw new TypeError(\"Failed to fetch\");\n  if (url === \"/broken\") return new Response(\"<html>oops\", { status: 200 });\n  if (url === \"/users\") return new Response(JSON.stringify(Object.values(users)), { status: 200 });\n  const m = /^\\/users\\/(\\d+)$/.exec(url);\n  if (m && users[m[1]]) return new Response(JSON.stringify(users[m[1]]), { status: 200 });\n  return new Response(JSON.stringify({ error: \"not found\" }), { status: 404 });\n}\n\nasync function getUser(id) {\n  const res = await fakeFetch(\"/users/\" + id);\n  return res.ok ? res.json() : null;\n}\n\nasync function loadMany(ids) {\n  return ids.map(async (id) => {\n    const u = await getUser(id);\n    return u ? u.name : \"?\";\n  });\n}\n",
+      "why": "Возвращается список обещаний: нет Promise.all."
+    },
+    {
+      "code": "const users = {\n  1: { id: 1, name: \"Аня\", age: 30 },\n  2: { id: 2, name: \"Борис\", age: 25 },\n  3: { id: 3, name: \"Вера\", age: 41 },\n};\n\nasync function fakeFetch(url) {\n  if (url === \"/offline\") throw new TypeError(\"Failed to fetch\");\n  if (url === \"/broken\") return new Response(\"<html>oops\", { status: 200 });\n  if (url === \"/users\") return new Response(JSON.stringify(Object.values(users)), { status: 200 });\n  const m = /^\\/users\\/(\\d+)$/.exec(url);\n  if (m && users[m[1]]) return new Response(JSON.stringify(users[m[1]]), { status: 200 });\n  return new Response(JSON.stringify({ error: \"not found\" }), { status: 404 });\n}\n\nasync function getUser(id) {\n  const res = await fakeFetch(\"/users/\" + id);\n  return res.ok ? res.json() : null;\n}\n\nasync function loadMany(ids) {\n  const list = await Promise.all(ids.map(getUser));\n  return list.filter(Boolean).map((u) => u.name);\n}\n",
+      "why": "Несуществующие пользователи теряются, а нужен знак вопроса."
+    }
+  ]
+}

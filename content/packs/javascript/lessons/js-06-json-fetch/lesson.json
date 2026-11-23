@@ -1,0 +1,45 @@
+{
+  "id": "js-06-json-fetch",
+  "title": "JavaScript: JSON, fetch и ошибки",
+  "goal": "Работать с JSON и ответами сервера, различать виды сбоев и запускать несколько запросов сразу.",
+  "skills": [
+    "js.json",
+    "js.fetch",
+    "js.errors"
+  ],
+  "prerequisites": [
+    "js-05-dom"
+  ],
+  "runner": "js",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-json.json",
+    "assignments/a2-user-name.json",
+    "assignments/a3-load-json.json",
+    "assignments/a4-older.json",
+    "assignments/a5-load-many.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Не проверяют res.ok",
+      "fix": "Статус 404 не отклоняет обещание: проверяйте ok сами."
+    },
+    {
+      "mistake": "Нет await перед res.json()",
+      "fix": "json возвращает обещание: без await вместо данных будет Promise."
+    },
+    {
+      "mistake": "JSON.parse без try/catch",
+      "fix": "Неверный текст вызывает SyntaxError: ловите его."
+    },
+    {
+      "mistake": "forEach с async внутри",
+      "fix": "Для нескольких запросов используйте Promise.all(ids.map(...))."
+    }
+  ]
+}

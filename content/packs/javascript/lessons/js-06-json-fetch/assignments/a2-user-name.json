@@ -1,0 +1,87 @@
+{
+  "id": "a2-user-name",
+  "type": "write",
+  "title": "Имя пользователя",
+  "statement": "Дана учебная функция `fakeFetch(url)` (как `fetch`: возвращает обещание с `Response`). Напишите **async**-функцию `userName(id)`: запросите `/users/` + `id`. Если ответ **не ok**, верните строку `\"не найден\"`, иначе верните поле `name` пользователя из тела ответа.",
+  "goal": "Проверять ok и читать тело ответа.",
+  "input": "Идентификатор пользователя.",
+  "expectedResult": "Возвращаемое значение.",
+  "constraints": [],
+  "starterCode": "const users = {\n  1: { id: 1, name: \"Аня\", age: 30 },\n  2: { id: 2, name: \"Борис\", age: 25 },\n  3: { id: 3, name: \"Вера\", age: 41 },\n};\n\nasync function fakeFetch(url) {\n  if (url === \"/offline\") throw new TypeError(\"Failed to fetch\");\n  if (url === \"/broken\") return new Response(\"<html>oops\", { status: 200 });\n  if (url === \"/users\") return new Response(JSON.stringify(Object.values(users)), { status: 200 });\n  const m = /^\\/users\\/(\\d+)$/.exec(url);\n  if (m && users[m[1]]) return new Response(JSON.stringify(users[m[1]]), { status: 200 });\n  return new Response(JSON.stringify({ error: \"not found\" }), { status: 404 });\n}\n\nasync function userName(id) {\n  // ваш код\n}\n",
+  "hints": [
+    "Сначала запросите данные: await fakeFetch(...).",
+    "Проверьте res.ok до чтения тела.",
+    "Если не ok — верните \"не найден\".",
+    "Тело достают методом json, и перед ним тоже нужен await.",
+    "return user.name после const user = await res.json()."
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "userName",
+        "args": [
+          1
+        ],
+        "expected": "Аня"
+      },
+      {
+        "id": "v2",
+        "function": "userName",
+        "args": [
+          3
+        ],
+        "expected": "Вера"
+      },
+      {
+        "id": "h3",
+        "function": "userName",
+        "args": [
+          99
+        ],
+        "expected": "не найден",
+        "hidden": true,
+        "hint": "Для несуществующего пользователя ответ — 404"
+      },
+      {
+        "id": "h4",
+        "function": "userName",
+        "args": [
+          2
+        ],
+        "expected": "Борис",
+        "hidden": true
+      },
+      {
+        "id": "h5",
+        "function": "userName",
+        "args": [
+          0
+        ],
+        "expected": "не найден",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "const users = {\n  1: { id: 1, name: \"Аня\", age: 30 },\n  2: { id: 2, name: \"Борис\", age: 25 },\n  3: { id: 3, name: \"Вера\", age: 41 },\n};\n\nasync function fakeFetch(url) {\n  if (url === \"/offline\") throw new TypeError(\"Failed to fetch\");\n  if (url === \"/broken\") return new Response(\"<html>oops\", { status: 200 });\n  if (url === \"/users\") return new Response(JSON.stringify(Object.values(users)), { status: 200 });\n  const m = /^\\/users\\/(\\d+)$/.exec(url);\n  if (m && users[m[1]]) return new Response(JSON.stringify(users[m[1]]), { status: 200 });\n  return new Response(JSON.stringify({ error: \"not found\" }), { status: 404 });\n}\n\nasync function userName(id) {\n  const res = await fakeFetch(\"/users/\" + id);\n  if (!res.ok) return \"не найден\";\n  const user = await res.json();\n  return user.name;\n}\n",
+  "explanation": "Статус 404 не отклоняет обещание, поэтому ok проверяют сами; тело ответа — тоже обещание, и его достают через await res.json().",
+  "criteria": [
+    "Результат верен на всех наборах, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "const users = {\n  1: { id: 1, name: \"Аня\", age: 30 },\n  2: { id: 2, name: \"Борис\", age: 25 },\n  3: { id: 3, name: \"Вера\", age: 41 },\n};\n\nasync function fakeFetch(url) {\n  if (url === \"/offline\") throw new TypeError(\"Failed to fetch\");\n  if (url === \"/broken\") return new Response(\"<html>oops\", { status: 200 });\n  if (url === \"/users\") return new Response(JSON.stringify(Object.values(users)), { status: 200 });\n  const m = /^\\/users\\/(\\d+)$/.exec(url);\n  if (m && users[m[1]]) return new Response(JSON.stringify(users[m[1]]), { status: 200 });\n  return new Response(JSON.stringify({ error: \"not found\" }), { status: 404 });\n}\n\nasync function userName(id) {\n  const res = await fakeFetch(\"/users/\" + id);\n  const user = await res.json();\n  return user.name;\n}\n",
+      "why": "Нет проверки ok: для 404 тело — это ошибка, и имени в нём нет."
+    },
+    {
+      "code": "const users = {\n  1: { id: 1, name: \"Аня\", age: 30 },\n  2: { id: 2, name: \"Борис\", age: 25 },\n  3: { id: 3, name: \"Вера\", age: 41 },\n};\n\nasync function fakeFetch(url) {\n  if (url === \"/offline\") throw new TypeError(\"Failed to fetch\");\n  if (url === \"/broken\") return new Response(\"<html>oops\", { status: 200 });\n  if (url === \"/users\") return new Response(JSON.stringify(Object.values(users)), { status: 200 });\n  const m = /^\\/users\\/(\\d+)$/.exec(url);\n  if (m && users[m[1]]) return new Response(JSON.stringify(users[m[1]]), { status: 200 });\n  return new Response(JSON.stringify({ error: \"not found\" }), { status: 404 });\n}\n\nasync function userName(id) {\n  const res = await fakeFetch(\"/users/\" + id);\n  if (!res.ok) return \"не найден\";\n  return res.json();\n}\n",
+      "why": "Возвращается весь объект пользователя, а нужно только имя."
+    },
+    {
+      "code": "const users = {\n  1: { id: 1, name: \"Аня\", age: 30 },\n  2: { id: 2, name: \"Борис\", age: 25 },\n  3: { id: 3, name: \"Вера\", age: 41 },\n};\n\nasync function fakeFetch(url) {\n  if (url === \"/offline\") throw new TypeError(\"Failed to fetch\");\n  if (url === \"/broken\") return new Response(\"<html>oops\", { status: 200 });\n  if (url === \"/users\") return new Response(JSON.stringify(Object.values(users)), { status: 200 });\n  const m = /^\\/users\\/(\\d+)$/.exec(url);\n  if (m && users[m[1]]) return new Response(JSON.stringify(users[m[1]]), { status: 200 });\n  return new Response(JSON.stringify({ error: \"not found\" }), { status: 404 });\n}\n\nasync function userName(id) {\n  const res = await fakeFetch(\"/users/\" + id);\n  if (!res.ok) return \"не найден\";\n  return res.name;\n}\n",
+      "why": "Имя лежит в теле ответа, которое читают через await res.json()."
+    }
+  ]
+}

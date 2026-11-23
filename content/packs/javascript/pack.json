@@ -11,7 +11,8 @@
     "js-02-arrays",
     "js-03-objects",
     "js-04-async",
-    "js-05-dom"
+    "js-05-dom",
+    "js-06-json-fetch"
   ],
   "skills": {
     "js.strings": "Строки и их методы",
@@ -22,12 +23,14 @@
     "js.sort": "Сортировка и копирование массивов",
     "js.objects": "Объекты: свойства и методы Object",
     "js.spread": "Spread и деструктуризация",
-    "js.json": "JSON и обработка ошибок разбора",
+    "js.json": "JSON: stringify и parse",
     "js.async": "Таймеры и порядок выполнения",
     "js.promise": "Promise",
     "js.await": "async/await и обработка ошибок",
     "js.dom2": "DOM: поиск и изменение элементов",
     "js.events2": "События и делегирование",
-    "js.safe-html": "textContent и безопасность (XSS)"
+    "js.safe-html": "textContent и безопасность (XSS)",
+    "js.fetch": "Ответ сервера: Response, ok, json",
+    "js.errors": "Сбои запросов, таймаут, Promise.all"
   }
 }

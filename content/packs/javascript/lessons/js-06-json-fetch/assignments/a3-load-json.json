@@ -1,0 +1,107 @@
+{
+  "id": "a3-load-json",
+  "type": "write",
+  "title": "Загрузка с обработкой сбоев",
+  "statement": "Напишите **async**-функцию `loadJson(url)`, которая **никогда не бросает ошибку**, а возвращает объект:\n\n- `{ ok: true, data }` — если ответ успешен и тело — корректный JSON;\n- `{ ok: false, error: \"HTTP 404\" }` — если ответ пришёл, но не ok (подставьте реальный статус);\n- `{ ok: false, error: \"network\" }` — если запрос не удался (обещание отклонено);\n- `{ ok: false, error: \"bad json\" }` — если тело не разбирается как JSON.",
+  "goal": "Различать три вида сбоев.",
+  "input": "Адрес запроса.",
+  "expectedResult": "Возвращаемое значение.",
+  "constraints": [],
+  "starterCode": "const users = {\n  1: { id: 1, name: \"Аня\", age: 30 },\n  2: { id: 2, name: \"Борис\", age: 25 },\n  3: { id: 3, name: \"Вера\", age: 41 },\n};\n\nasync function fakeFetch(url) {\n  if (url === \"/offline\") throw new TypeError(\"Failed to fetch\");\n  if (url === \"/broken\") return new Response(\"<html>oops\", { status: 200 });\n  if (url === \"/users\") return new Response(JSON.stringify(Object.values(users)), { status: 200 });\n  const m = /^\\/users\\/(\\d+)$/.exec(url);\n  if (m && users[m[1]]) return new Response(JSON.stringify(users[m[1]]), { status: 200 });\n  return new Response(JSON.stringify({ error: \"not found\" }), { status: 404 });\n}\n\nasync function loadJson(url) {\n  // ваш код\n}\n",
+  "hints": [
+    "Три вида сбоев — три разных места, где может случиться ошибка.",
+    "Запрос может быть отклонён: оберните await fakeFetch в try/catch и верните network.",
+    "Ответ может быть не ok: проверьте res.ok и верните \"HTTP \" + res.status.",
+    "Тело может не разобраться как JSON: await res.json() тоже кладут в try/catch и возвращают bad json.",
+    "Нужны два отдельных try/catch: один вокруг запроса, второй вокруг чтения тела."
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "loadJson",
+        "args": [
+          "/users/2"
+        ],
+        "expected": {
+          "ok": true,
+          "data": {
+            "id": 2,
+            "name": "Борис",
+            "age": 25
+          }
+        }
+      },
+      {
+        "id": "v2",
+        "function": "loadJson",
+        "args": [
+          "/users/99"
+        ],
+        "expected": {
+          "ok": false,
+          "error": "HTTP 404"
+        }
+      },
+      {
+        "id": "h3",
+        "function": "loadJson",
+        "args": [
+          "/offline"
+        ],
+        "expected": {
+          "ok": false,
+          "error": "network"
+        },
+        "hidden": true,
+        "hint": "Сеть недоступна: fakeFetch выбрасывает исключение"
+      },
+      {
+        "id": "h4",
+        "function": "loadJson",
+        "args": [
+          "/broken"
+        ],
+        "expected": {
+          "ok": false,
+          "error": "bad json"
+        },
+        "hidden": true,
+        "hint": "Тело ответа — не JSON"
+      },
+      {
+        "id": "h5",
+        "function": "loadJson",
+        "args": [
+          "/nothing"
+        ],
+        "expected": {
+          "ok": false,
+          "error": "HTTP 404"
+        },
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "const users = {\n  1: { id: 1, name: \"Аня\", age: 30 },\n  2: { id: 2, name: \"Борис\", age: 25 },\n  3: { id: 3, name: \"Вера\", age: 41 },\n};\n\nasync function fakeFetch(url) {\n  if (url === \"/offline\") throw new TypeError(\"Failed to fetch\");\n  if (url === \"/broken\") return new Response(\"<html>oops\", { status: 200 });\n  if (url === \"/users\") return new Response(JSON.stringify(Object.values(users)), { status: 200 });\n  const m = /^\\/users\\/(\\d+)$/.exec(url);\n  if (m && users[m[1]]) return new Response(JSON.stringify(users[m[1]]), { status: 200 });\n  return new Response(JSON.stringify({ error: \"not found\" }), { status: 404 });\n}\n\nasync function loadJson(url) {\n  let res;\n  try {\n    res = await fakeFetch(url);\n  } catch (e) {\n    return { ok: false, error: \"network\" };\n  }\n  if (!res.ok) return { ok: false, error: \"HTTP \" + res.status };\n  try {\n    return { ok: true, data: await res.json() };\n  } catch (e) {\n    return { ok: false, error: \"bad json\" };\n  }\n}\n",
+  "explanation": "Сбой запроса, плохой статус и неверное тело — три разных события, и каждое обрабатывается отдельно, чтобы вызывающий код получил понятный результат.",
+  "criteria": [
+    "Результат верен на всех наборах, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "const users = {\n  1: { id: 1, name: \"Аня\", age: 30 },\n  2: { id: 2, name: \"Борис\", age: 25 },\n  3: { id: 3, name: \"Вера\", age: 41 },\n};\n\nasync function fakeFetch(url) {\n  if (url === \"/offline\") throw new TypeError(\"Failed to fetch\");\n  if (url === \"/broken\") return new Response(\"<html>oops\", { status: 200 });\n  if (url === \"/users\") return new Response(JSON.stringify(Object.values(users)), { status: 200 });\n  const m = /^\\/users\\/(\\d+)$/.exec(url);\n  if (m && users[m[1]]) return new Response(JSON.stringify(users[m[1]]), { status: 200 });\n  return new Response(JSON.stringify({ error: \"not found\" }), { status: 404 });\n}\n\nasync function loadJson(url) {\n  const res = await fakeFetch(url);\n  if (!res.ok) return { ok: false, error: \"HTTP \" + res.status };\n  return { ok: true, data: await res.json() };\n}\n",
+      "why": "Нет перехвата сбоя сети и неверного JSON: ошибки вылетают наружу."
+    },
+    {
+      "code": "const users = {\n  1: { id: 1, name: \"Аня\", age: 30 },\n  2: { id: 2, name: \"Борис\", age: 25 },\n  3: { id: 3, name: \"Вера\", age: 41 },\n};\n\nasync function fakeFetch(url) {\n  if (url === \"/offline\") throw new TypeError(\"Failed to fetch\");\n  if (url === \"/broken\") return new Response(\"<html>oops\", { status: 200 });\n  if (url === \"/users\") return new Response(JSON.stringify(Object.values(users)), { status: 200 });\n  const m = /^\\/users\\/(\\d+)$/.exec(url);\n  if (m && users[m[1]]) return new Response(JSON.stringify(users[m[1]]), { status: 200 });\n  return new Response(JSON.stringify({ error: \"not found\" }), { status: 404 });\n}\n\nasync function loadJson(url) {\n  try {\n    const res = await fakeFetch(url);\n    return { ok: true, data: await res.json() };\n  } catch (e) {\n    return { ok: false, error: \"network\" };\n  }\n}\n",
+      "why": "Нет проверки ok и разных текстов ошибок: 404 принимается за успех."
+    },
+    {
+      "code": "const users = {\n  1: { id: 1, name: \"Аня\", age: 30 },\n  2: { id: 2, name: \"Борис\", age: 25 },\n  3: { id: 3, name: \"Вера\", age: 41 },\n};\n\nasync function fakeFetch(url) {\n  if (url === \"/offline\") throw new TypeError(\"Failed to fetch\");\n  if (url === \"/broken\") return new Response(\"<html>oops\", { status: 200 });\n  if (url === \"/users\") return new Response(JSON.stringify(Object.values(users)), { status: 200 });\n  const m = /^\\/users\\/(\\d+)$/.exec(url);\n  if (m && users[m[1]]) return new Response(JSON.stringify(users[m[1]]), { status: 200 });\n  return new Response(JSON.stringify({ error: \"not found\" }), { status: 404 });\n}\n\nasync function loadJson(url) {\n  try {\n    const res = await fakeFetch(url);\n    if (!res.ok) return { ok: false, error: \"HTTP \" + res.status };\n    return { ok: true, data: await res.json() };\n  } catch (e) {\n    return { ok: false, error: \"network\" };\n  }\n}\n",
+      "why": "Неверный JSON принимается за сбой сети: нужен отдельный результат bad json."
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "id": "a4-older",
+  "type": "fix",
+  "title": "Забытый await перед json",
+  "statement": "Функция `olderThan(age)` должна вернуть имена пользователей **старше** `age` (строго), в порядке списка, но падает с ошибкой. Найдите причину и исправьте.",
+  "goal": "Находить пропущенный await.",
+  "input": "Возраст.",
+  "expectedResult": "Возвращаемое значение.",
+  "constraints": [],
+  "starterCode": "const users = {\n  1: { id: 1, name: \"Аня\", age: 30 },\n  2: { id: 2, name: \"Борис\", age: 25 },\n  3: { id: 3, name: \"Вера\", age: 41 },\n};\n\nasync function fakeFetch(url) {\n  if (url === \"/offline\") throw new TypeError(\"Failed to fetch\");\n  if (url === \"/broken\") return new Response(\"<html>oops\", { status: 200 });\n  if (url === \"/users\") return new Response(JSON.stringify(Object.values(users)), { status: 200 });\n  const m = /^\\/users\\/(\\d+)$/.exec(url);\n  if (m && users[m[1]]) return new Response(JSON.stringify(users[m[1]]), { status: 200 });\n  return new Response(JSON.stringify({ error: \"not found\" }), { status: 404 });\n}\n\nasync function olderThan(age) {\n  const res = await fakeFetch(\"/users\");\n  const list = res.json();\n  return list.filter((u) => u.age > age).map((u) => u.name);\n}\n",
+  "hints": [
+    "Прочитайте текст ошибки: у чего нет метода filter?",
+    "res.json() возвращает не массив, а обещание массива.",
+    "Обещание нужно дождаться: перед вызовом json нужен await.",
+    "Именно перед res.json(), а не перед res.",
+    "const list = await res.json();"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "olderThan",
+        "args": [
+          29
+        ],
+        "expected": [
+          "Аня",
+          "Вера"
+        ]
+      },
+      {
+        "id": "v2",
+        "function": "olderThan",
+        "args": [
+          40
+        ],
+        "expected": [
+          "Вера"
+        ]
+      },
+      {
+        "id": "h3",
+        "function": "olderThan",
+        "args": [
+          50
+        ],
+        "expected": [],
+        "hidden": true,
+        "hint": "Старше 50 лет никого нет"
+      },
+      {
+        "id": "h4",
+        "function": "olderThan",
+        "args": [
+          24
+        ],
+        "expected": [
+          "Аня",
+          "Борис",
+          "Вера"
+        ],
+        "hidden": true
+      },
+      {
+        "id": "h5",
+        "function": "olderThan",
+        "args": [
+          30
+        ],
+        "expected": [
+          "Вера"
+        ],
+        "hidden": true,
+        "hint": "Строго старше: 30 не считается"
+      }
+    ]
+  },
+  "solution": "const users = {\n  1: { id: 1, name: \"Аня\", age: 30 },\n  2: { id: 2, name: \"Борис\", age: 25 },\n  3: { id: 3, name: \"Вера\", age: 41 },\n};\n\nasync function fakeFetch(url) {\n  if (url === \"/offline\") throw new TypeError(\"Failed to fetch\");\n  if (url === \"/broken\") return new Response(\"<html>oops\", { status: 200 });\n  if (url === \"/users\") return new Response(JSON.stringify(Object.values(users)), { status: 200 });\n  const m = /^\\/users\\/(\\d+)$/.exec(url);\n  if (m && users[m[1]]) return new Response(JSON.stringify(users[m[1]]), { status: 200 });\n  return new Response(JSON.stringify({ error: \"not found\" }), { status: 404 });\n}\n\nasync function olderThan(age) {\n  const res = await fakeFetch(\"/users\");\n  const list = await res.json();\n  return list.filter((u) => u.age > age).map((u) => u.name);\n}\n",
+  "explanation": "Метод json возвращает обещание. Без await в list лежит Promise, а у него нет метода filter. await достаёт из обещания сам массив.",
+  "criteria": [
+    "Результат верен на всех наборах, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "const users = {\n  1: { id: 1, name: \"Аня\", age: 30 },\n  2: { id: 2, name: \"Борис\", age: 25 },\n  3: { id: 3, name: \"Вера\", age: 41 },\n};\n\nasync function fakeFetch(url) {\n  if (url === \"/offline\") throw new TypeError(\"Failed to fetch\");\n  if (url === \"/broken\") return new Response(\"<html>oops\", { status: 200 });\n  if (url === \"/users\") return new Response(JSON.stringify(Object.values(users)), { status: 200 });\n  const m = /^\\/users\\/(\\d+)$/.exec(url);\n  if (m && users[m[1]]) return new Response(JSON.stringify(users[m[1]]), { status: 200 });\n  return new Response(JSON.stringify({ error: \"not found\" }), { status: 404 });\n}\n\nasync function olderThan(age) {\n  const res = await fakeFetch(\"/users\");\n  const list = await res;\n  return list.filter((u) => u.age > age).map((u) => u.name);\n}\n",
+      "why": "await стоит перед самим ответом, а не перед json(): у Response нет метода filter."
+    },
+    {
+      "code": "const users = {\n  1: { id: 1, name: \"Аня\", age: 30 },\n  2: { id: 2, name: \"Борис\", age: 25 },\n  3: { id: 3, name: \"Вера\", age: 41 },\n};\n\nasync function fakeFetch(url) {\n  if (url === \"/offline\") throw new TypeError(\"Failed to fetch\");\n  if (url === \"/broken\") return new Response(\"<html>oops\", { status: 200 });\n  if (url === \"/users\") return new Response(JSON.stringify(Object.values(users)), { status: 200 });\n  const m = /^\\/users\\/(\\d+)$/.exec(url);\n  if (m && users[m[1]]) return new Response(JSON.stringify(users[m[1]]), { status: 200 });\n  return new Response(JSON.stringify({ error: \"not found\" }), { status: 404 });\n}\n\nasync function olderThan(age) {\n  const res = await fakeFetch(\"/users\");\n  const list = await res.json();\n  return list.map((u) => u.name);\n}\n",
+      "why": "Потерян фильтр по возрасту."
+    },
+    {
+      "code": "const users = {\n  1: { id: 1, name: \"Аня\", age: 30 },\n  2: { id: 2, name: \"Борис\", age: 25 },\n  3: { id: 3, name: \"Вера\", age: 41 },\n};\n\nasync function fakeFetch(url) {\n  if (url === \"/offline\") throw new TypeError(\"Failed to fetch\");\n  if (url === \"/broken\") return new Response(\"<html>oops\", { status: 200 });\n  if (url === \"/users\") return new Response(JSON.stringify(Object.values(users)), { status: 200 });\n  const m = /^\\/users\\/(\\d+)$/.exec(url);\n  if (m && users[m[1]]) return new Response(JSON.stringify(users[m[1]]), { status: 200 });\n  return new Response(JSON.stringify({ error: \"not found\" }), { status: 404 });\n}\n\nasync function olderThan(age) {\n  const res = await fakeFetch(\"/users\");\n  const list = await res.json();\n  return list.filter((u) => u.age >= age).map((u) => u.name);\n}\n",
+      "why": "Нужно строго старше: пользователь возраста age не подходит."
+    }
+  ]
+}
