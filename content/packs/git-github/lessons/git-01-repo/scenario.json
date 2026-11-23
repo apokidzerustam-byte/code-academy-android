@@ -1,0 +1,258 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Зачем нужна система контроля версий",
+      "narration": "Знакомая ситуация: файл проекта называется «итоговый», потом «итоговый два», потом «итоговый окончательный», и уже непонятно, какой из них настоящий. Система контроля версий решает эту проблему. Она запоминает каждое сохранённое состояние проекта, позволяет вернуться назад, посмотреть, что и когда менялось, и работать над разными идеями параллельно. Самая популярная такая система называется Git. Её используют почти все разработчики мира. Сегодня мы создадим первый репозиторий, сделаем в нём первые сохранения и посмотрим на историю.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "**Git** помнит каждое сохранённое состояние проекта: «снимок» называется **коммитом**",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "init",
+      "title": "Создаём репозиторий",
+      "narration": "Все команды мы вводим в терминале. Команда pwd показывает, в какой папке мы находимся. Чтобы превратить обычную папку в репозиторий, достаточно выполнить git init. Git создаст внутри скрытую папку с именем «точка git», где будет храниться вся история. Увидеть её можно командой ls с ключом a, который показывает скрытые файлы. Удалять эту папку нельзя: вместе с ней исчезнет и вся история.",
+      "actions": [
+        {
+          "type": "type",
+          "text": "pwd\n",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "output",
+          "text": "/home/user/project\n",
+          "cue": 1
+        },
+        {
+          "type": "type",
+          "text": "git init\n",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "output",
+          "text": "Initialized empty Git repository in /home/user/project/.git/\n",
+          "cue": 2
+        },
+        {
+          "type": "type",
+          "text": "ls -a\n",
+          "file": "terminal.sh",
+          "cue": 4
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": ".\n..\n.git\n",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "status",
+      "title": "Что происходит в проекте",
+      "narration": "Главная команда, к которой вы будете возвращаться постоянно, — git status. Она рассказывает, что изменилось. Создадим файл README: команда echo печатает текст, а значок «больше» отправляет его в файл. Теперь git status сообщит, что появился новый файл, о котором Git пока ничего не знает. Такие файлы называются неотслеживаемыми.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "echo \"# Мой проект\" > README.md\n",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "type",
+          "text": "git status\n",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "On branch main\n\nNo commits yet\n\nUntracked files:\n  (use \"git add <file>...\" to include in what will be committed)\n\tREADME.md\n\nnothing added to commit but untracked files present (use \"git add\" to track)\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "add",
+      "title": "Индекс: подготовка к сохранению",
+      "narration": "Сохранение в Git состоит из двух шагов. Сначала мы выбираем, что попадёт в следующий снимок: это называется добавлением в индекс, команда git add. Потом фиксируем выбранное. Двухшаговая схема нужна, чтобы в один снимок попадали только связанные между собой изменения. Короткая форма статуса, git status с ключом s, показывает состояние файлов двумя буквами. Буква A означает, что файл добавлен в индекс.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "git add README.md\n",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "type",
+          "text": "git status -s\n",
+          "file": "terminal.sh",
+          "cue": 4
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 5
+        },
+        {
+          "type": "output",
+          "text": "A  README.md\n",
+          "cue": 5
+        }
+      ]
+    },
+    {
+      "id": "commit",
+      "title": "Коммит — снимок проекта",
+      "narration": "Теперь фиксируем снимок командой git commit. Ключ m задаёт сообщение: короткое описание, что и зачем изменено. Пишите сообщения так, чтобы через месяц вам самим было понятно, что произошло. Git ответит: сколько файлов изменено и какой короткий идентификатор получил коммит. Этот идентификатор у каждого коммита свой, у вас он будет другим.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "git commit -m \"Первый коммит\"\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "[main (root-commit) e6fed3c] Первый коммит\n 1 file changed, 1 insertion(+)\n create mode 100644 README.md\n",
+          "cue": 3
+        },
+        {
+          "type": "type",
+          "text": "git status\n",
+          "file": "terminal.sh",
+          "cue": 4
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "On branch main\nnothing to commit, working tree clean\n",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "second",
+      "title": "Второй коммит и история",
+      "narration": "Дополним проект: добавим в README ещё одну строку, ключ двойное «больше» дописывает в конец файла, а не затирает его. Статус с ключом s покажет букву M: файл изменён. Добавим изменение и сохраним. Команда git log с ключом oneline показывает историю одной строкой на коммит, самые новые сверху.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "echo \"Учебный репозиторий\" >> README.md\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "git status -s\n",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "output",
+          "text": " M README.md\n",
+          "cue": 1
+        },
+        {
+          "type": "type",
+          "text": "git add README.md\ngit commit -m \"Описание проекта\"\n",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "output",
+          "text": "[main f39ea8d] Описание проекта\n 1 file changed, 1 insertion(+)\n",
+          "cue": 2
+        },
+        {
+          "type": "type",
+          "text": "git log --oneline\n",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "f39ea8d Описание проекта\ne6fed3c Первый коммит\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. Git init создаёт репозиторий, git status показывает состояние, git add готовит изменения к сохранению, а git commit фиксирует снимок с сообщением. Git log показывает историю. Рабочий цикл всегда один: поменяли файлы, проверили статус, добавили в индекс, сохранили коммит. В следующем уроке научимся сравнивать версии и отменять изменения.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "Цикл: **изменить → `git status` → `git add` → `git commit`**",
+          "cue": 3
+        }
+      ]
+    }
+  ]
+}

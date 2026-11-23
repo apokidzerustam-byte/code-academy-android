@@ -16,16 +16,30 @@ from mk import ROOT, scene, write_lesson, asg, hints  # noqa: F401
 
 sys.path.insert(0, str(ROOT / "tools"))
 import validate_content as vc  # noqa: E402
+import shellrun  # noqa: E402
 
 PACKS = {}
-_BUF = {"code": "", "file": None}
+_BUF = {"code": "", "file": None, "pending": ""}
+_SH = {"sb": None}
+TERMINAL = "terminal.sh"
 
 
 def begin(file=None):
     """Начало урока: буфер кода сбрасывается; file — имя файла сцен (по умолчанию main.py)."""
     _BUF["code"] = ""
+    _BUF["pending"] = ""
     _BUF["file"] = file
     use_file(file)
+    if _SH["sb"] is not None:
+        _SH["sb"].close()
+        _SH["sb"] = None
+    if file == TERMINAL:
+        _SH["sb"] = shellrun.ShellSandbox()
+
+
+def begin_terminal():
+    """Урок про терминал и Git: команды выполняются настоящими bash/git в одном сеансе на весь урок."""
+    begin(TERMINAL)
 
 
 # --- шаги сцены ----------------------------------------------------------------------------------
@@ -49,10 +63,19 @@ def S(id, title, narration, *steps, stress=None):
         k = st[0]
         if k == "t":
             _BUF["code"] += st[1]
+            _BUF["pending"] += st[1]
             actions.append(T(st[1], at=st[2]))
         elif k == "c":
             _BUF["code"] = ""
+            _BUF["pending"] = ""
             actions.append(CLEAR(at=st[1]))
+        elif k == "r" and _BUF["file"] == TERMINAL:
+            res = _SH["sb"].run(_BUF["pending"])
+            _BUF["pending"] = ""
+            assert res["status"] == "OK", (id, "команды терминала не выполнились", res)
+            actions.append(RUN(at=st[1]))
+            if res["stdout"].strip():
+                actions.append(OUT(res["stdout"], at=st[1]))
         elif k == "r":
             res = vc.run_code(_BUF["code"], st[2] or "")
             actions.append(RUN(at=st[1], stdin=st[2]))
@@ -180,6 +203,45 @@ def predict_task(id, title, code, wrong, hints_, explanation, *, statement="Чт
                ["Все строки вывода верны."], wrong, code=code)
 
 
+def shell_predict(id, title, code, wrong, hints_, explanation, *, statement="Что выведут эти команды? Запишите вывод построчно, не запуская их.",
+                  goal=None):
+    """Что выведет сценарий оболочки (git, ls…). Вывод считается настоящим bash/git в чистой среде."""
+    res = shellrun.run_script(code)
+    assert res["status"] == "OK", (id, res)
+    expected = res["stdout"]
+    for w, why in wrong:
+        assert w.strip() != expected.strip(), (id, "неверный ответ совпал с верным", why)
+    return asg(id, "predict", title, statement, _text(goal, title), "Нет.", "Вывод команд.", ["Ответьте без запуска."],
+               hints_, {"kind": "answer", "expected_answer": expected.rstrip("\n")}, expected.rstrip("\n"), explanation,
+               ["Все строки вывода верны."], wrong, code=code)
+
+
+def shell_cmd_task(id, title, statement, solution, setup, check, wrong, hints_, explanation, *, goal=None, criteria=None):
+    """«Введите команду»: после setup выполняется ответ, затем check должен вывести то, что даёт эталон.
+    Ответ ученика сверяется с solution как текст (одна каноническая форма — её требует условие)."""
+    with shellrun.ShellSandbox() as sb:
+        if setup.strip():
+            sb.run(setup)
+        first = sb.run(solution)
+        res = sb.run(check)
+    assert first["status"] == "OK" and res["status"] == "OK", (id, first, res)
+    expected = res["stdout"].rstrip("\n")
+    assert expected.strip(), (id, "проверка ничего не выводит — задание нельзя отличить от ошибки")
+    for w, why in wrong:
+        assert w.strip() != solution.strip(), (id, "неверный ответ совпал с верным", why)
+        with shellrun.ShellSandbox() as sb:
+            if setup.strip():
+                sb.run(setup)
+            sb.run(w)
+            r2 = sb.run(check)
+        assert r2["stdout"].rstrip("\n").strip() != expected.strip(), (id, "неверная команда на самом деле выполняет задание", why)
+    a = asg(id, "write", title, statement, _text(goal, title), "Текст команды.", "Одна команда, как в терминале.",
+            ["Ответьте точной командой из условия, без лишних пробелов."], hints_,
+            {"kind": "answer", "expected_answer": solution.strip(), "shell": {"setup": setup, "check": check, "expected": expected}},
+            solution.strip(), explanation, criteria or ["Команда записана без ошибок."], wrong)
+    return a
+
+
 # --- уроки и пакеты ------------------------------------------------------------------------------
 def finish(lid, title, goal, skills, prereq, scenes, notes, tasks, mistakes, *, pack, runner="W", min_pass=None):
     """skills — словарь id → название (попадает в pack.json)."""
@@ -193,6 +255,8 @@ def finish(lid, title, goal, skills, prereq, scenes, notes, tasks, mistakes, *, 
 
 
 PACK_META = {
+    "git-github": dict(stage=5, title="Git и GitHub", language="bash", requires=["python-basics"],
+        description="Репозитории, commit, история, ветки, слияние, конфликты, удалённые репозитории и README — на настоящих командах Git (проверены в песочнице)."),
     "python-core": dict(stage=3, title="Python: функции, коллекции, файлы, ООП", language="python", requires=["python-basics"],
         description="Функции, кортежи и множества, словари, исключения, файлы, JSON, модули, классы, асинхронность и HTTP — продолжение курса Python."),
     "algorithms": dict(stage=4, title="Алгоритмы и структуры данных", language="python", requires=["python-core"],

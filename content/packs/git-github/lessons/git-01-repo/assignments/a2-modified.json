@@ -1,0 +1,41 @@
+{
+  "id": "a2-modified",
+  "type": "predict",
+  "title": "Изменённый файл",
+  "statement": "Что выведут эти команды? Запишите вывод построчно, не запуская их.",
+  "goal": "Изменённый файл",
+  "input": "Нет.",
+  "expectedResult": "Вывод команд.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "git init -q\necho one > a.txt\ngit add a.txt\ngit commit -q -m \"a\"\necho two >> a.txt\necho new > b.txt\ngit status -s\n",
+  "hints": [
+    "Файл a.txt уже в истории, а потом его изменили.",
+    "Изменение не добавлено в индекс — M стоит во втором столбце (после пробела).",
+    "Новый файл b.txt неотслеживаемый: ??.",
+    "Первая строка — a.txt, вторая — b.txt.",
+    "Строка для изменённого файла начинается с пробела: ' M a.txt'."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": " M a.txt\n?? b.txt"
+  },
+  "solution": " M a.txt\n?? b.txt",
+  "explanation": "Первый столбец — состояние индекса, второй — рабочей папки: ' M' значит «изменён, но не добавлен».",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "M  a.txt\n?? b.txt",
+      "answer": "M  a.txt\n?? b.txt",
+      "why": "Изменение a.txt ещё не добавлено в индекс: буква M стоит во втором столбце."
+    },
+    {
+      "code": " M a.txt\nA  b.txt",
+      "answer": " M a.txt\nA  b.txt",
+      "why": "Файл b.txt новый и не добавлен в индекс: статус ??."
+    }
+  ]
+}

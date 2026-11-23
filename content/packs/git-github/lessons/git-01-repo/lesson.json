@@ -1,0 +1,43 @@
+{
+  "id": "git-01-repo",
+  "title": "Первый репозиторий",
+  "goal": "Создать репозиторий, добавить файлы в индекс, сделать коммит и посмотреть историю.",
+  "skills": [
+    "git.init",
+    "git.commit",
+    "git.log"
+  ],
+  "prerequisites": [],
+  "runner": "A",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-status.json",
+    "assignments/a2-modified.json",
+    "assignments/a3-add-all.json",
+    "assignments/a4-commit.json",
+    "assignments/a5-log.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Выполняют git commit, не сделав git add",
+      "fix": "Сначала добавьте изменения в индекс: Git сохраняет только то, что в индексе."
+    },
+    {
+      "mistake": "Пишут бессмысленные сообщения: «правки», «ё»",
+      "fix": "Описывайте, что и зачем изменено, коротко и по делу."
+    },
+    {
+      "mistake": "Удаляют папку .git",
+      "fix": "В ней вся история — не трогайте её."
+    },
+    {
+      "mistake": "Запускают git status не в той папке",
+      "fix": "Проверьте pwd: нужна папка репозитория."
+    }
+  ]
+}

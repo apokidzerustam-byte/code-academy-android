@@ -11,7 +11,8 @@
 
 Языки: Python — ca_runner (FastAPI — тоже, нужен pip-пакет fastapi); HTML/CSS/JS, SQL и разбор
 Kotlin — ТОТ ЖЕ веб-раннер, что в приложении (web-runner/tools/run-jobs.mjs, настольный Chromium);
-программы на Kotlin компилируются и запускаются настоящим kotlinc (переменная KOTLINC или PATH).
+программы на Kotlin компилируются и запускаются настоящим kotlinc (переменная KOTLINC или PATH);
+уроки по терминалу и Git (язык пакета bash) — настоящими bash и git в временной среде (tools/shellrun.py).
 
 Использование: python tools/validate_content.py content/packs [--json report.json] [--require-kotlinc]
 Код возврата 1 при ошибках.
@@ -31,6 +32,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 RUNNER_DIR = ROOT / "app" / "src" / "main" / "python"
 sys.path.insert(0, str(RUNNER_DIR))
 import ca_runner  # noqa: E402
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import shellrun  # noqa: E402
 import jsonschema  # noqa: E402
 import importlib.util as _ilu  # noqa: E402
 
@@ -107,10 +110,11 @@ def run_code(code, stdin=""):
 # ---------------------------------------------------------------------------
 
 WEB_LANGS = {"html", "js", "sql", "kotlin"}
-EXT_LANG = {"py": "python", "html": "html", "htm": "html", "js": "js", "sql": "sql", "kt": "kotlin", "kts": "kotlin"}
+EXT_LANG = {"sh": "bash", "bash": "bash", "py": "python", "html": "html", "htm": "html", "js": "js", "sql": "sql", "kt": "kotlin", "kts": "kotlin"}
 KINDS = {
     "python": {"stdout", "function", "answer", "fastapi"},
     "html": {"web", "answer"}, "js": {"web", "answer"}, "sql": {"sql", "answer"}, "kotlin": {"kotlin", "answer"},
+    "bash": {"answer"},
 }
 
 
@@ -265,6 +269,8 @@ def start_run(rep, where, lang, code, files, entry, stdin=""):
 
 def validate_scenario(path, scen, rep):
     files, last, words = {}, None, 0
+    # Терминал (файлы .sh): команды, набранные с прошлого запуска, выполняются в одном «сеансе» на весь урок.
+    term, pending = None, {}
     for scene in scen["scenes"]:
         where = f"{path}#{scene['id']}"
         words += len(re.findall(r"\w+", scene["narration"]))
@@ -283,13 +289,24 @@ def validate_scenario(path, scen, rep):
             t = a["type"]
             if t == "clear":
                 files[f] = ""
+                pending[f] = ""
             elif t == "type":
                 files[f] = files.get(f, "") + a["text"]
+                pending[f] = pending.get(f, "") + a["text"]
             elif t == "run":
                 rf = a.get("file", "main.py")
-                last = start_run(rep, where, lang_of_file(rf), files.get(rf, ""), files, rf, a.get("stdin", ""))
-                if last is None:
-                    last = "skip"
+                if lang_of_file(rf) == "bash":
+                    if NO_RUN or not shellrun.have_tools():
+                        rep.warn(where, "bash/git не найдены — вывод терминала не проверен")
+                        last = "skip"
+                    else:
+                        term = term or shellrun.ShellSandbox()
+                        last = term.run(pending.get(rf, ""))
+                        pending[rf] = ""
+                else:
+                    last = start_run(rep, where, lang_of_file(rf), files.get(rf, ""), files, rf, a.get("stdin", ""))
+                    if last is None:
+                        last = "skip"
             elif t == "output":
                 if last is None:
                     rep.err(where, f"действие {i}: output без предшествующего run")
@@ -308,6 +325,8 @@ def validate_scenario(path, scen, rep):
                 bad = [ln for ln in a["lines"] if ln > n]
                 if bad:
                     rep.err(where, f"действие {i}: подсветка строк {bad}, а в файле {n} строк")
+    if term is not None:
+        term.close()
     minutes = words / WORDS_PER_MIN
     validate_audio(path.parent, scen, rep)
     return words, minutes
@@ -407,6 +426,47 @@ def validate_web_assignment(path, a, rep, lang):
                 rep.err(where, f"эталон на Kotlin выводит {rr['stdout']!r}, а ожидается {jvm['expected_stdout']!r}")
 
 
+def _validate_shell_answer(rep, where, a, tests):
+    """Задания по терминалу и Git. Два вида:
+      * «предскажи вывод» — code (сценарий оболочки) выполняется в чистой среде, вывод = expected_answer;
+      * «введи команду» — tests.shell = {setup, check, expected}: после setup выполняется ответ, затем check
+        должен вывести expected; все неверные ответы (wrongSolutions) этого не дают.
+    """
+    if not shellrun.have_tools():
+        rep.warn(where, "bash/git не найдены — задание по терминалу не проверено")
+        return
+    sh = tests.get("shell")
+    if sh is None:
+        r = shellrun.run_script(a["code"])
+        if r["status"] != "OK":
+            rep.err(where, f"сценарий для предсказания не выполняется: {r['stderr']}")
+        elif norm(r["stdout"]) != norm(tests["expected_answer"]):
+            rep.err(where, f"expected_answer {tests['expected_answer']!r} не совпадает с реальным выводом {r['stdout']!r}")
+        return
+    for key in ("setup", "check", "expected"):
+        if key not in sh:
+            rep.err(where, f"tests.shell: нет ключа {key!r}")
+            return
+
+    def outcome(cmd):
+        with shellrun.ShellSandbox() as sb:
+            if sh["setup"].strip():
+                sb.run(sh["setup"])
+            first = sb.run(cmd)
+            res = sb.run(sh["check"])
+            return first, res
+
+    first, res = outcome(a["solution"])
+    if first["status"] != "OK" or res["status"] != "OK":
+        rep.err(where, f"эталонная команда не выполняется: {first['stderr']} {res['stderr']}")
+    elif norm(res["stdout"]) != norm(sh["expected"]):
+        rep.err(where, f"после эталонной команды проверка выводит {res['stdout']!r}, а ожидается {sh['expected']!r}")
+    for w in a.get("wrongSolutions", []):
+        first, res = outcome(w.get("answer", w["code"]))
+        if res["status"] == "OK" and norm(res["stdout"]) == norm(sh["expected"]):
+            rep.err(where, f"неверный ответ «{w['why']}» на самом деле выполняет задание")
+
+
 def validate_assignment(path, a, rep, lang="python"):
     where = str(path)
     tests = a["tests"]
@@ -417,7 +477,9 @@ def validate_assignment(path, a, rep, lang="python"):
         validate_web_assignment(path, a, rep, lang)
         return
     if tests["kind"] == "answer":
-        if lang == "python":
+        if lang == "bash":
+            _validate_shell_answer(rep, where, a, tests)
+        elif lang == "python":
             _check_answer_output(rep, where, tests, run_code(a["code"]))
         elif lang == "html":
             pass  # ответ — вид страницы, а не вывод; сверяется скриптом урока по настоящему рендеру
@@ -494,7 +556,8 @@ def validate_pack(pack_dir, rep):
         lesson = load_json(ldir / "lesson.json", "lesson", rep)
         if not lesson:
             continue
-        lesson_lang = lesson.get("runner", "W") if lesson.get("runner") in WEB_LANGS else "python"
+        lesson_lang = ("bash" if pack.get("language") == "bash"
+                       else lesson.get("runner", "W") if lesson.get("runner") in WEB_LANGS else "python")
         if lesson["id"] != lid:
             rep.err(str(ldir), f"id урока {lesson['id']!r} не совпадает с папкой {lid!r}")
         titles = pack.get("skills", {})

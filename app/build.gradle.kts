@@ -110,6 +110,14 @@ android {
 
     testOptions {
         unitTests.isReturnDefaultValues = true
+        // Сообщения упавших тестов — в журнал сборки (иначе в CI видно только «AssertionError at …»).
+        unitTests.all {
+            it.testLogging {
+                events("failed")
+                exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+                showCauses = true
+            }
+        }
     }
 
     androidResources {
