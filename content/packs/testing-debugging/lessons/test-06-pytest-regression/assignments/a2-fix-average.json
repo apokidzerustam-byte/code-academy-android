@@ -1,0 +1,50 @@
+{
+  "id": "a2-fix-average",
+  "type": "fix",
+  "title": "Починить по падающим тестам",
+  "statement": "Запускатель показывает, что тесты для `average` падают. Исправьте **функцию** `average`, не меняя тесты и запускатель, чтобы все три теста прошли.",
+  "goal": "Исправить функцию по падающим тестам.",
+  "input": "Определяется условием.",
+  "expectedResult": "Три PASS и строка «итого: 3 пройдено, 0 упало».",
+  "constraints": [],
+  "starterCode": "def run_tests(namespace):\n    passed = failed = 0\n    for name, func in list(namespace.items()):\n        if name.startswith(\"test_\") and callable(func):\n            try:\n                func()\n            except AssertionError:\n                print(\"FAIL\", name)\n                failed += 1\n            except Exception as error:\n                print(\"ERROR\", name, type(error).__name__)\n                failed += 1\n            else:\n                print(\"PASS\", name)\n                passed += 1\n    print(f\"итого: {passed} пройдено, {failed} упало\")\n\n\ndef average(numbers):\n    return sum(numbers) / (len(numbers) + 1)\n\n\ndef test_average_two():\n    assert average([2, 4]) == 3\n\n\ndef test_average_single():\n    assert average([5]) == 5\n\n\ndef test_average_empty():\n    assert average([]) == 0\n\n\nrun_tests(globals())\n",
+  "hints": [
+    "Сначала запустите код и посмотрите, какие тесты упали.",
+    "Среднее — сумма, делённая на количество элементов.",
+    "Сейчас в знаменателе лишняя единица.",
+    "Пустой список даёт деление на ноль: его нужно обработать отдельно.",
+    "Для пустого списка верните 0, иначе — сумму, делённую на len."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "",
+        "expected_stdout": "PASS test_average_two\nPASS test_average_single\nPASS test_average_empty\nитого: 3 пройдено, 0 упало\n"
+      }
+    ]
+  },
+  "solution": "def run_tests(namespace):\n    passed = failed = 0\n    for name, func in list(namespace.items()):\n        if name.startswith(\"test_\") and callable(func):\n            try:\n                func()\n            except AssertionError:\n                print(\"FAIL\", name)\n                failed += 1\n            except Exception as error:\n                print(\"ERROR\", name, type(error).__name__)\n                failed += 1\n            else:\n                print(\"PASS\", name)\n                passed += 1\n    print(f\"итого: {passed} пройдено, {failed} упало\")\n\n\ndef average(numbers):\n    if not numbers:\n        return 0\n    return sum(numbers) / len(numbers)\n\n\ndef test_average_two():\n    assert average([2, 4]) == 3\n\n\ndef test_average_single():\n    assert average([5]) == 5\n\n\ndef test_average_empty():\n    assert average([]) == 0\n\n\nrun_tests(globals())\n",
+  "explanation": "Тесты показали две ошибки: лишняя единица в знаменателе и отсутствие обработки пустого списка. Исправляя по одной, проверяйте, что тесты стали зелёными.",
+  "criteria": [
+    "Среднее считается верно.",
+    "Пустой список даёт 0.",
+    "Все тесты проходят."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def run_tests(namespace):\n    passed = failed = 0\n    for name, func in list(namespace.items()):\n        if name.startswith(\"test_\") and callable(func):\n            try:\n                func()\n            except AssertionError:\n                print(\"FAIL\", name)\n                failed += 1\n            except Exception as error:\n                print(\"ERROR\", name, type(error).__name__)\n                failed += 1\n            else:\n                print(\"PASS\", name)\n                passed += 1\n    print(f\"итого: {passed} пройдено, {failed} упало\")\n\n\ndef average(numbers):\n    return sum(numbers) / (len(numbers) + 1)\n\n\ndef test_average_two():\n    assert average([2, 4]) == 3\n\n\ndef test_average_single():\n    assert average([5]) == 5\n\n\ndef test_average_empty():\n    assert average([]) == 0\n\n\nrun_tests(globals())\n",
+      "why": "Исходный код: два теста падают, а третий даёт ошибку."
+    },
+    {
+      "code": "def run_tests(namespace):\n    passed = failed = 0\n    for name, func in list(namespace.items()):\n        if name.startswith(\"test_\") and callable(func):\n            try:\n                func()\n            except AssertionError:\n                print(\"FAIL\", name)\n                failed += 1\n            except Exception as error:\n                print(\"ERROR\", name, type(error).__name__)\n                failed += 1\n            else:\n                print(\"PASS\", name)\n                passed += 1\n    print(f\"итого: {passed} пройдено, {failed} упало\")\n\n\ndef average(numbers):\n    return sum(numbers) / len(numbers)\n\n\ndef test_average_two():\n    assert average([2, 4]) == 3\n\n\ndef test_average_single():\n    assert average([5]) == 5\n\n\ndef test_average_empty():\n    assert average([]) == 0\n\n\nrun_tests(globals())\n",
+      "why": "Деление исправлено, но пустой список по-прежнему делит на ноль."
+    },
+    {
+      "code": "def run_tests(namespace):\n    passed = failed = 0\n    for name, func in list(namespace.items()):\n        if name.startswith(\"test_\") and callable(func):\n            try:\n                func()\n            except AssertionError:\n                print(\"FAIL\", name)\n                failed += 1\n            except Exception as error:\n                print(\"ERROR\", name, type(error).__name__)\n                failed += 1\n            else:\n                print(\"PASS\", name)\n                passed += 1\n    print(f\"итого: {passed} пройдено, {failed} упало\")\n\n\ndef average(numbers):\n    if not numbers:\n        return 0\n    return sum(numbers) / (len(numbers) + 1)\n\n\ndef test_average_two():\n    assert average([2, 4]) == 3\n\n\ndef test_average_single():\n    assert average([5]) == 5\n\n\ndef test_average_empty():\n    assert average([]) == 0\n\n\nrun_tests(globals())\n",
+      "why": "Пустой список обработан, но деление всё ещё на лишнюю единицу."
+    }
+  ]
+}

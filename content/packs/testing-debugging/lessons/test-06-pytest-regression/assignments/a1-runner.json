@@ -1,0 +1,41 @@
+{
+  "id": "a1-runner",
+  "type": "predict",
+  "title": "Результат запуска тестов",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Результат запуска тестов",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "def run_tests(namespace):\n    passed = failed = 0\n    for name, func in list(namespace.items()):\n        if name.startswith(\"test_\") and callable(func):\n            try:\n                func()\n            except AssertionError:\n                print(\"FAIL\", name)\n                failed += 1\n            except Exception as error:\n                print(\"ERROR\", name, type(error).__name__)\n                failed += 1\n            else:\n                print(\"PASS\", name)\n                passed += 1\n    print(f\"итого: {passed} пройдено, {failed} упало\")\n\n\ndef double(x):\n    return x * 2\n\n\ndef test_double_int():\n    assert double(4) == 8\n\n\ndef test_double_str():\n    assert double(\"ab\") == \"abab\"\n\n\ndef test_double_zero():\n    assert double(0) == 1\n\n\ndef test_double_list():\n    assert double([1]) == [1, 1]\n\n\nrun_tests(globals())\n",
+  "hints": [
+    "Запускатель перебирает функции в том порядке, в каком они записаны.",
+    "Для каждой функции test_… он вызывает её и смотрит на результат.",
+    "Если assert не сошёлся, печатается FAIL, иначе PASS.",
+    "Проверьте каждое утверждение: умножение работает и для чисел, и для строк, и для списков.",
+    "Последняя строка — итог: сколько прошло и сколько упало."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "PASS test_double_int\nPASS test_double_str\nFAIL test_double_zero\nPASS test_double_list\nитого: 3 пройдено, 1 упало\n"
+  },
+  "solution": "PASS test_double_int\nPASS test_double_str\nFAIL test_double_zero\nPASS test_double_list\nитого: 3 пройдено, 1 упало\n",
+  "explanation": "Запускатель вызывает тесты в порядке записи. Упал один тест: double(0) равно 0, а не 1. Остальные проходят, а строка итога считает оба числа.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "PASS test_double_int\nPASS test_double_list\nPASS test_double_str\nFAIL test_double_zero\nитого: 3 пройдено, 1 упало",
+      "answer": "PASS test_double_int\nPASS test_double_list\nPASS test_double_str\nFAIL test_double_zero\nитого: 3 пройдено, 1 упало",
+      "why": "Тесты запускаются в порядке записи в файле, а не по алфавиту."
+    },
+    {
+      "code": "PASS test_double_int\nPASS test_double_str\nPASS test_double_zero\nPASS test_double_list\nитого: 4 пройдено, 0 упало",
+      "answer": "PASS test_double_int\nPASS test_double_str\nPASS test_double_zero\nPASS test_double_list\nитого: 4 пройдено, 0 упало",
+      "why": "Тест с нулём неверный: 0 * 2 равно 0, а не 1."
+    }
+  ]
+}

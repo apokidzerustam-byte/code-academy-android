@@ -1,0 +1,49 @@
+{
+  "id": "a5-clamp",
+  "type": "complete",
+  "title": "Тест, который ловит обе ошибки",
+  "statement": "Функция `clamp(x, low, high)` ограничивает число диапазоном. Кроме верной версии есть две ошибочные: `clamp_no_upper` забыла верхнюю границу, `clamp_no_lower` — нижнюю. Допишите `check_clamp(impl)` так, чтобы она **проходила** на верной и **падала** на обеих ошибочных. Подсказка: нужны значения внутри диапазона, ниже и выше него.",
+  "goal": "Написать тест, различающий верную и две ошибочные версии.",
+  "input": "Определяется условием.",
+  "expectedResult": "PASS, FAIL, FAIL",
+  "constraints": [],
+  "starterCode": "def clamp(x, low, high):\n    return max(low, min(x, high))\n\n\ndef clamp_no_upper(x, low, high):\n    return max(low, x)\n\n\ndef clamp_no_lower(x, low, high):\n    return min(x, high)\n\n\ndef check_clamp(impl):\n    # ваши проверки: верная версия проходит, обе неверные — падают\n    pass\n\n\ndef verdict(check, impl):\n    try:\n        check(impl)\n        return \"PASS\"\n    except Exception:\n        return \"FAIL\"\n\n\nprint(verdict(check_clamp, clamp))\nprint(verdict(check_clamp, clamp_no_upper))\nprint(verdict(check_clamp, clamp_no_lower))\n",
+  "hints": [
+    "Каждая из двух ошибочных версий ломает свою границу.",
+    "Одним значением обе ошибки не поймать.",
+    "Нужно значение внутри диапазона, ниже нижней и выше верхней границы.",
+    "На каждом значении сравнивайте результат impl с ожидаемым.",
+    "Внутри — число без изменений, ниже — low, выше — high."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "",
+        "expected_stdout": "PASS\nFAIL\nFAIL\n"
+      }
+    ]
+  },
+  "solution": "def clamp(x, low, high):\n    return max(low, min(x, high))\n\n\ndef clamp_no_upper(x, low, high):\n    return max(low, x)\n\n\ndef clamp_no_lower(x, low, high):\n    return min(x, high)\n\n\ndef check_clamp(impl):\n    assert impl(5, 0, 10) == 5\n    assert impl(-3, 0, 10) == 0\n    assert impl(15, 0, 10) == 10\n\n\ndef verdict(check, impl):\n    try:\n        check(impl)\n        return \"PASS\"\n    except Exception:\n        return \"FAIL\"\n\n\nprint(verdict(check_clamp, clamp))\nprint(verdict(check_clamp, clamp_no_upper))\nprint(verdict(check_clamp, clamp_no_lower))\n",
+  "explanation": "Чтобы поймать обе ошибки, нужны три проверки: внутри диапазона, ниже нижней границы и выше верхней. Каждая ошибочная версия ломается на своём значении.",
+  "criteria": [
+    "Верная версия проходит.",
+    "Обе ошибочные версии падают."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def clamp(x, low, high):\n    return max(low, min(x, high))\n\n\ndef clamp_no_upper(x, low, high):\n    return max(low, x)\n\n\ndef clamp_no_lower(x, low, high):\n    return min(x, high)\n\n\ndef check_clamp(impl):\n    # ваши проверки: верная версия проходит, обе неверные — падают\n    pass\n\n\ndef verdict(check, impl):\n    try:\n        check(impl)\n        return \"PASS\"\n    except Exception:\n        return \"FAIL\"\n\n\nprint(verdict(check_clamp, clamp))\nprint(verdict(check_clamp, clamp_no_upper))\nprint(verdict(check_clamp, clamp_no_lower))\n",
+      "why": "Пустая проверка проходит на всех трёх версиях."
+    },
+    {
+      "code": "def clamp(x, low, high):\n    return max(low, min(x, high))\n\n\ndef clamp_no_upper(x, low, high):\n    return max(low, x)\n\n\ndef clamp_no_lower(x, low, high):\n    return min(x, high)\n\n\ndef check_clamp(impl):\n    assert impl(5, 0, 10) == 5\n\n\ndef verdict(check, impl):\n    try:\n        check(impl)\n        return \"PASS\"\n    except Exception:\n        return \"FAIL\"\n\n\nprint(verdict(check_clamp, clamp))\nprint(verdict(check_clamp, clamp_no_upper))\nprint(verdict(check_clamp, clamp_no_lower))\n",
+      "why": "Проверено только значение внутри диапазона: ошибки не пойманы."
+    },
+    {
+      "code": "def clamp(x, low, high):\n    return max(low, min(x, high))\n\n\ndef clamp_no_upper(x, low, high):\n    return max(low, x)\n\n\ndef clamp_no_lower(x, low, high):\n    return min(x, high)\n\n\ndef check_clamp(impl):\n    assert impl(5, 0, 10) == 5\n    assert impl(-3, 0, 10) == 0\n\n\ndef verdict(check, impl):\n    try:\n        check(impl)\n        return \"PASS\"\n    except Exception:\n        return \"FAIL\"\n\n\nprint(verdict(check_clamp, clamp))\nprint(verdict(check_clamp, clamp_no_upper))\nprint(verdict(check_clamp, clamp_no_lower))\n",
+      "why": "Нижняя граница проверена, верхняя нет: clamp_no_upper проходит."
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "id": "test-06-pytest-regression",
+  "title": "Pytest-стиль и регрессионные тесты",
+  "goal": "Писать тесты в стиле pytest, различать юнит, интеграционные и сквозные тесты и оформлять найденные ошибки регрессионными тестами.",
+  "skills": [
+    "test.pyramid",
+    "test.pytest-style",
+    "test.regression"
+  ],
+  "prerequisites": [
+    "test-05-mocks"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-runner.json",
+    "assignments/a2-fix-average.json",
+    "assignments/a3-regression.json",
+    "assignments/a4-slugify.json",
+    "assignments/a5-clamp.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Тест без assert",
+      "fix": "Без проверки тест всегда зелёный и ничего не доказывает: проверяйте результат."
+    },
+    {
+      "mistake": "Баг исправили, а теста не оставили",
+      "fix": "Сначала напишите тест, воспроизводящий ошибку, затем исправляйте код и оставьте тест."
+    },
+    {
+      "mistake": "Проверяют только удобные значения",
+      "fix": "Добавляйте граничные случаи: ноль, пустой список, отрицательные числа, края диапазона."
+    },
+    {
+      "mistake": "Один огромный тест на всё",
+      "fix": "Один тест — одна идея: при падении сразу видно причину."
+    }
+  ]
+}

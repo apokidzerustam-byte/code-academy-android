@@ -1,0 +1,49 @@
+{
+  "id": "a3-regression",
+  "type": "complete",
+  "title": "Регрессионная проверка",
+  "statement": "Ошибка найдена: `buggy_average([])` делит на ноль, а исправленная `average([])` возвращает `0`. Допишите функцию `check_empty(avg)` так, чтобы она **падала** на старой версии и **проходила** на новой. Программа это проверит и выведет вердикт для каждой версии.",
+  "goal": "Написать тест, ловящий конкретную ошибку.",
+  "input": "Определяется условием.",
+  "expectedResult": "до исправления: FAIL; после исправления: PASS",
+  "constraints": [],
+  "starterCode": "def buggy_average(numbers):\n    return sum(numbers) / len(numbers)\n\n\ndef average(numbers):\n    if not numbers:\n        return 0\n    return sum(numbers) / len(numbers)\n\n\ndef check_empty(avg):\n    # напишите регрессионную проверку для пустого списка\n    pass\n\n\ndef verdict(check, impl):\n    try:\n        check(impl)\n        return \"PASS\"\n    except Exception:\n        return \"FAIL\"\n\n\nprint(\"до исправления:\", verdict(check_empty, buggy_average))\nprint(\"после исправления:\", verdict(check_empty, average))\n",
+  "hints": [
+    "Регрессионный тест должен воспроизводить найденную ошибку.",
+    "Ошибка проявляется на пустом списке.",
+    "Проверка падает, если assert не сошёлся, или если функция выбросила исключение.",
+    "Вызовите переданную функцию avg с пустым списком.",
+    "Ожидаемое значение для пустого списка — 0."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "",
+        "expected_stdout": "до исправления: FAIL\nпосле исправления: PASS\n"
+      }
+    ]
+  },
+  "solution": "def buggy_average(numbers):\n    return sum(numbers) / len(numbers)\n\n\ndef average(numbers):\n    if not numbers:\n        return 0\n    return sum(numbers) / len(numbers)\n\n\ndef check_empty(avg):\n    assert avg([]) == 0\n\n\ndef verdict(check, impl):\n    try:\n        check(impl)\n        return \"PASS\"\n    except Exception:\n        return \"FAIL\"\n\n\nprint(\"до исправления:\", verdict(check_empty, buggy_average))\nprint(\"после исправления:\", verdict(check_empty, average))\n",
+  "explanation": "Регрессионный тест воспроизводит найденную ошибку. Старая версия падает на пустом списке, новая возвращает 0, поэтому проверка assert avg([]) == 0 различает версии.",
+  "criteria": [
+    "Падает на багованной версии.",
+    "Проходит на исправленной."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def buggy_average(numbers):\n    return sum(numbers) / len(numbers)\n\n\ndef average(numbers):\n    if not numbers:\n        return 0\n    return sum(numbers) / len(numbers)\n\n\ndef check_empty(avg):\n    # напишите регрессионную проверку для пустого списка\n    pass\n\n\ndef verdict(check, impl):\n    try:\n        check(impl)\n        return \"PASS\"\n    except Exception:\n        return \"FAIL\"\n\n\nprint(\"до исправления:\", verdict(check_empty, buggy_average))\nprint(\"после исправления:\", verdict(check_empty, average))\n",
+      "why": "Проверка пустая: проходит на обеих версиях, ошибку не ловит."
+    },
+    {
+      "code": "def buggy_average(numbers):\n    return sum(numbers) / len(numbers)\n\n\ndef average(numbers):\n    if not numbers:\n        return 0\n    return sum(numbers) / len(numbers)\n\n\ndef check_empty(avg):\n    assert avg([1, 3]) == 2\n\n\ndef verdict(check, impl):\n    try:\n        check(impl)\n        return \"PASS\"\n    except Exception:\n        return \"FAIL\"\n\n\nprint(\"до исправления:\", verdict(check_empty, buggy_average))\nprint(\"после исправления:\", verdict(check_empty, average))\n",
+      "why": "Проверка не затрагивает пустой список: старая версия тоже проходит."
+    },
+    {
+      "code": "def buggy_average(numbers):\n    return sum(numbers) / len(numbers)\n\n\ndef average(numbers):\n    if not numbers:\n        return 0\n    return sum(numbers) / len(numbers)\n\n\ndef check_empty(avg):\n    assert True\n\n\ndef verdict(check, impl):\n    try:\n        check(impl)\n        return \"PASS\"\n    except Exception:\n        return \"FAIL\"\n\n\nprint(\"до исправления:\", verdict(check_empty, buggy_average))\nprint(\"после исправления:\", verdict(check_empty, average))\n",
+      "why": "assert True никогда не падает: тест ничего не проверяет."
+    }
+  ]
+}
