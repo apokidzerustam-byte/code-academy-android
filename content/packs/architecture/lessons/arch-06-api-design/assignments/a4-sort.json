@@ -1,0 +1,103 @@
+{
+  "id": "a4-sort",
+  "type": "write",
+  "title": "Разбор сортировки",
+  "statement": "Параметр сортировки в адресе выглядит так: `-price` значит «по убыванию цены», `price` — «по возрастанию». Напишите `parse_sort(value)`: верните словарь `{\"field\": …, \"order\": …}` (`\"asc\"` или `\"desc\"`). Если после минуса поля нет или строка пуста, верните `None`.",
+  "goal": "Разобрать параметр сортировки.",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def parse_sort(value):\n    # \"-price\" -> {\"field\": \"price\", \"order\": \"desc\"}; \"price\" -> {\"field\": \"price\", \"order\": \"asc\"}; пустое поле -> None\n    pass\n",
+  "hints": [
+    "Порядок определяет первый символ: минус — по убыванию.",
+    "Поле — это строка без минуса.",
+    "Проверить начало строки можно методом startswith.",
+    "Минус отрезается срезом value[1:].",
+    "Если поля после минуса нет (строка пустая) — верните None."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "parse_sort",
+    "cases": [
+      {
+        "args": [
+          "-price"
+        ],
+        "id": "v1",
+        "expected": {
+          "field": "price",
+          "order": "desc"
+        }
+      },
+      {
+        "args": [
+          "price"
+        ],
+        "id": "v2",
+        "expected": {
+          "field": "price",
+          "order": "asc"
+        }
+      },
+      {
+        "args": [
+          "-created"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": {
+          "field": "created",
+          "order": "desc"
+        }
+      },
+      {
+        "args": [
+          ""
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": null
+      },
+      {
+        "args": [
+          "-"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": null
+      },
+      {
+        "args": [
+          "name"
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": {
+          "field": "name",
+          "order": "asc"
+        }
+      }
+    ]
+  },
+  "solution": "def parse_sort(value):\n    order = \"asc\"\n    if value.startswith(\"-\"):\n        order = \"desc\"\n        value = value[1:]\n    if not value:\n        return None\n    return {\"field\": value, \"order\": order}\n",
+  "explanation": "Соглашение «минус — по убыванию» удобно тем, что адрес остаётся коротким. Разбор отделяет порядок от названия поля и проверяет пустое значение.",
+  "criteria": [
+    "Минус даёт desc.",
+    "Поле без минуса.",
+    "Пустое значение — None."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def parse_sort(value):\n    order = \"asc\"\n    if value.startswith(\"-\"):\n        order = \"desc\"\n    if not value:\n        return None\n    return {\"field\": value, \"order\": order}\n",
+      "why": "Минус остаётся в названии поля: -price вместо price."
+    },
+    {
+      "code": "def parse_sort(value):\n    order = \"asc\"\n    if value.startswith(\"-\"):\n        order = \"asc\"\n        value = value[1:]\n    if not value:\n        return None\n    return {\"field\": value, \"order\": order}\n",
+      "why": "Порядок по убыванию не распознаётся."
+    },
+    {
+      "code": "def parse_sort(value):\n    order = \"asc\"\n    if value.startswith(\"-\"):\n        order = \"desc\"\n        value = value[1:]\n    return {\"field\": value, \"order\": order}\n",
+      "why": "Пустое поле возвращает словарь, а должен быть None."
+    }
+  ]
+}

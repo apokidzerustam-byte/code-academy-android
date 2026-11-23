@@ -1,0 +1,41 @@
+{
+  "id": "a1-statuses",
+  "type": "predict",
+  "title": "Коды ответов",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Коды ответов",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "USERS = {1: {\"id\": 1, \"name\": \"Анна\"}, 2: {\"id\": 2, \"name\": \"Борис\"}}\n\n\ndef api(method, url, body=None):\n    parts = url.strip(\"/\").split(\"/\")\n    if parts[0] != \"users\":\n        return 404, {\"error\": \"нет такого адреса\"}\n\n    if len(parts) == 1:\n        if method == \"GET\":\n            return 200, list(USERS.values())\n        if method == \"POST\":\n            new_id = max(USERS, default=0) + 1\n            USERS[new_id] = {\"id\": new_id, **body}\n            return 201, USERS[new_id]\n        return 405, {\"error\": \"метод не разрешён\"}\n    user_id = int(parts[1])\n    if user_id not in USERS:\n        return 404, {\"error\": \"пользователь не найден\"}\n    if method == \"GET\":\n        return 200, USERS[user_id]\n    if method == \"DELETE\":\n        del USERS[user_id]\n        return 204, None\n    return 405, {\"error\": \"метод не разрешён\"}\n\n\n\nrequests = [\n    (\"POST\", \"/users\", {\"name\": \"Вера\"}),\n    (\"GET\", \"/users/3\", None),\n    (\"DELETE\", \"/users/3\", None),\n    (\"DELETE\", \"/users/3\", None),\n    (\"PATCH\", \"/users/2\", None),\n    (\"GET\", \"/orders\", None),\n]\nfor method, url, body in requests:\n    status, _ = api(method, url, body)\n    print(method, url, status)\n",
+  "hints": [
+    "POST создаёт пользователя: его номер на единицу больше наибольшего, то есть 3.",
+    "GET для существующего пользователя отвечает 200.",
+    "Первый DELETE удаляет пользователя и отвечает 204 — успех без тела.",
+    "Второй DELETE: пользователя 3 уже нет, ответ 404.",
+    "Для PATCH пользователь 2 существует, но метода PATCH в модели нет — 405; адреса /orders нет вовсе — 404."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "POST /users 201\nGET /users/3 200\nDELETE /users/3 204\nDELETE /users/3 404\nPATCH /users/2 405\nGET /orders 404\n"
+  },
+  "solution": "POST /users 201\nGET /users/3 200\nDELETE /users/3 204\nDELETE /users/3 404\nPATCH /users/2 405\nGET /orders 404\n",
+  "explanation": "Код ответа зависит от того, существует ли адрес и ресурс и разрешён ли метод: создание даёт 201, удаление 204, повторное удаление 404, неразрешённый метод 405, неизвестный адрес 404.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "POST /users 201\nGET /users/3 200\nDELETE /users/3 204\nDELETE /users/3 204\nPATCH /users/2 405\nGET /orders 404",
+      "answer": "POST /users 201\nGET /users/3 200\nDELETE /users/3 204\nDELETE /users/3 204\nPATCH /users/2 405\nGET /orders 404",
+      "why": "Пользователя 3 уже нет: повторный DELETE получает 404."
+    },
+    {
+      "code": "POST /users 201\nGET /users/3 200\nDELETE /users/3 204\nDELETE /users/3 404\nPATCH /users/2 404\nGET /orders 404",
+      "answer": "POST /users 201\nGET /users/3 200\nDELETE /users/3 204\nDELETE /users/3 404\nPATCH /users/2 404\nGET /orders 404",
+      "why": "Адрес /users/2 существует, но метод PATCH для него не разрешён: это 405."
+    }
+  ]
+}

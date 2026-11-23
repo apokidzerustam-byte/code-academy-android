@@ -1,0 +1,68 @@
+{
+  "id": "a2-fix-codes",
+  "type": "fix",
+  "title": "Исправить коды ответов",
+  "statement": "Модель сервера отвечает неточными кодами: создание — `200` вместо **201**, удаление — `200` вместо **204**, а неразрешённый метод для адреса `/users` — `404` вместо **405**. Исправьте функцию `api`. Первая строка ввода — число запросов, далее по строке: метод, адрес и (для POST) имя.",
+  "goal": "Привести коды ответов к соглашениям HTTP.",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "USERS = {1: {\"id\": 1, \"name\": \"Анна\"}, 2: {\"id\": 2, \"name\": \"Борис\"}}\n\n\ndef api(method, url, body=None):\n    parts = url.strip(\"/\").split(\"/\")\n    if parts[0] != \"users\":\n        return 404, {\"error\": \"нет такого адреса\"}\n\n    if len(parts) == 1:\n        if method == \"GET\":\n            return 200, list(USERS.values())\n        if method == \"POST\":\n            new_id = max(USERS, default=0) + 1\n            USERS[new_id] = {\"id\": new_id, **body}\n            return 200, USERS[new_id]\n        return 404, {\"error\": \"метод не разрешён\"}\n    user_id = int(parts[1])\n    if user_id not in USERS:\n        return 404, {\"error\": \"пользователь не найден\"}\n    if method == \"GET\":\n        return 200, USERS[user_id]\n    if method == \"DELETE\":\n        del USERS[user_id]\n        return 200, None\n    return 405, {\"error\": \"метод не разрешён\"}\n\n\nfor _ in range(int(input())):\n    method, url, *rest = input().split()\n    body = {\"name\": rest[0]} if rest else None\n    status, _ = api(method, url, body)\n    print(method, url, status)\n",
+  "hints": [
+    "Запустите программу и сравните коды с ожидаемыми: что неверно?",
+    "Создание ресурса отвечает кодом 201.",
+    "Удаление без тела в ответе — код 204.",
+    "Метод, не разрешённый для существующего адреса, — 405, а 404 — это «нет такого».",
+    "Меняйте только числа в return: логика функции верна."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "4\nPOST /users Вера\nDELETE /users/1\nPUT /users\nGET /users\n",
+        "expected_stdout": "POST /users 201\nDELETE /users/1 204\nPUT /users 405\nGET /users 200\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "3\nDELETE /users/9\nPATCH /users/2\nGET /users/2\n",
+        "expected_stdout": "DELETE /users/9 404\nPATCH /users/2 405\nGET /users/2 200\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "2\nPOST /users Лена\nPOST /users Олег\n",
+        "expected_stdout": "POST /users 201\nPOST /users 201\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "1\nDELETE /users\n",
+        "expected_stdout": "DELETE /users 405\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "USERS = {1: {\"id\": 1, \"name\": \"Анна\"}, 2: {\"id\": 2, \"name\": \"Борис\"}}\n\n\ndef api(method, url, body=None):\n    parts = url.strip(\"/\").split(\"/\")\n    if parts[0] != \"users\":\n        return 404, {\"error\": \"нет такого адреса\"}\n\n    if len(parts) == 1:\n        if method == \"GET\":\n            return 200, list(USERS.values())\n        if method == \"POST\":\n            new_id = max(USERS, default=0) + 1\n            USERS[new_id] = {\"id\": new_id, **body}\n            return 201, USERS[new_id]\n        return 405, {\"error\": \"метод не разрешён\"}\n    user_id = int(parts[1])\n    if user_id not in USERS:\n        return 404, {\"error\": \"пользователь не найден\"}\n    if method == \"GET\":\n        return 200, USERS[user_id]\n    if method == \"DELETE\":\n        del USERS[user_id]\n        return 204, None\n    return 405, {\"error\": \"метод не разрешён\"}\n\n\nfor _ in range(int(input())):\n    method, url, *rest = input().split()\n    body = {\"name\": rest[0]} if rest else None\n    status, _ = api(method, url, body)\n    print(method, url, status)\n",
+  "explanation": "Код ответа сообщает результат без чтения тела: 201 — создано, 204 — успех без тела, 405 — метод не разрешён, 404 — нет такого.",
+  "criteria": [
+    "Создание — 201.",
+    "Удаление — 204.",
+    "Неразрешённый метод — 405."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "USERS = {1: {\"id\": 1, \"name\": \"Анна\"}, 2: {\"id\": 2, \"name\": \"Борис\"}}\n\n\ndef api(method, url, body=None):\n    parts = url.strip(\"/\").split(\"/\")\n    if parts[0] != \"users\":\n        return 404, {\"error\": \"нет такого адреса\"}\n\n    if len(parts) == 1:\n        if method == \"GET\":\n            return 200, list(USERS.values())\n        if method == \"POST\":\n            new_id = max(USERS, default=0) + 1\n            USERS[new_id] = {\"id\": new_id, **body}\n            return 200, USERS[new_id]\n        return 404, {\"error\": \"метод не разрешён\"}\n    user_id = int(parts[1])\n    if user_id not in USERS:\n        return 404, {\"error\": \"пользователь не найден\"}\n    if method == \"GET\":\n        return 200, USERS[user_id]\n    if method == \"DELETE\":\n        del USERS[user_id]\n        return 200, None\n    return 405, {\"error\": \"метод не разрешён\"}\n\n\nfor _ in range(int(input())):\n    method, url, *rest = input().split()\n    body = {\"name\": rest[0]} if rest else None\n    status, _ = api(method, url, body)\n    print(method, url, status)\n",
+      "why": "Исходная версия: неточные коды."
+    },
+    {
+      "code": "USERS = {1: {\"id\": 1, \"name\": \"Анна\"}, 2: {\"id\": 2, \"name\": \"Борис\"}}\n\n\ndef api(method, url, body=None):\n    parts = url.strip(\"/\").split(\"/\")\n    if parts[0] != \"users\":\n        return 404, {\"error\": \"нет такого адреса\"}\n\n    if len(parts) == 1:\n        if method == \"GET\":\n            return 200, list(USERS.values())\n        if method == \"POST\":\n            new_id = max(USERS, default=0) + 1\n            USERS[new_id] = {\"id\": new_id, **body}\n            return 201, USERS[new_id]\n        return 404, {\"error\": \"метод не разрешён\"}\n    user_id = int(parts[1])\n    if user_id not in USERS:\n        return 404, {\"error\": \"пользователь не найден\"}\n    if method == \"GET\":\n        return 200, USERS[user_id]\n    if method == \"DELETE\":\n        del USERS[user_id]\n        return 200, None\n    return 405, {\"error\": \"метод не разрешён\"}\n\n\nfor _ in range(int(input())):\n    method, url, *rest = input().split()\n    body = {\"name\": rest[0]} if rest else None\n    status, _ = api(method, url, body)\n    print(method, url, status)\n",
+      "why": "Исправлено только создание: удаление и неразрешённый метод по-прежнему неверны."
+    },
+    {
+      "code": "USERS = {1: {\"id\": 1, \"name\": \"Анна\"}, 2: {\"id\": 2, \"name\": \"Борис\"}}\n\n\ndef api(method, url, body=None):\n    parts = url.strip(\"/\").split(\"/\")\n    if parts[0] != \"users\":\n        return 404, {\"error\": \"нет такого адреса\"}\n\n    if len(parts) == 1:\n        if method == \"GET\":\n            return 200, list(USERS.values())\n        if method == \"POST\":\n            new_id = max(USERS, default=0) + 1\n            USERS[new_id] = {\"id\": new_id, **body}\n            return 201, USERS[new_id]\n        return 405, {\"error\": \"метод не разрешён\"}\n    user_id = int(parts[1])\n    if user_id not in USERS:\n        return 404, {\"error\": \"пользователь не найден\"}\n    if method == \"GET\":\n        return 200, USERS[user_id]\n    if method == \"DELETE\":\n        del USERS[user_id]\n        return 200, None\n    return 405, {\"error\": \"метод не разрешён\"}\n\n\nfor _ in range(int(input())):\n    method, url, *rest = input().split()\n    body = {\"name\": rest[0]} if rest else None\n    status, _ = api(method, url, body)\n    print(method, url, status)\n",
+      "why": "Удаление должно отвечать кодом 204."
+    }
+  ]
+}

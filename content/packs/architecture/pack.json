@@ -14,7 +14,8 @@
     "arch-02-layers",
     "arch-03-dependencies",
     "arch-04-solid",
-    "arch-05-mvc-mvvm"
+    "arch-05-mvc-mvvm",
+    "arch-06-api-design"
   ],
   "skills": {
     "arch.srp": "Принцип единственной ответственности",
@@ -31,6 +32,9 @@
     "arch.observer": "Паттерн «Наблюдатель»",
     "arch.mvc": "MVC: модель, вид, контроллер",
     "arch.mvvm": "MVVM: вью-модель и подписка",
-    "arch.state": "Управление состоянием"
+    "arch.state": "Управление состоянием",
+    "arch.api-resources": "Ресурсы и методы HTTP",
+    "arch.api-pages": "Страницы, фильтры, сортировка",
+    "arch.api-errors": "Единый формат ошибок и версии"
   }
 }

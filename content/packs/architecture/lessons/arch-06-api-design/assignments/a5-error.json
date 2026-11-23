@@ -1,0 +1,152 @@
+{
+  "id": "a5-error",
+  "type": "write",
+  "title": "Тело ошибки",
+  "statement": "Напишите `error_response(status, message, details=None)`, которая возвращает `{\"error\": {\"status\": …, \"code\": …, \"message\": …, \"details\": …}}`. Код берётся из таблицы: 400 — `bad_request`, 401 — `unauthorized`, 403 — `forbidden`, 404 — `not_found`, 422 — `validation_error`; для любого другого статуса — `error`. `details` — список подробностей (например, имена полей с ошибкой); если он не передан, должен быть **пустой список**.",
+  "goal": "Собрать тело ошибки единого формата.",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def error_response(status, message, details=None):\n    # Верните {\"error\": {status, code, message, details}}; code берите из таблицы по статусу\n    pass\n",
+  "hints": [
+    "Тело — вложенный словарь: снаружи ключ error, внутри статус, код, сообщение и подробности.",
+    "Таблицу кодов удобно хранить словарём по номеру статуса.",
+    "Для неизвестного статуса безопасен метод get с запасным значением.",
+    "Если details не передан, это None, а нужен пустой список.",
+    "details or [] даёт пустой список вместо None."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "error_response",
+    "cases": [
+      {
+        "args": [
+          404,
+          "Не найдено"
+        ],
+        "id": "v1",
+        "expected": {
+          "error": {
+            "status": 404,
+            "code": "not_found",
+            "message": "Не найдено",
+            "details": []
+          }
+        }
+      },
+      {
+        "args": [
+          422,
+          "Неверные данные",
+          [
+            "price"
+          ]
+        ],
+        "id": "v2",
+        "expected": {
+          "error": {
+            "status": 422,
+            "code": "validation_error",
+            "message": "Неверные данные",
+            "details": [
+              "price"
+            ]
+          }
+        }
+      },
+      {
+        "args": [
+          500,
+          "Сбой"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": {
+          "error": {
+            "status": 500,
+            "code": "error",
+            "message": "Сбой",
+            "details": []
+          }
+        }
+      },
+      {
+        "args": [
+          401,
+          "Нужен вход",
+          null
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": {
+          "error": {
+            "status": 401,
+            "code": "unauthorized",
+            "message": "Нужен вход",
+            "details": []
+          }
+        }
+      },
+      {
+        "args": [
+          400,
+          "Плохой запрос",
+          [
+            "a",
+            "b"
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": {
+          "error": {
+            "status": 400,
+            "code": "bad_request",
+            "message": "Плохой запрос",
+            "details": [
+              "a",
+              "b"
+            ]
+          }
+        }
+      },
+      {
+        "args": [
+          403,
+          "Нельзя"
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": {
+          "error": {
+            "status": 403,
+            "code": "forbidden",
+            "message": "Нельзя",
+            "details": []
+          }
+        }
+      }
+    ]
+  },
+  "solution": "CODES = {400: \"bad_request\", 401: \"unauthorized\", 403: \"forbidden\", 404: \"not_found\", 422: \"validation_error\"}\n\n\ndef error_response(status, message, details=None):\n    return {\"error\": {\"status\": status, \"code\": CODES.get(status, \"error\"), \"message\": message, \"details\": details or []}}\n",
+  "explanation": "Единый формат ошибок помогает клиентам разбирать их одним кодом. Метод словаря get защищает от неизвестных статусов, а «details or []» делает поле всегда списком.",
+  "criteria": [
+    "Структура верна.",
+    "Код из таблицы или error.",
+    "details всегда список."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "CODES = {400: \"bad_request\", 401: \"unauthorized\", 403: \"forbidden\", 404: \"not_found\", 422: \"validation_error\"}\n\n\ndef error_response(status, message, details=None):\n    return {\"error\": {\"status\": status, \"code\": CODES[status], \"message\": message, \"details\": details or []}}\n",
+      "why": "Неизвестный статус вызывает KeyError: нужен общий код error."
+    },
+    {
+      "code": "CODES = {400: \"bad_request\", 401: \"unauthorized\", 403: \"forbidden\", 404: \"not_found\", 422: \"validation_error\"}\n\n\ndef error_response(status, message, details=None):\n    return {\"error\": {\"status\": status, \"code\": CODES.get(status, \"error\"), \"message\": message, \"details\": details}}\n",
+      "why": "Если details не передан, должен быть пустой список, а не None."
+    },
+    {
+      "code": "CODES = {400: \"bad_request\", 401: \"unauthorized\", 403: \"forbidden\", 404: \"not_found\", 422: \"validation_error\"}\n\n\ndef error_response(status, message, details=None):\n    return {\"error\": {\"code\": CODES.get(status, \"error\"), \"message\": message, \"details\": details or []}}\n",
+      "why": "В теле нет статуса."
+    }
+  ]
+}

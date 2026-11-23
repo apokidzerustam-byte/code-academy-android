@@ -1,0 +1,45 @@
+{
+  "id": "arch-06-api-design",
+  "title": "Проектирование API",
+  "goal": "Проектировать предсказуемый API: адреса-ресурсы, методы и коды, страницы, фильтры, единый формат ошибок и версии.",
+  "skills": [
+    "arch.api-resources",
+    "arch.api-pages",
+    "arch.api-errors"
+  ],
+  "prerequisites": [
+    "arch-05-mvc-mvvm"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-statuses.json",
+    "assignments/a2-fix-codes.json",
+    "assignments/a3-paginate.json",
+    "assignments/a4-sort.json",
+    "assignments/a5-error.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Глаголы в адресах",
+      "fix": "Адрес называет ресурс (существительное), действие выражает метод HTTP."
+    },
+    {
+      "mistake": "Код 200 на всё, включая ошибки",
+      "fix": "Возвращайте честный код: 201, 204, 4xx, 5xx — клиент не должен читать тело, чтобы понять результат."
+    },
+    {
+      "mistake": "Список без страниц",
+      "fix": "Делите на страницы и ограничивайте размер страницы сверху."
+    },
+    {
+      "mistake": "Разные форматы ошибок и внутренности сервера в тексте",
+      "fix": "Один формат ошибок; подробности — в журнал, клиенту — короткое сообщение."
+    }
+  ]
+}
