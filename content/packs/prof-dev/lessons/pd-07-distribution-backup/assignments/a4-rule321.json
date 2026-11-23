@@ -1,0 +1,177 @@
+{
+  "id": "a4-rule321",
+  "type": "write",
+  "title": "Правило «три, два, один»",
+  "statement": "Напишите `rule_321(copies)`: `copies` — список пар `[носитель, место]`, например `[\"phone\", \"home\"]`, `[\"cloud\", \"offsite\"]`. Верните `True`, если выполнены все три условия: копий **не меньше трёх**; используется **не меньше двух разных носителей**; **хотя бы одна** копия лежит в другом месте (место равно `\"offsite\"`).",
+  "goal": "Проверить, выполняется ли правило резервного копирования.",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def rule_321(copies):\n    # copies: список пар [носитель, место]\n    pass\n",
+  "hints": [
+    "Нужно проверить три условия и объединить их через and.",
+    "Число копий — это длина списка.",
+    "Разные носители соберите во множество: {medium for medium, place in copies}.",
+    "Копия вне дома: any(place == \"offsite\" for ...).",
+    "Пустой список не проходит ни одно условие: len(copies) равна нулю."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "rule_321",
+    "cases": [
+      {
+        "args": [
+          [
+            [
+              "phone",
+              "home"
+            ],
+            [
+              "laptop",
+              "home"
+            ],
+            [
+              "cloud",
+              "offsite"
+            ]
+          ]
+        ],
+        "id": "v1",
+        "expected": true
+      },
+      {
+        "args": [
+          [
+            [
+              "phone",
+              "home"
+            ],
+            [
+              "phone",
+              "home"
+            ]
+          ]
+        ],
+        "id": "v2",
+        "expected": false
+      },
+      {
+        "args": [
+          [
+            [
+              "phone",
+              "home"
+            ],
+            [
+              "phone",
+              "home"
+            ],
+            [
+              "phone",
+              "offsite"
+            ]
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          [
+            [
+              "phone",
+              "home"
+            ],
+            [
+              "laptop",
+              "home"
+            ],
+            [
+              "laptop",
+              "home"
+            ]
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          [
+            [
+              "a",
+              "offsite"
+            ],
+            [
+              "b",
+              "home"
+            ],
+            [
+              "c",
+              "home"
+            ],
+            [
+              "d",
+              "home"
+            ]
+          ]
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": true
+      },
+      {
+        "args": [
+          [
+            [
+              "ssd",
+              "home"
+            ],
+            [
+              "hdd",
+              "offsite"
+            ]
+          ]
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": false
+      }
+    ]
+  },
+  "solution": "def rule_321(copies):\n    media = {medium for medium, place in copies}\n    offsite = any(place == \"offsite\" for medium, place in copies)\n    return len(copies) >= 3 and len(media) >= 2 and offsite\n",
+  "explanation": "Правило 3-2-1 защищает от разных бед: отказа диска, потери устройства и пожара или кражи. Поэтому нужны и несколько копий, и разные носители, и копия в другом месте.",
+  "criteria": [
+    "Три копии.",
+    "Два носителя.",
+    "Копия в другом месте."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def rule_321(copies):\n    media = {medium for medium, place in copies}\n    offsite = any(place == \"offsite\" for medium, place in copies)\n    return len(copies) >= 2 and len(media) >= 2 and offsite\n",
+      "why": "Достаточно двух копий: нарушено условие «три»."
+    },
+    {
+      "code": "def rule_321(copies):\n    media = {medium for medium, place in copies}\n    offsite = any(place == \"offsite\" for medium, place in copies)\n    return len(copies) >= 3 and len(media) >= 1 and offsite\n",
+      "why": "Один носитель считается достаточным."
+    },
+    {
+      "code": "def rule_321(copies):\n    media = {medium for medium, place in copies}\n    offsite = any(place == \"offsite\" for medium, place in copies)\n    return len(copies) >= 3 and len(media) >= 2\n",
+      "why": "Копия вне дома не требуется."
+    },
+    {
+      "code": "def rule_321(copies):\n    media = {medium for medium, place in copies}\n    offsite = any(place == \"offsite\" for medium, place in copies)\n    return len(copies) >= 3 and len(set(place for medium, place in copies)) >= 2 and offsite\n",
+      "why": "Считаются места вместо носителей."
+    }
+  ]
+}

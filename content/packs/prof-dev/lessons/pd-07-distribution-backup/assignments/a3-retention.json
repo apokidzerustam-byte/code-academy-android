@@ -1,0 +1,123 @@
+{
+  "id": "a3-retention",
+  "type": "fix",
+  "title": "Удаление старых копий",
+  "statement": "Имена копий имеют вид `notes-ГГГГ-ММ-ДД.zip`. Функция `to_delete(names, keep)` должна оставить `keep` самых свежих копий и вернуть список имён для удаления **от новых к старым**. Сейчас она считает, что список уже отсортирован, и удаляет не то. Исправьте её. Если копий не больше `keep`, верните пустой список.",
+  "goal": "Удалять только старые копии.",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def to_delete(names, keep):\n    return names[keep:]\n",
+  "hints": [
+    "Имена с датой ГГГГ-ММ-ДД сортируются как обычные строки в хронологическом порядке.",
+    "Отсортируйте имена от новых к старым: sorted(names, reverse=True).",
+    "Первые keep имён нужно оставить.",
+    "Всё остальное, то есть срез от keep и дальше, удаляется.",
+    "Срез при слишком большом keep даёт пустой список — отдельная проверка не нужна."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "to_delete",
+    "cases": [
+      {
+        "args": [
+          [
+            "notes-2026-11-01.zip",
+            "notes-2026-11-09.zip",
+            "notes-2026-10-28.zip",
+            "notes-2026-11-15.zip"
+          ],
+          2
+        ],
+        "id": "v1",
+        "expected": [
+          "notes-2026-11-01.zip",
+          "notes-2026-10-28.zip"
+        ]
+      },
+      {
+        "args": [
+          [
+            "notes-2026-01-01.zip"
+          ],
+          3
+        ],
+        "id": "v2",
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            "a-2026-12-31.zip",
+            "a-2026-02-01.zip",
+            "a-2025-12-31.zip"
+          ],
+          1
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          "a-2026-02-01.zip",
+          "a-2025-12-31.zip"
+        ]
+      },
+      {
+        "args": [
+          [],
+          2
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            "x-2026-03-05.zip",
+            "x-2026-03-04.zip"
+          ],
+          0
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          "x-2026-03-05.zip",
+          "x-2026-03-04.zip"
+        ]
+      },
+      {
+        "args": [
+          [
+            "x-2026-03-05.zip",
+            "x-2026-03-04.zip"
+          ],
+          2
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": []
+      }
+    ]
+  },
+  "solution": "def to_delete(names, keep):\n    newest_first = sorted(names, reverse=True)\n    return newest_first[keep:]\n",
+  "explanation": "Даты в формате год-месяц-число в именах файлов сортируются по алфавиту так же, как по времени. Поэтому правило хранения записывается сортировкой и срезом.",
+  "criteria": [
+    "Свежие копии сохраняются.",
+    "Удаляются старые от новых к старым.",
+    "Пустой результат при малом числе копий."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def to_delete(names, keep):\n    return names[keep:]\n",
+      "why": "Исходная версия: порядок списка не учитывается."
+    },
+    {
+      "code": "def to_delete(names, keep):\n    return sorted(names)[keep:]\n",
+      "why": "Сортировка по возрастанию: удаляются самые свежие копии."
+    },
+    {
+      "code": "def to_delete(names, keep):\n    newest_first = sorted(names, reverse=True)\n    return newest_first[:keep]\n",
+      "why": "Возвращаются копии, которые нужно оставить, а не удалить."
+    }
+  ]
+}

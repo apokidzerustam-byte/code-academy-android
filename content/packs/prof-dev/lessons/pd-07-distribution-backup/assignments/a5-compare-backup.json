@@ -1,0 +1,93 @@
+{
+  "id": "a5-compare-backup",
+  "type": "write",
+  "title": "Проверка восстановления",
+  "statement": "Напишите `compare_backup(original, backup)`: оба аргумента — словари «имя файла → хеш». Верните отсортированный по алфавиту список имён файлов из `original`, которые в копии **отсутствуют** или **имеют другой хеш**. Лишние файлы, которые есть только в копии, игнорируйте.",
+  "goal": "Найти потерянные и испорченные файлы в копии.",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def compare_backup(original, backup):\n    # original и backup: словари имя файла -> хеш\n    pass\n",
+  "hints": [
+    "Идите по файлам оригинала.",
+    "Файл проблемный, если в копии его нет.",
+    "Файл проблемный и тогда, когда хеш в копии отличается.",
+    "Оба случая объединяет одно условие: backup.get(name) != digest.",
+    "Верните список имён, отсортированный по алфавиту."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "compare_backup",
+    "cases": [
+      {
+        "args": [
+          {
+            "a.db": "1",
+            "b.json": "2",
+            "c.txt": "3"
+          },
+          {
+            "a.db": "1",
+            "b.json": "xx",
+            "c.txt": "3"
+          }
+        ],
+        "id": "v1",
+        "expected": [
+          "b.json"
+        ]
+      },
+      {
+        "args": [
+          {
+            "a": "1"
+          },
+          {
+            "a": "1",
+            "b": "2"
+          }
+        ],
+        "id": "v2",
+        "expected": []
+      },
+      {
+        "args": [
+          {
+            "z": "1",
+            "a": "2",
+            "m": "3"
+          },
+          {}
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          "a",
+          "m",
+          "z"
+        ]
+      }
+    ]
+  },
+  "solution": "def compare_backup(original, backup):\n    return sorted(name for name, digest in original.items() if backup.get(name) != digest)\n",
+  "explanation": "Проверка восстановления ищет два вида проблем: потерянные файлы и испорченные. Метод get со значением по умолчанию None позволяет объединить оба случая одним условием.",
+  "criteria": [
+    "Находит отсутствующие файлы.",
+    "Находит изменённые.",
+    "Лишние файлы игнорирует."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def compare_backup(original, backup):\n    return sorted(name for name, digest in original.items() if name in backup and backup[name] != digest)\n",
+      "why": "Отсутствующие в копии файлы не замечаются."
+    },
+    {
+      "code": "def compare_backup(original, backup):\n    return sorted(name for name, digest in original.items() if name not in backup)\n",
+      "why": "Файлы с другим хешем не замечаются."
+    },
+    {
+      "code": "def compare_backup(original, backup):\n    return list(name for name, digest in original.items() if backup.get(name) != digest)\n",
+      "why": "Результат не отсортирован."
+    }
+  ]
+}

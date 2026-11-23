@@ -1,0 +1,72 @@
+{
+  "id": "a2-checksums",
+  "type": "complete",
+  "title": "Сверка с контрольными суммами",
+  "statement": "Первая строка ввода — число файлов, затем строки `имя|ожидаемый_хеш|содержимое`. Ожидаемый хеш — первые 8 символов SHA-256 от содержимого (в кодировке UTF-8), строчными буквами, но может быть записан и прописными. Содержимое может содержать любые символы, в том числе `|`. Для каждого файла выведите `имя OK`, если хеш совпал, или `имя CORRUPT`, если нет.",
+  "goal": "Проверить файлы по контрольным суммам.",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "import hashlib\n\nn = int(input())\nfor _ in range(n):\n    name, expected, content = input().split(\"|\", 2)\n    # Сравните первые 8 символов sha256(content) с expected\n",
+  "hints": [
+    "Каждую строку разбейте на три части: имя, ожидаемый хеш и содержимое.",
+    "Содержимое может включать символ «|»: разделять нужно только по первым двум.",
+    "Хеш считается от содержимого: hashlib.sha256(content.encode()).hexdigest().",
+    "Берите первые 8 символов хеша и сравнивайте с ожидаемым значением в нижнем регистре.",
+    "Печатайте имя и OK или CORRUPT через пробел."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "3\napp.apk|b6186d9c|release 1.2.0\nnotes.txt|b94d27b9|hello world\nkey.jks|deadbeef|secret bytes\n",
+        "expected_stdout": "app.apk OK\nnotes.txt OK\nkey.jks CORRUPT\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "2\na|791a886d|x|y\nb|e3b0c442|\n",
+        "expected_stdout": "a OK\nb OK\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "2\nx|3A6EB079|data\ny|3a6eb079|data \n",
+        "expected_stdout": "x OK\ny CORRUPT\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "1\nlong|2d93d67b|text with  two spaces\n",
+        "expected_stdout": "long OK\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "import hashlib\n\nn = int(input())\nfor _ in range(n):\n    name, expected, content = input().split(\"|\", 2)\n    actual = hashlib.sha256(content.encode()).hexdigest()[:8]\n    print(name, \"OK\" if actual == expected.strip().lower() else \"CORRUPT\")\n",
+  "explanation": "Сверка с контрольной суммой — основа проверки скачанного файла. Регистр записи хеша не важен, а разбор строки должен учитывать, что содержимое может содержать разделитель.",
+  "criteria": [
+    "Хеш считается от содержимого.",
+    "Регистр записи не важен.",
+    "Разделитель в содержимом не мешает."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import hashlib\n\nn = int(input())\nfor _ in range(n):\n    name, expected, content = input().split(\"|\", 2)\n    # Сравните первые 8 символов sha256(content) с expected\n",
+      "why": "Заготовка ничего не печатает."
+    },
+    {
+      "code": "import hashlib\n\nn = int(input())\nfor _ in range(n):\n    name, expected, content = input().split(\"|\")\n    actual = hashlib.sha256(content.encode()).hexdigest()[:8]\n    print(name, \"OK\" if actual == expected.strip().lower() else \"CORRUPT\")\n",
+      "why": "Содержимое с символом | ломает разбор строки."
+    },
+    {
+      "code": "import hashlib\n\nn = int(input())\nfor _ in range(n):\n    name, expected, content = input().split(\"|\", 2)\n    actual = hashlib.sha256(content.encode()).hexdigest()[:8]\n    print(name, \"OK\" if actual == expected else \"CORRUPT\")\n",
+      "why": "Хеш, записанный прописными буквами, не распознаётся."
+    },
+    {
+      "code": "import hashlib\n\nn = int(input())\nfor _ in range(n):\n    name, expected, content = input().split(\"|\", 2)\n    actual = hashlib.sha256(content.encode()).hexdigest()[:6]\n    print(name, \"OK\" if actual == expected.strip().lower() else \"CORRUPT\")\n",
+      "why": "Сравнивается слишком короткий префикс: подмена может остаться незамеченной."
+    }
+  ]
+}

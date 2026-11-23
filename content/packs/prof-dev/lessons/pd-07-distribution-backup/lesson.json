@@ -1,0 +1,45 @@
+{
+  "id": "pd-07-distribution-backup",
+  "title": "Распространение и резервное копирование",
+  "goal": "Проверять целостность скачанных файлов и организовывать надёжное резервное копирование.",
+  "skills": [
+    "pro.checksum",
+    "pro.backup",
+    "pro.restore"
+  ],
+  "prerequisites": [
+    "pd-06-performance-logging"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-hash.json",
+    "assignments/a2-checksums.json",
+    "assignments/a3-retention.json",
+    "assignments/a4-rule321.json",
+    "assignments/a5-compare-backup.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Выкладывают файл без контрольной суммы и подписи",
+      "fix": "Публикуйте хеш рядом с файлом и подписывайте приложение."
+    },
+    {
+      "mistake": "Копия лежит на том же устройстве",
+      "fix": "Правило 3-2-1: разные носители и копия в другом месте."
+    },
+    {
+      "mistake": "Ключ подписи и пароль хранятся рядом в открытом виде",
+      "fix": "Шифруйте копию и храните пароль отдельно."
+    },
+    {
+      "mistake": "Восстановление ни разу не проверяли",
+      "fix": "Периодически сравнивайте хеши и пробуйте восстановить копию."
+    }
+  ]
+}

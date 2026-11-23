@@ -15,7 +15,8 @@
     "pd-03-code-review",
     "pd-04-docs",
     "pd-05-release",
-    "pd-06-performance-logging"
+    "pd-06-performance-logging",
+    "pd-07-distribution-backup"
   ],
   "skills": {
     "pro.naming": "Названия и константы",
@@ -35,6 +36,9 @@
     "pro.signing": "Подпись приложения",
     "pro.measure": "Измерение производительности",
     "pro.cache": "Кэширование и структуры данных",
-    "pro.logging": "Журналирование без секретов"
+    "pro.logging": "Журналирование без секретов",
+    "pro.checksum": "Контрольные суммы и распространение",
+    "pro.backup": "Резервное копирование 3-2-1",
+    "pro.restore": "Проверка восстановления"
   }
 }
