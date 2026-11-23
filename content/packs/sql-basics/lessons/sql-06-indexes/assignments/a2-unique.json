@@ -1,0 +1,84 @@
+{
+  "id": "a2-unique",
+  "type": "write",
+  "title": "Уникальная почта",
+  "statement": "Две учётные записи с одной почтой недопустимы. Создайте **уникальный** индекс `idx_users_email` на столбце `email` таблицы `users`.",
+  "goal": "Запретить повторы индексом UNIQUE.",
+  "input": "Таблицы создаются автоматически перед запуском.",
+  "expectedResult": "Таблица результата.",
+  "constraints": [],
+  "starterCode": "-- Создайте уникальный индекс\n",
+  "hints": [
+    "Уникальный индекс создаёт та же команда, но с дополнительным словом.",
+    "Слово UNIQUE ставится между CREATE и INDEX.",
+    "Имя индекса idx_users_email, таблица users, столбец email.",
+    "Уникальные значения нужны для столбца email.",
+    "CREATE UNIQUE INDEX idx_users_email ON users(email);"
+  ],
+  "tests": {
+    "kind": "sql",
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE users (\n  id INTEGER PRIMARY KEY,\n  email TEXT NOT NULL,\n  name TEXT NOT NULL\n);\n\nINSERT INTO users (email, name) VALUES\n  ('anna@example.com', 'Анна'), ('ivan@example.com', 'Иван'), ('olga@example.com', 'Ольга'),\n  ('petr@example.com', 'Пётр'), ('eva@example.com', 'Ева'), ('oleg@example.com', 'Олег');\n",
+        "query": "SELECT name, \"unique\" FROM pragma_index_list('users') ORDER BY name;",
+        "expected": {
+          "rows": [
+            [
+              "idx_users_email",
+              1
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h2",
+        "setup": "CREATE TABLE users (\n  id INTEGER PRIMARY KEY,\n  email TEXT NOT NULL,\n  name TEXT NOT NULL\n);\n\nINSERT INTO users (email, name) VALUES ('x@y.ru', 'Икс'), ('z@y.ru', 'Зет');\n",
+        "query": "SELECT name, \"unique\" FROM pragma_index_list('users') ORDER BY name;",
+        "expected": {
+          "rows": [
+            [
+              "idx_users_email",
+              1
+            ]
+          ]
+        },
+        "hidden": true,
+        "hint": "Индекс должен быть уникальным"
+      },
+      {
+        "id": "h3",
+        "setup": "CREATE TABLE users (\n  id INTEGER PRIMARY KEY,\n  email TEXT NOT NULL,\n  name TEXT NOT NULL\n);\n\nINSERT INTO users (email, name) VALUES\n  ('anna@example.com', 'Анна'), ('ivan@example.com', 'Иван'), ('olga@example.com', 'Ольга'),\n  ('petr@example.com', 'Пётр'), ('eva@example.com', 'Ева'), ('oleg@example.com', 'Олег');\n",
+        "query": "SELECT name FROM pragma_index_info('idx_users_email') ORDER BY seqno;",
+        "expected": {
+          "rows": [
+            [
+              "email"
+            ]
+          ]
+        },
+        "hidden": true,
+        "hint": "Индекс охватывает email"
+      }
+    ]
+  },
+  "solution": "CREATE UNIQUE INDEX idx_users_email ON users(email);",
+  "explanation": "Уникальный индекс одновременно ускоряет поиск и запрещает повторяющиеся значения столбца.",
+  "criteria": [
+    "Результат совпадает на всех наборах данных, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "CREATE INDEX idx_users_email ON users(email);",
+      "why": "Индекс не уникальный: повторы возможны."
+    },
+    {
+      "code": "CREATE UNIQUE INDEX idx_users_name ON users(name);",
+      "why": "Другой индекс: нужен idx_users_email по email."
+    },
+    {
+      "code": "CREATE UNIQUE INDEX idx_users_email ON users(name);",
+      "why": "Уникальный индекс создан по другому столбцу."
+    }
+  ]
+}

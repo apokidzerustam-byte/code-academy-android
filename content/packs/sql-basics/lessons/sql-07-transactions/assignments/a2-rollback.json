@@ -1,0 +1,86 @@
+{
+  "id": "a2-rollback",
+  "type": "complete",
+  "title": "Отменить удаление",
+  "statement": "Сотрудник начал транзакцию и выполнил `DELETE FROM orders;`, но удалять заказы было нельзя. Допишите завершение транзакции так, чтобы **изменения были отменены**.",
+  "goal": "Отменять транзакцию командой ROLLBACK.",
+  "input": "Таблицы создаются автоматически перед запуском.",
+  "expectedResult": "Таблица результата.",
+  "constraints": [],
+  "starterCode": "BEGIN;\nDELETE FROM orders;\n-- завершите транзакцию\n",
+  "hints": [
+    "Транзакция уже открыта и содержит опасную команду.",
+    "Отменяет транзакцию отдельная команда.",
+    "COMMIT фиксирует изменения, а нужна обратная команда.",
+    "Это слово из двух частей: «откат».",
+    "Команда состоит из одного слова: по-английски «откат назад» (roll back), слитно."
+  ],
+  "tests": {
+    "kind": "sql",
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE orders (id INTEGER PRIMARY KEY, customer TEXT NOT NULL);\nINSERT INTO orders (customer) VALUES ('А'), ('Б'), ('В');\n",
+        "query": "SELECT COUNT(*) FROM orders;",
+        "expected": {
+          "rows": [
+            [
+              3
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h2",
+        "setup": "CREATE TABLE orders (id INTEGER PRIMARY KEY, customer TEXT NOT NULL);\nINSERT INTO orders (customer) VALUES ('А'), ('Б'), ('В');\n",
+        "query": "SELECT id, customer FROM orders ORDER BY id;",
+        "expected": {
+          "rows": [
+            [
+              1,
+              "А"
+            ],
+            [
+              2,
+              "Б"
+            ],
+            [
+              3,
+              "В"
+            ]
+          ]
+        },
+        "hidden": true,
+        "hint": "Заказы должны остаться"
+      },
+      {
+        "id": "h3",
+        "setup": "CREATE TABLE orders (id INTEGER PRIMARY KEY, customer TEXT NOT NULL);\n",
+        "query": "SELECT COUNT(*) FROM orders;",
+        "expected": {
+          "rows": [
+            [
+              0
+            ]
+          ]
+        },
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "BEGIN;\nDELETE FROM orders;\nROLLBACK;",
+  "explanation": "ROLLBACK откатывает все изменения с момента BEGIN: заказы возвращаются в прежнее состояние.",
+  "criteria": [
+    "Результат совпадает на всех наборах данных, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "BEGIN;\nDELETE FROM orders;\nCOMMIT;",
+      "why": "COMMIT фиксирует удаление, а нужно отменить."
+    },
+    {
+      "code": "BEGIN;\nDELETE FROM orders;",
+      "why": "Транзакция осталась открытой, удаление не отменено."
+    }
+  ]
+}

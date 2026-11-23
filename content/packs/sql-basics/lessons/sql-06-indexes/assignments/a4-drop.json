@@ -1,0 +1,70 @@
+{
+  "id": "a4-drop",
+  "type": "write",
+  "title": "Лишний индекс",
+  "statement": "У таблицы `notes` два индекса: `idx_notes_user` (по `user_id`) и `idx_notes_user_created` (по `user_id` и `created`). Первый дублирует левую часть второго и только замедляет запись. Удалите **лишний** индекс.",
+  "goal": "Удалять ненужные индексы командой DROP INDEX.",
+  "input": "Таблицы создаются автоматически перед запуском.",
+  "expectedResult": "Таблица результата.",
+  "constraints": [],
+  "starterCode": "-- Удалите лишний индекс\n",
+  "hints": [
+    "Индекс удаляет команда DROP INDEX.",
+    "После неё пишут имя индекса.",
+    "Составной индекс (user_id, created) покрывает запросы по user_id: он нужнее.",
+    "Лишний тот, что включает только первый столбец составного.",
+    "DROP INDEX idx_notes_user;"
+  ],
+  "tests": {
+    "kind": "sql",
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE notes (\n  id INTEGER PRIMARY KEY,\n  user_id INTEGER NOT NULL,\n  created TEXT NOT NULL,\n  text TEXT NOT NULL\n);\nCREATE INDEX idx_notes_user ON notes(user_id);\nCREATE INDEX idx_notes_user_created ON notes(user_id, created);\n",
+        "query": "SELECT name, tbl_name FROM sqlite_master WHERE type = 'index' AND name NOT LIKE 'sqlite_%' ORDER BY name;",
+        "expected": {
+          "rows": [
+            [
+              "idx_notes_user_created",
+              "notes"
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h2",
+        "setup": "CREATE TABLE notes (\n  id INTEGER PRIMARY KEY,\n  user_id INTEGER NOT NULL,\n  created TEXT NOT NULL,\n  text TEXT NOT NULL\n);\nCREATE INDEX idx_notes_user ON notes(user_id);\nCREATE INDEX idx_notes_user_created ON notes(user_id, created);\nINSERT INTO notes (user_id, created, text) VALUES (1, '2026-01-01', 'a');",
+        "query": "SELECT name, tbl_name FROM sqlite_master WHERE type = 'index' AND name NOT LIKE 'sqlite_%' ORDER BY name;",
+        "expected": {
+          "rows": [
+            [
+              "idx_notes_user_created",
+              "notes"
+            ]
+          ]
+        },
+        "hidden": true,
+        "hint": "Остаться должен составной индекс"
+      }
+    ]
+  },
+  "solution": "DROP INDEX idx_notes_user;",
+  "explanation": "Составной индекс (user_id, created) помогает и запросам только по user_id, поэтому отдельный индекс по user_id не нужен: он только занимает место и замедляет запись.",
+  "criteria": [
+    "Результат совпадает на всех наборах данных, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "DROP INDEX idx_notes_user_created;",
+      "why": "Удалён составной индекс, а лишний — idx_notes_user."
+    },
+    {
+      "code": "DROP INDEX idx_notes_user;\nDROP INDEX idx_notes_user_created;",
+      "why": "Удалены оба индекса."
+    },
+    {
+      "code": "-- ничего не удалено\n",
+      "why": "Лишний индекс остался."
+    }
+  ]
+}

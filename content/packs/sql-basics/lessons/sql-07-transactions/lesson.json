@@ -1,0 +1,45 @@
+{
+  "id": "sql-07-transactions",
+  "title": "SQL: транзакции",
+  "goal": "Объединять операции в транзакции, откатывать их целиком или частично и понимать гарантии ACID.",
+  "skills": [
+    "sql.transaction",
+    "sql.savepoint",
+    "sql.acid"
+  ],
+  "prerequisites": [
+    "sql-06-indexes"
+  ],
+  "runner": "sql",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-transfer.json",
+    "assignments/a2-rollback.json",
+    "assignments/a3-savepoint.json",
+    "assignments/a4-order.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Перевод без транзакции",
+      "fix": "Объедините списание и зачисление в BEGIN … COMMIT."
+    },
+    {
+      "mistake": "Транзакция осталась открытой",
+      "fix": "Всегда завершайте её: COMMIT или ROLLBACK, иначе база блокируется."
+    },
+    {
+      "mistake": "Номер связанной строки записан числом",
+      "fix": "Берите номер из last_insert_rowid() или из результата вставки."
+    },
+    {
+      "mistake": "Долгая транзакция с ожиданием ввода или сети",
+      "fix": "Держите транзакции короткими: открытая запись блокирует других."
+    }
+  ]
+}

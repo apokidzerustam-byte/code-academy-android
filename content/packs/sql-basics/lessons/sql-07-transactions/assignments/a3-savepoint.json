@@ -1,0 +1,67 @@
+{
+  "id": "a3-savepoint",
+  "type": "complete",
+  "title": "Частичный откат",
+  "statement": "В транзакции уже добавлена запись «начало» и поставлена метка `sp`, после которой добавлена запись «эксперимент». Откатите **только эксперимент** (к метке `sp`) и зафиксируйте остальное.",
+  "goal": "Использовать SAVEPOINT и ROLLBACK TO.",
+  "input": "Таблицы создаются автоматически перед запуском.",
+  "expectedResult": "Таблица результата.",
+  "constraints": [],
+  "starterCode": "BEGIN;\nINSERT INTO log (msg) VALUES ('начало');\nSAVEPOINT sp;\nINSERT INTO log (msg) VALUES ('эксперимент');\n-- откатите эксперимент и завершите транзакцию\n",
+  "hints": [
+    "Метка sp уже поставлена: запись «эксперимент» добавлена после неё.",
+    "Откат только до метки — это ROLLBACK TO, а не простой ROLLBACK.",
+    "После отката к метке транзакция остаётся открытой.",
+    "Потом её нужно зафиксировать.",
+    "ROLLBACK TO sp; затем COMMIT;"
+  ],
+  "tests": {
+    "kind": "sql",
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE log (\n  id INTEGER PRIMARY KEY,\n  msg TEXT NOT NULL\n);\n",
+        "query": "SELECT msg FROM log ORDER BY id;",
+        "expected": {
+          "rows": [
+            [
+              "начало"
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h2",
+        "setup": "CREATE TABLE log (\n  id INTEGER PRIMARY KEY,\n  msg TEXT NOT NULL\n);\nINSERT INTO log (msg) VALUES ('старое');\n",
+        "query": "SELECT msg FROM log ORDER BY id;",
+        "expected": {
+          "rows": [
+            [
+              "старое"
+            ],
+            [
+              "начало"
+            ]
+          ]
+        },
+        "hidden": true,
+        "hint": "Раньше сделанное тоже остаётся"
+      }
+    ]
+  },
+  "solution": "BEGIN;\nINSERT INTO log (msg) VALUES ('начало');\nSAVEPOINT sp;\nINSERT INTO log (msg) VALUES ('эксперимент');\nROLLBACK TO sp;\nCOMMIT;",
+  "explanation": "ROLLBACK TO sp отменяет только то, что сделано после метки; транзакция остаётся открытой, и COMMIT фиксирует оставшееся.",
+  "criteria": [
+    "Результат совпадает на всех наборах данных, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "BEGIN;\nINSERT INTO log (msg) VALUES ('начало');\nSAVEPOINT sp;\nINSERT INTO log (msg) VALUES ('эксперимент');\nCOMMIT;",
+      "why": "Эксперимент не откатан."
+    },
+    {
+      "code": "BEGIN;\nINSERT INTO log (msg) VALUES ('начало');\nSAVEPOINT sp;\nINSERT INTO log (msg) VALUES ('эксперимент');\nROLLBACK;",
+      "why": "ROLLBACK отменяет всё, включая «начало»: нужен откат к метке."
+    }
+  ]
+}

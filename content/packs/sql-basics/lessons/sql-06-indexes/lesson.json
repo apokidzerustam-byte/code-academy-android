@@ -1,0 +1,45 @@
+{
+  "id": "sql-06-indexes",
+  "title": "SQL: индексы",
+  "goal": "Создавать обычные, уникальные и составные индексы, проверять их работу и понимать, чем индексы обходятся.",
+  "skills": [
+    "sql.index",
+    "sql.index-composite",
+    "sql.index-cost"
+  ],
+  "prerequisites": [
+    "sql-05-design"
+  ],
+  "runner": "sql",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-index.json",
+    "assignments/a2-unique.json",
+    "assignments/a3-composite.json",
+    "assignments/a4-drop.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Индексы на все столбцы подряд",
+      "fix": "Индекс замедляет запись и занимает место: создавайте только для частых условий, соединений и сортировок."
+    },
+    {
+      "mistake": "Не тот порядок столбцов в составном индексе",
+      "fix": "Первым ставят столбец, по которому всегда фильтруют (правило левого префикса)."
+    },
+    {
+      "mistake": "Над столбцом вызывается функция или LIKE '%…'",
+      "fix": "Индекс не используется: постройте индекс по выражению или измените условие."
+    },
+    {
+      "mistake": "Индекс на столбце с двумя значениями",
+      "fix": "Такой индекс почти не помогает: подходит половина таблицы."
+    }
+  ]
+}

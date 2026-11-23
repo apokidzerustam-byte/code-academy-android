@@ -1,0 +1,44 @@
+{
+  "id": "a5-predict",
+  "type": "predict",
+  "title": "Откат к метке",
+  "statement": "Что вернёт запрос? Запишите строки результата по одной в строке, значения через « | » (без заголовка таблицы).",
+  "goal": "Откат к метке",
+  "input": "—",
+  "expectedResult": "Строки результата.",
+  "constraints": [],
+  "code": "CREATE TABLE acc (id INTEGER PRIMARY KEY, balance INTEGER NOT NULL);\nINSERT INTO acc VALUES (1, 100), (2, 50);\nBEGIN;\nUPDATE acc SET balance = balance - 30 WHERE id = 1;\nSAVEPOINT s1;\nUPDATE acc SET balance = balance + 30 WHERE id = 2;\nUPDATE acc SET balance = 0 WHERE id = 1;\nROLLBACK TO s1;\nUPDATE acc SET balance = balance + 10 WHERE id = 2;\nCOMMIT;\nSELECT id, balance FROM acc ORDER BY id;\n",
+  "hints": [
+    "Пройдите по шагам: сначала у первого счёта 70.",
+    "Метка s1 ставится после списания: к ней можно вернуться.",
+    "Всё между меткой и ROLLBACK TO отменяется: зачисление 30 и обнуление.",
+    "После отката первый счёт 70, второй 50.",
+    "Потом второму добавляют 10 и фиксируют: получается 60."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "1 | 70\n2 | 60"
+  },
+  "solution": "1 | 70\n2 | 60",
+  "explanation": "ROLLBACK TO s1 отменяет только действия после метки: списание 30 с первого счёта остаётся, зачисление 30 и обнуление откатываются; затем второй счёт получает 10, и COMMIT фиксирует итог.",
+  "criteria": [
+    "Правильные строки в правильном порядке."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "1 | 100\n2 | 50",
+      "answer": "1 | 100\n2 | 50",
+      "why": "Основная транзакция зафиксирована (COMMIT): изменения после BEGIN сохраняются, кроме отката до метки."
+    },
+    {
+      "code": "1 | 0\n2 | 80",
+      "answer": "1 | 0\n2 | 80",
+      "why": "Откат к метке s1 отменил обе команды после неё."
+    },
+    {
+      "code": "1 | 70\n2 | 80",
+      "answer": "1 | 70\n2 | 80",
+      "why": "Зачисление 30 стояло после метки и откатилось."
+    }
+  ]
+}

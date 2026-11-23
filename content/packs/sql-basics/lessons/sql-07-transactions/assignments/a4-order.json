@@ -1,0 +1,86 @@
+{
+  "id": "a4-order",
+  "type": "write",
+  "title": "Заказ с позицией",
+  "statement": "Добавьте одной транзакцией заказ клиента «Анна» и его позицию: товар «Чай», количество 2. Номер заказа в позиции возьмите функцией `last_insert_rowid()`, а не записывайте числом.",
+  "goal": "Связать вставки в транзакции через last_insert_rowid().",
+  "input": "Таблицы создаются автоматически перед запуском.",
+  "expectedResult": "Таблица результата.",
+  "constraints": [],
+  "starterCode": "-- Напишите транзакцию\n",
+  "hints": [
+    "Сначала добавляется заказ, затем его позиция: всё между BEGIN и COMMIT.",
+    "Номер только что добавленной строки возвращает функция last_insert_rowid().",
+    "Подставьте её вместо номера заказа в INSERT позиции.",
+    "Позиция: product — «Чай», qty — 2.",
+    "INSERT INTO order_items (order_id, product, qty) VALUES (last_insert_rowid(), 'Чай', 2);"
+  ],
+  "tests": {
+    "kind": "sql",
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE orders (id INTEGER PRIMARY KEY, customer TEXT NOT NULL);\nCREATE TABLE order_items (id INTEGER PRIMARY KEY, order_id INTEGER NOT NULL REFERENCES orders(id), product TEXT NOT NULL, qty INTEGER NOT NULL);\n",
+        "query": "SELECT o.id, o.customer, i.product, i.qty FROM orders o JOIN order_items i ON i.order_id = o.id ORDER BY o.id, i.id;",
+        "expected": {
+          "rows": [
+            [
+              1,
+              "Анна",
+              "Чай",
+              2
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h2",
+        "setup": "CREATE TABLE orders (id INTEGER PRIMARY KEY, customer TEXT NOT NULL);\nCREATE TABLE order_items (id INTEGER PRIMARY KEY, order_id INTEGER NOT NULL REFERENCES orders(id), product TEXT NOT NULL, qty INTEGER NOT NULL);\nINSERT INTO orders (customer) VALUES ('Старый'), ('Ещё один');\nINSERT INTO order_items (order_id, product, qty) VALUES (1, 'Хлеб', 1), (2, 'Сыр', 3);\n",
+        "query": "SELECT o.id, o.customer, i.product, i.qty FROM orders o JOIN order_items i ON i.order_id = o.id ORDER BY o.id, i.id;",
+        "expected": {
+          "rows": [
+            [
+              1,
+              "Старый",
+              "Хлеб",
+              1
+            ],
+            [
+              2,
+              "Ещё один",
+              "Сыр",
+              3
+            ],
+            [
+              3,
+              "Анна",
+              "Чай",
+              2
+            ]
+          ]
+        },
+        "hidden": true,
+        "hint": "В таблицах уже есть заказы: номер нового заказа не равен 1"
+      }
+    ]
+  },
+  "solution": "BEGIN;\nINSERT INTO orders (customer) VALUES ('Анна');\nINSERT INTO order_items (order_id, product, qty) VALUES (last_insert_rowid(), 'Чай', 2);\nCOMMIT;",
+  "explanation": "last_insert_rowid() возвращает номер последней вставленной строки, поэтому позиция всегда привязывается к только что созданному заказу, какой бы номер он ни получил.",
+  "criteria": [
+    "Результат совпадает на всех наборах данных, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "BEGIN;\nINSERT INTO orders (customer) VALUES ('Анна');\nINSERT INTO order_items (order_id, product, qty) VALUES (1, 'Чай', 2);\nCOMMIT;",
+      "why": "Номер заказа записан числом: при других данных позиция попадёт к чужому заказу."
+    },
+    {
+      "code": "BEGIN;\nINSERT INTO orders (customer) VALUES ('Анна');\nCOMMIT;",
+      "why": "Нет позиции заказа."
+    },
+    {
+      "code": "BEGIN;\nINSERT INTO orders (customer) VALUES ('Анна');\nINSERT INTO order_items (order_id, product, qty) VALUES (last_insert_rowid(), 'Чай', 1);\nCOMMIT;",
+      "why": "Количество должно быть 2."
+    }
+  ]
+}

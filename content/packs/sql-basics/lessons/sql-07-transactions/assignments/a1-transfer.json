@@ -1,0 +1,86 @@
+{
+  "id": "a1-transfer",
+  "type": "write",
+  "title": "Перевод между счетами",
+  "statement": "Переведите **150** со счёта с `id = 1` на счёт с `id = 2` одной транзакцией: откройте её, спишите и зачислите, зафиксируйте.",
+  "goal": "Объединить две операции в транзакцию.",
+  "input": "Таблицы создаются автоматически перед запуском.",
+  "expectedResult": "Таблица результата.",
+  "constraints": [],
+  "starterCode": "-- Напишите транзакцию перевода\n",
+  "hints": [
+    "Транзакция начинается командой BEGIN и заканчивается COMMIT.",
+    "Внутри две команды UPDATE: одна уменьшает баланс, другая увеличивает.",
+    "Списать нужно со счёта 1, зачислить — на счёт 2.",
+    "Сумма в обеих командах одна и та же: 150.",
+    "BEGIN; UPDATE … SET balance = balance - 150 WHERE id = 1; UPDATE … SET balance = balance + 150 WHERE id = 2; COMMIT;"
+  ],
+  "tests": {
+    "kind": "sql",
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE accounts (\n  id INTEGER PRIMARY KEY,\n  owner TEXT NOT NULL,\n  balance INTEGER NOT NULL CHECK (balance >= 0)\n);\n\nINSERT INTO accounts (owner, balance) VALUES ('Анна', 500), ('Борис', 200);\n",
+        "query": "SELECT id, balance FROM accounts ORDER BY id;",
+        "expected": {
+          "rows": [
+            [
+              1,
+              350
+            ],
+            [
+              2,
+              350
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h2",
+        "setup": "CREATE TABLE accounts (\n  id INTEGER PRIMARY KEY,\n  owner TEXT NOT NULL,\n  balance INTEGER NOT NULL CHECK (balance >= 0)\n);\n\nINSERT INTO accounts (owner, balance) VALUES ('Вера', 900), ('Глеб', 10), ('Дина', 0);\n",
+        "query": "SELECT id, balance FROM accounts ORDER BY id;",
+        "expected": {
+          "rows": [
+            [
+              1,
+              750
+            ],
+            [
+              2,
+              160
+            ],
+            [
+              3,
+              0
+            ]
+          ]
+        },
+        "hidden": true,
+        "hint": "Меняются именно счета 1 и 2"
+      }
+    ]
+  },
+  "solution": "BEGIN;\nUPDATE accounts SET balance = balance - 150 WHERE id = 1;\nUPDATE accounts SET balance = balance + 150 WHERE id = 2;\nCOMMIT;",
+  "explanation": "Две команды UPDATE между BEGIN и COMMIT применяются как единое целое: деньги не могут пропасть.",
+  "criteria": [
+    "Результат совпадает на всех наборах данных, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "BEGIN;\nUPDATE accounts SET balance = balance - 150 WHERE id = 1;\nCOMMIT;",
+      "why": "Деньги списаны, но не зачислены."
+    },
+    {
+      "code": "BEGIN;\nUPDATE accounts SET balance = balance + 150 WHERE id = 2;\nCOMMIT;",
+      "why": "Деньги зачислены, но не списаны."
+    },
+    {
+      "code": "BEGIN;\nUPDATE accounts SET balance = balance - 150 WHERE id = 2;\nUPDATE accounts SET balance = balance + 150 WHERE id = 1;\nCOMMIT;",
+      "why": "Направление перевода перепутано."
+    },
+    {
+      "code": "BEGIN;\nUPDATE accounts SET balance = balance - 100 WHERE id = 1;\nUPDATE accounts SET balance = balance + 100 WHERE id = 2;\nCOMMIT;",
+      "why": "Сумма перевода должна быть 150."
+    }
+  ]
+}

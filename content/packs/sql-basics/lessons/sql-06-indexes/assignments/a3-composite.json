@@ -1,0 +1,96 @@
+{
+  "id": "a3-composite",
+  "type": "write",
+  "title": "Составной индекс",
+  "statement": "Заметки одного пользователя часто выбирают и сортируют по дате. Создайте составной индекс `idx_notes_user_created` на таблице `notes`: сначала `user_id`, затем `created`.",
+  "goal": "Создавать составной индекс и помнить о порядке столбцов.",
+  "input": "Таблицы создаются автоматически перед запуском.",
+  "expectedResult": "Таблица результата.",
+  "constraints": [],
+  "starterCode": "-- Создайте составной индекс\n",
+  "hints": [
+    "Составной индекс охватывает несколько столбцов: они перечисляются в скобках через запятую.",
+    "Порядок важен: индекс сортируется сначала по первому столбцу, затем по второму.",
+    "Запросы начинаются с условия по user_id, поэтому он первый.",
+    "Вторым идёт created: по нему сортируют внутри пользователя.",
+    "CREATE INDEX idx_notes_user_created ON notes(user_id, created);"
+  ],
+  "tests": {
+    "kind": "sql",
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE notes (\n  id INTEGER PRIMARY KEY,\n  user_id INTEGER NOT NULL,\n  created TEXT NOT NULL,\n  text TEXT NOT NULL\n);\n",
+        "query": "SELECT seqno, name FROM pragma_index_info('idx_notes_user_created') ORDER BY seqno;",
+        "expected": {
+          "rows": [
+            [
+              0,
+              "user_id"
+            ],
+            [
+              1,
+              "created"
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h2",
+        "setup": "CREATE TABLE notes (\n  id INTEGER PRIMARY KEY,\n  user_id INTEGER NOT NULL,\n  created TEXT NOT NULL,\n  text TEXT NOT NULL\n);\nINSERT INTO notes (user_id, created, text) VALUES (1, '2026-01-01', 'a'), (2, '2026-01-02', 'b');\n",
+        "query": "SELECT seqno, name FROM pragma_index_info('idx_notes_user_created') ORDER BY seqno;",
+        "expected": {
+          "rows": [
+            [
+              0,
+              "user_id"
+            ],
+            [
+              1,
+              "created"
+            ]
+          ]
+        },
+        "hidden": true,
+        "hint": "Порядок столбцов: сначала user_id, затем created"
+      },
+      {
+        "id": "h3",
+        "setup": "CREATE TABLE notes (\n  id INTEGER PRIMARY KEY,\n  user_id INTEGER NOT NULL,\n  created TEXT NOT NULL,\n  text TEXT NOT NULL\n);\n",
+        "query": "SELECT name, tbl_name FROM sqlite_master WHERE type = 'index' AND name NOT LIKE 'sqlite_%' ORDER BY name;",
+        "expected": {
+          "rows": [
+            [
+              "idx_notes_user_created",
+              "notes"
+            ]
+          ]
+        },
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "CREATE INDEX idx_notes_user_created ON notes(user_id, created);",
+  "explanation": "Индекс по двум столбцам сортируется по первому, затем по второму. Запрос с условием по user_id и сортировкой по created читается подряд, без отдельной сортировки.",
+  "criteria": [
+    "Результат совпадает на всех наборах данных, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "CREATE INDEX idx_notes_user_created ON notes(created, user_id);",
+      "why": "Порядок столбцов обратный: сначала нужен user_id."
+    },
+    {
+      "code": "CREATE INDEX idx_notes_user_created ON notes(user_id);",
+      "why": "В индексе нет столбца created."
+    },
+    {
+      "code": "CREATE INDEX idx_notes_user_created ON notes(created);",
+      "why": "Индекс только по дате: user_id пропущен."
+    },
+    {
+      "code": "CREATE INDEX idx_notes_user ON notes(user_id, created);",
+      "why": "Неверное имя индекса."
+    }
+  ]
+}

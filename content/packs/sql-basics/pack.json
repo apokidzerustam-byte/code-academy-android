@@ -11,7 +11,9 @@
     "sql-02-aggregates",
     "sql-03-joins",
     "sql-04-modify",
-    "sql-05-design"
+    "sql-05-design",
+    "sql-06-indexes",
+    "sql-07-transactions"
   ],
   "skills": {
     "sql.tables": "Таблицы, CREATE и INSERT",
@@ -31,6 +33,12 @@
     "sql.constraints": "Ограничения таблицы",
     "sql.design": "Проектирование таблиц",
     "sql.keys": "Первичные и внешние ключи",
-    "sql.normalize": "Нормализация данных"
+    "sql.normalize": "Нормализация данных",
+    "sql.index": "Индексы: создание и проверка",
+    "sql.index-composite": "Составные и уникальные индексы",
+    "sql.index-cost": "Цена индексов",
+    "sql.transaction": "Транзакции: BEGIN, COMMIT, ROLLBACK",
+    "sql.savepoint": "SAVEPOINT и частичный откат",
+    "sql.acid": "Гарантии ACID"
   }
 }

@@ -1,0 +1,44 @@
+{
+  "id": "a5-predict",
+  "type": "predict",
+  "title": "Повтор почты",
+  "statement": "Что вернёт запрос? Запишите строки результата по одной в строке, значения через « | » (без заголовка таблицы).",
+  "goal": "Повтор почты",
+  "input": "—",
+  "expectedResult": "Строки результата.",
+  "constraints": [],
+  "code": "CREATE TABLE users (id INTEGER PRIMARY KEY, email TEXT NOT NULL, name TEXT NOT NULL);\nCREATE UNIQUE INDEX idx_users_email ON users(email);\nINSERT OR IGNORE INTO users (email, name) VALUES ('a@x.ru', 'Анна');\nINSERT OR IGNORE INTO users (email, name) VALUES ('a@x.ru', 'Другая Анна');\nINSERT OR IGNORE INTO users (email, name) VALUES ('b@x.ru', 'Борис');\nINSERT OR REPLACE INTO users (email, name) VALUES ('b@x.ru', 'Борис Второй');\nSELECT id, email, name FROM users ORDER BY id;\n",
+  "hints": [
+    "Уникальный индекс не допускает двух строк с одной почтой.",
+    "INSERT OR IGNORE при конфликте молча пропускает новую строку.",
+    "Значит, вторая Анна не добавлена: остаётся первая, номер 1. Борис получает номер 2.",
+    "INSERT OR REPLACE при конфликте удаляет старую строку и вставляет новую.",
+    "Новая строка получает следующий свободный номер, а не номер удалённой: строка Бориса теперь с номером 3."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "1 | a@x.ru | Анна\n3 | b@x.ru | Борис Второй"
+  },
+  "solution": "1 | a@x.ru | Анна\n3 | b@x.ru | Борис Второй",
+  "explanation": "IGNORE пропускает новую строку, REPLACE удаляет старую и добавляет новую (с новым номером). В обоих случаях повторов почты не появляется: их запрещает уникальный индекс.",
+  "criteria": [
+    "Правильные строки в правильном порядке."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "1 | a@x.ru | Анна\n2 | b@x.ru | Борис Второй",
+      "answer": "1 | a@x.ru | Анна\n2 | b@x.ru | Борис Второй",
+      "why": "REPLACE удаляет старую строку и вставляет новую уже с новым номером."
+    },
+    {
+      "code": "1 | a@x.ru | Анна\n2 | b@x.ru | Борис\n3 | b@x.ru | Борис Второй",
+      "answer": "1 | a@x.ru | Анна\n2 | b@x.ru | Борис\n3 | b@x.ru | Борис Второй",
+      "why": "Уникальный индекс не допускает двух строк с одной почтой."
+    },
+    {
+      "code": "1 | a@x.ru | Другая Анна\n3 | b@x.ru | Борис Второй",
+      "answer": "1 | a@x.ru | Другая Анна\n3 | b@x.ru | Борис Второй",
+      "why": "OR IGNORE оставляет старую строку: вторая Анна не добавляется."
+    }
+  ]
+}
