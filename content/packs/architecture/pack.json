@@ -13,7 +13,8 @@
     "arch-01-responsibility",
     "arch-02-layers",
     "arch-03-dependencies",
-    "arch-04-solid"
+    "arch-04-solid",
+    "arch-05-mvc-mvvm"
   ],
   "skills": {
     "arch.srp": "Принцип единственной ответственности",
@@ -27,6 +28,9 @@
     "arch.root": "Корень композиции",
     "arch.solid": "Принципы SOLID",
     "arch.strategy": "Паттерн «Стратегия»",
-    "arch.observer": "Паттерн «Наблюдатель»"
+    "arch.observer": "Паттерн «Наблюдатель»",
+    "arch.mvc": "MVC: модель, вид, контроллер",
+    "arch.mvvm": "MVVM: вью-модель и подписка",
+    "arch.state": "Управление состоянием"
   }
 }

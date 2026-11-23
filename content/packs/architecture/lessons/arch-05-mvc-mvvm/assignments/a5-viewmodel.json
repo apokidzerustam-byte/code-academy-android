@@ -1,0 +1,72 @@
+{
+  "id": "a5-viewmodel",
+  "type": "complete",
+  "title": "Вью-модель с подписчиками",
+  "statement": "Допишите вью-модель. Метод `observe(listener)` запоминает слушателя и **сразу** вызывает его с текущим состоянием. Метод `add(title)` строит **новое** состояние с добавленным делом и вызывает всех слушателей. Вид `view` уже написан и печатает список. Первая строка ввода — число дел, далее по одному на строку.",
+  "goal": "Реализовать подписку и уведомление.",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "class ListViewModel:\n    def __init__(self):\n        self.state = {\"items\": []}\n        self.listeners = []\n\n    def observe(self, listener):\n        # Запомните слушателя и сразу покажите ему текущее состояние\n        pass\n\n    def add(self, title):\n        # Создайте НОВОЕ состояние с добавленным делом и сообщите всем слушателям\n        pass\n\n\ndef view(state):\n    print(\"экран:\", \", \".join(state[\"items\"]) or \"пусто\")\n\n\nvm = ListViewModel()\nvm.observe(view)\nfor _ in range(int(input())):\n    vm.add(input())\n",
+  "hints": [
+    "Подписчиков хранит список self.listeners.",
+    "observe: добавьте слушателя в список и сразу вызовите его с self.state.",
+    "add: сначала постройте новое состояние, потом уведомляйте.",
+    "Новое состояние — словарь с новым списком: старый список плюс новый элемент, без append.",
+    "Для каждого слушателя в self.listeners вызовите его с новым состоянием."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "2\nМолоко\nХлеб\n",
+        "expected_stdout": "экран: пусто\nэкран: Молоко\nэкран: Молоко, Хлеб\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "0\n",
+        "expected_stdout": "экран: пусто\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "1\nЧай\n",
+        "expected_stdout": "экран: пусто\nэкран: Чай\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "3\nА\nБ\nВ\n",
+        "expected_stdout": "экран: пусто\nэкран: А\nэкран: А, Б\nэкран: А, Б, В\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "class ListViewModel:\n    def __init__(self):\n        self.state = {\"items\": []}\n        self.listeners = []\n\n    def observe(self, listener):\n        self.listeners.append(listener)\n        listener(self.state)\n\n    def add(self, title):\n        self.state = {\"items\": self.state[\"items\"] + [title]}\n        for listener in self.listeners:\n            listener(self.state)\n\n\ndef view(state):\n    print(\"экран:\", \", \".join(state[\"items\"]) or \"пусто\")\n\n\nvm = ListViewModel()\nvm.observe(view)\nfor _ in range(int(input())):\n    vm.add(input())\n",
+  "explanation": "Вью-модель владеет состоянием и рассылает его подписчикам. Новое состояние строится до рассылки, а подписчик при подключении сразу получает текущее.",
+  "criteria": [
+    "Слушатель сразу получает состояние.",
+    "Каждое добавление уведомляет всех.",
+    "Состояние заменяется новым."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "class ListViewModel:\n    def __init__(self):\n        self.state = {\"items\": []}\n        self.listeners = []\n\n    def observe(self, listener):\n        # Запомните слушателя и сразу покажите ему текущее состояние\n        pass\n\n    def add(self, title):\n        # Создайте НОВОЕ состояние с добавленным делом и сообщите всем слушателям\n        pass\n\n\ndef view(state):\n    print(\"экран:\", \", \".join(state[\"items\"]) or \"пусто\")\n\n\nvm = ListViewModel()\nvm.observe(view)\nfor _ in range(int(input())):\n    vm.add(input())\n",
+      "why": "Заготовка: подписка и добавление ничего не делают."
+    },
+    {
+      "code": "class ListViewModel:\n    def __init__(self):\n        self.state = {\"items\": []}\n        self.listeners = []\n\n    def observe(self, listener):\n        self.listeners.append(listener)\n\n    def add(self, title):\n        self.state = {\"items\": self.state[\"items\"] + [title]}\n        for listener in self.listeners:\n            listener(self.state)\n\n\ndef view(state):\n    print(\"экран:\", \", \".join(state[\"items\"]) or \"пусто\")\n\n\nvm = ListViewModel()\nvm.observe(view)\nfor _ in range(int(input())):\n    vm.add(input())\n",
+      "why": "При подписке слушатель не получает текущее состояние: нет первой строки «пусто»."
+    },
+    {
+      "code": "class ListViewModel:\n    def __init__(self):\n        self.state = {\"items\": []}\n        self.listeners = []\n\n    def observe(self, listener):\n        self.listeners.append(listener)\n        listener(self.state)\n\n    def add(self, title):\n        self.state = {\"items\": self.state[\"items\"] + [title]}\n\n\ndef view(state):\n    print(\"экран:\", \", \".join(state[\"items\"]) or \"пусто\")\n\n\nvm = ListViewModel()\nvm.observe(view)\nfor _ in range(int(input())):\n    vm.add(input())\n",
+      "why": "Слушатели не уведомляются об изменении."
+    },
+    {
+      "code": "class ListViewModel:\n    def __init__(self):\n        self.state = {\"items\": []}\n        self.listeners = []\n\n    def observe(self, listener):\n        self.listeners.append(listener)\n        listener(self.state)\n\n    def add(self, title):\n        for listener in self.listeners:\n            listener(self.state)\n        self.state = {\"items\": self.state[\"items\"] + [title]}\n\n\ndef view(state):\n    print(\"экран:\", \", \".join(state[\"items\"]) or \"пусто\")\n\n\nvm = ListViewModel()\nvm.observe(view)\nfor _ in range(int(input())):\n    vm.add(input())\n",
+      "why": "Слушатели уведомляются до замены состояния и получают старое."
+    }
+  ]
+}

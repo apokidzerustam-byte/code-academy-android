@@ -1,0 +1,249 @@
+{
+  "id": "a4-summary",
+  "type": "write",
+  "title": "Сводка по списку дел",
+  "statement": "Состояние хранит только список дел `state[\"items\"]`: у каждого есть поле `done` (выполнено или нет). Напишите функцию `summary(state)`, которая **вычисляет** сводку и возвращает словарь `{\"left\": …, \"total\": …, \"percent\": …}`: сколько дел осталось, сколько всего и какой процент выполнен (`round(100 * выполнено / всего)`; для пустого списка — 0).",
+  "goal": "Вычислить производное состояние.",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def summary(state):\n    # Вычислите left, total и percent из списка state[\"items\"]\n    pass\n",
+  "hints": [
+    "Ничего не храним: сводка вычисляется из списка при каждом вызове.",
+    "Выполненные дела — те, у которых done истинно; их можно посчитать генератором внутри sum.",
+    "Невыполненных — всего минус выполненных.",
+    "Процент: 100 умножить на выполненные и разделить на всего, затем round.",
+    "Если дел нет, делить нельзя: верните 0."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "summary",
+    "cases": [
+      {
+        "args": [
+          {
+            "items": [
+              {
+                "title": "дело 1",
+                "done": true
+              },
+              {
+                "title": "дело 2",
+                "done": false
+              },
+              {
+                "title": "дело 3",
+                "done": false
+              }
+            ]
+          }
+        ],
+        "id": "v1",
+        "expected": {
+          "left": 2,
+          "total": 3,
+          "percent": 33
+        }
+      },
+      {
+        "args": [
+          {
+            "items": [
+              {
+                "title": "дело 1",
+                "done": true
+              },
+              {
+                "title": "дело 2",
+                "done": true
+              },
+              {
+                "title": "дело 3",
+                "done": false
+              }
+            ]
+          }
+        ],
+        "id": "v2",
+        "expected": {
+          "left": 1,
+          "total": 3,
+          "percent": 67
+        }
+      },
+      {
+        "args": [
+          {
+            "items": []
+          }
+        ],
+        "id": "v3",
+        "expected": {
+          "left": 0,
+          "total": 0,
+          "percent": 0
+        }
+      },
+      {
+        "args": [
+          {
+            "items": [
+              {
+                "title": "дело 1",
+                "done": true
+              },
+              {
+                "title": "дело 2",
+                "done": true
+              }
+            ]
+          }
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": {
+          "left": 0,
+          "total": 2,
+          "percent": 100
+        }
+      },
+      {
+        "args": [
+          {
+            "items": [
+              {
+                "title": "дело 1",
+                "done": false
+              },
+              {
+                "title": "дело 2",
+                "done": false
+              },
+              {
+                "title": "дело 3",
+                "done": false
+              },
+              {
+                "title": "дело 4",
+                "done": false
+              },
+              {
+                "title": "дело 5",
+                "done": false
+              },
+              {
+                "title": "дело 6",
+                "done": false
+              }
+            ]
+          }
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": {
+          "left": 6,
+          "total": 6,
+          "percent": 0
+        }
+      },
+      {
+        "args": [
+          {
+            "items": [
+              {
+                "title": "дело 1",
+                "done": true
+              },
+              {
+                "title": "дело 2",
+                "done": false
+              },
+              {
+                "title": "дело 3",
+                "done": false
+              },
+              {
+                "title": "дело 4",
+                "done": false
+              },
+              {
+                "title": "дело 5",
+                "done": false
+              },
+              {
+                "title": "дело 6",
+                "done": false
+              }
+            ]
+          }
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": {
+          "left": 5,
+          "total": 6,
+          "percent": 17
+        }
+      },
+      {
+        "args": [
+          {
+            "items": [
+              {
+                "title": "дело 1",
+                "done": true
+              },
+              {
+                "title": "дело 2",
+                "done": true
+              },
+              {
+                "title": "дело 3",
+                "done": true
+              },
+              {
+                "title": "дело 4",
+                "done": true
+              },
+              {
+                "title": "дело 5",
+                "done": true
+              },
+              {
+                "title": "дело 6",
+                "done": false
+              }
+            ]
+          }
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": {
+          "left": 1,
+          "total": 6,
+          "percent": 83
+        }
+      }
+    ]
+  },
+  "solution": "def summary(state):\n    items = state[\"items\"]\n    total = len(items)\n    done = sum(1 for item in items if item[\"done\"])\n    percent = round(100 * done / total) if total else 0\n    return {\"left\": total - done, \"total\": total, \"percent\": percent}\n",
+  "explanation": "Производное состояние не хранят, а вычисляют из основного: так значения не могут разойтись. Особый случай — пустой список: делить на ноль нельзя.",
+  "criteria": [
+    "left, total и percent верны.",
+    "Пустой список даёт 0 процентов."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def summary(state):\n    items = state[\"items\"]\n    total = len(items)\n    done = sum(1 for item in items if item[\"done\"])\n    percent = 100 * done // total if total else 0\n    return {\"left\": total - done, \"total\": total, \"percent\": percent}\n",
+      "why": "Целочисленное деление отбрасывает дробную часть: 2 из 3 даёт 66, а нужно 67."
+    },
+    {
+      "code": "def summary(state):\n    items = state[\"items\"]\n    total = len(items)\n    done = sum(1 for item in items if item[\"done\"])\n    percent = round(100 * done / total)\n    return {\"left\": total - done, \"total\": total, \"percent\": percent}\n",
+      "why": "Пустой список: деление на ноль."
+    },
+    {
+      "code": "def summary(state):\n    items = state[\"items\"]\n    total = len(items)\n    done = sum(1 for item in items if item[\"done\"])\n    percent = round(100 * done / total) if total else 0\n    return {\"left\": done, \"total\": total, \"percent\": percent}\n",
+      "why": "В left должны попасть невыполненные дела, а не выполненные."
+    }
+  ]
+}

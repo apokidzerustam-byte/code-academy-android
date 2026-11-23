@@ -1,0 +1,78 @@
+{
+  "id": "a2-controller",
+  "type": "complete",
+  "title": "Контроллер списка дел",
+  "statement": "Модель `TodoModel` и вид `render` готовы. Допишите **контроллер** `handle(model, command)`: команды `add <название>`, `done <номер>` (отметить или снять отметку) и `remove <номер>`; номера считаются с **единицы**. После каждой команды вид должен перерисовать список. Первая строка ввода — число команд.",
+  "goal": "Связать модель и вид контроллером.",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "class TodoModel:\n    def __init__(self):\n        self.items = []\n\n    def add(self, title):\n        self.items.append({\"title\": title, \"done\": False})\n\n    def toggle(self, index):\n        self.items[index][\"done\"] = not self.items[index][\"done\"]\n\n    def remove(self, index):\n        del self.items[index]\n\n\ndef render(items):\n    if not items:\n        print(\"(пусто)\")\n    for number, item in enumerate(items, 1):\n        mark = \"x\" if item[\"done\"] else \" \"\n        print(f\"{number}. [{mark}] {item['title']}\")\n\n\ndef handle(model, command):\n    # Разберите команду, вызовите метод модели и перерисуйте список\n    pass\n\n\nmodel = TodoModel()\nfor _ in range(int(input())):\n    handle(model, input())\n",
+  "hints": [
+    "Команду делят на слово и аргумент: command.partition(\" \").",
+    "Для add передайте аргумент как название дела.",
+    "Для done и remove аргумент — номер с единицы: индекс в модели на единицу меньше.",
+    "Контроллер не печатает список сам: он вызывает готовую функцию render.",
+    "В конце handle — render(model.items), и он выполняется после любой команды."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "3\nadd Молоко\nadd Хлеб\ndone 1\n",
+        "expected_stdout": "1. [ ] Молоко\n1. [ ] Молоко\n2. [ ] Хлеб\n1. [x] Молоко\n2. [ ] Хлеб\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "4\nadd А\nremove 1\nadd Б\ndone 1\n",
+        "expected_stdout": "1. [ ] А\n(пусто)\n1. [ ] Б\n1. [x] Б\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "1\nadd X\n",
+        "expected_stdout": "1. [ ] X\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "3\nadd Я\ndone 1\ndone 1\n",
+        "expected_stdout": "1. [ ] Я\n1. [x] Я\n1. [ ] Я\n",
+        "hidden": true
+      },
+      {
+        "id": "h5",
+        "stdin": "2\nadd Я\nremove 1\n",
+        "expected_stdout": "1. [ ] Я\n(пусто)\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "class TodoModel:\n    def __init__(self):\n        self.items = []\n\n    def add(self, title):\n        self.items.append({\"title\": title, \"done\": False})\n\n    def toggle(self, index):\n        self.items[index][\"done\"] = not self.items[index][\"done\"]\n\n    def remove(self, index):\n        del self.items[index]\n\n\ndef render(items):\n    if not items:\n        print(\"(пусто)\")\n    for number, item in enumerate(items, 1):\n        mark = \"x\" if item[\"done\"] else \" \"\n        print(f\"{number}. [{mark}] {item['title']}\")\n\n\ndef handle(model, command):\n    action, _, argument = command.partition(\" \")\n    if action == \"add\":\n        model.add(argument)\n    elif action == \"done\":\n        model.toggle(int(argument) - 1)\n    elif action == \"remove\":\n        model.remove(int(argument) - 1)\n    render(model.items)\n\n\nmodel = TodoModel()\nfor _ in range(int(input())):\n    handle(model, input())\n",
+  "explanation": "Контроллер разбирает команду, вызывает метод модели и просит вид перерисоваться. Правила остаются в модели, а вывод — в виде.",
+  "criteria": [
+    "Три команды обработаны.",
+    "Индексы с единицы.",
+    "После каждой команды список перерисован."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "class TodoModel:\n    def __init__(self):\n        self.items = []\n\n    def add(self, title):\n        self.items.append({\"title\": title, \"done\": False})\n\n    def toggle(self, index):\n        self.items[index][\"done\"] = not self.items[index][\"done\"]\n\n    def remove(self, index):\n        del self.items[index]\n\n\ndef render(items):\n    if not items:\n        print(\"(пусто)\")\n    for number, item in enumerate(items, 1):\n        mark = \"x\" if item[\"done\"] else \" \"\n        print(f\"{number}. [{mark}] {item['title']}\")\n\n\ndef handle(model, command):\n    # Разберите команду, вызовите метод модели и перерисуйте список\n    pass\n\n\nmodel = TodoModel()\nfor _ in range(int(input())):\n    handle(model, input())\n",
+      "why": "Заготовка: контроллер ничего не делает и не перерисовывает вид."
+    },
+    {
+      "code": "class TodoModel:\n    def __init__(self):\n        self.items = []\n\n    def add(self, title):\n        self.items.append({\"title\": title, \"done\": False})\n\n    def toggle(self, index):\n        self.items[index][\"done\"] = not self.items[index][\"done\"]\n\n    def remove(self, index):\n        del self.items[index]\n\n\ndef render(items):\n    if not items:\n        print(\"(пусто)\")\n    for number, item in enumerate(items, 1):\n        mark = \"x\" if item[\"done\"] else \" \"\n        print(f\"{number}. [{mark}] {item['title']}\")\n\n\ndef handle(model, command):\n    action, _, argument = command.partition(\" \")\n    if action == \"add\":\n        model.add(argument)\n    elif action == \"done\":\n        model.toggle(int(argument) - 1)\n    elif action == \"remove\":\n        model.remove(int(argument) - 1)\n\n\nmodel = TodoModel()\nfor _ in range(int(input())):\n    handle(model, input())\n",
+      "why": "После команды вид не перерисовывается."
+    },
+    {
+      "code": "class TodoModel:\n    def __init__(self):\n        self.items = []\n\n    def add(self, title):\n        self.items.append({\"title\": title, \"done\": False})\n\n    def toggle(self, index):\n        self.items[index][\"done\"] = not self.items[index][\"done\"]\n\n    def remove(self, index):\n        del self.items[index]\n\n\ndef render(items):\n    if not items:\n        print(\"(пусто)\")\n    for number, item in enumerate(items, 1):\n        mark = \"x\" if item[\"done\"] else \" \"\n        print(f\"{number}. [{mark}] {item['title']}\")\n\n\ndef handle(model, command):\n    action, _, argument = command.partition(\" \")\n    if action == \"add\":\n        model.add(argument)\n    elif action == \"done\":\n        model.toggle(int(argument))\n    elif action == \"remove\":\n        model.remove(int(argument))\n    render(model.items)\n\n\nmodel = TodoModel()\nfor _ in range(int(input())):\n    handle(model, input())\n",
+      "why": "Номера считаются с единицы: индекс списка на единицу меньше."
+    },
+    {
+      "code": "class TodoModel:\n    def __init__(self):\n        self.items = []\n\n    def add(self, title):\n        self.items.append({\"title\": title, \"done\": False})\n\n    def toggle(self, index):\n        self.items[index][\"done\"] = not self.items[index][\"done\"]\n\n    def remove(self, index):\n        del self.items[index]\n\n\ndef render(items):\n    if not items:\n        print(\"(пусто)\")\n    for number, item in enumerate(items, 1):\n        mark = \"x\" if item[\"done\"] else \" \"\n        print(f\"{number}. [{mark}] {item['title']}\")\n\n\ndef handle(model, command):\n    action, _, argument = command.partition(\" \")\n    if action == \"add\":\n        model.add(argument)\n    elif action == \"done\":\n        model.toggle(int(argument) - 1)\n    render(model.items)\n\n\nmodel = TodoModel()\nfor _ in range(int(input())):\n    handle(model, input())\n",
+      "why": "Команда remove не обработана."
+    }
+  ]
+}

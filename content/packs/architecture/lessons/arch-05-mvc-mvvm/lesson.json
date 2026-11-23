@@ -1,0 +1,45 @@
+{
+  "id": "arch-05-mvc-mvvm",
+  "title": "MVC, MVVM и управление состоянием",
+  "goal": "Разделять приложение на модель, вид и посредника и управлять состоянием: новое вместо правки, производное вычислять.",
+  "skills": [
+    "arch.mvc",
+    "arch.mvvm",
+    "arch.state"
+  ],
+  "prerequisites": [
+    "arch-04-solid"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-observers.json",
+    "assignments/a2-controller.json",
+    "assignments/a3-undo.json",
+    "assignments/a4-summary.json",
+    "assignments/a5-viewmodel.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Вид сам решает, что делать с данными",
+      "fix": "Логику держите в модели и посреднике: так её можно проверить без экрана."
+    },
+    {
+      "mistake": "Состояние меняют на месте",
+      "fix": "Стройте новое состояние: подписчики и история получают целый снимок."
+    },
+    {
+      "mistake": "Одни и те же данные хранятся в двух местах",
+      "fix": "Производное (число невыполненных, фильтр списка) вычисляйте из основного состояния."
+    },
+    {
+      "mistake": "Посредник знает про оформление экрана",
+      "fix": "Вью-модель и контроллер не должны знать, как нарисован экран."
+    }
+  ]
+}

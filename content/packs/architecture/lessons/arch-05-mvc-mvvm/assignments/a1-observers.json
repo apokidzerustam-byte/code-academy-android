@@ -1,0 +1,41 @@
+{
+  "id": "a1-observers",
+  "type": "predict",
+  "title": "Кто и когда получает состояние",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Кто и когда получает состояние",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "class CounterViewModel:\n    def __init__(self):\n        self.state = 0\n        self.listeners = []\n\n    def observe(self, listener):\n        self.listeners.append(listener)\n        listener(self.state)\n\n    def increment(self):\n        self.state += 1\n        for listener in self.listeners:\n            listener(self.state)\n\n    def reset(self):\n        self.state = 0\n        for listener in self.listeners:\n            listener(self.state)\n\n\nvm = CounterViewModel()\nvm.observe(lambda s: print(\"экран A:\", s))\nvm.increment()\nvm.observe(lambda s: print(\"экран B:\", s))\nvm.increment()\nvm.reset()\n",
+  "hints": [
+    "Метод observe не только запоминает слушателя, но и сразу вызывает его.",
+    "Первый вызов observe печатает «экран A: 0».",
+    "increment меняет состояние и уведомляет всех, кто уже подписан.",
+    "Второй observe подключает B: он сразу получает текущее состояние 1, а не 0.",
+    "После подписки B каждое изменение (increment, reset) печатает две строки: сначала A, потом B."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "экран A: 0\nэкран A: 1\nэкран B: 1\nэкран A: 2\nэкран B: 2\nэкран A: 0\nэкран B: 0\n"
+  },
+  "solution": "экран A: 0\nэкран A: 1\nэкран B: 1\nэкран A: 2\nэкран B: 2\nэкран A: 0\nэкран B: 0\n",
+  "explanation": "observe сразу показывает слушателю текущее состояние, а затем слушатель получает каждое изменение. После подписки B все изменения печатают по две строки, A и B.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "экран A: 1\nэкран A: 2\nэкран B: 2\nэкран A: 0\nэкран B: 0",
+      "answer": "экран A: 1\nэкран A: 2\nэкран B: 2\nэкран A: 0\nэкран B: 0",
+      "why": "При подписке слушатель сразу получает текущее состояние: сначала A: 0, затем B: 1."
+    },
+    {
+      "code": "экран A: 0\nэкран A: 1\nэкран B: 1\nэкран A: 2\nэкран B: 2\nэкран A: 0",
+      "answer": "экран A: 0\nэкран A: 1\nэкран B: 1\nэкран A: 2\nэкран B: 2\nэкран A: 0",
+      "why": "Сброс уведомляет всех подписчиков, в том числе экран B."
+    }
+  ]
+}
