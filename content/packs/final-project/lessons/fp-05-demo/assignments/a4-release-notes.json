@@ -1,0 +1,99 @@
+{
+  "id": "a4-release-notes",
+  "type": "function",
+  "title": "Заметки о выпуске",
+  "statement": "Напишите `release_notes(changes)`: `changes` — список пар `(тип, текст)`, где тип — `\"added\"`, `\"fixed\"` или `\"changed\"`. Верните строку: для каждого типа **в порядке added, fixed, changed**, у которого есть изменения, заголовок `Добавлено:` / `Исправлено:` / `Изменено:` и строки `- текст`. Блоки разделяет пустая строка. Если изменений нет — `Без изменений`.",
+  "goal": "Заметки о выпуске",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Порядок блоков фиксирован.",
+    "Для каждого типа соберите тексты.",
+    "Пустые блоки пропускайте.",
+    "Заголовок и строки с дефисом соединяются переводом строки.",
+    "Блоки разделяются пустой строкой."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "release_notes",
+    "cases": [
+      {
+        "args": [
+          [
+            [
+              "added",
+              "Экспорт"
+            ],
+            [
+              "fixed",
+              "Округление"
+            ],
+            [
+              "added",
+              "Справка"
+            ]
+          ]
+        ],
+        "id": "v1",
+        "expected": "Добавлено:\n- Экспорт\n- Справка\n\nИсправлено:\n- Округление"
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": "Без изменений"
+      },
+      {
+        "args": [
+          [
+            [
+              "changed",
+              "Тексты"
+            ]
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "Изменено:\n- Тексты"
+      },
+      {
+        "args": [
+          [
+            [
+              "fixed",
+              "A"
+            ],
+            [
+              "changed",
+              "B"
+            ],
+            [
+              "added",
+              "C"
+            ]
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "Добавлено:\n- C\n\nИсправлено:\n- A\n\nИзменено:\n- B"
+      }
+    ]
+  },
+  "solution": "TITLES = [(\"added\", \"Добавлено:\"), (\"fixed\", \"Исправлено:\"), (\"changed\", \"Изменено:\")]\n\n\ndef release_notes(changes):\n    blocks = []\n    for kind, title in TITLES:\n        items = [text for k, text in changes if k == kind]\n        if items:\n            blocks.append(\"\\n\".join([title] + [f\"- {t}\" for t in items]))\n    return \"\\n\\n\".join(blocks) if blocks else \"Без изменений\"\n",
+  "explanation": "Фиксированный порядок типов в списке пар даёт предсказуемый результат независимо от порядка изменений.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def release_notes(changes):\n    blocks = []\n    for kind, title in [(\"added\", \"Добавлено:\"), (\"fixed\", \"Исправлено:\"), (\"changed\", \"Изменено:\")]:\n        items = [text for k, text in changes if k == kind]\n        if items:\n            blocks.append(\"\\n\".join([title] + [f\"- {t}\" for t in items]))\n    return \"\\n\\n\".join(blocks)\n",
+      "why": "Для пустого списка нужно «Без изменений»."
+    },
+    {
+      "code": "def release_notes(changes):\n    blocks = []\n    for kind, title in [(\"fixed\", \"Исправлено:\"), (\"added\", \"Добавлено:\"), (\"changed\", \"Изменено:\")]:\n        items = [text for k, text in changes if k == kind]\n        if items:\n            blocks.append(\"\\n\".join([title] + [f\"- {t}\" for t in items]))\n    return \"\\n\\n\".join(blocks) if blocks else \"Без изменений\"\n",
+      "why": "Блоки идут не в том порядке."
+    }
+  ]
+}

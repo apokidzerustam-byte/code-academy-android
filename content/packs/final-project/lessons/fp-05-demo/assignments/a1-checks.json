@@ -1,0 +1,41 @@
+{
+  "id": "a1-checks",
+  "type": "predict",
+  "title": "Чек-лист",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Чек-лист",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "checks = {\"tests\": True, \"readme\": False, \"demo\": True, \"secrets\": False}\nready = [k for k, v in checks.items() if v]\nmissing = [k for k, v in checks.items() if not v]\nprint(len(ready), \"из\", len(checks))\nprint(missing)\nprint(all(checks.values()))\n",
+  "hints": [
+    "Подсчитайте выполненные проверки.",
+    "Выполнены tests и demo — две.",
+    "Не выполнены readme и secrets.",
+    "Список печатается в квадратных скобках.",
+    "all истинно, только если все значения истинны."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "2 из 4\n['readme', 'secrets']\nFalse\n"
+  },
+  "solution": "2 из 4\n['readme', 'secrets']\nFalse\n",
+  "explanation": "Чек-лист — словарь «проверка → да/нет»: список невыполненного и итог считаются из него.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "2 из 4\n['readme', 'secrets']\nTrue",
+      "answer": "2 из 4\n['readme', 'secrets']\nTrue",
+      "why": "Не все проверки выполнены — all даёт False."
+    },
+    {
+      "code": "2 из 4\n['tests', 'demo']\nFalse",
+      "answer": "2 из 4\n['tests', 'demo']\nFalse",
+      "why": "Список missing — невыполненные проверки."
+    }
+  ]
+}

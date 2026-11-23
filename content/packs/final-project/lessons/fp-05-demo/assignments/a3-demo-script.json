@@ -1,0 +1,95 @@
+{
+  "id": "a3-demo-script",
+  "type": "function",
+  "title": "Сценарий демонстрации",
+  "statement": "Напишите `demo_script(steps)`: `steps` — список пар `(команда, результат)`. Верните строку, где каждый шаг на отдельной строке в виде `\"<номер>. <команда> -> <результат>\"` (номера с 1). Строки соединяются `\\n`, без перевода в конце. Для пустого списка верните пустую строку.",
+  "goal": "Сценарий демонстрации",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Каждый шаг — отдельная строка.",
+    "Нумерация с единицы.",
+    "Номер, точка, пробел, команда.",
+    "Затем стрелка из дефиса и «больше» и результат.",
+    "Склейте строки через перевод строки."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "demo_script",
+    "cases": [
+      {
+        "args": [
+          [
+            [
+              "add Хлеб",
+              "Добавлено: #1 Хлеб"
+            ],
+            [
+              "list",
+              "1. [ ] Хлеб"
+            ]
+          ]
+        ],
+        "id": "v1",
+        "expected": "1. add Хлеб -> Добавлено: #1 Хлеб\n2. list -> 1. [ ] Хлеб"
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": ""
+      },
+      {
+        "args": [
+          [
+            [
+              "quit",
+              "До встречи!"
+            ]
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "1. quit -> До встречи!"
+      },
+      {
+        "args": [
+          [
+            [
+              "a",
+              "b"
+            ],
+            [
+              "c",
+              "d"
+            ],
+            [
+              "e",
+              "f"
+            ]
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "1. a -> b\n2. c -> d\n3. e -> f"
+      }
+    ]
+  },
+  "solution": "def demo_script(steps):\n    return \"\\n\".join(f\"{n}. {command} -> {result}\" for n, (command, result) in enumerate(steps, 1))\n",
+  "explanation": "enumerate(steps, 1) нумерует с единицы, а join склеивает без лишнего перевода строки в конце.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def demo_script(steps):\n    return \"\\n\".join(f\"{n}. {command} -> {result}\" for n, (command, result) in enumerate(steps))\n",
+      "why": "Нумерация должна начинаться с 1."
+    },
+    {
+      "code": "def demo_script(steps):\n    return \"\\n\".join(f\"{n}. {command} -> {result}\" for n, (command, result) in enumerate(steps, 1)) + \"\\n\"\n",
+      "why": "В конце не должно быть перевода строки."
+    }
+  ]
+}

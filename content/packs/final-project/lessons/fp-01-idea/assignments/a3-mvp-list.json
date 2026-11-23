@@ -1,0 +1,135 @@
+{
+  "id": "a3-mvp-list",
+  "type": "function",
+  "title": "Состав MVP",
+  "statement": "Напишите `mvp(features)`: `features` — список словарей `{\"name\", \"priority\", \"hours\"}`. Верните названия функций с приоритетом `\"must\"`, **отсортированные по возрастанию трудоёмкости** (при равенстве — в исходном порядке).",
+  "goal": "Состав MVP",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Отберите обязательные функции.",
+    "Их порядок определяет трудоёмкость.",
+    "Сортировка по числовому полю словаря.",
+    "Сортировка списка в Python устойчива — равные остаются в исходном порядке.",
+    "Верните только названия."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "mvp",
+    "cases": [
+      {
+        "args": [
+          [
+            {
+              "name": "A",
+              "priority": "must",
+              "hours": 5
+            },
+            {
+              "name": "B",
+              "priority": "could",
+              "hours": 1
+            },
+            {
+              "name": "C",
+              "priority": "must",
+              "hours": 2
+            }
+          ]
+        ],
+        "id": "v1",
+        "expected": [
+          "C",
+          "A"
+        ]
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            {
+              "name": "X",
+              "priority": "must",
+              "hours": 3
+            },
+            {
+              "name": "Y",
+              "priority": "must",
+              "hours": 3
+            }
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          "X",
+          "Y"
+        ]
+      },
+      {
+        "args": [
+          [
+            {
+              "name": "Z",
+              "priority": "should",
+              "hours": 1
+            }
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            {
+              "name": "P",
+              "priority": "must",
+              "hours": 9
+            },
+            {
+              "name": "Q",
+              "priority": "must",
+              "hours": 1
+            },
+            {
+              "name": "R",
+              "priority": "must",
+              "hours": 5
+            }
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          "Q",
+          "R",
+          "P"
+        ]
+      }
+    ]
+  },
+  "solution": "def mvp(features):\n    must = [f for f in features if f[\"priority\"] == \"must\"]\n    must.sort(key=lambda f: f[\"hours\"])\n    return [f[\"name\"] for f in must]\n",
+  "explanation": "sort с ключом по полю hours; устойчивость сортировки сохраняет исходный порядок равных элементов.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def mvp(features):\n    return [f[\"name\"] for f in features if f[\"priority\"] == \"must\"]\n",
+      "why": "Нет сортировки по трудоёмкости."
+    },
+    {
+      "code": "def mvp(features):\n    return sorted(f[\"name\"] for f in features if f[\"priority\"] == \"must\")\n",
+      "why": "Сортировка по названию, а не по трудоёмкости."
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "id": "a5-render",
+  "type": "function",
+  "title": "Оформление отдельно от данных",
+  "statement": "Напишите `render_task(task)`: верните строку `\"<номер>. [x] название\"` для выполненной и `\"<номер>. [ ] название\"` для невыполненной. Функция **ничего не печатает**.",
+  "goal": "Оформление отдельно от данных",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Результат — строка, а не вывод.",
+    "Отметка зависит от поля done.",
+    "Для выполненной — x, для остальных — пробел.",
+    "Номер, точка, пробел, отметка в квадратных скобках.",
+    "Затем пробел и название."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "render_task",
+    "cases": [
+      {
+        "args": [
+          {
+            "id": 1,
+            "title": "Купить хлеб",
+            "done": false
+          }
+        ],
+        "id": "v1",
+        "expected": "1. [ ] Купить хлеб"
+      },
+      {
+        "args": [
+          {
+            "id": 2,
+            "title": "Сдать отчёт",
+            "done": true
+          }
+        ],
+        "id": "v2",
+        "expected": "2. [x] Сдать отчёт"
+      },
+      {
+        "args": [
+          {
+            "id": 10,
+            "title": "A",
+            "done": true
+          }
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "10. [x] A"
+      },
+      {
+        "args": [
+          {
+            "id": 3,
+            "title": "",
+            "done": false
+          }
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "3. [ ] "
+      }
+    ]
+  },
+  "solution": "def render_task(task):\n    mark = \"x\" if task[\"done\"] else \" \"\n    return f\"{task['id']}. [{mark}] {task['title']}\"\n",
+  "explanation": "Функция оформления возвращает строку: печатает её внешний слой, поэтому её легко проверять тестом.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def render_task(task):\n    print(f\"{task['id']}. [{'x' if task['done'] else ' '}] {task['title']}\")\n",
+      "why": "Функция печатает, а не возвращает строку."
+    },
+    {
+      "code": "def render_task(task):\n    mark = \"x\" if task[\"done\"] else \"\"\n    return f\"{task['id']}. [{mark}] {task['title']}\"\n",
+      "why": "У невыполненной задачи должен быть пробел в скобках."
+    }
+  ]
+}

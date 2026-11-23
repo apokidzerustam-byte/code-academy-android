@@ -1,0 +1,111 @@
+{
+  "id": "a5-incomplete",
+  "type": "function",
+  "title": "Полнота требования",
+  "statement": "Напишите `missing_fields(req)`: требование — словарь. Обязательные поля: `role`, `action`, `goal`, `criteria`. Верните отсортированный список полей, которые **отсутствуют или пусты** (пустая строка, пустой список).",
+  "goal": "Полнота требования",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Для каждого обязательного поля проверьте наличие значения.",
+    "Пустая строка и пустой список — тоже «нет значения».",
+    "Метод get не падает на отсутствующем ключе.",
+    "Логическое «не» истинно для пустых значений.",
+    "Результат отсортируйте."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "missing_fields",
+    "cases": [
+      {
+        "args": [
+          {
+            "role": "студент",
+            "action": "добавить расход",
+            "goal": "считать траты",
+            "criteria": [
+              "расход виден в отчёте"
+            ]
+          }
+        ],
+        "id": "v1",
+        "expected": []
+      },
+      {
+        "args": [
+          {
+            "role": "студент",
+            "action": ""
+          }
+        ],
+        "id": "v2",
+        "expected": [
+          "action",
+          "criteria",
+          "goal"
+        ]
+      },
+      {
+        "args": [
+          {}
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          "action",
+          "criteria",
+          "goal",
+          "role"
+        ]
+      },
+      {
+        "args": [
+          {
+            "role": "a",
+            "action": "b",
+            "goal": "c",
+            "criteria": []
+          }
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          "criteria"
+        ]
+      },
+      {
+        "args": [
+          {
+            "goal": "c",
+            "criteria": [
+              "x"
+            ],
+            "extra": 1
+          }
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          "action",
+          "role"
+        ]
+      }
+    ]
+  },
+  "solution": "def missing_fields(req):\n    required = [\"role\", \"action\", \"goal\", \"criteria\"]\n    return sorted(name for name in required if not req.get(name))\n",
+  "explanation": "not req.get(name) покрывает сразу три случая: ключа нет, значение None, значение пустое.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def missing_fields(req):\n    return [n for n in [\"role\", \"action\", \"goal\", \"criteria\"] if n not in req]\n",
+      "why": "Пустые значения считаются заполненными."
+    },
+    {
+      "code": "def missing_fields(req):\n    return [n for n in [\"role\", \"action\", \"goal\", \"criteria\"] if not req.get(n)]\n",
+      "why": "Список не отсортирован по алфавиту."
+    }
+  ]
+}

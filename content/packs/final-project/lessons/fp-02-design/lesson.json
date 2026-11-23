@@ -1,0 +1,45 @@
+{
+  "id": "fp-02-design",
+  "title": "Проектирование структуры",
+  "goal": "Спроектировать модель данных и разделить код на операции и оболочку.",
+  "skills": [
+    "final.design",
+    "final.data-model",
+    "final.separation"
+  ],
+  "prerequisites": [
+    "fp-01-idea"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-model.json",
+    "assignments/a2-add-task.json",
+    "assignments/a3-group.json",
+    "assignments/a4-split-command.json",
+    "assignments/a5-render.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Печатают результат внутри функции логики",
+      "fix": "Возвращайте значение, печатайте снаружи."
+    },
+    {
+      "mistake": "Берут номер по длине списка",
+      "fix": "Максимальный номер плюс единица."
+    },
+    {
+      "mistake": "Хранят данные в разных формах",
+      "fix": "Договоритесь о форме и держитесь её."
+    },
+    {
+      "mistake": "Одна функция делает всё",
+      "fix": "Разделите: данные, операции, оформление."
+    }
+  ]
+}

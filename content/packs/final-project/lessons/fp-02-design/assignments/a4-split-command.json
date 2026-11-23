@@ -1,0 +1,110 @@
+{
+  "id": "a4-split-command",
+  "type": "function",
+  "title": "Разбор команды",
+  "statement": "Напишите `split_command(line)`: верните пару `(команда, аргументы)`. Команда — первое слово в **нижнем регистре**, аргументы — список остальных слов (лишние пробелы игнорируются). Для пустой или пробельной строки верните `(\"\", [])`.",
+  "goal": "Разбор команды",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Разбейте строку на слова.",
+    "Метод split без аргументов убирает лишние пробелы.",
+    "Пустой результат нужно обработать отдельно.",
+    "Первое слово — команда, приведите его к нижнему регистру.",
+    "Остальные слова — аргументы."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "split_command",
+    "cases": [
+      {
+        "args": [
+          "ADD Купить молоко"
+        ],
+        "id": "v1",
+        "expected": [
+          "add",
+          [
+            "Купить",
+            "молоко"
+          ]
+        ]
+      },
+      {
+        "args": [
+          ""
+        ],
+        "id": "v2",
+        "expected": [
+          "",
+          []
+        ]
+      },
+      {
+        "args": [
+          "  done   3  "
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          "done",
+          [
+            "3"
+          ]
+        ]
+      },
+      {
+        "args": [
+          "list"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          "list",
+          []
+        ]
+      },
+      {
+        "args": [
+          "Spend 5.5 food"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          "spend",
+          [
+            "5.5",
+            "food"
+          ]
+        ]
+      },
+      {
+        "args": [
+          "   "
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": [
+          "",
+          []
+        ]
+      }
+    ]
+  },
+  "solution": "def split_command(line):\n    parts = line.split()\n    if not parts:\n        return (\"\", [])\n    return (parts[0].lower(), parts[1:])\n",
+  "explanation": "split() без аргументов делит по любым пробельным символам и не создаёт пустых слов.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def split_command(line):\n    parts = line.split(\" \")\n    return (parts[0].lower(), parts[1:])\n",
+      "why": "Лишние пробелы дают пустые слова, а пустая строка — ошибку."
+    },
+    {
+      "code": "def split_command(line):\n    parts = line.split()\n    if not parts:\n        return (\"\", [])\n    return (parts[0], parts[1:])\n",
+      "why": "Команда должна быть в нижнем регистре."
+    }
+  ]
+}

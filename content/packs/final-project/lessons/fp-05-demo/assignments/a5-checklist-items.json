@@ -1,0 +1,110 @@
+{
+  "id": "a5-checklist-items",
+  "type": "function",
+  "title": "Что осталось сделать",
+  "statement": "Напишите `todo_left(items)`: `items` — список строк чек-листа вида `\"[x] текст\"` или `\"[ ] текст\"`. Верните список текстов **невыполненных** пунктов в исходном порядке.",
+  "goal": "Что осталось сделать",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Невыполненные пункты начинаются с метки в квадратных скобках с пробелом.",
+    "Проверьте начало строки методом startswith.",
+    "Выполненные — с буквой x.",
+    "Из невыполненных уберите метку: четыре первых символа.",
+    "Порядок остаётся исходным."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "todo_left",
+    "cases": [
+      {
+        "args": [
+          [
+            "[x] Тесты",
+            "[ ] README",
+            "[ ] Демо"
+          ]
+        ],
+        "id": "v1",
+        "expected": [
+          "README",
+          "Демо"
+        ]
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            "[x] A"
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            "[ ] A",
+            "[x] B",
+            "[ ] C"
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          "A",
+          "C"
+        ]
+      },
+      {
+        "args": [
+          [
+            "[ ] Один пункт"
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          "Один пункт"
+        ]
+      },
+      {
+        "args": [
+          [
+            "Просто строка",
+            "[ ] Дело",
+            "[x] Готово"
+          ]
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": [
+          "Дело"
+        ]
+      }
+    ]
+  },
+  "solution": "def todo_left(items):\n    return [line[4:] for line in items if line.startswith(\"[ ] \")]\n",
+  "explanation": "startswith выбирает пункты по метке, срез отбрасывает метку — остаётся чистый текст задачи.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def todo_left(items):\n    return [line for line in items if line.startswith(\"[ ] \")]\n",
+      "why": "Метка [ ] остаётся в тексте."
+    },
+    {
+      "code": "def todo_left(items):\n    return [line[4:] for line in items if not line.startswith(\"[x] \")]\n",
+      "why": "Строки без метки тоже попадают в результат."
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "id": "a3-tests-amount",
+  "type": "write",
+  "title": "Тесты, которые ловят баги",
+  "statement": "Выше — четыре версии функции `is_valid_amount(text)`: верная `good` и три с ошибками. Напишите в `tests(is_valid_amount)` проверки `assert` так, чтобы программа печатала **`PASS` для `good`** и **`FAIL` для каждой неверной версии**. Версия выбирается входной строкой (`good`, `bug1`, `bug2`, `bug3`).\n\nСумма допустима, если это положительное число.",
+  "goal": "Тесты, которые ловят баги",
+  "input": "Название версии: good, bug1, bug2 или bug3.",
+  "expectedResult": "PASS для верной версии и FAIL для каждой неверной.",
+  "constraints": [],
+  "starterCode": "def good(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return False\n    return value > 0\n\n\ndef bug1(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return False\n    return value >= 0\n\n\ndef bug2(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return False\n    return value != 0\n\n\ndef bug3(text):\n    return float(text) > 0\n\n\nVERSIONS = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3}\n\n\ndef tests(is_valid_amount):\n    pass\n\n\nname = input().strip()\ntry:\n    tests(VERSIONS[name])\n    print(\"PASS\")\nexcept Exception:\n    print(\"FAIL\")\n",
+  "hints": [
+    "Сначала запустите со входом good: должно быть PASS.",
+    "У каждой ошибочной версии своя слабость.",
+    "Проверьте обычное положительное число.",
+    "Нужны граничный ноль, отрицательное число и текст, не являющийся числом.",
+    "Пять утверждений: два положительных, ноль, минус и нечисло."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "good\n",
+        "expected_stdout": "PASS\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "bug1\n",
+        "expected_stdout": "FAIL\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "bug2\n",
+        "expected_stdout": "FAIL\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "bug3\n",
+        "expected_stdout": "FAIL\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "def good(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return False\n    return value > 0\n\n\ndef bug1(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return False\n    return value >= 0\n\n\ndef bug2(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return False\n    return value != 0\n\n\ndef bug3(text):\n    return float(text) > 0\n\n\nVERSIONS = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3}\n\n\ndef tests(is_valid_amount):\n    assert is_valid_amount(\"5\")\n    assert is_valid_amount(\"0.5\")\n    assert not is_valid_amount(\"0\")\n    assert not is_valid_amount(\"-3\")\n    assert not is_valid_amount(\"abc\")\n\n\nname = input().strip()\ntry:\n    tests(VERSIONS[name])\n    print(\"PASS\")\nexcept Exception:\n    print(\"FAIL\")\n",
+  "explanation": "Тест полезен, если способен упасть: bug1 ловит ноль, bug2 — отрицательное число, bug3 — нечисловую строку.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def good(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return False\n    return value > 0\n\n\ndef bug1(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return False\n    return value >= 0\n\n\ndef bug2(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return False\n    return value != 0\n\n\ndef bug3(text):\n    return float(text) > 0\n\n\nVERSIONS = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3}\n\n\ndef tests(is_valid_amount):\n    assert is_valid_amount(\"5\")\n    assert not is_valid_amount(\"-3\")\n    assert not is_valid_amount(\"abc\")\n\n\nname = input().strip()\ntry:\n    tests(VERSIONS[name])\n    print(\"PASS\")\nexcept Exception:\n    print(\"FAIL\")\n",
+      "why": "Нет проверки нуля: bug1 не пойман."
+    },
+    {
+      "code": "def good(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return False\n    return value > 0\n\n\ndef bug1(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return False\n    return value >= 0\n\n\ndef bug2(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return False\n    return value != 0\n\n\ndef bug3(text):\n    return float(text) > 0\n\n\nVERSIONS = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3}\n\n\ndef tests(is_valid_amount):\n    assert is_valid_amount(\"5\")\n    assert not is_valid_amount(\"0\")\n    assert not is_valid_amount(\"abc\")\n\n\nname = input().strip()\ntry:\n    tests(VERSIONS[name])\n    print(\"PASS\")\nexcept Exception:\n    print(\"FAIL\")\n",
+      "why": "Нет проверки отрицательных: bug2 не пойман."
+    },
+    {
+      "code": "def good(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return False\n    return value > 0\n\n\ndef bug1(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return False\n    return value >= 0\n\n\ndef bug2(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return False\n    return value != 0\n\n\ndef bug3(text):\n    return float(text) > 0\n\n\nVERSIONS = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3}\n\n\ndef tests(is_valid_amount):\n    assert is_valid_amount(\"5\")\n    assert not is_valid_amount(\"0\")\n    assert not is_valid_amount(\"-3\")\n\n\nname = input().strip()\ntry:\n    tests(VERSIONS[name])\n    print(\"PASS\")\nexcept Exception:\n    print(\"FAIL\")\n",
+      "why": "Нет проверки нечисла: bug3 не пойман."
+    },
+    {
+      "code": "def good(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return False\n    return value > 0\n\n\ndef bug1(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return False\n    return value >= 0\n\n\ndef bug2(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return False\n    return value != 0\n\n\ndef bug3(text):\n    return float(text) > 0\n\n\nVERSIONS = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3}\n\n\ndef tests(is_valid_amount):\n    assert not is_valid_amount(\"5\")\n\n\nname = input().strip()\ntry:\n    tests(VERSIONS[name])\n    print(\"PASS\")\nexcept Exception:\n    print(\"FAIL\")\n",
+      "why": "Тест неверен: падает на правильной версии."
+    }
+  ]
+}

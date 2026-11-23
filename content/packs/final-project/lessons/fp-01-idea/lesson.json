@@ -1,0 +1,43 @@
+{
+  "id": "fp-01-idea",
+  "title": "Идея и требования",
+  "goal": "Превратить идею в проверяемые требования и план первой версии.",
+  "skills": [
+    "final.requirements",
+    "final.mvp",
+    "final.planning"
+  ],
+  "prerequisites": [],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-mvp.json",
+    "assignments/a2-story.json",
+    "assignments/a3-mvp-list.json",
+    "assignments/a4-plan.json",
+    "assignments/a5-incomplete.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Начинают с кода без формулировки цели",
+      "fix": "Сначала история: роль, действие, цель."
+    },
+    {
+      "mistake": "Берутся за всё сразу",
+      "fix": "Выделите MVP — только обязательное."
+    },
+    {
+      "mistake": "Пишут расплывчатые критерии",
+      "fix": "Критерий должен проверяться: да или нет."
+    },
+    {
+      "mistake": "Обещают больше, чем успеют",
+      "fix": "Сопоставьте оценки со временем и отложите лишнее."
+    }
+  ]
+}

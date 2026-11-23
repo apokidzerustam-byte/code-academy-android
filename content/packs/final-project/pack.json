@@ -1,0 +1,39 @@
+{
+  "id": "final-project",
+  "version": "0.1.0",
+  "stage": 15,
+  "title": "Финальный проект",
+  "description": "От идеи и требований до проекта: план, структура, реализация, тесты и документация — финальный проект курса.",
+  "language": "python",
+  "minAppVersion": 1,
+  "requiresPacks": [
+    "python-core"
+  ],
+  "lessons": [
+    "fp-01-idea",
+    "fp-02-design",
+    "fp-03-implement",
+    "fp-04-quality",
+    "fp-05-demo"
+  ],
+  "skills": {
+    "final.requirements": "Требования и истории",
+    "final.mvp": "MVP",
+    "final.planning": "Планирование",
+    "final.design": "Проектирование структуры",
+    "final.data-model": "Модель данных",
+    "final.separation": "Логика отдельно от ввода-вывода",
+    "final.cli": "Командная строка",
+    "final.dispatch": "Таблица команд",
+    "final.incremental": "Пошаговая разработка",
+    "final.testing": "Тесты проекта",
+    "final.debugging": "Поиск ошибок по шагам",
+    "final.regression": "Регрессионные тесты",
+    "final.demo": "Демонстрация проекта",
+    "final.checklist": "Чек-лист готовности",
+    "final.retro": "Ретроспектива"
+  },
+  "projects": [
+    "finance-final"
+  ]
+}

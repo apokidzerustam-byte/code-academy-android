@@ -1,0 +1,41 @@
+{
+  "id": "a1-mvp",
+  "type": "predict",
+  "title": "Обязательное",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Обязательное",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "features = [(\"A\", \"must\"), (\"B\", \"could\"), (\"C\", \"must\"), (\"D\", \"should\")]\nmust = [n for n, p in features if p == \"must\"]\nprint(must)\nprint(len(features) - len(must))\n",
+  "hints": [
+    "Отберите только функции с приоритетом must.",
+    "Это A и C.",
+    "Список печатается со скобками и кавычками.",
+    "Всего функций четыре.",
+    "Остальных — четыре минус две."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "['A', 'C']\n2\n"
+  },
+  "solution": "['A', 'C']\n2\n",
+  "explanation": "MVP — это функции с приоритетом must; остальные откладываются.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "['A', 'C']\n3",
+      "answer": "['A', 'C']\n3",
+      "why": "Не обязательных функций две: B и D, так что 4 − 2 = 2."
+    },
+    {
+      "code": "['A', 'B']\n2",
+      "answer": "['A', 'B']\n2",
+      "why": "B имеет приоритет could, а не must."
+    }
+  ]
+}

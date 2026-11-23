@@ -1,0 +1,41 @@
+{
+  "id": "a1-dispatch",
+  "type": "predict",
+  "title": "Таблица команд",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Таблица команд",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "def up(args):\n    return \" \".join(args).upper()\n\n\ndef count(args):\n    return str(len(args))\n\n\nTABLE = {\"up\": up, \"count\": count}\nfor line in [\"up a b\", \"count x y z\", \"count\", \"boom\"]:\n    name, *args = line.split()\n    h = TABLE.get(name)\n    print(h(args) if h else \"?\")\n",
+  "hints": [
+    "Разберите каждую строку по порядку.",
+    "up a b → «A B».",
+    "count x y z → число слов: 3.",
+    "count без аргументов → 0.",
+    "Неизвестная команда → «?»."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "A B\n3\n0\n?\n"
+  },
+  "solution": "A B\n3\n0\n?\n",
+  "explanation": "Таблица команд сопоставляет имя и функцию; отсутствие в таблице — повод для сообщения.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "a b\n3\n0\n?",
+      "answer": "a b\n3\n0\n?",
+      "why": "Функция up приводит текст к верхнему регистру."
+    },
+    {
+      "code": "A B\n3\n1\n?",
+      "answer": "A B\n3\n1\n?",
+      "why": "У команды count без аргументов список пуст: длина 0."
+    }
+  ]
+}

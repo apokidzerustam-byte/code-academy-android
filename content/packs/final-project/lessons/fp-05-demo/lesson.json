@@ -1,0 +1,45 @@
+{
+  "id": "fp-05-demo",
+  "title": "Демонстрация и выпуск",
+  "goal": "Подготовить проект к показу: README, сценарий демонстрации, чек-лист и итоги.",
+  "skills": [
+    "final.demo",
+    "final.checklist",
+    "final.retro"
+  ],
+  "prerequisites": [
+    "fp-04-quality"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-checks.json",
+    "assignments/a2-readiness.json",
+    "assignments/a3-demo-script.json",
+    "assignments/a4-release-notes.json",
+    "assignments/a5-checklist-items.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Считают проект готовым, потому что код написан",
+      "fix": "Готов — когда есть тесты, README и демонстрация."
+    },
+    {
+      "mistake": "README без команды запуска",
+      "fix": "Новичок должен запустить проект за минуту."
+    },
+    {
+      "mistake": "Коммитят пароли и ключи",
+      "fix": "Секреты не должны попадать в репозиторий."
+    },
+    {
+      "mistake": "Не подводят итоги",
+      "fix": "Ретроспектива: что хорошо, что трудно, что изменить."
+    }
+  ]
+}

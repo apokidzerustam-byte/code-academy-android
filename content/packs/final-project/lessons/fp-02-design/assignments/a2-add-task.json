@@ -1,0 +1,139 @@
+{
+  "id": "a2-add-task",
+  "type": "function",
+  "title": "Добавление задачи",
+  "statement": "Напишите `add_task(tasks, title)`: верните **новый список** — копию `tasks` с добавленным словарём `{\"id\": N, \"title\": title, \"done\": False}`, где `N` — на единицу больше наибольшего номера в списке (для пустого — 1). Исходный список не изменяйте.",
+  "goal": "Добавление задачи",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Новый номер зависит от существующих.",
+    "Нужен наибольший номер плюс единица.",
+    "Для пустого списка функции max нужно значение по умолчанию.",
+    "Результат — исходные задачи плюс одна новая.",
+    "Исходный список менять не нужно: склейте два списка."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "add_task",
+    "cases": [
+      {
+        "args": [
+          [],
+          "Первая"
+        ],
+        "id": "v1",
+        "expected": [
+          {
+            "id": 1,
+            "title": "Первая",
+            "done": false
+          }
+        ]
+      },
+      {
+        "args": [
+          [
+            {
+              "id": 1,
+              "title": "A",
+              "done": false
+            }
+          ],
+          "Вторая"
+        ],
+        "id": "v2",
+        "expected": [
+          {
+            "id": 1,
+            "title": "A",
+            "done": false
+          },
+          {
+            "id": 2,
+            "title": "Вторая",
+            "done": false
+          }
+        ]
+      },
+      {
+        "args": [
+          [
+            {
+              "id": 1,
+              "title": "A",
+              "done": true
+            },
+            {
+              "id": 5,
+              "title": "B",
+              "done": false
+            }
+          ],
+          "C"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          {
+            "id": 1,
+            "title": "A",
+            "done": true
+          },
+          {
+            "id": 5,
+            "title": "B",
+            "done": false
+          },
+          {
+            "id": 6,
+            "title": "C",
+            "done": false
+          }
+        ]
+      },
+      {
+        "args": [
+          [
+            {
+              "id": 7,
+              "title": "X",
+              "done": false
+            }
+          ],
+          "Y"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          {
+            "id": 7,
+            "title": "X",
+            "done": false
+          },
+          {
+            "id": 8,
+            "title": "Y",
+            "done": false
+          }
+        ]
+      }
+    ]
+  },
+  "solution": "def add_task(tasks, title):\n    next_id = max((t[\"id\"] for t in tasks), default=0) + 1\n    return tasks + [{\"id\": next_id, \"title\": title, \"done\": False}]\n",
+  "explanation": "Номер на единицу больше максимального надёжнее, чем длина списка: он не повторяется даже после удалений.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def add_task(tasks, title):\n    return tasks + [{\"id\": len(tasks) + 1, \"title\": title, \"done\": False}]\n",
+      "why": "Номер по длине списка совпадает с существующим, если есть «дыры» в нумерации."
+    },
+    {
+      "code": "def add_task(tasks, title):\n    next_id = max((t[\"id\"] for t in tasks), default=0) + 1\n    return {\"id\": next_id, \"title\": title, \"done\": False}\n",
+      "why": "Возвращается только новая задача, а не весь список."
+    }
+  ]
+}

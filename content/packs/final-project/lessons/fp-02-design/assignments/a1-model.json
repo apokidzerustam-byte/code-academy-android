@@ -1,0 +1,41 @@
+{
+  "id": "a1-model",
+  "type": "predict",
+  "title": "Работа с моделью",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Работа с моделью",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "tasks = [\n    {\"id\": 1, \"title\": \"A\", \"done\": False},\n    {\"id\": 2, \"title\": \"B\", \"done\": True},\n    {\"id\": 3, \"title\": \"C\", \"done\": False},\n]\nopen_tasks = [t[\"title\"] for t in tasks if not t[\"done\"]]\nprint(open_tasks)\nprint(sum(1 for t in tasks if t[\"done\"]))\ntasks[0][\"done\"] = True\nprint([t[\"id\"] for t in tasks if not t[\"done\"]])\n",
+  "hints": [
+    "Незавершённые задачи — те, у которых done ложно.",
+    "Это A и C.",
+    "Выполненных задач одна: B.",
+    "Затем A становится выполненной.",
+    "Остаётся только задача с номером 3."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "['A', 'C']\n1\n[3]\n"
+  },
+  "solution": "['A', 'C']\n1\n[3]\n",
+  "explanation": "Данные — обычные словари и списки; изменение элемента списка видно во всех выборках.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "['A', 'C']\n1\n[2, 3]",
+      "answer": "['A', 'C']\n1\n[2, 3]",
+      "why": "После выполнения задачи 1 незавершённой остаётся только задача 3."
+    },
+    {
+      "code": "['B']\n1\n[3]",
+      "answer": "['B']\n1\n[3]",
+      "why": "Не выполнены A и C, а B выполнена."
+    }
+  ]
+}

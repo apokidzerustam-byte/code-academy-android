@@ -1,0 +1,100 @@
+{
+  "id": "a4-parse-amount",
+  "type": "function",
+  "title": "Разбор суммы по-человечески",
+  "statement": "Напишите `parse_amount(text)`: уберите пробелы по краям, запятую замените точкой (`\"12,5\"` → `12.5`). Верните число, если оно **положительное**; иначе `None` (ноль, минус, не число, пустая строка).",
+  "goal": "Разбор суммы по-человечески",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Подготовьте строку: обрежьте пробелы и замените запятую.",
+    "Преобразование в число — внутри try.",
+    "При ValueError вернуть None.",
+    "Сумма должна быть строго больше нуля.",
+    "Для «1,2,3» после замены получится не число."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "parse_amount",
+    "cases": [
+      {
+        "args": [
+          "12,5"
+        ],
+        "id": "v1",
+        "expected": 12.5
+      },
+      {
+        "args": [
+          "abc"
+        ],
+        "id": "v2",
+        "expected": null
+      },
+      {
+        "args": [
+          " 7 "
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 7.0
+      },
+      {
+        "args": [
+          "0"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": null
+      },
+      {
+        "args": [
+          "-1,5"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": null
+      },
+      {
+        "args": [
+          ""
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": null
+      },
+      {
+        "args": [
+          "3.25"
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": 3.25
+      },
+      {
+        "args": [
+          "1,2,3"
+        ],
+        "id": "h8",
+        "hidden": true,
+        "expected": null
+      }
+    ]
+  },
+  "solution": "def parse_amount(text):\n    try:\n        value = float(text.strip().replace(\",\", \".\"))\n    except ValueError:\n        return None\n    return value if value > 0 else None\n",
+  "explanation": "Нормализация ввода (пробелы, запятая) перед разбором делает программу дружелюбнее, а проверка > 0 — безопасной.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def parse_amount(text):\n    try:\n        value = float(text.strip())\n    except ValueError:\n        return None\n    return value if value > 0 else None\n",
+      "why": "Запятая как десятичный разделитель не поддерживается."
+    },
+    {
+      "code": "def parse_amount(text):\n    try:\n        return float(text.strip().replace(\",\", \".\"))\n    except ValueError:\n        return None\n",
+      "why": "Нулевые и отрицательные суммы принимаются."
+    }
+  ]
+}

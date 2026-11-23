@@ -1,0 +1,153 @@
+{
+  "id": "a4-plan",
+  "type": "function",
+  "title": "План по времени",
+  "statement": "Напишите `plan(features, capacity)`: `features` — список пар `(название, часы)` в порядке важности. Идите по списку и берите функцию, если её часы **помещаются** в оставшееся время. Верните список выбранных названий.",
+  "goal": "План по времени",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Идите по функциям в порядке важности.",
+    "Сравнивайте часы с оставшимся временем.",
+    "Помещается — значит «не больше».",
+    "После выбора уменьшите оставшееся время.",
+    "Не помещающиеся функции пропускайте и идите дальше."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "plan",
+    "cases": [
+      {
+        "args": [
+          [
+            [
+              "Задачи",
+              3
+            ],
+            [
+              "Расходы",
+              4
+            ],
+            [
+              "Экспорт",
+              2
+            ],
+            [
+              "Справка",
+              1
+            ]
+          ],
+          8
+        ],
+        "id": "v1",
+        "expected": [
+          "Задачи",
+          "Расходы",
+          "Справка"
+        ]
+      },
+      {
+        "args": [
+          [
+            [
+              "A",
+              5
+            ],
+            [
+              "B",
+              5
+            ]
+          ],
+          6
+        ],
+        "id": "v2",
+        "expected": [
+          "A"
+        ]
+      },
+      {
+        "args": [
+          [
+            [
+              "A",
+              2
+            ]
+          ],
+          2
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          "A"
+        ]
+      },
+      {
+        "args": [
+          [],
+          5
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            [
+              "A",
+              9
+            ],
+            [
+              "B",
+              1
+            ]
+          ],
+          3
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          "B"
+        ]
+      },
+      {
+        "args": [
+          [
+            [
+              "A",
+              1
+            ],
+            [
+              "B",
+              1
+            ],
+            [
+              "C",
+              1
+            ]
+          ],
+          0
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": []
+      }
+    ]
+  },
+  "solution": "def plan(features, capacity):\n    chosen = []\n    for name, hours in features:\n        if hours <= capacity:\n            chosen.append(name)\n            capacity -= hours\n    return chosen\n",
+  "explanation": "Жадный выбор: по очереди берём то, что помещается, и сокращаем остаток.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def plan(features, capacity):\n    chosen = []\n    for name, hours in features:\n        if hours < capacity:\n            chosen.append(name)\n            capacity -= hours\n    return chosen\n",
+      "why": "Функция, помещающаяся ровно, отбрасывается."
+    },
+    {
+      "code": "def plan(features, capacity):\n    chosen = []\n    for name, hours in features:\n        if hours <= capacity:\n            chosen.append(name)\n    return chosen\n",
+      "why": "Оставшееся время не уменьшается."
+    }
+  ]
+}

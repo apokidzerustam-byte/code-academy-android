@@ -1,0 +1,410 @@
+{
+  "id": "finance-final",
+  "kind": "through",
+  "title": "Мои задачи и финансы — итог",
+  "summary": "Итоговый проект курса: программа с командной строкой для задач и личных расходов. Четыре этапа: список задач, расходы и отчёт, проверка ввода, справка и экспорт.",
+  "language": "python",
+  "afterLesson": "fp-02-design",
+  "skills": [
+    "final.design",
+    "final.cli",
+    "final.testing",
+    "final.debugging"
+  ],
+  "milestones": [
+    {
+      "id": "tasks",
+      "title": "Этап 1. Список задач",
+      "afterLesson": "fp-02-design",
+      "statement": "Итоговый проект собирает всё изученное: вы напишете **программу с командной строкой** в файле `main.py`. Она читает команды по одной в строке (без приглашений, просто `input()`) и работает, пока не встретит `quit` или не закончится ввод.\n\nКоманды этого этапа:\n\n- `add <название>` — новая задача; печатает `Добавлено: #<номер> <название>`. Номера идут с 1.\n- `list` — все задачи по одной в строке: `1. [ ] Купить молоко`; у выполненных вместо пробела `x`. Если задач нет — `Задач нет`.\n- `done <номер>` — отметить выполненной; печатает `Выполнено: #<номер>`, а если такой задачи нет — `Нет задачи #<номер>`.\n- `quit` — печатает `До встречи!` и завершает работу.\n- Любая другая команда: `Неизвестная команда: <команда>`.\n\nПустые строки пропускайте. Если ввод закончился без `quit`, программа должна завершиться без ошибки.",
+      "goal": "Структура программы: данные, небольшие функции, цикл обработки команд.",
+      "hints": [
+        "Храните задачи в списке словарей: номер, название, признак «выполнено».",
+        "Цикл чтения команд: пока есть ввод, читайте строку и разбирайте её на слова методом split.",
+        "Название задачи — все слова после команды, склеенные пробелами.",
+        "Для поиска задачи по номеру напишите отдельную функцию, которая возвращает задачу или None.",
+        "Ввод может закончиться раньше quit: перехватите EOFError, чтобы программа не падала."
+      ],
+      "tests": {
+        "kind": "project",
+        "cases": [
+          {
+            "id": "add-list",
+            "file": "main.py",
+            "stdin": "add Купить молоко\nadd Позвонить маме\nlist\nquit\n",
+            "expected_stdout": "Добавлено: #1 Купить молоко\nДобавлено: #2 Позвонить маме\n1. [ ] Купить молоко\n2. [ ] Позвонить маме\nДо встречи!\n"
+          },
+          {
+            "id": "done",
+            "file": "main.py",
+            "stdin": "add Купить молоко\nadd Сдать отчёт\ndone 2\nlist\nquit\n",
+            "expected_stdout": "Добавлено: #1 Купить молоко\nДобавлено: #2 Сдать отчёт\nВыполнено: #2\n1. [ ] Купить молоко\n2. [x] Сдать отчёт\nДо встречи!\n",
+            "hint": "Выполненная задача отмечается [x] в списке"
+          },
+          {
+            "id": "empty",
+            "file": "main.py",
+            "stdin": "list\nquit\n",
+            "expected_stdout": "Задач нет\nДо встречи!\n",
+            "hint": "Если задач нет — «Задач нет»"
+          },
+          {
+            "id": "missing",
+            "file": "main.py",
+            "stdin": "done 5\nquit\n",
+            "expected_stdout": "Нет задачи #5\nДо встречи!\n",
+            "hidden": true,
+            "hint": "Несуществующая задача: «Нет задачи #5»"
+          },
+          {
+            "id": "unknown",
+            "file": "main.py",
+            "stdin": "fly\nquit\n",
+            "expected_stdout": "Неизвестная команда: fly\nДо встречи!\n",
+            "hidden": true,
+            "hint": "Неизвестная команда выводится вместе с её названием"
+          },
+          {
+            "id": "ids",
+            "file": "main.py",
+            "stdin": "add Первая\nadd Вторая\nadd Третья\ndone 1\ndone 3\nlist\nquit\n",
+            "expected_stdout": "Добавлено: #1 Первая\nДобавлено: #2 Вторая\nДобавлено: #3 Третья\nВыполнено: #1\nВыполнено: #3\n1. [x] Первая\n2. [ ] Вторая\n3. [x] Третья\nДо встречи!\n",
+            "hidden": true,
+            "hint": "Номера задач не меняются после выполнения"
+          },
+          {
+            "id": "eof",
+            "file": "main.py",
+            "stdin": "add Без выхода\nlist\n",
+            "expected_stdout": "Добавлено: #1 Без выхода\n1. [ ] Без выхода\n",
+            "hidden": true,
+            "hint": "Программа не должна падать, если ввод закончился без quit"
+          },
+          {
+            "id": "blank",
+            "file": "main.py",
+            "stdin": "\n\nadd Пробелы   между   словами\nlist\nquit\n",
+            "expected_stdout": "Добавлено: #1 Пробелы между словами\n1. [ ] Пробелы между словами\nДо встречи!\n",
+            "hidden": true,
+            "hint": "Пустые строки пропускаются"
+          }
+        ]
+      },
+      "solutionFiles": {
+        "main.py": "import json\n\ntasks = []\nexpenses = []\n\n\ndef add_task(title):\n    task = {\"id\": len(tasks) + 1, \"title\": title, \"done\": False}\n    tasks.append(task)\n    return task\n\n\ndef find_task(task_id):\n    for task in tasks:\n        if task[\"id\"] == task_id:\n            return task\n    return None\n\n\ndef show_tasks():\n    if not tasks:\n        print(\"Задач нет\")\n        return\n    for task in tasks:\n        mark = \"x\" if task[\"done\"] else \" \"\n        print(f\"{task['id']}. [{mark}] {task['title']}\")\n\n\ndef handle(line):\n    parts = line.split()\n    if not parts:\n        return True\n    command = parts[0]\n    if command == \"quit\":\n        print(\"До встречи!\")\n        return False\n    if command == \"add\":\n        task = add_task(\" \".join(parts[1:]))\n        print(f\"Добавлено: #{task['id']} {task['title']}\")\n    elif command == \"list\":\n        show_tasks()\n    elif command == \"done\":\n        task = find_task(int(parts[1]))\n        if task is None:\n            print(f\"Нет задачи #{parts[1]}\")\n        else:\n            task[\"done\"] = True\n            print(f\"Выполнено: #{task['id']}\")\n    else:\n        print(f\"Неизвестная команда: {command}\")\n    return True\n\n\ndef main():\n    while True:\n        try:\n            line = input()\n        except EOFError:\n            break\n        if not handle(line):\n            break\n\n\nmain()\n"
+      },
+      "explanation": "Данные лежат в списке словарей, каждая команда обрабатывается в функции handle, а цикл main читает строки и останавливается на quit или конце ввода. Номера задаёт длина списка, поэтому они не меняются.",
+      "criteria": [
+        "Все команды этапа работают.",
+        "Программа не падает на пустом вводе и неизвестных командах."
+      ],
+      "wrongSolutions": [
+        {
+          "files": {
+            "main.py": "import json\n\ntasks = []\nexpenses = []\n\n\ndef add_task(title):\n    task = {\"id\": len(tasks), \"title\": title, \"done\": False}\n    tasks.append(task)\n    return task\n\n\ndef find_task(task_id):\n    for task in tasks:\n        if task[\"id\"] == task_id:\n            return task\n    return None\n\n\ndef show_tasks():\n    if not tasks:\n        print(\"Задач нет\")\n        return\n    for task in tasks:\n        mark = \"x\" if task[\"done\"] else \" \"\n        print(f\"{task['id']}. [{mark}] {task['title']}\")\n\n\ndef handle(line):\n    parts = line.split()\n    if not parts:\n        return True\n    command = parts[0]\n    if command == \"quit\":\n        print(\"До встречи!\")\n        return False\n    if command == \"add\":\n        task = add_task(\" \".join(parts[1:]))\n        print(f\"Добавлено: #{task['id']} {task['title']}\")\n    elif command == \"list\":\n        show_tasks()\n    elif command == \"done\":\n        task = find_task(int(parts[1]))\n        if task is None:\n            print(f\"Нет задачи #{parts[1]}\")\n        else:\n            task[\"done\"] = True\n            print(f\"Выполнено: #{task['id']}\")\n    else:\n        print(f\"Неизвестная команда: {command}\")\n    return True\n\n\ndef main():\n    while True:\n        try:\n            line = input()\n        except EOFError:\n            break\n        if not handle(line):\n            break\n\n\nmain()\n"
+          },
+          "why": "Номера начинаются с нуля."
+        },
+        {
+          "files": {
+            "main.py": "import json\n\ntasks = []\nexpenses = []\n\n\ndef add_task(title):\n    task = {\"id\": len(tasks) + 1, \"title\": title, \"done\": False}\n    tasks.append(task)\n    return task\n\n\ndef find_task(task_id):\n    for task in tasks:\n        if task[\"id\"] == task_id:\n            return task\n    return None\n\n\ndef show_tasks():\n    if not tasks:\n        print(\"Задач нет\")\n        return\n    for task in tasks:\n        mark = \" \"\n        print(f\"{task['id']}. [{mark}] {task['title']}\")\n\n\ndef handle(line):\n    parts = line.split()\n    if not parts:\n        return True\n    command = parts[0]\n    if command == \"quit\":\n        print(\"До встречи!\")\n        return False\n    if command == \"add\":\n        task = add_task(\" \".join(parts[1:]))\n        print(f\"Добавлено: #{task['id']} {task['title']}\")\n    elif command == \"list\":\n        show_tasks()\n    elif command == \"done\":\n        task = find_task(int(parts[1]))\n        if task is None:\n            print(f\"Нет задачи #{parts[1]}\")\n        else:\n            task[\"done\"] = True\n            print(f\"Выполнено: #{task['id']}\")\n    else:\n        print(f\"Неизвестная команда: {command}\")\n    return True\n\n\ndef main():\n    while True:\n        try:\n            line = input()\n        except EOFError:\n            break\n        if not handle(line):\n            break\n\n\nmain()\n"
+          },
+          "why": "Выполненные задачи не отмечаются."
+        },
+        {
+          "files": {
+            "main.py": "import json\n\ntasks = []\nexpenses = []\n\n\ndef add_task(title):\n    task = {\"id\": len(tasks) + 1, \"title\": title, \"done\": False}\n    tasks.append(task)\n    return task\n\n\ndef find_task(task_id):\n    for task in tasks:\n        if task[\"id\"] == task_id:\n            return task\n    return None\n\n\ndef show_tasks():\n    if not tasks:\n        print(\"Задач нет\")\n        return\n    for task in tasks:\n        mark = \"x\" if task[\"done\"] else \" \"\n        print(f\"{task['id']}. [{mark}] {task['title']}\")\n\n\ndef handle(line):\n    parts = line.split()\n    if not parts:\n        return True\n    command = parts[0]\n    if command == \"quit\":\n        print(\"До встречи!\")\n        return False\n    if command == \"add\":\n        task = add_task(\" \".join(parts[1:]))\n        print(f\"Добавлено: #{task['id']} {task['title']}\")\n    elif command == \"list\":\n        show_tasks()\n    elif command == \"done\":\n        task = find_task(int(parts[1]))\n        if task is None:\n            print(f\"Нет задачи #{parts[1]}\")\n        else:\n            task[\"done\"] = True\n            print(f\"Выполнено: #{task['id']}\")\n    else:\n        print(f\"Неизвестная команда: {command}\")\n    return True\n\n\ndef main():\n    while True:\n        try:\n            line = input()\n        except KeyboardInterrupt:\n            break\n        if not handle(line):\n            break\n\n\nmain()\n"
+          },
+          "why": "Программа падает, если ввод закончился без quit."
+        }
+      ]
+    },
+    {
+      "id": "finance",
+      "title": "Этап 2. Расходы и отчёт",
+      "afterLesson": "fp-03-implement",
+      "statement": "Добавьте в программу учёт расходов. Новые команды:\n\n- `spend <сумма> <категория>` — записать расход; печатает `Расход: <сумма> <категория>` (сумма — число с плавающей точкой: `12.5`, `30.0`).\n- `report` — отчёт. Если расходов нет: `Расходов нет`. Иначе:\n\n```\nРасходов: 3\nВсего: 50.0\nПо категориям:\n  taxi: 30.0\n  food: 20.0\n```\n\nКатегории — по убыванию суммы, при равенстве — по алфавиту; суммы округляются до 2 знаков.\n\nЗадачи из этапа 1 должны продолжать работать.",
+      "goal": "Словари для группировки, сортировка по составному ключу, округление.",
+      "hints": [
+        "Расходы удобно хранить отдельным списком словарей рядом со списком задач.",
+        "Для отчёта соберите словарь «категория → сумма».",
+        "Накопление суммы по ключу: totals.get(категория, 0) плюс сумма.",
+        "Сортировка по убыванию суммы и по алфавиту при равенстве: ключ-кортеж с минусом перед суммой.",
+        "Общую сумму и суммы по категориям округляйте до двух знаков функцией round."
+      ],
+      "tests": {
+        "kind": "project",
+        "cases": [
+          {
+            "id": "report",
+            "file": "main.py",
+            "stdin": "spend 12.5 food\nspend 30 taxi\nspend 7.5 food\nreport\nquit\n",
+            "expected_stdout": "Расход: 12.5 food\nРасход: 30.0 taxi\nРасход: 7.5 food\nРасходов: 3\nВсего: 50.0\nПо категориям:\n  taxi: 30.0\n  food: 20.0\nДо встречи!\n"
+          },
+          {
+            "id": "none",
+            "file": "main.py",
+            "stdin": "report\nquit\n",
+            "expected_stdout": "Расходов нет\nДо встречи!\n",
+            "hint": "Без расходов — «Расходов нет»"
+          },
+          {
+            "id": "tasks",
+            "file": "main.py",
+            "stdin": "add Задача\nlist\nspend 5 tea\nreport\nquit\n",
+            "expected_stdout": "Добавлено: #1 Задача\n1. [ ] Задача\nРасход: 5.0 tea\nРасходов: 1\nВсего: 5.0\nПо категориям:\n  tea: 5.0\nДо встречи!\n",
+            "hint": "Задачи из этапа 1 продолжают работать"
+          },
+          {
+            "id": "order",
+            "file": "main.py",
+            "stdin": "spend 10 b\nspend 10 a\nspend 5 c\nreport\nquit\n",
+            "expected_stdout": "Расход: 10.0 b\nРасход: 10.0 a\nРасход: 5.0 c\nРасходов: 3\nВсего: 25.0\nПо категориям:\n  a: 10.0\n  b: 10.0\n  c: 5.0\nДо встречи!\n",
+            "hidden": true,
+            "hint": "Категории — по убыванию суммы, при равенстве — по алфавиту"
+          },
+          {
+            "id": "round",
+            "file": "main.py",
+            "stdin": "spend 0.1 x\nspend 0.2 x\nreport\nquit\n",
+            "expected_stdout": "Расход: 0.1 x\nРасход: 0.2 x\nРасходов: 2\nВсего: 0.3\nПо категориям:\n  x: 0.3\nДо встречи!\n",
+            "hidden": true,
+            "hint": "Суммы округляются до 2 знаков"
+          },
+          {
+            "id": "done",
+            "file": "main.py",
+            "stdin": "add A\nadd B\ndone 1\nlist\nquit\n",
+            "expected_stdout": "Добавлено: #1 A\nДобавлено: #2 B\nВыполнено: #1\n1. [x] A\n2. [ ] B\nДо встречи!\n",
+            "hidden": true,
+            "hint": "Этап 1: выполнение задач"
+          },
+          {
+            "id": "many",
+            "file": "main.py",
+            "stdin": "spend 1 a\nspend 2 b\nspend 3 c\nspend 4 d\nreport\nquit\n",
+            "expected_stdout": "Расход: 1.0 a\nРасход: 2.0 b\nРасход: 3.0 c\nРасход: 4.0 d\nРасходов: 4\nВсего: 10.0\nПо категориям:\n  d: 4.0\n  c: 3.0\n  b: 2.0\n  a: 1.0\nДо встречи!\n",
+            "hidden": true
+          }
+        ]
+      },
+      "solutionFiles": {
+        "main.py": "import json\n\ntasks = []\nexpenses = []\n\n\ndef add_task(title):\n    task = {\"id\": len(tasks) + 1, \"title\": title, \"done\": False}\n    tasks.append(task)\n    return task\n\n\ndef find_task(task_id):\n    for task in tasks:\n        if task[\"id\"] == task_id:\n            return task\n    return None\n\n\ndef show_tasks():\n    if not tasks:\n        print(\"Задач нет\")\n        return\n    for task in tasks:\n        mark = \"x\" if task[\"done\"] else \" \"\n        print(f\"{task['id']}. [{mark}] {task['title']}\")\n\n\ndef add_expense(amount, category):\n    expenses.append({\"amount\": amount, \"category\": category})\n\n\ndef show_report():\n    if not expenses:\n        print(\"Расходов нет\")\n        return\n    totals = {}\n    for item in expenses:\n        totals[item[\"category\"]] = totals.get(item[\"category\"], 0) + item[\"amount\"]\n    print(\"Расходов:\", len(expenses))\n    print(\"Всего:\", round(sum(item[\"amount\"] for item in expenses), 2))\n    print(\"По категориям:\")\n    for category, total in sorted(totals.items(), key=lambda pair: (-pair[1], pair[0])):\n        print(f\"  {category}: {round(total, 2)}\")\n\n\ndef handle(line):\n    parts = line.split()\n    if not parts:\n        return True\n    command = parts[0]\n    if command == \"quit\":\n        print(\"До встречи!\")\n        return False\n    if command == \"add\":\n        task = add_task(\" \".join(parts[1:]))\n        print(f\"Добавлено: #{task['id']} {task['title']}\")\n    elif command == \"list\":\n        show_tasks()\n    elif command == \"done\":\n        task = find_task(int(parts[1]))\n        if task is None:\n            print(f\"Нет задачи #{parts[1]}\")\n        else:\n            task[\"done\"] = True\n            print(f\"Выполнено: #{task['id']}\")\n    elif command == \"spend\":\n        amount = float(parts[1])\n        add_expense(amount, parts[2])\n        print(f\"Расход: {amount} {parts[2]}\")\n    elif command == \"report\":\n        show_report()\n    else:\n        print(f\"Неизвестная команда: {command}\")\n    return True\n\n\ndef main():\n    while True:\n        try:\n            line = input()\n        except EOFError:\n            break\n        if not handle(line):\n            break\n\n\nmain()\n"
+      },
+      "explanation": "Расходы лежат в отдельном списке. Отчёт группирует суммы в словарь и сортирует пары по ключу (−сумма, категория), так порядок получается одинаковым при любых вводах.",
+      "criteria": [
+        "Отчёт верен на разных наборах.",
+        "Команды этапа 1 не сломаны."
+      ],
+      "wrongSolutions": [
+        {
+          "files": {
+            "main.py": "import json\n\ntasks = []\nexpenses = []\n\n\ndef add_task(title):\n    task = {\"id\": len(tasks) + 1, \"title\": title, \"done\": False}\n    tasks.append(task)\n    return task\n\n\ndef find_task(task_id):\n    for task in tasks:\n        if task[\"id\"] == task_id:\n            return task\n    return None\n\n\ndef show_tasks():\n    if not tasks:\n        print(\"Задач нет\")\n        return\n    for task in tasks:\n        mark = \"x\" if task[\"done\"] else \" \"\n        print(f\"{task['id']}. [{mark}] {task['title']}\")\n\n\ndef add_expense(amount, category):\n    expenses.append({\"amount\": amount, \"category\": category})\n\n\ndef show_report():\n    if not expenses:\n        print(\"Расходов нет\")\n        return\n    totals = {}\n    for item in expenses:\n        totals[item[\"category\"]] = totals.get(item[\"category\"], 0) + item[\"amount\"]\n    print(\"Расходов:\", len(expenses))\n    print(\"Всего:\", round(sum(item[\"amount\"] for item in expenses), 2))\n    print(\"По категориям:\")\n    for category, total in sorted(totals.items(), key=lambda pair: pair[0]):\n        print(f\"  {category}: {round(total, 2)}\")\n\n\ndef handle(line):\n    parts = line.split()\n    if not parts:\n        return True\n    command = parts[0]\n    if command == \"quit\":\n        print(\"До встречи!\")\n        return False\n    if command == \"add\":\n        task = add_task(\" \".join(parts[1:]))\n        print(f\"Добавлено: #{task['id']} {task['title']}\")\n    elif command == \"list\":\n        show_tasks()\n    elif command == \"done\":\n        task = find_task(int(parts[1]))\n        if task is None:\n            print(f\"Нет задачи #{parts[1]}\")\n        else:\n            task[\"done\"] = True\n            print(f\"Выполнено: #{task['id']}\")\n    elif command == \"spend\":\n        amount = float(parts[1])\n        add_expense(amount, parts[2])\n        print(f\"Расход: {amount} {parts[2]}\")\n    elif command == \"report\":\n        show_report()\n    else:\n        print(f\"Неизвестная команда: {command}\")\n    return True\n\n\ndef main():\n    while True:\n        try:\n            line = input()\n        except EOFError:\n            break\n        if not handle(line):\n            break\n\n\nmain()\n"
+          },
+          "why": "Категории отсортированы только по алфавиту."
+        },
+        {
+          "files": {
+            "main.py": "import json\n\ntasks = []\nexpenses = []\n\n\ndef add_task(title):\n    task = {\"id\": len(tasks) + 1, \"title\": title, \"done\": False}\n    tasks.append(task)\n    return task\n\n\ndef find_task(task_id):\n    for task in tasks:\n        if task[\"id\"] == task_id:\n            return task\n    return None\n\n\ndef show_tasks():\n    if not tasks:\n        print(\"Задач нет\")\n        return\n    for task in tasks:\n        mark = \"x\" if task[\"done\"] else \" \"\n        print(f\"{task['id']}. [{mark}] {task['title']}\")\n\n\ndef add_expense(amount, category):\n    expenses.append({\"amount\": amount, \"category\": category})\n\n\ndef show_report():\n    if not expenses:\n        print(\"Расходов нет\")\n        return\n    totals = {}\n    for item in expenses:\n        totals[item[\"category\"]] = totals.get(item[\"category\"], 0) + item[\"amount\"]\n    print(\"Расходов:\", len(expenses))\n    print(\"Всего:\", sum(item[\"amount\"] for item in expenses))\n    print(\"По категориям:\")\n    for category, total in sorted(totals.items(), key=lambda pair: (-pair[1], pair[0])):\n        print(f\"  {category}: {round(total, 2)}\")\n\n\ndef handle(line):\n    parts = line.split()\n    if not parts:\n        return True\n    command = parts[0]\n    if command == \"quit\":\n        print(\"До встречи!\")\n        return False\n    if command == \"add\":\n        task = add_task(\" \".join(parts[1:]))\n        print(f\"Добавлено: #{task['id']} {task['title']}\")\n    elif command == \"list\":\n        show_tasks()\n    elif command == \"done\":\n        task = find_task(int(parts[1]))\n        if task is None:\n            print(f\"Нет задачи #{parts[1]}\")\n        else:\n            task[\"done\"] = True\n            print(f\"Выполнено: #{task['id']}\")\n    elif command == \"spend\":\n        amount = float(parts[1])\n        add_expense(amount, parts[2])\n        print(f\"Расход: {amount} {parts[2]}\")\n    elif command == \"report\":\n        show_report()\n    else:\n        print(f\"Неизвестная команда: {command}\")\n    return True\n\n\ndef main():\n    while True:\n        try:\n            line = input()\n        except EOFError:\n            break\n        if not handle(line):\n            break\n\n\nmain()\n"
+          },
+          "why": "Общая сумма не округлена."
+        },
+        {
+          "files": {
+            "main.py": "import json\n\ntasks = []\nexpenses = []\n\n\ndef add_task(title):\n    task = {\"id\": len(tasks) + 1, \"title\": title, \"done\": False}\n    tasks.append(task)\n    return task\n\n\ndef find_task(task_id):\n    for task in tasks:\n        if task[\"id\"] == task_id:\n            return task\n    return None\n\n\ndef show_tasks():\n    if not tasks:\n        print(\"Задач нет\")\n        return\n    for task in tasks:\n        mark = \"x\" if task[\"done\"] else \" \"\n        print(f\"{task['id']}. [{mark}] {task['title']}\")\n\n\ndef add_expense(amount, category):\n    expenses.append({\"amount\": amount, \"category\": category})\n\n\ndef show_report():\n    totals = {}\n    for item in expenses:\n        totals[item[\"category\"]] = totals.get(item[\"category\"], 0) + item[\"amount\"]\n    print(\"Расходов:\", len(expenses))\n    print(\"Всего:\", round(sum(item[\"amount\"] for item in expenses), 2))\n    print(\"По категориям:\")\n    for category, total in sorted(totals.items(), key=lambda pair: (-pair[1], pair[0])):\n        print(f\"  {category}: {round(total, 2)}\")\n\n\ndef handle(line):\n    parts = line.split()\n    if not parts:\n        return True\n    command = parts[0]\n    if command == \"quit\":\n        print(\"До встречи!\")\n        return False\n    if command == \"add\":\n        task = add_task(\" \".join(parts[1:]))\n        print(f\"Добавлено: #{task['id']} {task['title']}\")\n    elif command == \"list\":\n        show_tasks()\n    elif command == \"done\":\n        task = find_task(int(parts[1]))\n        if task is None:\n            print(f\"Нет задачи #{parts[1]}\")\n        else:\n            task[\"done\"] = True\n            print(f\"Выполнено: #{task['id']}\")\n    elif command == \"spend\":\n        amount = float(parts[1])\n        add_expense(amount, parts[2])\n        print(f\"Расход: {amount} {parts[2]}\")\n    elif command == \"report\":\n        show_report()\n    else:\n        print(f\"Неизвестная команда: {command}\")\n    return True\n\n\ndef main():\n    while True:\n        try:\n            line = input()\n        except EOFError:\n            break\n        if not handle(line):\n            break\n\n\nmain()\n"
+          },
+          "why": "Пустой отчёт печатает заголовки без данных."
+        }
+      ]
+    },
+    {
+      "id": "validation",
+      "title": "Этап 3. Проверка ввода",
+      "afterLesson": "fp-04-quality",
+      "statement": "Настоящая программа не должна верить вводу. Добавьте проверки:\n\n- `add` без названия — `Нужно название`.\n- `done` без номера или с нечисловым номером — `Нужен номер задачи`; повторное выполнение — `Уже выполнена: #<номер>`.\n- `spend`: сумма не число или не больше нуля — `Некорректная сумма` (так же, если сумма не указана); нет категории — `Нужна категория`.\n\nНичего при этом не записывайте и не роняйте программу.",
+      "goal": "Проверка ввода, ранний возврат, функции для разбора значений.",
+      "hints": [
+        "Сначала проверьте, что слов в команде достаточно.",
+        "Для проверки номера подойдёт метод строки isdigit.",
+        "Сумму разберите отдельной функцией: пробуйте float внутри try и возвращайте None при ошибке.",
+        "Сумма должна быть строго больше нуля.",
+        "Порядок проверок в spend: сначала сумма, затем категория."
+      ],
+      "tests": {
+        "kind": "project",
+        "cases": [
+          {
+            "id": "bad-amount",
+            "file": "main.py",
+            "stdin": "spend abc food\nspend -5 food\nspend 0 food\nreport\nquit\n",
+            "expected_stdout": "Некорректная сумма\nНекорректная сумма\nНекорректная сумма\nРасходов нет\nДо встречи!\n",
+            "hint": "Сумма должна быть положительным числом"
+          },
+          {
+            "id": "no-category",
+            "file": "main.py",
+            "stdin": "spend 5\nquit\n",
+            "expected_stdout": "Нужна категория\nДо встречи!\n",
+            "hint": "Без категории — «Нужна категория»"
+          },
+          {
+            "id": "no-title",
+            "file": "main.py",
+            "stdin": "add\nlist\nquit\n",
+            "expected_stdout": "Нужно название\nЗадач нет\nДо встречи!\n",
+            "hint": "Задача без названия — «Нужно название»"
+          },
+          {
+            "id": "done-twice",
+            "file": "main.py",
+            "stdin": "add A\ndone 1\ndone 1\nquit\n",
+            "expected_stdout": "Добавлено: #1 A\nВыполнено: #1\nУже выполнена: #1\nДо встречи!\n",
+            "hint": "Повторное выполнение — «Уже выполнена: #1»"
+          },
+          {
+            "id": "done-bad",
+            "file": "main.py",
+            "stdin": "done\ndone abc\ndone 0\nquit\n",
+            "expected_stdout": "Нужен номер задачи\nНужен номер задачи\nНет задачи #0\nДо встречи!\n",
+            "hidden": true,
+            "hint": "Нужен номер задачи; номер 0 — «Нет задачи #0»"
+          },
+          {
+            "id": "valid",
+            "file": "main.py",
+            "stdin": "spend 2.5 tea\nspend 1 tea\nreport\nquit\n",
+            "expected_stdout": "Расход: 2.5 tea\nРасход: 1.0 tea\nРасходов: 2\nВсего: 3.5\nПо категориям:\n  tea: 3.5\nДо встречи!\n",
+            "hidden": true,
+            "hint": "Корректные расходы по-прежнему записываются"
+          },
+          {
+            "id": "spend-none",
+            "file": "main.py",
+            "stdin": "spend\nquit\n",
+            "expected_stdout": "Некорректная сумма\nДо встречи!\n",
+            "hidden": true,
+            "hint": "Команда spend без аргументов не роняет программу"
+          }
+        ]
+      },
+      "solutionFiles": {
+        "main.py": "import json\n\ntasks = []\nexpenses = []\n\n\ndef add_task(title):\n    task = {\"id\": len(tasks) + 1, \"title\": title, \"done\": False}\n    tasks.append(task)\n    return task\n\n\ndef find_task(task_id):\n    for task in tasks:\n        if task[\"id\"] == task_id:\n            return task\n    return None\n\n\ndef show_tasks():\n    if not tasks:\n        print(\"Задач нет\")\n        return\n    for task in tasks:\n        mark = \"x\" if task[\"done\"] else \" \"\n        print(f\"{task['id']}. [{mark}] {task['title']}\")\n\n\ndef add_expense(amount, category):\n    expenses.append({\"amount\": amount, \"category\": category})\n\n\ndef show_report():\n    if not expenses:\n        print(\"Расходов нет\")\n        return\n    totals = {}\n    for item in expenses:\n        totals[item[\"category\"]] = totals.get(item[\"category\"], 0) + item[\"amount\"]\n    print(\"Расходов:\", len(expenses))\n    print(\"Всего:\", round(sum(item[\"amount\"] for item in expenses), 2))\n    print(\"По категориям:\")\n    for category, total in sorted(totals.items(), key=lambda pair: (-pair[1], pair[0])):\n        print(f\"  {category}: {round(total, 2)}\")\n\n\ndef parse_amount(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return None\n    return value if value > 0 else None\n\n\ndef handle(line):\n    parts = line.split()\n    if not parts:\n        return True\n    command = parts[0]\n    if command == \"quit\":\n        print(\"До встречи!\")\n        return False\n    if command == \"add\":\n        if len(parts) < 2:\n            print(\"Нужно название\")\n            return True\n        task = add_task(\" \".join(parts[1:]))\n        print(f\"Добавлено: #{task['id']} {task['title']}\")\n    elif command == \"list\":\n        show_tasks()\n    elif command == \"done\":\n        if len(parts) < 2 or not parts[1].isdigit():\n            print(\"Нужен номер задачи\")\n            return True\n        task = find_task(int(parts[1]))\n        if task is None:\n            print(f\"Нет задачи #{parts[1]}\")\n        elif task[\"done\"]:\n            print(f\"Уже выполнена: #{task['id']}\")\n        else:\n            task[\"done\"] = True\n            print(f\"Выполнено: #{task['id']}\")\n    elif command == \"spend\":\n        amount = parse_amount(parts[1]) if len(parts) > 1 else None\n        if amount is None:\n            print(\"Некорректная сумма\")\n        elif len(parts) < 3:\n            print(\"Нужна категория\")\n        else:\n            add_expense(amount, parts[2])\n            print(f\"Расход: {amount} {parts[2]}\")\n    elif command == \"report\":\n        show_report()\n    else:\n        print(f\"Неизвестная команда: {command}\")\n    return True\n\n\ndef main():\n    while True:\n        try:\n            line = input()\n        except EOFError:\n            break\n        if not handle(line):\n            break\n\n\nmain()\n"
+      },
+      "explanation": "Каждая команда сначала проверяет аргументы и сообщает о проблеме, не меняя данные. Разбор суммы вынесен в parse_amount: она возвращает число или None.",
+      "criteria": [
+        "Некорректный ввод не меняет данные.",
+        "Все сообщения совпадают с условием."
+      ],
+      "wrongSolutions": [
+        {
+          "files": {
+            "main.py": "import json\n\ntasks = []\nexpenses = []\n\n\ndef add_task(title):\n    task = {\"id\": len(tasks) + 1, \"title\": title, \"done\": False}\n    tasks.append(task)\n    return task\n\n\ndef find_task(task_id):\n    for task in tasks:\n        if task[\"id\"] == task_id:\n            return task\n    return None\n\n\ndef show_tasks():\n    if not tasks:\n        print(\"Задач нет\")\n        return\n    for task in tasks:\n        mark = \"x\" if task[\"done\"] else \" \"\n        print(f\"{task['id']}. [{mark}] {task['title']}\")\n\n\ndef add_expense(amount, category):\n    expenses.append({\"amount\": amount, \"category\": category})\n\n\ndef show_report():\n    if not expenses:\n        print(\"Расходов нет\")\n        return\n    totals = {}\n    for item in expenses:\n        totals[item[\"category\"]] = totals.get(item[\"category\"], 0) + item[\"amount\"]\n    print(\"Расходов:\", len(expenses))\n    print(\"Всего:\", round(sum(item[\"amount\"] for item in expenses), 2))\n    print(\"По категориям:\")\n    for category, total in sorted(totals.items(), key=lambda pair: (-pair[1], pair[0])):\n        print(f\"  {category}: {round(total, 2)}\")\n\n\ndef parse_amount(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return None\n    return value\n\n\ndef handle(line):\n    parts = line.split()\n    if not parts:\n        return True\n    command = parts[0]\n    if command == \"quit\":\n        print(\"До встречи!\")\n        return False\n    if command == \"add\":\n        if len(parts) < 2:\n            print(\"Нужно название\")\n            return True\n        task = add_task(\" \".join(parts[1:]))\n        print(f\"Добавлено: #{task['id']} {task['title']}\")\n    elif command == \"list\":\n        show_tasks()\n    elif command == \"done\":\n        if len(parts) < 2 or not parts[1].isdigit():\n            print(\"Нужен номер задачи\")\n            return True\n        task = find_task(int(parts[1]))\n        if task is None:\n            print(f\"Нет задачи #{parts[1]}\")\n        elif task[\"done\"]:\n            print(f\"Уже выполнена: #{task['id']}\")\n        else:\n            task[\"done\"] = True\n            print(f\"Выполнено: #{task['id']}\")\n    elif command == \"spend\":\n        amount = parse_amount(parts[1]) if len(parts) > 1 else None\n        if amount is None:\n            print(\"Некорректная сумма\")\n        elif len(parts) < 3:\n            print(\"Нужна категория\")\n        else:\n            add_expense(amount, parts[2])\n            print(f\"Расход: {amount} {parts[2]}\")\n    elif command == \"report\":\n        show_report()\n    else:\n        print(f\"Неизвестная команда: {command}\")\n    return True\n\n\ndef main():\n    while True:\n        try:\n            line = input()\n        except EOFError:\n            break\n        if not handle(line):\n            break\n\n\nmain()\n"
+          },
+          "why": "Отрицательные суммы принимаются."
+        },
+        {
+          "files": {
+            "main.py": "import json\n\ntasks = []\nexpenses = []\n\n\ndef add_task(title):\n    task = {\"id\": len(tasks) + 1, \"title\": title, \"done\": False}\n    tasks.append(task)\n    return task\n\n\ndef find_task(task_id):\n    for task in tasks:\n        if task[\"id\"] == task_id:\n            return task\n    return None\n\n\ndef show_tasks():\n    if not tasks:\n        print(\"Задач нет\")\n        return\n    for task in tasks:\n        mark = \"x\" if task[\"done\"] else \" \"\n        print(f\"{task['id']}. [{mark}] {task['title']}\")\n\n\ndef add_expense(amount, category):\n    expenses.append({\"amount\": amount, \"category\": category})\n\n\ndef show_report():\n    if not expenses:\n        print(\"Расходов нет\")\n        return\n    totals = {}\n    for item in expenses:\n        totals[item[\"category\"]] = totals.get(item[\"category\"], 0) + item[\"amount\"]\n    print(\"Расходов:\", len(expenses))\n    print(\"Всего:\", round(sum(item[\"amount\"] for item in expenses), 2))\n    print(\"По категориям:\")\n    for category, total in sorted(totals.items(), key=lambda pair: (-pair[1], pair[0])):\n        print(f\"  {category}: {round(total, 2)}\")\n\n\ndef parse_amount(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return None\n    return value if value > 0 else None\n\n\ndef handle(line):\n    parts = line.split()\n    if not parts:\n        return True\n    command = parts[0]\n    if command == \"quit\":\n        print(\"До встречи!\")\n        return False\n    if command == \"add\":\n        if len(parts) < 2:\n            print(\"Нужно название\")\n            return True\n        task = add_task(\" \".join(parts[1:]))\n        print(f\"Добавлено: #{task['id']} {task['title']}\")\n    elif command == \"list\":\n        show_tasks()\n    elif command == \"done\":\n        if len(parts) < 2 or not parts[1].isdigit():\n            print(\"Нужен номер задачи\")\n            return True\n        task = find_task(int(parts[1]))\n        if task is None:\n            print(f\"Нет задачи #{parts[1]}\")\n        else:\n            task[\"done\"] = True\n            print(f\"Выполнено: #{task['id']}\")\n    elif command == \"spend\":\n        amount = parse_amount(parts[1]) if len(parts) > 1 else None\n        if amount is None:\n            print(\"Некорректная сумма\")\n        elif len(parts) < 3:\n            print(\"Нужна категория\")\n        else:\n            add_expense(amount, parts[2])\n            print(f\"Расход: {amount} {parts[2]}\")\n    elif command == \"report\":\n        show_report()\n    else:\n        print(f\"Неизвестная команда: {command}\")\n    return True\n\n\ndef main():\n    while True:\n        try:\n            line = input()\n        except EOFError:\n            break\n        if not handle(line):\n            break\n\n\nmain()\n"
+          },
+          "why": "Повторное выполнение не обрабатывается."
+        },
+        {
+          "files": {
+            "main.py": "import json\n\ntasks = []\nexpenses = []\n\n\ndef add_task(title):\n    task = {\"id\": len(tasks) + 1, \"title\": title, \"done\": False}\n    tasks.append(task)\n    return task\n\n\ndef find_task(task_id):\n    for task in tasks:\n        if task[\"id\"] == task_id:\n            return task\n    return None\n\n\ndef show_tasks():\n    if not tasks:\n        print(\"Задач нет\")\n        return\n    for task in tasks:\n        mark = \"x\" if task[\"done\"] else \" \"\n        print(f\"{task['id']}. [{mark}] {task['title']}\")\n\n\ndef add_expense(amount, category):\n    expenses.append({\"amount\": amount, \"category\": category})\n\n\ndef show_report():\n    if not expenses:\n        print(\"Расходов нет\")\n        return\n    totals = {}\n    for item in expenses:\n        totals[item[\"category\"]] = totals.get(item[\"category\"], 0) + item[\"amount\"]\n    print(\"Расходов:\", len(expenses))\n    print(\"Всего:\", round(sum(item[\"amount\"] for item in expenses), 2))\n    print(\"По категориям:\")\n    for category, total in sorted(totals.items(), key=lambda pair: (-pair[1], pair[0])):\n        print(f\"  {category}: {round(total, 2)}\")\n\n\ndef parse_amount(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return None\n    return value if value > 0 else None\n\n\ndef handle(line):\n    parts = line.split()\n    if not parts:\n        return True\n    command = parts[0]\n    if command == \"quit\":\n        print(\"До встречи!\")\n        return False\n    if command == \"add\":\n        task = add_task(\" \".join(parts[1:]))\n        print(f\"Добавлено: #{task['id']} {task['title']}\")\n    elif command == \"list\":\n        show_tasks()\n    elif command == \"done\":\n        if len(parts) < 2 or not parts[1].isdigit():\n            print(\"Нужен номер задачи\")\n            return True\n        task = find_task(int(parts[1]))\n        if task is None:\n            print(f\"Нет задачи #{parts[1]}\")\n        elif task[\"done\"]:\n            print(f\"Уже выполнена: #{task['id']}\")\n        else:\n            task[\"done\"] = True\n            print(f\"Выполнено: #{task['id']}\")\n    elif command == \"spend\":\n        amount = parse_amount(parts[1]) if len(parts) > 1 else None\n        if amount is None:\n            print(\"Некорректная сумма\")\n        elif len(parts) < 3:\n            print(\"Нужна категория\")\n        else:\n            add_expense(amount, parts[2])\n            print(f\"Расход: {amount} {parts[2]}\")\n    elif command == \"report\":\n        show_report()\n    else:\n        print(f\"Неизвестная команда: {command}\")\n    return True\n\n\ndef main():\n    while True:\n        try:\n            line = input()\n        except EOFError:\n            break\n        if not handle(line):\n            break\n\n\nmain()\n"
+          },
+          "why": "Пустое название принимается."
+        }
+      ]
+    },
+    {
+      "id": "final",
+      "title": "Этап 4. Справка, сводка и экспорт",
+      "afterLesson": "fp-05-demo",
+      "statement": "Завершите проект. Новые команды:\n\n- `help` — список команд, по строке на команду (тексты задайте в списке `HELP`, как в условии ниже).\n- `stats` — две строки: `Задач: <всего>, выполнено: <сколько>` и `Расходов: <число>`.\n- `export` — одну строку JSON: `{\"expenses\": …, \"tasks\": …}` — ключи по алфавиту, русские буквы как есть (без `\\u`-кодов).\n\nСтроки справки по порядку:\n\n```\nadd <название> — новая задача\nlist — список задач\ndone <номер> — выполнить задачу\nspend <сумма> <категория> — записать расход\nreport — отчёт по расходам\nstats — сводка\nexport — данные в формате JSON\nquit — выход\n```\n\nВсе прежние команды должны работать как раньше.",
+      "goal": "Модуль json, параметры dumps, сводные значения, итоговая проверка проекта.",
+      "hints": [
+        "Справку удобно хранить в списке строк и печатать циклом.",
+        "Для сводки посчитайте выполненные задачи генераторным выражением с sum.",
+        "Для экспорта соберите словарь из двух списков и превратите его в строку модулем json.",
+        "Параметр sort_keys упорядочит ключи по алфавиту.",
+        "Параметр ensure_ascii со значением False сохранит русские буквы как есть."
+      ],
+      "tests": {
+        "kind": "project",
+        "cases": [
+          {
+            "id": "help",
+            "file": "main.py",
+            "stdin": "help\nquit\n",
+            "expected_stdout": "add <название> — новая задача\nlist — список задач\ndone <номер> — выполнить задачу\nspend <сумма> <категория> — записать расход\nreport — отчёт по расходам\nstats — сводка\nexport — данные в формате JSON\nquit — выход\nДо встречи!\n"
+          },
+          {
+            "id": "stats",
+            "file": "main.py",
+            "stdin": "add A\nadd B\nadd C\ndone 2\nspend 1 x\nspend 2 y\nstats\nquit\n",
+            "expected_stdout": "Добавлено: #1 A\nДобавлено: #2 B\nДобавлено: #3 C\nВыполнено: #2\nРасход: 1.0 x\nРасход: 2.0 y\nЗадач: 3, выполнено: 1\nРасходов: 2\nДо встречи!\n",
+            "hint": "Сводка: задачи и выполненные, число расходов"
+          },
+          {
+            "id": "export",
+            "file": "main.py",
+            "stdin": "add Купить хлеб\ndone 1\nspend 10.5 food\nexport\nquit\n",
+            "expected_stdout": "Добавлено: #1 Купить хлеб\nВыполнено: #1\nРасход: 10.5 food\n{\"expenses\": [{\"amount\": 10.5, \"category\": \"food\"}], \"tasks\": [{\"done\": true, \"id\": 1, \"title\": \"Купить хлеб\"}]}\nДо встречи!\n",
+            "hint": "JSON с ключами по алфавиту и русскими буквами без \\u-кодов"
+          },
+          {
+            "id": "empty-export",
+            "file": "main.py",
+            "stdin": "export\nquit\n",
+            "expected_stdout": "{\"expenses\": [], \"tasks\": []}\nДо встречи!\n",
+            "hidden": true,
+            "hint": "Пустые данные — пустые списки"
+          },
+          {
+            "id": "all",
+            "file": "main.py",
+            "stdin": "add Задача\nspend abc x\nspend 5 x\nreport\nstats\nlist\nquit\n",
+            "expected_stdout": "Добавлено: #1 Задача\nНекорректная сумма\nРасход: 5.0 x\nРасходов: 1\nВсего: 5.0\nПо категориям:\n  x: 5.0\nЗадач: 1, выполнено: 0\nРасходов: 1\n1. [ ] Задача\nДо встречи!\n",
+            "hidden": true,
+            "hint": "Все прежние команды работают"
+          },
+          {
+            "id": "export-many",
+            "file": "main.py",
+            "stdin": "add Первая\nadd Вторая\nspend 3 a\nspend 4 b\nexport\nquit\n",
+            "expected_stdout": "Добавлено: #1 Первая\nДобавлено: #2 Вторая\nРасход: 3.0 a\nРасход: 4.0 b\n{\"expenses\": [{\"amount\": 3.0, \"category\": \"a\"}, {\"amount\": 4.0, \"category\": \"b\"}], \"tasks\": [{\"done\": false, \"id\": 1, \"title\": \"Первая\"}, {\"done\": false, \"id\": 2, \"title\": \"Вторая\"}]}\nДо встречи!\n",
+            "hidden": true
+          }
+        ]
+      },
+      "solutionFiles": {
+        "main.py": "import json\n\ntasks = []\nexpenses = []\n\n\ndef add_task(title):\n    task = {\"id\": len(tasks) + 1, \"title\": title, \"done\": False}\n    tasks.append(task)\n    return task\n\n\ndef find_task(task_id):\n    for task in tasks:\n        if task[\"id\"] == task_id:\n            return task\n    return None\n\n\ndef show_tasks():\n    if not tasks:\n        print(\"Задач нет\")\n        return\n    for task in tasks:\n        mark = \"x\" if task[\"done\"] else \" \"\n        print(f\"{task['id']}. [{mark}] {task['title']}\")\n\n\ndef add_expense(amount, category):\n    expenses.append({\"amount\": amount, \"category\": category})\n\n\ndef show_report():\n    if not expenses:\n        print(\"Расходов нет\")\n        return\n    totals = {}\n    for item in expenses:\n        totals[item[\"category\"]] = totals.get(item[\"category\"], 0) + item[\"amount\"]\n    print(\"Расходов:\", len(expenses))\n    print(\"Всего:\", round(sum(item[\"amount\"] for item in expenses), 2))\n    print(\"По категориям:\")\n    for category, total in sorted(totals.items(), key=lambda pair: (-pair[1], pair[0])):\n        print(f\"  {category}: {round(total, 2)}\")\n\n\ndef parse_amount(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return None\n    return value if value > 0 else None\n\n\nHELP = [\"add <название> — новая задача\", \"list — список задач\", \"done <номер> — выполнить задачу\",\n        \"spend <сумма> <категория> — записать расход\", \"report — отчёт по расходам\",\n        \"stats — сводка\", \"export — данные в формате JSON\", \"quit — выход\"]\n\n\ndef show_stats():\n    done = sum(1 for task in tasks if task[\"done\"])\n    print(f\"Задач: {len(tasks)}, выполнено: {done}\")\n    print(\"Расходов:\", len(expenses))\n\n\ndef handle(line):\n    parts = line.split()\n    if not parts:\n        return True\n    command = parts[0]\n    if command == \"quit\":\n        print(\"До встречи!\")\n        return False\n    if command == \"add\":\n        if len(parts) < 2:\n            print(\"Нужно название\")\n            return True\n        task = add_task(\" \".join(parts[1:]))\n        print(f\"Добавлено: #{task['id']} {task['title']}\")\n    elif command == \"list\":\n        show_tasks()\n    elif command == \"done\":\n        if len(parts) < 2 or not parts[1].isdigit():\n            print(\"Нужен номер задачи\")\n            return True\n        task = find_task(int(parts[1]))\n        if task is None:\n            print(f\"Нет задачи #{parts[1]}\")\n        elif task[\"done\"]:\n            print(f\"Уже выполнена: #{task['id']}\")\n        else:\n            task[\"done\"] = True\n            print(f\"Выполнено: #{task['id']}\")\n    elif command == \"spend\":\n        amount = parse_amount(parts[1]) if len(parts) > 1 else None\n        if amount is None:\n            print(\"Некорректная сумма\")\n        elif len(parts) < 3:\n            print(\"Нужна категория\")\n        else:\n            add_expense(amount, parts[2])\n            print(f\"Расход: {amount} {parts[2]}\")\n    elif command == \"report\":\n        show_report()\n    elif command == \"help\":\n        for text in HELP:\n            print(text)\n    elif command == \"stats\":\n        show_stats()\n    elif command == \"export\":\n        print(json.dumps({\"tasks\": tasks, \"expenses\": expenses}, ensure_ascii=False, sort_keys=True))\n    else:\n        print(f\"Неизвестная команда: {command}\")\n    return True\n\n\ndef main():\n    while True:\n        try:\n            line = input()\n        except EOFError:\n            break\n        if not handle(line):\n            break\n\n\nmain()\n"
+      },
+      "explanation": "HELP хранит тексты справки, stats считает задачи и расходы, а export превращает данные в JSON: sort_keys даёт стабильный порядок, ensure_ascii=False — читаемые русские буквы.",
+      "criteria": [
+        "Справка, сводка и экспорт совпадают с условием.",
+        "Старые команды не сломались."
+      ],
+      "wrongSolutions": [
+        {
+          "files": {
+            "main.py": "import json\n\ntasks = []\nexpenses = []\n\n\ndef add_task(title):\n    task = {\"id\": len(tasks) + 1, \"title\": title, \"done\": False}\n    tasks.append(task)\n    return task\n\n\ndef find_task(task_id):\n    for task in tasks:\n        if task[\"id\"] == task_id:\n            return task\n    return None\n\n\ndef show_tasks():\n    if not tasks:\n        print(\"Задач нет\")\n        return\n    for task in tasks:\n        mark = \"x\" if task[\"done\"] else \" \"\n        print(f\"{task['id']}. [{mark}] {task['title']}\")\n\n\ndef add_expense(amount, category):\n    expenses.append({\"amount\": amount, \"category\": category})\n\n\ndef show_report():\n    if not expenses:\n        print(\"Расходов нет\")\n        return\n    totals = {}\n    for item in expenses:\n        totals[item[\"category\"]] = totals.get(item[\"category\"], 0) + item[\"amount\"]\n    print(\"Расходов:\", len(expenses))\n    print(\"Всего:\", round(sum(item[\"amount\"] for item in expenses), 2))\n    print(\"По категориям:\")\n    for category, total in sorted(totals.items(), key=lambda pair: (-pair[1], pair[0])):\n        print(f\"  {category}: {round(total, 2)}\")\n\n\ndef parse_amount(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return None\n    return value if value > 0 else None\n\n\nHELP = [\"add <название> — новая задача\", \"list — список задач\", \"done <номер> — выполнить задачу\",\n        \"spend <сумма> <категория> — записать расход\", \"report — отчёт по расходам\",\n        \"stats — сводка\", \"export — данные в формате JSON\", \"quit — выход\"]\n\n\ndef show_stats():\n    done = sum(1 for task in tasks if task[\"done\"])\n    print(f\"Задач: {len(tasks)}, выполнено: {done}\")\n    print(\"Расходов:\", len(expenses))\n\n\ndef handle(line):\n    parts = line.split()\n    if not parts:\n        return True\n    command = parts[0]\n    if command == \"quit\":\n        print(\"До встречи!\")\n        return False\n    if command == \"add\":\n        if len(parts) < 2:\n            print(\"Нужно название\")\n            return True\n        task = add_task(\" \".join(parts[1:]))\n        print(f\"Добавлено: #{task['id']} {task['title']}\")\n    elif command == \"list\":\n        show_tasks()\n    elif command == \"done\":\n        if len(parts) < 2 or not parts[1].isdigit():\n            print(\"Нужен номер задачи\")\n            return True\n        task = find_task(int(parts[1]))\n        if task is None:\n            print(f\"Нет задачи #{parts[1]}\")\n        elif task[\"done\"]:\n            print(f\"Уже выполнена: #{task['id']}\")\n        else:\n            task[\"done\"] = True\n            print(f\"Выполнено: #{task['id']}\")\n    elif command == \"spend\":\n        amount = parse_amount(parts[1]) if len(parts) > 1 else None\n        if amount is None:\n            print(\"Некорректная сумма\")\n        elif len(parts) < 3:\n            print(\"Нужна категория\")\n        else:\n            add_expense(amount, parts[2])\n            print(f\"Расход: {amount} {parts[2]}\")\n    elif command == \"report\":\n        show_report()\n    elif command == \"help\":\n        for text in HELP:\n            print(text)\n    elif command == \"stats\":\n        show_stats()\n    elif command == \"export\":\n        print(json.dumps({\"tasks\": tasks, \"expenses\": expenses}, sort_keys=True))\n    else:\n        print(f\"Неизвестная команда: {command}\")\n    return True\n\n\ndef main():\n    while True:\n        try:\n            line = input()\n        except EOFError:\n            break\n        if not handle(line):\n            break\n\n\nmain()\n"
+          },
+          "why": "Русские буквы превращаются в коды \\uXXXX."
+        },
+        {
+          "files": {
+            "main.py": "import json\n\ntasks = []\nexpenses = []\n\n\ndef add_task(title):\n    task = {\"id\": len(tasks) + 1, \"title\": title, \"done\": False}\n    tasks.append(task)\n    return task\n\n\ndef find_task(task_id):\n    for task in tasks:\n        if task[\"id\"] == task_id:\n            return task\n    return None\n\n\ndef show_tasks():\n    if not tasks:\n        print(\"Задач нет\")\n        return\n    for task in tasks:\n        mark = \"x\" if task[\"done\"] else \" \"\n        print(f\"{task['id']}. [{mark}] {task['title']}\")\n\n\ndef add_expense(amount, category):\n    expenses.append({\"amount\": amount, \"category\": category})\n\n\ndef show_report():\n    if not expenses:\n        print(\"Расходов нет\")\n        return\n    totals = {}\n    for item in expenses:\n        totals[item[\"category\"]] = totals.get(item[\"category\"], 0) + item[\"amount\"]\n    print(\"Расходов:\", len(expenses))\n    print(\"Всего:\", round(sum(item[\"amount\"] for item in expenses), 2))\n    print(\"По категориям:\")\n    for category, total in sorted(totals.items(), key=lambda pair: (-pair[1], pair[0])):\n        print(f\"  {category}: {round(total, 2)}\")\n\n\ndef parse_amount(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return None\n    return value if value > 0 else None\n\n\nHELP = [\"add <название> — новая задача\", \"list — список задач\", \"done <номер> — выполнить задачу\",\n        \"spend <сумма> <категория> — записать расход\", \"report — отчёт по расходам\",\n        \"stats — сводка\", \"export — данные в формате JSON\", \"quit — выход\"]\n\n\ndef show_stats():\n    done = sum(1 for task in tasks if task[\"done\"])\n    print(f\"Задач: {len(tasks)}, выполнено: {done}\")\n    print(\"Расходов:\", len(expenses))\n\n\ndef handle(line):\n    parts = line.split()\n    if not parts:\n        return True\n    command = parts[0]\n    if command == \"quit\":\n        print(\"До встречи!\")\n        return False\n    if command == \"add\":\n        if len(parts) < 2:\n            print(\"Нужно название\")\n            return True\n        task = add_task(\" \".join(parts[1:]))\n        print(f\"Добавлено: #{task['id']} {task['title']}\")\n    elif command == \"list\":\n        show_tasks()\n    elif command == \"done\":\n        if len(parts) < 2 or not parts[1].isdigit():\n            print(\"Нужен номер задачи\")\n            return True\n        task = find_task(int(parts[1]))\n        if task is None:\n            print(f\"Нет задачи #{parts[1]}\")\n        elif task[\"done\"]:\n            print(f\"Уже выполнена: #{task['id']}\")\n        else:\n            task[\"done\"] = True\n            print(f\"Выполнено: #{task['id']}\")\n    elif command == \"spend\":\n        amount = parse_amount(parts[1]) if len(parts) > 1 else None\n        if amount is None:\n            print(\"Некорректная сумма\")\n        elif len(parts) < 3:\n            print(\"Нужна категория\")\n        else:\n            add_expense(amount, parts[2])\n            print(f\"Расход: {amount} {parts[2]}\")\n    elif command == \"report\":\n        show_report()\n    elif command == \"help\":\n        for text in HELP:\n            print(text)\n    elif command == \"stats\":\n        show_stats()\n    elif command == \"export\":\n        print(json.dumps({\"tasks\": tasks, \"expenses\": expenses}, ensure_ascii=False))\n    else:\n        print(f\"Неизвестная команда: {command}\")\n    return True\n\n\ndef main():\n    while True:\n        try:\n            line = input()\n        except EOFError:\n            break\n        if not handle(line):\n            break\n\n\nmain()\n"
+          },
+          "why": "Ключи не упорядочены по алфавиту."
+        },
+        {
+          "files": {
+            "main.py": "import json\n\ntasks = []\nexpenses = []\n\n\ndef add_task(title):\n    task = {\"id\": len(tasks) + 1, \"title\": title, \"done\": False}\n    tasks.append(task)\n    return task\n\n\ndef find_task(task_id):\n    for task in tasks:\n        if task[\"id\"] == task_id:\n            return task\n    return None\n\n\ndef show_tasks():\n    if not tasks:\n        print(\"Задач нет\")\n        return\n    for task in tasks:\n        mark = \"x\" if task[\"done\"] else \" \"\n        print(f\"{task['id']}. [{mark}] {task['title']}\")\n\n\ndef add_expense(amount, category):\n    expenses.append({\"amount\": amount, \"category\": category})\n\n\ndef show_report():\n    if not expenses:\n        print(\"Расходов нет\")\n        return\n    totals = {}\n    for item in expenses:\n        totals[item[\"category\"]] = totals.get(item[\"category\"], 0) + item[\"amount\"]\n    print(\"Расходов:\", len(expenses))\n    print(\"Всего:\", round(sum(item[\"amount\"] for item in expenses), 2))\n    print(\"По категориям:\")\n    for category, total in sorted(totals.items(), key=lambda pair: (-pair[1], pair[0])):\n        print(f\"  {category}: {round(total, 2)}\")\n\n\ndef parse_amount(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return None\n    return value if value > 0 else None\n\n\nHELP = [\"add <название> — новая задача\", \"list — список задач\", \"done <номер> — выполнить задачу\",\n        \"spend <сумма> <категория> — записать расход\", \"report — отчёт по расходам\",\n        \"stats — сводка\", \"export — данные в формате JSON\", \"quit — выход\"]\n\n\ndef show_stats():\n    done = len(tasks)\n    print(f\"Задач: {len(tasks)}, выполнено: {done}\")\n    print(\"Расходов:\", len(expenses))\n\n\ndef handle(line):\n    parts = line.split()\n    if not parts:\n        return True\n    command = parts[0]\n    if command == \"quit\":\n        print(\"До встречи!\")\n        return False\n    if command == \"add\":\n        if len(parts) < 2:\n            print(\"Нужно название\")\n            return True\n        task = add_task(\" \".join(parts[1:]))\n        print(f\"Добавлено: #{task['id']} {task['title']}\")\n    elif command == \"list\":\n        show_tasks()\n    elif command == \"done\":\n        if len(parts) < 2 or not parts[1].isdigit():\n            print(\"Нужен номер задачи\")\n            return True\n        task = find_task(int(parts[1]))\n        if task is None:\n            print(f\"Нет задачи #{parts[1]}\")\n        elif task[\"done\"]:\n            print(f\"Уже выполнена: #{task['id']}\")\n        else:\n            task[\"done\"] = True\n            print(f\"Выполнено: #{task['id']}\")\n    elif command == \"spend\":\n        amount = parse_amount(parts[1]) if len(parts) > 1 else None\n        if amount is None:\n            print(\"Некорректная сумма\")\n        elif len(parts) < 3:\n            print(\"Нужна категория\")\n        else:\n            add_expense(amount, parts[2])\n            print(f\"Расход: {amount} {parts[2]}\")\n    elif command == \"report\":\n        show_report()\n    elif command == \"help\":\n        for text in HELP:\n            print(text)\n    elif command == \"stats\":\n        show_stats()\n    elif command == \"export\":\n        print(json.dumps({\"tasks\": tasks, \"expenses\": expenses}, ensure_ascii=False, sort_keys=True))\n    else:\n        print(f\"Неизвестная команда: {command}\")\n    return True\n\n\ndef main():\n    while True:\n        try:\n            line = input()\n        except EOFError:\n            break\n        if not handle(line):\n            break\n\n\nmain()\n"
+          },
+          "why": "Сводка считает все задачи выполненными."
+        }
+      ]
+    }
+  ]
+}

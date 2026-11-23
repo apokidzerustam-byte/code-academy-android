@@ -1,0 +1,114 @@
+{
+  "id": "a2-readiness",
+  "type": "function",
+  "title": "Готовность проекта",
+  "statement": "Напишите `readiness(checks)`: `checks` — словарь «проверка → True/False». Верните словарь `{\"percent\": число, \"missing\": [...]}`: `percent` — доля выполненных в процентах, округлённая до целого (для пустого словаря — 100), `missing` — отсортированные названия невыполненных проверок.",
+  "goal": "Готовность проекта",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Посчитайте выполненные проверки.",
+    "Для пустого словаря сразу верните готовность 100.",
+    "Процент — доля выполненных, умноженная на сто.",
+    "Округлите до целого.",
+    "Невыполненные названия отсортируйте."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "readiness",
+    "cases": [
+      {
+        "args": [
+          {
+            "tests": true,
+            "readme": false,
+            "demo": true,
+            "secrets": true
+          }
+        ],
+        "id": "v1",
+        "expected": {
+          "percent": 75,
+          "missing": [
+            "readme"
+          ]
+        }
+      },
+      {
+        "args": [
+          {}
+        ],
+        "id": "v2",
+        "expected": {
+          "percent": 100,
+          "missing": []
+        }
+      },
+      {
+        "args": [
+          {
+            "a": true
+          }
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": {
+          "percent": 100,
+          "missing": []
+        }
+      },
+      {
+        "args": [
+          {
+            "b": false,
+            "a": false,
+            "c": true
+          }
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": {
+          "percent": 33,
+          "missing": [
+            "a",
+            "b"
+          ]
+        }
+      },
+      {
+        "args": [
+          {
+            "x": true,
+            "y": false,
+            "z": false
+          }
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": {
+          "percent": 33,
+          "missing": [
+            "y",
+            "z"
+          ]
+        }
+      }
+    ]
+  },
+  "solution": "def readiness(checks):\n    if not checks:\n        return {\"percent\": 100, \"missing\": []}\n    done = sum(1 for ok in checks.values() if ok)\n    return {\"percent\": round(done / len(checks) * 100), \"missing\": sorted(name for name, ok in checks.items() if not ok)}\n",
+  "explanation": "Пустой чек-лист не содержит невыполненного — готовность 100%; остальное — простая арифметика.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def readiness(checks):\n    done = sum(1 for ok in checks.values() if ok)\n    return {\"percent\": round(done / len(checks) * 100), \"missing\": sorted(name for name, ok in checks.items() if not ok)}\n",
+      "why": "Пустой словарь вызывает деление на ноль."
+    },
+    {
+      "code": "def readiness(checks):\n    if not checks:\n        return {\"percent\": 100, \"missing\": []}\n    done = sum(1 for ok in checks.values() if ok)\n    return {\"percent\": round(done / len(checks) * 100), \"missing\": [name for name, ok in checks.items() if not ok]}\n",
+      "why": "Список не отсортирован по алфавиту."
+    }
+  ]
+}

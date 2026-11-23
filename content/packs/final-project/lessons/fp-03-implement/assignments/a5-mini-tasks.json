@@ -1,0 +1,62 @@
+{
+  "id": "a5-mini-tasks",
+  "type": "complete",
+  "title": "Мини-список дел",
+  "statement": "Программа читает команды: `add <название>` — запомнить задачу; `list` — вывести задачи по одной в строке в виде `1. название`, а если задач нет — `Пусто`; `quit` — выход. Конец ввода — тоже выход.",
+  "goal": "Мини-список дел",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "tasks = []\n# читайте команды add, list и quit\n",
+  "hints": [
+    "Задачи накапливаются в списке.",
+    "Команда add: название — всё после «add ».",
+    "Для list нужна нумерация с единицы.",
+    "Пустой список требует отдельного сообщения.",
+    "quit и конец ввода останавливают цикл."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "add Молоко\nadd Хлеб\nlist\nquit\n",
+        "expected_stdout": "1. Молоко\n2. Хлеб\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "list\n",
+        "expected_stdout": "Пусто\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "add Раз\nlist\nadd Два\nlist\n",
+        "expected_stdout": "1. Раз\n1. Раз\n2. Два\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "add  Пробелы  \nlist\nquit\n",
+        "expected_stdout": "1. Пробелы\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "tasks = []\nwhile True:\n    try:\n        line = input().strip()\n    except EOFError:\n        break\n    if line == \"quit\":\n        break\n    if line.startswith(\"add \"):\n        tasks.append(line[4:].strip())\n    elif line == \"list\":\n        if not tasks:\n            print(\"Пусто\")\n        for i, title in enumerate(tasks, 1):\n            print(f\"{i}. {title}\")\n",
+  "explanation": "Мини-версия итогового проекта: цикл команд, список задач и вывод с нумерацией через enumerate.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "tasks = []\nwhile True:\n    try:\n        line = input().strip()\n    except EOFError:\n        break\n    if line == \"quit\":\n        break\n    if line.startswith(\"add \"):\n        tasks.append(line[4:].strip())\n    elif line == \"list\":\n        for i, title in enumerate(tasks, 1):\n            print(f\"{i}. {title}\")\n",
+      "why": "Для пустого списка нужно «Пусто»."
+    },
+    {
+      "code": "tasks = []\nwhile True:\n    try:\n        line = input().strip()\n    except EOFError:\n        break\n    if line == \"quit\":\n        break\n    if line.startswith(\"add \"):\n        tasks.append(line[4:].strip())\n    elif line == \"list\":\n        if not tasks:\n            print(\"Пусто\")\n        for i, title in enumerate(tasks):\n            print(f\"{i}. {title}\")\n",
+      "why": "Нумерация должна начинаться с 1."
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "id": "a2-story",
+  "type": "function",
+  "title": "Разбор истории",
+  "statement": "Напишите `parse_story(text)`: из строки вида `\"Как <роль>, я хочу <действие>, чтобы <цель>\"` верните словарь `{\"role\": …, \"action\": …, \"goal\": …}`.",
+  "goal": "Разбор истории",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "История состоит из трёх частей, разделённых запятыми.",
+    "Сначала уберите слово «Как» в начале.",
+    "Роль — до фразы «я хочу».",
+    "Действие — между «я хочу» и «чтобы».",
+    "Цель — после «чтобы»."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "parse_story",
+    "cases": [
+      {
+        "args": [
+          "Как студент, я хочу записывать расходы, чтобы понимать траты"
+        ],
+        "id": "v1",
+        "expected": {
+          "role": "студент",
+          "action": "записывать расходы",
+          "goal": "понимать траты"
+        }
+      },
+      {
+        "args": [
+          "Как админ, я хочу видеть логи, чтобы искать ошибки"
+        ],
+        "id": "v2",
+        "expected": {
+          "role": "админ",
+          "action": "видеть логи",
+          "goal": "искать ошибки"
+        }
+      },
+      {
+        "args": [
+          "Как гость, я хочу войти, чтобы работать"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": {
+          "role": "гость",
+          "action": "войти",
+          "goal": "работать"
+        }
+      },
+      {
+        "args": [
+          "Как мама, я хочу напоминания, чтобы не забывать"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": {
+          "role": "мама",
+          "action": "напоминания",
+          "goal": "не забывать"
+        }
+      }
+    ]
+  },
+  "solution": "def parse_story(text):\n    start = text.removeprefix(\"Как \")\n    role, rest = start.split(\", я хочу \")\n    action, goal = rest.split(\", чтобы \")\n    return {\"role\": role, \"action\": action, \"goal\": goal}\n",
+  "explanation": "split по фиксированным разделителям разбирает шаблонную строку на части.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def parse_story(text):\n    role, rest = text.split(\", я хочу \")\n    action, goal = rest.split(\", чтобы \")\n    return {\"role\": role, \"action\": action, \"goal\": goal}\n",
+      "why": "В роли остаётся слово «Как»."
+    },
+    {
+      "code": "def parse_story(text):\n    start = text.removeprefix(\"Как \")\n    role, rest = start.split(\", я хочу \")\n    action, goal = rest.split(\", чтобы \")\n    return {\"role\": role, \"action\": goal, \"goal\": action}\n",
+      "why": "Действие и цель перепутаны."
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "id": "a2-counter",
+  "type": "complete",
+  "title": "Мини-REPL: счётчик",
+  "statement": "Напишите программу, которая читает команды по одной в строке: `inc` — увеличить счётчик на 1, `dec` — уменьшить на 1, `show` — вывести число, `quit` — выход. Начальное значение 0. Если ввод закончился без `quit`, завершайтесь без ошибки. Другие строки игнорируйте.",
+  "goal": "Мини-REPL: счётчик",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "counter = 0\n# читайте команды в цикле\n",
+  "hints": [
+    "Нужен бесконечный цикл с выходом по условию.",
+    "Конец ввода — исключение EOFError.",
+    "Команду quit проверяйте до остальных.",
+    "Счётчик меняется командами inc и dec.",
+    "show печатает текущее значение."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "inc\ninc\nshow\nquit\n",
+        "expected_stdout": "2\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "show\ndec\nshow\n",
+        "expected_stdout": "0\n-1\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "inc\nfly\ninc\nshow\nshow\nquit\ninc\nshow\n",
+        "expected_stdout": "2\n2\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "\ninc\n  show  \n",
+        "expected_stdout": "1\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "counter = 0\nwhile True:\n    try:\n        line = input().strip()\n    except EOFError:\n        break\n    if line == \"quit\":\n        break\n    if line == \"inc\":\n        counter += 1\n    elif line == \"dec\":\n        counter -= 1\n    elif line == \"show\":\n        print(counter)\n",
+  "explanation": "Цикл чтения команд всегда завершается двумя способами: командой выхода и концом ввода.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "counter = 0\nwhile True:\n    line = input().strip()\n    if line == \"quit\":\n        break\n    if line == \"inc\":\n        counter += 1\n    elif line == \"dec\":\n        counter -= 1\n    elif line == \"show\":\n        print(counter)\n",
+      "why": "Без quit программа падает с EOFError."
+    },
+    {
+      "code": "counter = 0\nwhile True:\n    try:\n        line = input().strip()\n    except EOFError:\n        break\n    if line == \"inc\":\n        counter += 1\n    elif line == \"dec\":\n        counter -= 1\n    elif line == \"show\":\n        print(counter)\n",
+      "why": "Команда quit не останавливает чтение."
+    }
+  ]
+}

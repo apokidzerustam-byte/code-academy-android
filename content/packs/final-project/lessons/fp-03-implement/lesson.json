@@ -1,0 +1,45 @@
+{
+  "id": "fp-03-implement",
+  "title": "Реализация по шагам",
+  "goal": "Реализовать программу с командной строкой маленькими проверяемыми шагами.",
+  "skills": [
+    "final.cli",
+    "final.dispatch",
+    "final.incremental"
+  ],
+  "prerequisites": [
+    "fp-02-design"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-dispatch.json",
+    "assignments/a2-counter.json",
+    "assignments/a3-parse-expense.json",
+    "assignments/a4-dispatch.json",
+    "assignments/a5-mini-tasks.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Пишут всё сразу и запускают в конце",
+      "fix": "Запускайте после каждого шага."
+    },
+    {
+      "mistake": "Забывают EOFError в цикле чтения",
+      "fix": "Перехватывайте конец ввода."
+    },
+    {
+      "mistake": "Длинная цепочка if-elif для команд",
+      "fix": "Словарь «имя → функция»."
+    },
+    {
+      "mistake": "Всё хранят в глобальных переменных",
+      "fix": "Передавайте данные аргументами, где можно."
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "id": "a3-group",
+  "type": "function",
+  "title": "Группировка расходов",
+  "statement": "Напишите `group_by_category(expenses)`: по списку словарей `{\"amount\", \"category\"}` верните словарь «категория → сумма», суммы округлены до 2 знаков.",
+  "goal": "Группировка расходов",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Нужен словарь «категория → сумма».",
+    "Для каждой траты прибавьте сумму к категории.",
+    "Метод get с нулём даёт начальное значение.",
+    "Сумма дробных трат может иметь много знаков после запятой.",
+    "Округлите итоговые суммы до двух знаков."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "group_by_category",
+    "cases": [
+      {
+        "args": [
+          [
+            {
+              "amount": 10,
+              "category": "food"
+            },
+            {
+              "amount": 5.5,
+              "category": "food"
+            },
+            {
+              "amount": 30,
+              "category": "taxi"
+            }
+          ]
+        ],
+        "id": "v1",
+        "expected": {
+          "food": 15.5,
+          "taxi": 30
+        }
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": {}
+      },
+      {
+        "args": [
+          [
+            {
+              "amount": 1.234,
+              "category": "x"
+            },
+            {
+              "amount": 2.345,
+              "category": "x"
+            }
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": {
+          "x": 3.58
+        }
+      },
+      {
+        "args": [
+          [
+            {
+              "amount": 1,
+              "category": "a"
+            },
+            {
+              "amount": 2,
+              "category": "b"
+            }
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": {
+          "a": 1,
+          "b": 2
+        }
+      }
+    ]
+  },
+  "solution": "def group_by_category(expenses):\n    totals = {}\n    for item in expenses:\n        totals[item[\"category\"]] = totals.get(item[\"category\"], 0) + item[\"amount\"]\n    return {category: round(total, 2) for category, total in totals.items()}\n",
+  "explanation": "Накопление по ключу через get(ключ, 0) — стандартный приём группировки.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def group_by_category(expenses):\n    totals = {}\n    for item in expenses:\n        totals[item[\"category\"]] = totals.get(item[\"category\"], 0) + item[\"amount\"]\n    return totals\n",
+      "why": "Суммы не округлены."
+    },
+    {
+      "code": "def group_by_category(expenses):\n    return {item[\"category\"]: item[\"amount\"] for item in expenses}\n",
+      "why": "Суммы одной категории не складываются."
+    }
+  ]
+}

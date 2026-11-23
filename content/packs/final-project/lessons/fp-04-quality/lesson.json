@@ -1,0 +1,45 @@
+{
+  "id": "fp-04-quality",
+  "title": "Качество: тесты и отладка",
+  "goal": "Проверять функции проекта тестами, искать и закрывать ошибки.",
+  "skills": [
+    "final.testing",
+    "final.debugging",
+    "final.regression"
+  ],
+  "prerequisites": [
+    "fp-03-implement"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-table.json",
+    "assignments/a2-share.json",
+    "assignments/a3-tests-amount.json",
+    "assignments/a4-parse-amount.json",
+    "assignments/a5-fix-shares.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Проверяют только «хороший» ввод",
+      "fix": "Добавляйте ноль, минус, пусто и текст."
+    },
+    {
+      "mistake": "Исправляют, не воспроизведя ошибку",
+      "fix": "Сначала самый короткий пример, который падает."
+    },
+    {
+      "mistake": "После исправления не добавляют тест",
+      "fix": "Регрессионный тест не даст ошибке вернуться."
+    },
+    {
+      "mistake": "Путают // и /",
+      "fix": "// отбрасывает дробную часть."
+    }
+  ]
+}

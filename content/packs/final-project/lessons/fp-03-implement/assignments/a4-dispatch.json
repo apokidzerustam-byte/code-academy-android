@@ -1,0 +1,92 @@
+{
+  "id": "a4-dispatch",
+  "type": "function",
+  "title": "Диспетчер команд",
+  "statement": "Напишите `dispatch(line)`: команды `upper <текст>` — вернуть текст в верхнем регистре; `len <текст>` — вернуть длину текста (число, преобразованное в строку); `rev <текст>` — вернуть текст задом наперёд. Для пустой строки верните `\"\"`, для неизвестной команды — `\"Неизвестная команда: <команда>\"`. Текст — всё, что после команды (слова склеиваются одним пробелом).",
+  "goal": "Диспетчер команд",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Разберите строку на команду и текст.",
+    "Для пустой строки — сразу пустой ответ.",
+    "Сопоставьте имя команды с действием.",
+    "Длину превратите в строку.",
+    "Для неизвестной команды — сообщение с её названием."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "dispatch",
+    "cases": [
+      {
+        "args": [
+          "upper hello world"
+        ],
+        "id": "v1",
+        "expected": "HELLO WORLD"
+      },
+      {
+        "args": [
+          "len abc"
+        ],
+        "id": "v2",
+        "expected": "3"
+      },
+      {
+        "args": [
+          "rev привет"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "тевирп"
+      },
+      {
+        "args": [
+          ""
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": ""
+      },
+      {
+        "args": [
+          "jump"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": "Неизвестная команда: jump"
+      },
+      {
+        "args": [
+          "len   a    b "
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": "3"
+      },
+      {
+        "args": [
+          "upper"
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": ""
+      }
+    ]
+  },
+  "solution": "def dispatch(line):\n    parts = line.split()\n    if not parts:\n        return \"\"\n    command, text = parts[0], \" \".join(parts[1:])\n    actions = {\"upper\": lambda s: s.upper(), \"len\": lambda s: str(len(s)), \"rev\": lambda s: s[::-1]}\n    handler = actions.get(command)\n    return handler(text) if handler else f\"Неизвестная команда: {command}\"\n",
+  "explanation": "Диспетчер связывает команду с функцией; результат всегда строка — единообразие упрощает проверку.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def dispatch(line):\n    parts = line.split()\n    command, text = parts[0], \" \".join(parts[1:])\n    if command == \"upper\":\n        return text.upper()\n    if command == \"len\":\n        return str(len(text))\n    if command == \"rev\":\n        return text[::-1]\n    return f\"Неизвестная команда: {command}\"\n",
+      "why": "Пустая строка приводит к ошибке."
+    },
+    {
+      "code": "def dispatch(line):\n    parts = line.split()\n    if not parts:\n        return \"\"\n    command, text = parts[0], \" \".join(parts[1:])\n    if command == \"upper\":\n        return text.upper()\n    if command == \"len\":\n        return len(text)\n    if command == \"rev\":\n        return text[::-1]\n    return f\"Неизвестная команда: {command}\"\n",
+      "why": "Длина возвращается числом, а не строкой."
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "id": "a5-fix-shares",
+  "type": "fix",
+  "title": "Отчёт с долями",
+  "statement": "Исправьте программу. Ввод — строки `сумма категория`, до пустой строки. Вывод — по строке на категорию: `категория: сумма (доля%)`, где доля — процент от общей суммы с одним знаком после запятой, а порядок — по убыванию суммы, при равенстве по алфавиту. Если данных нет — `Пусто`.",
+  "goal": "Отчёт с долями",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "totals = {}\nwhile True:\n    line = input().strip()\n    if not line:\n        break\n    amount, category = line.split()\n    totals[category] = totals.get(category, 0) + float(amount)\nif not totals:\n    print(\"Пусто\")\nelse:\n    all_sum = sum(totals.values())\n    for category, amount in sorted(totals.items(), key=lambda p: (p[1], p[0])):\n        print(f\"{category}: {round(amount, 2)} ({round(amount // all_sum * 100, 1)}%)\")\n",
+  "hints": [
+    "Запустите на примере и сравните вывод с условием.",
+    "Сначала посмотрите на порядок категорий.",
+    "Сортировка должна идти по убыванию суммы.",
+    "Доля — обычное деление, умноженное на сто.",
+    "Пустые данные обрабатываются отдельной веткой."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "10 food\n30 taxi\n10 tea\n\n",
+        "expected_stdout": "taxi: 30.0 (60.0%)\nfood: 10.0 (20.0%)\ntea: 10.0 (20.0%)\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "\n",
+        "expected_stdout": "Пусто\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "5 a\n5 b\n\n",
+        "expected_stdout": "a: 5.0 (50.0%)\nb: 5.0 (50.0%)\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "1 x\n2 x\n1 y\n\n",
+        "expected_stdout": "x: 3.0 (75.0%)\ny: 1.0 (25.0%)\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "totals = {}\nwhile True:\n    line = input().strip()\n    if not line:\n        break\n    amount, category = line.split()\n    totals[category] = totals.get(category, 0) + float(amount)\nif not totals:\n    print(\"Пусто\")\nelse:\n    all_sum = sum(totals.values())\n    for category, amount in sorted(totals.items(), key=lambda p: (-p[1], p[0])):\n        print(f\"{category}: {round(amount, 2)} ({round(amount / all_sum * 100, 1)}%)\")\n",
+  "explanation": "Ошибки в заготовке: сортировка по возрастанию и целочисленное деление; каждая видна на коротком примере.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "totals = {}\nwhile True:\n    line = input().strip()\n    if not line:\n        break\n    amount, category = line.split()\n    totals[category] = totals.get(category, 0) + float(amount)\nall_sum = sum(totals.values())\nfor category, amount in sorted(totals.items(), key=lambda p: (-p[1], p[0])):\n    print(f\"{category}: {round(amount, 2)} ({round(amount / all_sum * 100, 1)}%)\")\n",
+      "why": "Для пустых данных нужно «Пусто» (иначе деление на ноль не случится, но вывод пуст)."
+    }
+  ]
+}
