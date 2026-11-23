@@ -1,0 +1,75 @@
+{
+  "id": "a5-guess",
+  "type": "write",
+  "title": "Угадай число стратегией пополам",
+  "statement": "Загаданное число `secret` — от 1 до 100 (вводится одной строкой). Игрок угадывает так: `low = 1`, `high = 100`, каждый раз называет `guess = (low + high) // 2`. Если `guess` меньше `secret`, то `low = guess + 1`; если больше — `high = guess - 1`; если равно — число угадано. Выведите, **за сколько попыток** оно угадано.\n\nВвод:\n```\n50\n```\nВывод:\n```\n1\n```",
+  "goal": "Угадай число стратегией пополам",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "",
+  "hints": [
+    "Это бинарный поиск по числам от 1 до 100: список строить не нужно, достаточно границ.",
+    "Заведите low = 1, high = 100 и счётчик попыток tries = 0.",
+    "В цикле: guess = (low + high) // 2, tries += 1, затем сравнение с secret.",
+    "Если угадали — выходите из цикла; если guess меньше secret — low = guess + 1, иначе high = guess - 1.",
+    "После цикла print(tries). Для 50 получится 1, для 1 — 6."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "50\n",
+        "expected_stdout": "1\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "1\n",
+        "expected_stdout": "6\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "100\n",
+        "expected_stdout": "7\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "37\n",
+        "expected_stdout": "3\n",
+        "hidden": true
+      },
+      {
+        "id": "h5",
+        "stdin": "75\n",
+        "expected_stdout": "2\n",
+        "hidden": true
+      },
+      {
+        "id": "h6",
+        "stdin": "99\n",
+        "expected_stdout": "6\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "secret = int(input())\nlow, high = 1, 100\ntries = 0\nwhile True:\n    guess = (low + high) // 2\n    tries += 1\n    if guess == secret:\n        break\n    if guess < secret:\n        low = guess + 1\n    else:\n        high = guess - 1\nprint(tries)\n",
+  "explanation": "Игрок каждый раз делит область пополам, поэтому любое число от 1 до 100 угадывается не более чем за 7 попыток.",
+  "criteria": [
+    "Число, названное с первой попытки, даёт 1.",
+    "Не больше 7 попыток для любого числа."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "secret = int(input())\nprint(secret)\n",
+      "why": "Это линейная стратегия «1, 2, 3…»: число попыток равно самому числу."
+    },
+    {
+      "code": "secret = int(input())\nlow, high = 1, 100\ntries = 0\nwhile low <= high:\n    guess = (low + high) // 2\n    if guess == secret:\n        break\n    tries += 1\n    if guess < secret:\n        low = guess + 1\n    else:\n        high = guess - 1\nprint(tries)\n",
+      "why": "Последняя, удачная попытка не посчитана."
+    }
+  ]
+}

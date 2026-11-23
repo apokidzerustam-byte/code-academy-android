@@ -1,0 +1,97 @@
+{
+  "id": "a3-price",
+  "type": "function",
+  "title": "Цена с копейками",
+  "statement": "Напишите функцию `format_price(rubles, kopeks=0, currency=\"₽\")`, которая возвращает строку вида `150.00 ₽` — рубли, точка, копейки **двумя цифрами**, пробел и валюта.\n\nПримеры: `format_price(150)` → `\"150.00 ₽\"`, `format_price(99, 5)` → `\"99.05 ₽\"`, `format_price(10, currency=\"$\")` → `\"10.00 $\"`.",
+  "goal": "Цена с копейками",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Результат — строка, значит, удобно использовать f-строку.",
+    "Три параметра: рубли, копейки (по умолчанию 0) и валюта (по умолчанию ₽).",
+    "Копейки всегда выводятся двумя цифрами: 5 → 05.",
+    "В f-строке формат «две цифры с нулём» записывается как {kopeks:02d}.",
+    "return f\"{rubles}.{kopeks:02d} {currency}\"."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "format_price",
+    "cases": [
+      {
+        "args": [
+          150
+        ],
+        "id": "v1",
+        "expected": "150.00 ₽"
+      },
+      {
+        "args": [
+          99,
+          5
+        ],
+        "id": "v2",
+        "expected": "99.05 ₽"
+      },
+      {
+        "args": [
+          10
+        ],
+        "kwargs": {
+          "currency": "$"
+        },
+        "id": "h3",
+        "hidden": true,
+        "expected": "10.00 $"
+      },
+      {
+        "args": [
+          7,
+          50
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "7.50 ₽"
+      },
+      {
+        "args": [
+          1
+        ],
+        "kwargs": {
+          "kopeks": 9,
+          "currency": "€"
+        },
+        "id": "h5",
+        "hidden": true,
+        "expected": "1.09 €"
+      },
+      {
+        "args": [
+          0
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": "0.00 ₽"
+      }
+    ]
+  },
+  "solution": "def format_price(rubles, kopeks=0, currency=\"₽\"):\n    return f\"{rubles}.{kopeks:02d} {currency}\"\n",
+  "explanation": "Формат :02d дополняет число слева нулями до двух знаков. Значения по умолчанию позволяют вызывать функцию с одним, двумя или тремя аргументами.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def format_price(rubles, kopeks=0, currency=\"₽\"):\n    return f\"{rubles}.{kopeks} {currency}\"\n",
+      "why": "Копейки не дополнены нулём: получится 99.5 вместо 99.05."
+    },
+    {
+      "code": "def format_price(rubles, kopeks=0, currency=\"₽\"):\n    return f\"{rubles},{kopeks:02d} {currency}\"\n",
+      "why": "Вместо точки поставлена запятая."
+    },
+    {
+      "code": "def format_price(rubles, kopeks=0, currency=\"₽\"):\n    return f\"{rubles}.{kopeks:02d}\"\n",
+      "why": "Не добавлена валюта."
+    }
+  ]
+}

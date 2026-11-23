@@ -1,0 +1,43 @@
+{
+  "id": "alg-01-big-o",
+  "title": "Сложность алгоритмов: Big O",
+  "goal": "Оценивать скорость алгоритма числом шагов и различать постоянный, логарифмический, линейный и квадратичный рост.",
+  "skills": [
+    "algo.bigo",
+    "algo.bigo.classes"
+  ],
+  "prerequisites": [
+    "py-10-lists"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-pairs.json",
+    "assignments/a2-halvings.json",
+    "assignments/a3-classify.json",
+    "assignments/a4-count-steps.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Считают скорость алгоритма в секундах на своём телефоне",
+      "fix": "Сравнивайте число шагов в зависимости от n — оно не зависит от устройства."
+    },
+    {
+      "mistake": "Складывают шаги вложенных циклов вместо умножения",
+      "fix": "Цикл в цикле даёт n · n; два цикла подряд — n + n."
+    },
+    {
+      "mistake": "Оставляют в Big O константы: O(2n)",
+      "fix": "Константы отбрасываются: O(2n) — это O(n)."
+    },
+    {
+      "mistake": "Путают O(log n) и O(n)",
+      "fix": "Логарифм получается, когда данные на каждом шаге делятся пополам, а не просматриваются целиком."
+    }
+  ]
+}

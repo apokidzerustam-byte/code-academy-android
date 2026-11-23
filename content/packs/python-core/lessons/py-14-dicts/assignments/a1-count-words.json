@@ -1,0 +1,103 @@
+{
+  "id": "a1-count-words",
+  "type": "function",
+  "title": "Частота слов",
+  "statement": "Напишите функцию `count_words(text)`, которая возвращает словарь: слово → сколько раз оно встретилось. Слова разделены пробелами; регистр не учитывается (`Да` и `да` — одно слово).\n\nПример: `count_words(\"Да нет да\")` → `{\"да\": 2, \"нет\": 1}`.",
+  "goal": "Частота слов",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Для каждого слова нужен свой счётчик — словарь подходит идеально.",
+    "Разбейте текст на слова методом split, предварительно приведя к нижнему регистру.",
+    "Для каждого слова увеличивайте значение: если слова ещё нет, начните с нуля.",
+    "counts.get(word, 0) вернёт 0 для нового слова.",
+    "counts[word] = counts.get(word, 0) + 1."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "count_words",
+    "cases": [
+      {
+        "args": [
+          "Да нет да"
+        ],
+        "id": "v1",
+        "expected": {
+          "да": 2,
+          "нет": 1
+        }
+      },
+      {
+        "args": [
+          ""
+        ],
+        "id": "v2",
+        "expected": {}
+      },
+      {
+        "args": [
+          "а а а"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": {
+          "а": 3
+        }
+      },
+      {
+        "args": [
+          "Кот кот КОТ пёс"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": {
+          "кот": 3,
+          "пёс": 1
+        }
+      },
+      {
+        "args": [
+          "один два три"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": {
+          "один": 1,
+          "два": 1,
+          "три": 1
+        }
+      },
+      {
+        "args": [
+          "  много   пробелов  "
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": {
+          "много": 1,
+          "пробелов": 1
+        }
+      }
+    ]
+  },
+  "solution": "def count_words(text):\n    counts = {}\n    for word in text.lower().split():\n        counts[word] = counts.get(word, 0) + 1\n    return counts\n",
+  "explanation": "Метод get с нулём по умолчанию избавляет от проверки «есть ли ключ». lower() делает подсчёт нечувствительным к регистру.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def count_words(text):\n    counts = {}\n    for word in text.split():\n        counts[word] = counts.get(word, 0) + 1\n    return counts\n",
+      "why": "Регистр не учтён: «Да» и «да» посчитаны как разные слова."
+    },
+    {
+      "code": "def count_words(text):\n    counts = {}\n    for word in text.lower().split():\n        counts[word] = 1\n    return counts\n",
+      "why": "Счётчик всегда равен 1: повторы не накапливаются."
+    },
+    {
+      "code": "def count_words(text):\n    return {w: 1 for w in set(text.lower().split())}\n",
+      "why": "Подсчёта нет: у каждого слова значение 1."
+    }
+  ]
+}

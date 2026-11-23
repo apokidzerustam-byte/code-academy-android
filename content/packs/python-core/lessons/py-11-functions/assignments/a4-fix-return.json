@@ -1,0 +1,69 @@
+{
+  "id": "a4-fix-return",
+  "type": "fix",
+  "title": "Исправь функцию",
+  "statement": "Функция `double(x)` должна **возвращать** удвоенное число, но она только печатает его, и поэтому `double(4) + 1` вызывает ошибку. Исправьте функцию.",
+  "goal": "Исправь функцию",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def double(x):\n    print(x * 2)\n",
+  "hints": [
+    "Что делает print и что делает return?",
+    "Результат нужно отдать вызывающему коду.",
+    "Замените print на return.",
+    "После return скобки не нужны.",
+    "return x * 2."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "double",
+    "cases": [
+      {
+        "args": [
+          4
+        ],
+        "id": "v1",
+        "expected": 8
+      },
+      {
+        "args": [
+          -5
+        ],
+        "id": "v2",
+        "expected": -10
+      },
+      {
+        "args": [
+          0
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          2.5
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 5.0
+      }
+    ]
+  },
+  "solution": "def double(x):\n    return x * 2\n",
+  "explanation": "print лишь показывает значение, а функция при этом возвращает None. return отдаёт значение, и с ним можно работать дальше.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def double(x):\n    return x + 1\n",
+      "why": "Прибавление единицы вместо удвоения."
+    },
+    {
+      "code": "def double(x):\n    print(x * 2)\n",
+      "why": "Прежняя ошибка: печать вместо return."
+    }
+  ]
+}

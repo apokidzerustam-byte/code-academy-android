@@ -1,0 +1,126 @@
+{
+  "id": "a1-linear",
+  "type": "function",
+  "title": "Линейный поиск",
+  "statement": "Напишите функцию `linear_search(items, target)`: она возвращает индекс **первого** элемента, равного `target`, или `-1`, если такого нет. Использовать `index` и `in` нельзя — пишите цикл сами.\n\nПримеры: `linear_search([4, 8, 8, 1], 8)` → `1`, `linear_search([4, 8], 5)` → `-1`.",
+  "goal": "Линейный поиск",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Нужно просмотреть список по порядку, от первого элемента к последнему.",
+    "Цикл по индексам: for i in range(len(items)).",
+    "Как только items[i] равен target — сразу возвращайте i, дальше смотреть не нужно.",
+    "Если цикл закончился ничем, верните -1 уже после цикла, а не внутри него.",
+    "for i in range(len(items)): if items[i] == target: return i; после цикла: return -1."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "linear_search",
+    "cases": [
+      {
+        "args": [
+          [
+            4,
+            8,
+            8,
+            1
+          ],
+          8
+        ],
+        "id": "v1",
+        "expected": 1
+      },
+      {
+        "args": [
+          [
+            4,
+            8
+          ],
+          5
+        ],
+        "id": "v2",
+        "expected": -1
+      },
+      {
+        "args": [
+          [],
+          3
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": -1
+      },
+      {
+        "args": [
+          [
+            7
+          ],
+          7
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          [
+            "а",
+            "б",
+            "в"
+          ],
+          "в"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 2
+      },
+      {
+        "args": [
+          [
+            1,
+            2,
+            3,
+            2
+          ],
+          2
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": 1
+      },
+      {
+        "args": [
+          [
+            5,
+            5,
+            5
+          ],
+          5
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": 0
+      }
+    ]
+  },
+  "solution": "def linear_search(items, target):\n    for i in range(len(items)):\n        if items[i] == target:\n            return i\n    return -1\n",
+  "explanation": "Возврат из цикла происходит при первом совпадении, поэтому найденный индекс — самый левый. Минус один возвращаем после цикла, когда стало ясно, что элемента нет.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def linear_search(items, target):\n    result = -1\n    for i in range(len(items)):\n        if items[i] == target:\n            result = i\n    return result\n",
+      "why": "Возвращается индекс последнего совпадения, а не первого."
+    },
+    {
+      "code": "def linear_search(items, target):\n    for i in range(len(items)):\n        if items[i] == target:\n            return i\n",
+      "why": "Если элемента нет, функция возвращает None вместо -1."
+    },
+    {
+      "code": "def linear_search(items, target):\n    for i in range(1, len(items)):\n        if items[i] == target:\n            return i\n    return -1\n",
+      "why": "Первый элемент (индекс 0) не проверяется."
+    }
+  ]
+}

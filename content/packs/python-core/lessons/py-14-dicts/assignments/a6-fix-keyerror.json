@@ -1,0 +1,79 @@
+{
+  "id": "a6-fix-keyerror",
+  "type": "fix",
+  "title": "Исправь KeyError",
+  "statement": "Функция `get_age(people, name)` должна возвращать возраст человека или `-1`, если его нет в словаре `people`. Сейчас для отсутствующего имени она падает с `KeyError`. Исправьте.",
+  "goal": "Исправь KeyError",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def get_age(people, name):\n    return people[name]\n",
+  "hints": [
+    "Ошибка KeyError возникает, когда ключа нет.",
+    "Нужно обработать случай «ключа нет».",
+    "У словаря есть метод, который не падает.",
+    "get принимает вторым аргументом значение по умолчанию.",
+    "return people.get(name, -1)."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "get_age",
+    "cases": [
+      {
+        "args": [
+          {
+            "Аня": 25
+          },
+          "Аня"
+        ],
+        "id": "v1",
+        "expected": 25
+      },
+      {
+        "args": [
+          {
+            "Аня": 25
+          },
+          "Борис"
+        ],
+        "id": "v2",
+        "expected": -1
+      },
+      {
+        "args": [
+          {},
+          "x"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": -1
+      },
+      {
+        "args": [
+          {
+            "а": 0
+          },
+          "а"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 0
+      }
+    ]
+  },
+  "solution": "def get_age(people, name):\n    return people.get(name, -1)\n",
+  "explanation": "get — безопасный способ чтения; обратите внимание, что возраст 0 при этом считается нормальным значением, а не отсутствием.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def get_age(people, name):\n    return people[name]\n",
+      "why": "KeyError для отсутствующего имени."
+    },
+    {
+      "code": "def get_age(people, name):\n    return people.get(name)\n",
+      "why": "Вместо -1 возвращается None."
+    }
+  ]
+}

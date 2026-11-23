@@ -1,0 +1,41 @@
+{
+  "id": "a6-none",
+  "type": "predict",
+  "title": "Забытый return",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Забытый return",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "def add(a, b):\n    result = a + b\n\nx = add(2, 3)\nprint(x)\nprint(add(1, 1) is None)\n\ndef twice(n):\n    return n * 2\n\nprint(twice(twice(3)))\n",
+  "hints": [
+    "Выполните программу сверху вниз.",
+    "Что возвращает функция без return?",
+    "Функция add ничего не возвращает — значит, None.",
+    "Во втором вызове проверка is None даёт True.",
+    "Последняя строка: twice(3) = 6, затем twice(6) = 12."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "None\nTrue\n12\n"
+  },
+  "solution": "None\nTrue\n12\n",
+  "explanation": "Без return функция возвращает None, поэтому печатается None, а проверка is None истинна. Вложенные вызовы вычисляются изнутри наружу: 3 → 6 → 12.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "5\nFalse\n12\n",
+      "answer": "5\nFalse\n12\n",
+      "why": "В add нет return, поэтому x равно None, а не 5."
+    },
+    {
+      "code": "None\nTrue\n6\n",
+      "answer": "None\nTrue\n6\n",
+      "why": "twice(twice(3)): внутренний вызов даёт 6, внешний — 12."
+    }
+  ]
+}

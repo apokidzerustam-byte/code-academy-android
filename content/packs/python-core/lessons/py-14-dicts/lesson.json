@@ -1,0 +1,49 @@
+{
+  "id": "py-14-dicts",
+  "title": "Словари",
+  "goal": "Хранить и менять данные в словарях, перебирать их и считать частоты.",
+  "skills": [
+    "python.dicts",
+    "python.dicts.get",
+    "python.dicts.iterate",
+    "python.dicts.counting"
+  ],
+  "prerequisites": [
+    "py-13-collections"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-count-words.json",
+    "assignments/a2-invert.json",
+    "assignments/a3-best.json",
+    "assignments/a4-prices.json",
+    "assignments/a5-dict.json",
+    "assignments/a6-fix-keyerror.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Чтение по несуществующему ключу: d['x']",
+      "fix": "Используйте d.get('x', значение_по_умолчанию) или проверьте 'x' in d.",
+      "errorType": "KeyError"
+    },
+    {
+      "mistake": "Список как ключ словаря",
+      "fix": "Ключ должен быть неизменяемым: используйте кортеж.",
+      "errorType": "TypeError"
+    },
+    {
+      "mistake": "Меняют словарь во время перебора",
+      "fix": "Перебирайте копию: for k in list(d)."
+    },
+    {
+      "mistake": "Пустой словарь создают set()",
+      "fix": "Пустой словарь — {}."
+    }
+  ]
+}

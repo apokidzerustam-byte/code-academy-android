@@ -1,0 +1,93 @@
+{
+  "id": "a1-power",
+  "type": "function",
+  "title": "Степень со значением по умолчанию",
+  "statement": "Напишите функцию `power(base, exponent=2)`, которая возводит `base` в степень `exponent`. Если степень не указана, берётся 2.\n\nПримеры: `power(5)` → `25`, `power(2, 10)` → `1024`.",
+  "goal": "Степень со значением по умолчанию",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Нужен параметр, у которого есть значение, если его не указали.",
+    "В def значение по умолчанию записывают через =.",
+    "Обязательный параметр base — слева, необязательный exponent — справа.",
+    "Возведение в степень в Python — оператор **.",
+    "def power(base, exponent=2): return base ** exponent."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "power",
+    "cases": [
+      {
+        "args": [
+          5
+        ],
+        "id": "v1",
+        "expected": 25
+      },
+      {
+        "args": [
+          2,
+          10
+        ],
+        "id": "v2",
+        "expected": 1024
+      },
+      {
+        "args": [
+          3,
+          0
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 1
+      },
+      {
+        "args": [
+          10
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 100
+      },
+      {
+        "args": [
+          2,
+          3
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 8
+      },
+      {
+        "args": [],
+        "kwargs": {
+          "base": 4,
+          "exponent": 3
+        },
+        "id": "h6",
+        "hidden": true,
+        "expected": 64
+      }
+    ]
+  },
+  "solution": "def power(base, exponent=2):\n    return base ** exponent\n",
+  "explanation": "exponent=2 используется, если при вызове второй аргумент не передан. Оператор ** возводит в степень.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def power(base, exponent):\n    return base ** exponent\n",
+      "why": "Нет значения по умолчанию: вызов power(5) вызывает ошибку."
+    },
+    {
+      "code": "def power(base, exponent=2):\n    return base * exponent\n",
+      "why": "Умножение вместо возведения в степень."
+    },
+    {
+      "code": "def power(base, exponent=1):\n    return base ** exponent\n",
+      "why": "По умолчанию должна быть степень 2, а не 1."
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "id": "alg-02-search",
+  "title": "Поиск: линейный и бинарный",
+  "goal": "Писать линейный и бинарный поиск, считать число шагов и понимать, когда бинарный поиск применим.",
+  "skills": [
+    "algo.search.linear",
+    "algo.search.binary",
+    "algo.search.bisect"
+  ],
+  "prerequisites": [
+    "alg-01-big-o"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-linear.json",
+    "assignments/a2-binary.json",
+    "assignments/a3-steps.json",
+    "assignments/a4-trace.json",
+    "assignments/a5-guess.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Бинарный поиск по неотсортированному списку",
+      "fix": "Сначала отсортируйте: sorted(items). Иначе результат неверный."
+    },
+    {
+      "mistake": "Условие цикла while low < high",
+      "fix": "Нужно low <= high, иначе пропускается последняя оставшаяся клетка."
+    },
+    {
+      "mistake": "low = mid или high = mid без ±1",
+      "fix": "Середина уже проверена: low = mid + 1, high = mid - 1 — иначе возможен бесконечный цикл."
+    },
+    {
+      "mistake": "Функция ничего не возвращает, если элемента нет",
+      "fix": "После цикла нужно явно вернуть -1."
+    }
+  ]
+}

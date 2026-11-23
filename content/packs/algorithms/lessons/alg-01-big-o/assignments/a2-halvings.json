@@ -1,0 +1,105 @@
+{
+  "id": "a2-halvings",
+  "type": "complete",
+  "title": "Сколько раз можно поделить пополам",
+  "statement": "Напишите функцию `halvings(n)`, которая возвращает, сколько раз можно разделить `n` пополам (целочисленно, `//`), пока не получится `1`. Для `n = 1` ответ `0`.\n\nПримеры: `halvings(8)` → `3`, `halvings(10)` → `3`, `halvings(1000)` → `9`.",
+  "goal": "Сколько раз можно поделить пополам",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def halvings(n):\n    # посчитайте количество делений пополам\n    pass\n",
+  "hints": [
+    "Подумайте, сколько раз вы делили число в уроке, пока не осталась единица.",
+    "Нужен цикл, который повторяется, пока число больше единицы.",
+    "На каждом шаге число делится пополам целочисленно, а счётчик увеличивается.",
+    "Условие цикла: n > 1. Для n = 1 цикл не выполняется — ответ 0.",
+    "steps = 0; while n > 1: n //= 2; steps += 1; return steps."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "halvings",
+    "cases": [
+      {
+        "args": [
+          8
+        ],
+        "id": "v1",
+        "expected": 3
+      },
+      {
+        "args": [
+          10
+        ],
+        "id": "v2",
+        "expected": 3
+      },
+      {
+        "args": [
+          1
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          2
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 1
+      },
+      {
+        "args": [
+          1000
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 9
+      },
+      {
+        "args": [
+          1000000
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": 19
+      },
+      {
+        "args": [
+          1023
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": 9
+      },
+      {
+        "args": [
+          1024
+        ],
+        "id": "h8",
+        "hidden": true,
+        "expected": 10
+      }
+    ]
+  },
+  "solution": "def halvings(n):\n    steps = 0\n    while n > 1:\n        n //= 2\n        steps += 1\n    return steps\n",
+  "explanation": "Каждое деление уменьшает задачу вдвое, поэтому шагов около log₂(n): для миллиона их всего 19.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def halvings(n):\n    steps = 0\n    while n > 0:\n        n //= 2\n        steps += 1\n    return steps\n",
+      "why": "Цикл идёт до нуля, а не до единицы: ответ на единицу больше."
+    },
+    {
+      "code": "def halvings(n):\n    return n // 2\n",
+      "why": "Возвращается половина числа, а не количество делений."
+    },
+    {
+      "code": "def halvings(n):\n    steps = 0\n    while n > 1:\n        n -= 2\n        steps += 1\n    return steps\n",
+      "why": "Вычитание вместо деления: рост линейный, а не логарифмический."
+    }
+  ]
+}

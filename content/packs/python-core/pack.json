@@ -1,0 +1,35 @@
+{
+  "id": "python-core",
+  "version": "0.1.0",
+  "stage": 3,
+  "title": "Python: функции, коллекции, файлы, ООП",
+  "description": "Функции, кортежи и множества, словари, исключения, файлы, JSON, модули, классы, асинхронность и HTTP — продолжение курса Python.",
+  "language": "python",
+  "minAppVersion": 1,
+  "requiresPacks": [
+    "python-basics"
+  ],
+  "lessons": [
+    "py-11-functions",
+    "py-12-functions-advanced",
+    "py-13-collections",
+    "py-14-dicts"
+  ],
+  "skills": {
+    "python.functions": "Функции: def и вызов",
+    "python.functions.params": "Параметры и аргументы",
+    "python.functions.return": "Возврат значения: return",
+    "python.functions.defaults": "Параметры по умолчанию",
+    "python.functions.keyword": "Именованные аргументы",
+    "python.functions.scope": "Область видимости",
+    "python.functions.multi-return": "Несколько возвращаемых значений",
+    "python.slices": "Срезы",
+    "python.tuples": "Кортежи",
+    "python.sets": "Множества",
+    "python.iteration.tools": "enumerate и zip",
+    "python.dicts": "Словари",
+    "python.dicts.get": "Метод get и KeyError",
+    "python.dicts.iterate": "Перебор словаря: items",
+    "python.dicts.counting": "Подсчёт частот"
+  }
+}

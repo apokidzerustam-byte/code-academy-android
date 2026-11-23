@@ -1,0 +1,123 @@
+{
+  "id": "a3-rotate",
+  "type": "function",
+  "title": "Сдвиг списка",
+  "statement": "Напишите функцию `rotate_left(items, k)`, которая возвращает новый список, сдвинутый влево на `k` позиций (`0 <= k <= len(items)`): первые `k` элементов уходят в конец.\n\nПример: `rotate_left([1, 2, 3, 4, 5], 2)` → `[3, 4, 5, 1, 2]`.",
+  "goal": "Сдвиг списка",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Список можно разрезать на две части и склеить в другом порядке.",
+    "Первые k элементов — срез items[:k], остальные — items[k:].",
+    "Сдвиг влево: сначала «остальные», затем «первые k».",
+    "Списки склеиваются оператором +.",
+    "return items[k:] + items[:k]."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "rotate_left",
+    "cases": [
+      {
+        "args": [
+          [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          2
+        ],
+        "id": "v1",
+        "expected": [
+          3,
+          4,
+          5,
+          1,
+          2
+        ]
+      },
+      {
+        "args": [
+          [
+            1,
+            2,
+            3
+          ],
+          0
+        ],
+        "id": "v2",
+        "expected": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "args": [
+          [
+            1,
+            2,
+            3
+          ],
+          3
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "args": [
+          [],
+          0
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            "а",
+            "б",
+            "в",
+            "г"
+          ],
+          1
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          "б",
+          "в",
+          "г",
+          "а"
+        ]
+      }
+    ]
+  },
+  "solution": "def rotate_left(items, k):\n    return items[k:] + items[:k]\n",
+  "explanation": "Срез items[k:] — всё после k-го элемента, items[:k] — первые k. Склейка в обратном порядке и даёт сдвиг.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def rotate_left(items, k):\n    return items[:k] + items[k:]\n",
+      "why": "Части склеены в прежнем порядке: список не изменился."
+    },
+    {
+      "code": "def rotate_left(items, k):\n    return items[k:]\n",
+      "why": "Начало списка потеряно."
+    },
+    {
+      "code": "def rotate_left(items, k):\n    return items[-k:] + items[:-k]\n",
+      "why": "Это сдвиг вправо, а не влево (и ломается при k = 0)."
+    }
+  ]
+}

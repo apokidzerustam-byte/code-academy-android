@@ -1,0 +1,46 @@
+{
+  "id": "py-13-collections",
+  "title": "Срезы, кортежи и множества",
+  "goal": "Брать срезы, пользоваться кортежами и множествами и применять enumerate и zip.",
+  "skills": [
+    "python.slices",
+    "python.tuples",
+    "python.sets",
+    "python.iteration.tools"
+  ],
+  "prerequisites": [
+    "py-12-functions-advanced"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-unique.json",
+    "assignments/a2-common.json",
+    "assignments/a3-rotate.json",
+    "assignments/a4-slices.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Ждут, что конец среза включается",
+      "fix": "nums[1:4] берёт индексы 1, 2, 3 — конец не входит."
+    },
+    {
+      "mistake": "Пытаются изменить кортеж",
+      "fix": "Кортеж неизменяем: создайте новый кортеж или используйте список.",
+      "errorType": "TypeError"
+    },
+    {
+      "mistake": "Пустое множество записывают {}",
+      "fix": "{} — это пустой словарь; пустое множество — set()."
+    },
+    {
+      "mistake": "Рассчитывают на порядок элементов множества",
+      "fix": "Порядок не гарантирован — сортируйте: sorted(s)."
+    }
+  ]
+}

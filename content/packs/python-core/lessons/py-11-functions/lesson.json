@@ -1,0 +1,48 @@
+{
+  "id": "py-11-functions",
+  "title": "Функции",
+  "goal": "Объявлять функции с параметрами, возвращать результат через return и собирать программу из небольших функций.",
+  "skills": [
+    "python.functions",
+    "python.functions.params",
+    "python.functions.return"
+  ],
+  "prerequisites": [
+    "py-10-lists"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-square-cube.json",
+    "assignments/a2-average3.json",
+    "assignments/a3-is-even.json",
+    "assignments/a4-fix-return.json",
+    "assignments/a5-factorial.json",
+    "assignments/a6-none.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Вместо return используют print",
+      "fix": "Если результат нужен программе — return. print только показывает значение."
+    },
+    {
+      "mistake": "Вызывают функцию без скобок: greet",
+      "fix": "Вызов — это имя со скобками: greet()."
+    },
+    {
+      "mistake": "Вызывают функцию до объявления",
+      "fix": "Сначала def, потом вызов — Python читает файл сверху вниз.",
+      "errorType": "NameError"
+    },
+    {
+      "mistake": "Неверное число аргументов",
+      "fix": "Передайте столько аргументов, сколько параметров в def.",
+      "errorType": "TypeError"
+    }
+  ]
+}

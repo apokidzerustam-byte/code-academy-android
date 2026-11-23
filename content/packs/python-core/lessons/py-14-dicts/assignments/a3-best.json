@@ -1,0 +1,131 @@
+{
+  "id": "a3-best",
+  "type": "function",
+  "title": "Лучший ученик",
+  "statement": "Дан словарь `marks`: имя → список оценок. Напишите функцию `best_student(marks)`, которая возвращает имя ученика с **наибольшим средним баллом**. Ничьих в тестах нет.\n\nПример: `best_student({\"Аня\": [5, 4, 5], \"Борис\": [3, 5]})` → `\"Аня\"`.",
+  "goal": "Лучший ученик",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Нужно вычислить среднее для каждого ученика и выбрать наибольшее.",
+    "Перебирайте пары словаря через items().",
+    "Среднее — сумма оценок, делённая на их количество.",
+    "Храните имя лучшего и его среднее; обновляйте, если нашли среднее выше.",
+    "Начальное среднее поставьте меньше любого возможного, например -1."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "best_student",
+    "cases": [
+      {
+        "args": [
+          {
+            "Аня": [
+              5,
+              4,
+              5
+            ],
+            "Борис": [
+              3,
+              5
+            ]
+          }
+        ],
+        "id": "v1",
+        "expected": "Аня"
+      },
+      {
+        "args": [
+          {
+            "Вера": [
+              5
+            ]
+          }
+        ],
+        "id": "v2",
+        "expected": "Вера"
+      },
+      {
+        "args": [
+          {
+            "а": [
+              3,
+              3
+            ],
+            "б": [
+              4,
+              5,
+              5
+            ],
+            "в": [
+              5,
+              1
+            ]
+          }
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "б"
+      },
+      {
+        "args": [
+          {
+            "Аня": [
+              5,
+              5
+            ],
+            "Борис": [
+              4,
+              4,
+              4
+            ]
+          }
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "Аня"
+      },
+      {
+        "args": [
+          {
+            "x": [
+              2,
+              2,
+              2
+            ],
+            "y": [
+              1,
+              5,
+              5,
+              5
+            ]
+          }
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": "y"
+      }
+    ],
+    "tolerance": 1e-09
+  },
+  "solution": "def best_student(marks):\n    best, best_avg = None, -1\n    for name, lst in marks.items():\n        avg = sum(lst) / len(lst)\n        if avg > best_avg:\n            best, best_avg = name, avg\n    return best\n",
+  "explanation": "Количество оценок у учеников разное, поэтому сравнивать нужно средние значения, а не суммы.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def best_student(marks):\n    best, best_sum = None, -1\n    for name, lst in marks.items():\n        if sum(lst) > best_sum:\n            best, best_sum = name, sum(lst)\n    return best\n",
+      "why": "Сравниваются суммы, а не средние: у учеников разное число оценок."
+    },
+    {
+      "code": "def best_student(marks):\n    return max(marks)\n",
+      "why": "max по словарю даёт наибольшее имя, а не лучшего ученика."
+    },
+    {
+      "code": "def best_student(marks):\n    best, best_avg = None, -1\n    for name, lst in marks.items():\n        avg = sum(lst) / len(lst)\n        if avg < best_avg:\n            best, best_avg = name, avg\n    return best\n",
+      "why": "Знак сравнения перепутан и выбор никогда не происходит."
+    }
+  ]
+}

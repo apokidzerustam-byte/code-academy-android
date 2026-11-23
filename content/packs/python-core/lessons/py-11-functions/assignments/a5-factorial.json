@@ -1,0 +1,68 @@
+{
+  "id": "a5-factorial",
+  "type": "write",
+  "title": "Факториал функцией",
+  "statement": "Напишите функцию `factorial(n)`, возвращающую произведение чисел от 1 до `n` (для `0` — `1`). Прочитайте `n` и выведите `factorial(n)`.\n\nВвод:\n```\n5\n```\nВывод:\n```\n120\n```",
+  "goal": "Факториал функцией",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "",
+  "hints": [
+    "Факториал — произведение 1 · 2 · … · n.",
+    "Нужен накопитель произведения и цикл for.",
+    "Накопитель для произведения начинается с 1, а не с 0.",
+    "Цикл по range(1, n + 1), чтобы включить n. Для n = 0 цикл не выполняется — ответ 1.",
+    "result = 1; for i in range(1, n + 1): result *= i; return result."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "5\n",
+        "expected_stdout": "120\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "0\n",
+        "expected_stdout": "1\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "1\n",
+        "expected_stdout": "1\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "10\n",
+        "expected_stdout": "3628800\n",
+        "hidden": true
+      },
+      {
+        "id": "h5",
+        "stdin": "12\n",
+        "expected_stdout": "479001600\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "def factorial(n):\n    result = 1\n    for i in range(1, n + 1):\n        result *= i\n    return result\n\nprint(factorial(int(input())))\n",
+  "explanation": "Накопитель умножается на каждое число от 1 до n. Для 0 цикл пуст, и остаётся начальное значение 1 — это как раз 0! по определению.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def factorial(n):\n    result = 0\n    for i in range(1, n + 1):\n        result *= i\n    return result\n\nprint(factorial(int(input())))\n",
+      "why": "Накопитель начинается с 0: произведение всегда 0."
+    },
+    {
+      "code": "def factorial(n):\n    result = 1\n    for i in range(1, n):\n        result *= i\n    return result\n\nprint(factorial(int(input())))\n",
+      "why": "range(1, n) не доходит до n: для 5 получится 24."
+    }
+  ]
+}

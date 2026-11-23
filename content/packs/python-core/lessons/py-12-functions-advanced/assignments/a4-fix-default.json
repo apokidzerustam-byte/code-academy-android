@@ -1,0 +1,90 @@
+{
+  "id": "a4-fix-default",
+  "type": "fix",
+  "title": "Список по умолчанию",
+  "statement": "Функция `add_tag(tag, tags=...)` должна возвращать **новый** список с одной меткой, если второй аргумент не передан. Сейчас метки накапливаются между вызовами: `add_tag(\"b\")` после `add_tag(\"a\")` возвращает `['a', 'b']`. Исправьте.",
+  "goal": "Список по умолчанию",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def add_tag(tag, tags=[]):\n    tags.append(tag)\n    return tags\n",
+  "hints": [
+    "Список в значении по умолчанию создаётся один раз — при объявлении функции.",
+    "Нужно создавать новый список при каждом вызове без второго аргумента.",
+    "В качестве значения по умолчанию используйте None.",
+    "Внутри функции: если tags равен None, создайте пустой список.",
+    "if tags is None: tags = []; затем append и return."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "add_tag",
+    "cases": [
+      {
+        "args": [
+          "a"
+        ],
+        "id": "v1",
+        "expected": [
+          "a"
+        ]
+      },
+      {
+        "args": [
+          "b"
+        ],
+        "id": "v2",
+        "expected": [
+          "b"
+        ]
+      },
+      {
+        "args": [
+          "c",
+          [
+            "x"
+          ]
+        ],
+        "id": "v3",
+        "expected": [
+          "x",
+          "c"
+        ]
+      },
+      {
+        "args": [
+          "d"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          "d"
+        ]
+      },
+      {
+        "args": [
+          "e"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          "e"
+        ]
+      }
+    ]
+  },
+  "solution": "def add_tag(tag, tags=None):\n    if tags is None:\n        tags = []\n    tags.append(tag)\n    return tags\n",
+  "explanation": "None — безопасная замена: пустой список создаётся внутри функции заново при каждом вызове.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def add_tag(tag, tags=[]):\n    tags.append(tag)\n    return tags\n",
+      "why": "Список по умолчанию создаётся один раз и накапливает метки."
+    },
+    {
+      "code": "def add_tag(tag, tags=None):\n    tags = []\n    tags.append(tag)\n    return tags\n",
+      "why": "Переданный список игнорируется: вызов add_tag('c', ['x']) должен вернуть ['x', 'c']."
+    }
+  ]
+}

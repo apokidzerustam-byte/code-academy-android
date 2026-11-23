@@ -1,0 +1,113 @@
+{
+  "id": "a1-unique",
+  "type": "function",
+  "title": "Без повторов, по порядку",
+  "statement": "Напишите функцию `unique_sorted(items)`, которая возвращает список уникальных значений из `items`, отсортированный по возрастанию.\n\nПример: `unique_sorted([5, 3, 5, 4, 3])` → `[3, 4, 5]`.",
+  "goal": "Без повторов, по порядку",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Повторы убирает множество, порядок задаёт сортировка.",
+    "Превратите список во множество: set(items).",
+    "Множество нужно снова превратить в упорядоченный список.",
+    "sorted() принимает множество и возвращает список.",
+    "return sorted(set(items))."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "unique_sorted",
+    "cases": [
+      {
+        "args": [
+          [
+            5,
+            3,
+            5,
+            4,
+            3
+          ]
+        ],
+        "id": "v1",
+        "expected": [
+          3,
+          4,
+          5
+        ]
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            1,
+            1,
+            1
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          1
+        ]
+      },
+      {
+        "args": [
+          [
+            9,
+            -2,
+            0,
+            -2,
+            9
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          -2,
+          0,
+          9
+        ]
+      },
+      {
+        "args": [
+          [
+            "б",
+            "а",
+            "б"
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          "а",
+          "б"
+        ]
+      }
+    ]
+  },
+  "solution": "def unique_sorted(items):\n    return sorted(set(items))\n",
+  "explanation": "set() убирает повторы, а sorted() возвращает новый отсортированный список из элементов множества.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def unique_sorted(items):\n    return set(items)\n",
+      "why": "Возвращено множество, а не отсортированный список."
+    },
+    {
+      "code": "def unique_sorted(items):\n    return sorted(items)\n",
+      "why": "Повторы не убраны."
+    },
+    {
+      "code": "def unique_sorted(items):\n    return list(set(items))\n",
+      "why": "Порядок элементов множества не гарантирован: список не отсортирован."
+    }
+  ]
+}

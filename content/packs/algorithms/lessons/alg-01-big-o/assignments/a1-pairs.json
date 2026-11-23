@@ -1,0 +1,73 @@
+{
+  "id": "a1-pairs",
+  "type": "write",
+  "title": "Пары по двойному циклу",
+  "statement": "Прочитайте число `n`. С помощью **двойного цикла** посчитайте, сколько существует пар `(i, j)`, где `0 <= i < j < n`, и выведите это число.\n\nВвод:\n```\n4\n```\nВывод:\n```\n6\n```\nПары: (0,1) (0,2) (0,3) (1,2) (1,3) (2,3).",
+  "goal": "Пары по двойному циклу",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "",
+  "hints": [
+    "Нужно перебрать все пары чисел, поэтому понадобятся два цикла, один внутри другого.",
+    "Внешний цикл задаёт i, внутренний — j. Счётчик увеличивается на каждом шаге внутреннего цикла.",
+    "Чтобы выполнялось i < j, внутренний цикл должен начинаться с i + 1.",
+    "Внутренний цикл: for j in range(i + 1, n). Для n = 4 при i = 3 он не выполнится ни разу.",
+    "count = 0; for i in range(n): for j in range(i + 1, n): count += 1; затем print(count)."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "4\n",
+        "expected_stdout": "6\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "1\n",
+        "expected_stdout": "0\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "0\n",
+        "expected_stdout": "0\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "10\n",
+        "expected_stdout": "45\n",
+        "hidden": true
+      },
+      {
+        "id": "h5",
+        "stdin": "100\n",
+        "expected_stdout": "4950\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "n = int(input())\ncount = 0\nfor i in range(n):\n    for j in range(i + 1, n):\n        count += 1\nprint(count)\n",
+  "explanation": "Внутренний цикл начинается с i + 1, поэтому каждая пара считается ровно один раз. Всего пар n·(n−1)/2 — это по-прежнему квадратичный рост.",
+  "criteria": [
+    "Пары не повторяются.",
+    "Работает для n = 0 и n = 1."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "n = int(input())\ncount = 0\nfor i in range(n):\n    for j in range(n):\n        count += 1\nprint(count)\n",
+      "why": "Считаются все пары, а не только с i < j."
+    },
+    {
+      "code": "n = int(input())\nprint(n * n // 2)\n",
+      "why": "Формула приблизительная: не совпадает при малых n (например, n = 4)."
+    },
+    {
+      "code": "n = int(input())\ncount = 0\nfor i in range(n):\n    for j in range(i, n):\n        count += 1\nprint(count)\n",
+      "why": "Условие i < j нарушено: пары с i = j тоже посчитаны."
+    }
+  ]
+}

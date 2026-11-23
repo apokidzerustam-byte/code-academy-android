@@ -1,0 +1,90 @@
+{
+  "id": "a2-invert",
+  "type": "function",
+  "title": "Поменять ключи и значения",
+  "statement": "Напишите функцию `invert(d)`, которая возвращает новый словарь, где ключи и значения поменялись местами. Значения в `d` уникальны.\n\nПример: `invert({\"cat\": \"кот\", \"dog\": \"пёс\"})` → `{\"кот\": \"cat\", \"пёс\": \"dog\"}`.",
+  "goal": "Поменять ключи и значения",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Перебирайте пары словаря и записывайте их наоборот.",
+    "Нужен новый пустой словарь и цикл по d.items().",
+    "На каждом шаге новый ключ — это старое значение.",
+    "result[value] = key.",
+    "Не забудьте вернуть result."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "invert",
+    "cases": [
+      {
+        "args": [
+          {
+            "cat": "кот",
+            "dog": "пёс"
+          }
+        ],
+        "id": "v1",
+        "expected": {
+          "кот": "cat",
+          "пёс": "dog"
+        }
+      },
+      {
+        "args": [
+          {}
+        ],
+        "id": "v2",
+        "expected": {}
+      },
+      {
+        "args": [
+          {
+            "x": "y"
+          }
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": {
+          "y": "x"
+        }
+      },
+      {
+        "args": [
+          {
+            "к": "ключ",
+            "д": "дверь",
+            "о": "окно"
+          }
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": {
+          "ключ": "к",
+          "дверь": "д",
+          "окно": "о"
+        }
+      }
+    ]
+  },
+  "solution": "def invert(d):\n    result = {}\n    for key, value in d.items():\n        result[value] = key\n    return result\n",
+  "explanation": "Цикл по items() выдаёт пары (ключ, значение); в новый словарь записываем (значение, ключ).",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def invert(d):\n    return d\n",
+      "why": "Словарь не изменён."
+    },
+    {
+      "code": "def invert(d):\n    return list(d.values())\n",
+      "why": "Возвращён список значений, а не словарь."
+    },
+    {
+      "code": "def invert(d):\n    result = {}\n    for key, value in d.items():\n        result[key] = value\n    return result\n",
+      "why": "Ключи и значения не поменялись."
+    }
+  ]
+}

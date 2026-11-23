@@ -1,0 +1,47 @@
+{
+  "id": "py-12-functions-advanced",
+  "title": "Параметры, return и область видимости",
+  "goal": "Использовать значения по умолчанию, именованные аргументы, возвращать несколько значений и понимать локальные и глобальные переменные.",
+  "skills": [
+    "python.functions.defaults",
+    "python.functions.keyword",
+    "python.functions.scope",
+    "python.functions.multi-return"
+  ],
+  "prerequisites": [
+    "py-11-functions"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-power.json",
+    "assignments/a2-min-max.json",
+    "assignments/a3-price.json",
+    "assignments/a4-fix-default.json",
+    "assignments/a5-scope.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Список или словарь как значение по умолчанию",
+      "fix": "Используйте None и создавайте объект внутри функции."
+    },
+    {
+      "mistake": "Необязательный параметр поставили левее обязательного",
+      "fix": "Сначала обязательные, потом со значениями по умолчанию.",
+      "errorType": "SyntaxError"
+    },
+    {
+      "mistake": "Ждут, что присваивание внутри функции изменит внешнюю переменную",
+      "fix": "Верните новое значение через return и присвойте его снаружи."
+    },
+    {
+      "mistake": "Забывают нули в копейках: 99.5 вместо 99.05",
+      "fix": "Формат {kopeks:02d}."
+    }
+  ]
+}

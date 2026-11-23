@@ -1,0 +1,23 @@
+{
+  "id": "algorithms",
+  "version": "0.1.0",
+  "stage": 4,
+  "title": "Алгоритмы и структуры данных",
+  "description": "Big O, поиск, сортировка, рекурсия, стек, очередь, хеш-таблицы, деревья, графы и оптимизация — на Python, с автопроверкой.",
+  "language": "python",
+  "minAppVersion": 1,
+  "requiresPacks": [
+    "python-basics"
+  ],
+  "lessons": [
+    "alg-01-big-o",
+    "alg-02-search"
+  ],
+  "skills": {
+    "algo.bigo": "Big O: рост числа шагов",
+    "algo.bigo.classes": "Виды роста: O(1), O(log n), O(n), O(n²)",
+    "algo.search.linear": "Линейный поиск",
+    "algo.search.binary": "Бинарный поиск",
+    "algo.search.bisect": "Модуль bisect"
+  }
+}

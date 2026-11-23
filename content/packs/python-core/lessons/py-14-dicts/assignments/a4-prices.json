@@ -1,0 +1,62 @@
+{
+  "id": "a4-prices",
+  "type": "write",
+  "title": "Прайс-лист",
+  "statement": "Первая строка — число товаров `n`. Следующие `n` строк — название и цена через пробел (одно слово и целое число). Затем строка с названием искомого товара. Выведите его цену или `нет такого товара`.\n\nВвод:\n```\n3\nхлеб 40\nмолоко 90\nсыр 350\nмолоко\n```\nВывод:\n```\n90\n```",
+  "goal": "Прайс-лист",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "",
+  "hints": [
+    "Прайс-лист — это словарь: название → цена.",
+    "Сначала прочитайте n строк в цикле и заполните словарь.",
+    "Каждую строку разбейте на два слова методом split.",
+    "Последняя строка ввода — запрос. Для отсутствующего ключа удобен get.",
+    "print(prices.get(query, 'нет такого товара'))."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "3\nхлеб 40\nмолоко 90\nсыр 350\nмолоко\n",
+        "expected_stdout": "90\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "3\nхлеб 40\nмолоко 90\nсыр 350\nмясо\n",
+        "expected_stdout": "нет такого товара\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "1\nчай 120\nчай\n",
+        "expected_stdout": "120\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "2\nа 1\nб 2\nб\n",
+        "expected_stdout": "2\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "n = int(input())\nprices = {}\nfor i in range(n):\n    name, price = input().split()\n    prices[name] = int(price)\nquery = input()\nprint(prices.get(query, \"нет такого товара\"))\n",
+  "explanation": "Метод get возвращает запасное значение вместо ошибки, если ключа нет.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "n = int(input())\nprices = {}\nfor i in range(n):\n    name, price = input().split()\n    prices[name] = int(price)\nquery = input()\nprint(prices.get(query))\n",
+      "why": "Для отсутствующего товара печатается None вместо сообщения."
+    },
+    {
+      "code": "n = int(input())\nprices = {}\nfor i in range(n):\n    name, price = input().split()\n    prices[name] = int(price)\nquery = input()\nprint(prices[query])\n",
+      "why": "Для отсутствующего товара выдаётся KeyError вместо сообщения."
+    }
+  ]
+}
