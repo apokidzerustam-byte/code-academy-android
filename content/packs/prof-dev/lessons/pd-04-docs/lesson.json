@@ -1,0 +1,45 @@
+{
+  "id": "pd-04-docs",
+  "title": "Документация",
+  "goal": "Писать docstring, аннотации, комментарии, README и журнал изменений.",
+  "skills": [
+    "pro.docstring",
+    "pro.readme",
+    "pro.changelog"
+  ],
+  "prerequisites": [
+    "pd-03-code-review"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-doc.json",
+    "assignments/a2-contract.json",
+    "assignments/a3-readme.json",
+    "assignments/a4-changelog.json",
+    "assignments/a5-args-doc.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Комментарий пересказывает код",
+      "fix": "Объясняйте причину, а не действие."
+    },
+    {
+      "mistake": "Оставляют устаревшую документацию",
+      "fix": "Меняя код, меняйте текст рядом с ним."
+    },
+    {
+      "mistake": "Считают, что аннотации проверяются при запуске",
+      "fix": "Python их не проверяет; их читают редакторы и анализаторы."
+    },
+    {
+      "mistake": "Пишут README без команды запуска",
+      "fix": "Новичок должен запустить проект за минуту."
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "id": "a3-readme",
+  "type": "function",
+  "title": "Генератор README",
+  "statement": "Напишите `make_readme(name, description, commands)` и верните текст из таких строк по порядку: `# имя`; пустая строка; описание; пустая строка; `## Запуск`; пустая строка; строка из трёх обратных кавычек; команды, по одной на строку; строка из трёх обратных кавычек. Строки соединяются символом `\\n`, в конце тоже `\\n`.",
+  "goal": "Генератор README",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Соберите текст из списка строк.",
+    "Сначала заголовок первого уровня с именем.",
+    "Затем пустая строка, описание и снова пустая строка.",
+    "Раздел «Запуск», пустая строка и открывающие тройные кавычки.",
+    "Команды, закрывающие кавычки; склейка через перевод строки и перевод строки в конце."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "make_readme",
+    "cases": [
+      {
+        "args": [
+          "tasks",
+          "Менеджер задач.",
+          [
+            "python main.py"
+          ]
+        ],
+        "id": "v1",
+        "expected": "# tasks\n\nМенеджер задач.\n\n## Запуск\n\n```\npython main.py\n```\n"
+      },
+      {
+        "args": [
+          "app",
+          "Игра.",
+          [
+            "pip install x",
+            "python run.py"
+          ]
+        ],
+        "id": "v2",
+        "expected": "# app\n\nИгра.\n\n## Запуск\n\n```\npip install x\npython run.py\n```\n"
+      },
+      {
+        "args": [
+          "x",
+          "y",
+          []
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "# x\n\ny\n\n## Запуск\n\n```\n```\n"
+      },
+      {
+        "args": [
+          "Калькулятор",
+          "Считает.",
+          [
+            "python calc.py"
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "# Калькулятор\n\nСчитает.\n\n## Запуск\n\n```\npython calc.py\n```\n"
+      }
+    ]
+  },
+  "solution": "def make_readme(name, description, commands):\n    lines = [f\"# {name}\", \"\", description, \"\", \"## Запуск\", \"\", \"```\"]\n    lines.extend(commands)\n    lines.append(\"```\")\n    return \"\\n\".join(lines) + \"\\n\"\n",
+  "explanation": "Markdown состоит из строк: пустые строки разделяют блоки, тройные кавычки обрамляют код.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def make_readme(name, description, commands):\n    return f\"# {name}\\n\\n{description}\\n\\n## Запуск\\n\\n\" + \"\\n\".join(commands) + \"\\n\"\n",
+      "why": "Нет блока кода из тройных кавычек."
+    },
+    {
+      "code": "def make_readme(name, description, commands):\n    lines = [f\"# {name}\", description, \"## Запуск\", \"```\"]\n    lines.extend(commands)\n    lines.append(\"```\")\n    return \"\\n\".join(lines) + \"\\n\"\n",
+      "why": "Нет пустых строк между разделами."
+    }
+  ]
+}

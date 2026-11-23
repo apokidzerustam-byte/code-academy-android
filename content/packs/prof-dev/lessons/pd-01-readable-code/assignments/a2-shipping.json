@@ -1,0 +1,100 @@
+{
+  "id": "a2-shipping",
+  "type": "fix",
+  "title": "Стоимость доставки",
+  "statement": "Исправьте функцию `shipping(weight, express)`. Правила: вес до 1 кг **включительно** — 5; до 5 кг включительно — 10; тяжелее — 10 плюс 2 за каждый целый килограмм сверх 5. Экспресс-доставка стоит вдвое дороже. Заодно перепишите код без вложенных условий.",
+  "goal": "Стоимость доставки",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def shipping(weight, express):\n    if weight > 0:\n        if weight < 1:\n            cost = 5\n        else:\n            if weight < 5:\n                cost = 10\n            else:\n                cost = 10 + 2 * (weight - 5)\n        if express:\n            cost = cost * 2\n        return cost\n    else:\n        return 0\n",
+  "hints": [
+    "Ошибка скрыта в границах диапазонов.",
+    "Сравнение «до N включительно» — это не строго меньше.",
+    "Проверьте значения ровно 1 и ровно 5.",
+    "Надбавка начисляется только за вес сверх пяти килограммов.",
+    "Экспресс удваивает уже посчитанную стоимость."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "shipping",
+    "cases": [
+      {
+        "args": [
+          1,
+          false
+        ],
+        "id": "v1",
+        "expected": 5
+      },
+      {
+        "args": [
+          3,
+          true
+        ],
+        "id": "v2",
+        "expected": 20
+      },
+      {
+        "args": [
+          5,
+          false
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 10
+      },
+      {
+        "args": [
+          8,
+          false
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 16
+      },
+      {
+        "args": [
+          8,
+          true
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 32
+      },
+      {
+        "args": [
+          0,
+          false
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": 5
+      },
+      {
+        "args": [
+          6,
+          false
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": 12
+      }
+    ]
+  },
+  "solution": "def shipping(weight, express):\n    if weight <= 1:\n        cost = 5\n    elif weight <= 5:\n        cost = 10\n    else:\n        cost = 10 + 2 * (weight - 5)\n    if express:\n        cost *= 2\n    return cost\n",
+  "explanation": "Во вложенных условиях граничные значения легко перепутать; плоская цепочка условий делает границы видимыми.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def shipping(weight, express):\n    if weight < 1:\n        cost = 5\n    elif weight < 5:\n        cost = 10\n    else:\n        cost = 10 + 2 * (weight - 5)\n    if express:\n        cost *= 2\n    return cost\n",
+      "why": "Границы 1 и 5 кг не включены."
+    },
+    {
+      "code": "def shipping(weight, express):\n    if weight <= 1:\n        cost = 5\n    elif weight <= 5:\n        cost = 10\n    else:\n        cost = 10 + 2 * weight\n    if express:\n        cost *= 2\n    return cost\n",
+      "why": "Надбавка считается от всего веса, а не от превышения."
+    }
+  ]
+}

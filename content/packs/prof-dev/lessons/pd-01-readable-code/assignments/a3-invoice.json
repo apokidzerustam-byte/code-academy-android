@@ -1,0 +1,97 @@
+{
+  "id": "a3-invoice",
+  "type": "fix",
+  "title": "Счёт с налогом и скидкой",
+  "statement": "Исправьте `invoice_total(prices)`: сумма цен; если сумма **не меньше** 200, скидка 10%; затем налог 23%. Итог округлите до двух знаков. Числа 0.23 и 200 вынесите в константы.",
+  "goal": "Счёт с налогом и скидкой",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def invoice_total(prices):\n    s = sum(prices)\n    if s > 200:\n        s = s - s * 0.1\n    return round(s * 1.22, 2)\n",
+  "hints": [
+    "Сумма цен — основа расчёта.",
+    "Скидка зависит от сравнения суммы с порогом.",
+    "Порог включительно: «не меньше».",
+    "Налог применяется ко всей сумме после скидки.",
+    "Итог округляется до двух знаков."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "invoice_total",
+    "cases": [
+      {
+        "args": [
+          [
+            100.0,
+            50.0
+          ]
+        ],
+        "id": "v1",
+        "expected": 184.5
+      },
+      {
+        "args": [
+          [
+            150.0,
+            50.0
+          ]
+        ],
+        "id": "v2",
+        "expected": 221.4
+      },
+      {
+        "args": [
+          [
+            199.99
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 245.99
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 0.0
+      },
+      {
+        "args": [
+          [
+            1000.0
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 1107.0
+      },
+      {
+        "args": [
+          [
+            200.0
+          ]
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": 221.4
+      }
+    ]
+  },
+  "solution": "VAT_RATE = 0.23\nDISCOUNT_RATE = 0.10\nDISCOUNT_FROM = 200\n\n\ndef invoice_total(prices):\n    subtotal = sum(prices)\n    if subtotal >= DISCOUNT_FROM:\n        subtotal *= 1 - DISCOUNT_RATE\n    return round(subtotal * (1 + VAT_RATE), 2)\n",
+  "explanation": "Ставки и пороги в константах: меняются в одном месте и не расходятся по коду.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "VAT_RATE = 0.23\n\n\ndef invoice_total(prices):\n    subtotal = sum(prices)\n    if subtotal > 200:\n        subtotal *= 0.9\n    return round(subtotal * (1 + VAT_RATE), 2)\n",
+      "why": "На сумме ровно 200 скидка не применяется."
+    },
+    {
+      "code": "def invoice_total(prices):\n    subtotal = sum(prices)\n    if subtotal >= 200:\n        subtotal *= 0.9\n    return round(subtotal * 1.22, 2)\n",
+      "why": "Неверная ставка налога."
+    }
+  ]
+}

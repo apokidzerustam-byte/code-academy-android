@@ -1,0 +1,97 @@
+{
+  "id": "a2-contract",
+  "type": "fix",
+  "title": "Код и документация",
+  "statement": "Docstring функции обещает: `in_range(x, low, high)` — «`True`, если `x` лежит **между `low` и `high` включительно**». Код не соответствует обещанию. Исправьте код.",
+  "goal": "Код и документация",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def in_range(x, low, high):\n    \"\"\"True, если x лежит между low и high включительно.\"\"\"\n    return low < x < high\n",
+  "hints": [
+    "Проверьте обе границы.",
+    "Включительно — значит допускается равенство.",
+    "Нижняя граница: не меньше.",
+    "Верхняя граница: не больше.",
+    "Оба сравнения можно записать цепочкой."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "in_range",
+    "cases": [
+      {
+        "args": [
+          5,
+          1,
+          10
+        ],
+        "id": "v1",
+        "expected": true
+      },
+      {
+        "args": [
+          11,
+          1,
+          10
+        ],
+        "id": "v2",
+        "expected": false
+      },
+      {
+        "args": [
+          1,
+          1,
+          10
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": true
+      },
+      {
+        "args": [
+          10,
+          1,
+          10
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": true
+      },
+      {
+        "args": [
+          0,
+          1,
+          10
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          5,
+          5,
+          5
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": true
+      }
+    ]
+  },
+  "solution": "def in_range(x, low, high):\n    \"\"\"True, если x лежит между low и high включительно.\"\"\"\n    return low <= x <= high\n",
+  "explanation": "Docstring — контракт: код обязан его выполнять, а при расхождении ошибка либо в коде, либо в тексте.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def in_range(x, low, high):\n    return low < x < high\n",
+      "why": "Границы не включены."
+    },
+    {
+      "code": "def in_range(x, low, high):\n    return low <= x < high\n",
+      "why": "Верхняя граница не включена."
+    }
+  ]
+}

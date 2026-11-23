@@ -1,0 +1,85 @@
+{
+  "id": "a2-discount-table",
+  "type": "write",
+  "title": "Скидка по таблице",
+  "statement": "Перепишите `discount_percent(kind)` без цепочки `if`: словарь `regular=0`, `silver=5`, `gold=10`, `vip=20`; для неизвестного типа верните 0.",
+  "goal": "Скидка по таблице",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def discount_percent(kind):\n    if kind == \"regular\":\n        return 0\n    elif kind == \"silver\":\n        return 5\n    elif kind == \"gold\":\n        return 10\n    elif kind == \"vip\":\n        return 20\n    return 0\n",
+  "hints": [
+    "Данные удобно хранить в словаре.",
+    "Ключ — тип клиента, значение — процент.",
+    "Обычное обращение по ключу падает на неизвестном ключе.",
+    "Метод get принимает значение по умолчанию.",
+    "По умолчанию — ноль."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "discount_percent",
+    "cases": [
+      {
+        "args": [
+          "gold"
+        ],
+        "id": "v1",
+        "expected": 10
+      },
+      {
+        "args": [
+          "unknown"
+        ],
+        "id": "v2",
+        "expected": 0
+      },
+      {
+        "args": [
+          "regular"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          "vip"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 20
+      },
+      {
+        "args": [
+          "silver"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 5
+      },
+      {
+        "args": [
+          ""
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": 0
+      }
+    ]
+  },
+  "solution": "DISCOUNTS = {\"regular\": 0, \"silver\": 5, \"gold\": 10, \"vip\": 20}\n\n\ndef discount_percent(kind):\n    return DISCOUNTS.get(kind, 0)\n",
+  "explanation": "Словарь превращает цепочку условий в данные; get с умолчанием — защита от неизвестных ключей.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "DISCOUNTS = {\"regular\": 0, \"silver\": 5, \"gold\": 10, \"vip\": 20}\n\n\ndef discount_percent(kind):\n    return DISCOUNTS[kind]\n",
+      "why": "Неизвестный тип приводит к ошибке."
+    },
+    {
+      "code": "DISCOUNTS = {\"regular\": 0, \"silver\": 5, \"gold\": 10, \"vip\": 20}\n\n\ndef discount_percent(kind):\n    return DISCOUNTS.get(kind, 5)\n",
+      "why": "Для неизвестных типов нужен 0."
+    }
+  ]
+}

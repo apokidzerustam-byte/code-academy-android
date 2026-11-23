@@ -1,0 +1,45 @@
+{
+  "id": "pd-03-code-review",
+  "title": "Code review",
+  "goal": "Находить ошибки и риски в чужом коде и формулировать понятные замечания.",
+  "skills": [
+    "pro.review",
+    "pro.edge-cases",
+    "pro.safe-input"
+  ],
+  "prerequisites": [
+    "pd-02-refactoring"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-zero-division.json",
+    "assignments/a2-eval.json",
+    "assignments/a3-total-zero.json",
+    "assignments/a4-safe-average.json",
+    "assignments/a5-duplicates.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Проверяют только «работает ли на примере»",
+      "fix": "Спросите: что на пустом вводе, нуле, минусе?"
+    },
+    {
+      "mistake": "Пишут «плохой код» без объяснений",
+      "fix": "Укажите место, причину и вариант исправления."
+    },
+    {
+      "mistake": "Принимают замечания как личную критику",
+      "fix": "Review — помощь проекту."
+    },
+    {
+      "mistake": "Передают ввод пользователя в eval",
+      "fix": "Используйте int/float/json/ast.literal_eval."
+    }
+  ]
+}

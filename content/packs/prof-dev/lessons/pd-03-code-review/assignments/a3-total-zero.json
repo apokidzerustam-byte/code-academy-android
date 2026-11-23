@@ -1,0 +1,41 @@
+{
+  "id": "a3-total-zero",
+  "type": "review",
+  "title": "При каком значении падает",
+  "statement": "Ревьюер вызывает функцию с `total = 20` и `total = 0`. Что выведет программа? Запишите вывод построчно.",
+  "goal": "При каком значении падает",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска кода."
+  ],
+  "code": "def percent(part, total):\n    return round(part / total * 100, 1)\n\n\nfor total in (20, 0):\n    try:\n        print(percent(5, total))\n    except ZeroDivisionError:\n        print(\"падение при total =\", total)\n",
+  "hints": [
+    "Первый вызов — обычные числа.",
+    "5 / 20 — это 0.25, умножаем на 100.",
+    "Округление до одного знака даёт 25.0.",
+    "Второй вызов делит на ноль.",
+    "Исключение перехватывается и печатается значение total."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "25.0\nпадение при total = 0\n"
+  },
+  "solution": "25.0\nпадение при total = 0\n",
+  "explanation": "Деление на total: при total = 0 будет ZeroDivisionError — проверка нужна до деления.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "25.0\n0.0",
+      "answer": "25.0\n0.0",
+      "why": "Деление на ноль не даёт ноль — оно вызывает исключение."
+    },
+    {
+      "code": "падение при total = 20\nпадение при total = 0",
+      "answer": "падение при total = 20\nпадение при total = 0",
+      "why": "Первый вызов успешен: 5 / 20 · 100 = 25.0."
+    }
+  ]
+}

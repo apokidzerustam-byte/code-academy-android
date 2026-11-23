@@ -1,0 +1,41 @@
+{
+  "id": "a1-compare",
+  "type": "predict",
+  "title": "Совпадают ли версии",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Совпадают ли версии",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "def old(items):\n    for x in items:\n        if x > 10:\n            return True\n    return False\n\n\ndef new(items):\n    return any(x > 10 for x in items)\n\n\ndef broken(items):\n    return all(x > 10 for x in items)\n\n\nfor data in ([], [5], [20], [5, 20]):\n    print(old(data) == new(data), old(data) == broken(data))\n",
+  "hints": [
+    "old и new — одно и то же; broken другая.",
+    "Первое сравнение всегда True.",
+    "Для [] old даёт False, а all([]) даёт True.",
+    "Для [5] обе версии дают False.",
+    "Для [20] — True; для [5, 20] old даёт True, all даёт False."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "True False\nTrue True\nTrue True\nTrue False\n"
+  },
+  "solution": "True False\nTrue True\nTrue True\nTrue False\n",
+  "explanation": "all для пустого списка истинен, any — ложен: на пустых данных версии легко различаются.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "True True\nTrue True\nTrue True\nTrue True",
+      "answer": "True True\nTrue True\nTrue True\nTrue True",
+      "why": "Версия broken отличается на пустом списке и смешанных данных."
+    },
+    {
+      "code": "True False\nTrue True\nTrue False\nTrue False",
+      "answer": "True False\nTrue True\nTrue False\nTrue False",
+      "why": "На списке [20] версии all и old совпадают."
+    }
+  ]
+}

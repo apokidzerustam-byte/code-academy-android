@@ -1,0 +1,85 @@
+{
+  "id": "a5-short-name",
+  "type": "function",
+  "title": "Короткое имя",
+  "statement": "Напишите `short_name(first, last, middle=None)`: верните `\"Фамилия И. О.\"` (инициалы с точками). Если отчества нет, `\"Фамилия И.\"`.",
+  "goal": "Короткое имя",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Результат начинается с фамилии.",
+    "Затем — первая буква имени с точкой.",
+    "Отчество может отсутствовать.",
+    "Если оно есть — добавьте пробел и инициал.",
+    "Пустая строка тоже означает отсутствие."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "short_name",
+    "cases": [
+      {
+        "args": [
+          "Иван",
+          "Петров",
+          "Сергеевич"
+        ],
+        "id": "v1",
+        "expected": "Петров И. С."
+      },
+      {
+        "args": [
+          "Анна",
+          "Иванова"
+        ],
+        "id": "v2",
+        "expected": "Иванова А."
+      },
+      {
+        "args": [
+          "Мария",
+          "Ли",
+          null
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "Ли М."
+      },
+      {
+        "args": [
+          "Олег",
+          "Орлов",
+          ""
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "Орлов О."
+      },
+      {
+        "args": [
+          "Ян",
+          "Смит",
+          "Ян"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": "Смит Я. Я."
+      }
+    ]
+  },
+  "solution": "def short_name(first, last, middle=None):\n    result = f\"{last} {first[0]}.\"\n    if middle:\n        result += f\" {middle[0]}.\"\n    return result\n",
+  "explanation": "Необязательный аргумент требует отдельной ветки: условие `if middle` покрывает и None, и пустую строку.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def short_name(first, last, middle=None):\n    return f\"{last} {first[0]}. {middle[0]}.\"\n",
+      "why": "Падает без отчества."
+    },
+    {
+      "code": "def short_name(first, last, middle=None):\n    result = f\"{last} {first[0]}.\"\n    if middle:\n        result += f\"{middle[0]}.\"\n    return result\n",
+      "why": "Нет пробела между инициалами."
+    }
+  ]
+}

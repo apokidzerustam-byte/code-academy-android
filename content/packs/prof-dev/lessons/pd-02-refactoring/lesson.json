@@ -1,0 +1,45 @@
+{
+  "id": "pd-02-refactoring",
+  "title": "Рефакторинг",
+  "goal": "Улучшать структуру кода, сохраняя поведение, и проверять это сравнением версий.",
+  "skills": [
+    "pro.refactoring",
+    "pro.dry",
+    "pro.compare"
+  ],
+  "prerequisites": [
+    "pd-01-readable-code"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-compare.json",
+    "assignments/a2-discount-table.json",
+    "assignments/a3-adults.json",
+    "assignments/a4-perimeter.json",
+    "assignments/a5-same.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Меняют поведение и структуру одновременно",
+      "fix": "Рефакторинг — только структура; ошибки чините отдельным шагом."
+    },
+    {
+      "mistake": "Рефакторят без проверки",
+      "fix": "Сравнивайте старую и новую версии на разных данных."
+    },
+    {
+      "mistake": "Забывают про пустой ввод в all/any",
+      "fix": "all([]) истинно, any([]) ложно."
+    },
+    {
+      "mistake": "Делают выражение слишком хитрым",
+      "fix": "Если трудно прочитать, оставьте обычный цикл."
+    }
+  ]
+}

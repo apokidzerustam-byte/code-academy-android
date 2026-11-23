@@ -1,0 +1,45 @@
+{
+  "id": "pd-05-release",
+  "title": "Версии, CI и подпись приложения",
+  "goal": "Объяснять выпуск приложения: версии, проверки CI и подпись ключом.",
+  "skills": [
+    "pro.semver",
+    "pro.ci",
+    "pro.signing"
+  ],
+  "prerequisites": [
+    "pd-04-docs"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-versions.json",
+    "assignments/a2-parse-version.json",
+    "assignments/a3-bump.json",
+    "assignments/a4-blockers.json",
+    "assignments/a5-secret-files.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Сравнивают версии как строки",
+      "fix": "Разбейте на числа и сравнивайте кортежи."
+    },
+    {
+      "mistake": "Кладут keystore и пароли в репозиторий",
+      "fix": "Секреты — только в защищённом хранилище CI."
+    },
+    {
+      "mistake": "Не делают резервную копию ключа",
+      "fix": "Потеря ключа — невозможность обновить приложение."
+    },
+    {
+      "mistake": "Выпускают, пропустив проверку",
+      "fix": "Отсутствие результата тоже блокирует выпуск."
+    }
+  ]
+}

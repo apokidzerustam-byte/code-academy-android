@@ -1,0 +1,43 @@
+{
+  "id": "pd-01-readable-code",
+  "title": "Читаемый код",
+  "goal": "Писать код с понятными названиями, константами и плоской структурой.",
+  "skills": [
+    "pro.naming",
+    "pro.small-functions",
+    "pro.early-return"
+  ],
+  "prerequisites": [],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-nested.json",
+    "assignments/a2-shipping.json",
+    "assignments/a3-invoice.json",
+    "assignments/a4-grade.json",
+    "assignments/a5-short-name.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Называют функции f, x, data2",
+      "fix": "Название отвечает на вопрос «что делает?»."
+    },
+    {
+      "mistake": "Оставляют числа в формулах без объяснения",
+      "fix": "Вынесите их в именованные константы."
+    },
+    {
+      "mistake": "Пишут одну функцию на всё",
+      "fix": "Разделите: проверка, расчёт, оформление."
+    },
+    {
+      "mistake": "Строят лестницу из if внутри if",
+      "fix": "Ранний возврат: сначала особые случаи."
+    }
+  ]
+}

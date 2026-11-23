@@ -1,0 +1,77 @@
+{
+  "id": "a5-args-doc",
+  "type": "function",
+  "title": "Блок Args",
+  "statement": "Напишите `args_block(params)`: по словарю «имя → описание» верните текст `Args:` и далее по строке `    имя: описание` (четыре пробела) на каждый параметр в порядке словаря. Строки соединяются `\\n`; для пустого словаря верните `Args: нет`.",
+  "goal": "Блок Args",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Нужен заголовок Args: и строки с параметрами.",
+    "Для пустого словаря — отдельный ответ.",
+    "Каждая строка начинается с четырёх пробелов.",
+    "Далее имя, двоеточие, пробел и описание.",
+    "Строки соединяются переводом строки, без перевода в конце."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "args_block",
+    "cases": [
+      {
+        "args": [
+          {
+            "x": "число",
+            "y": "число"
+          }
+        ],
+        "id": "v1",
+        "expected": "Args:\n    x: число\n    y: число"
+      },
+      {
+        "args": [
+          {}
+        ],
+        "id": "v2",
+        "expected": "Args: нет"
+      },
+      {
+        "args": [
+          {
+            "name": "имя"
+          }
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "Args:\n    name: имя"
+      },
+      {
+        "args": [
+          {
+            "a": "первое",
+            "b": "второе",
+            "c": "третье"
+          }
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "Args:\n    a: первое\n    b: второе\n    c: третье"
+      }
+    ]
+  },
+  "solution": "def args_block(params):\n    if not params:\n        return \"Args: нет\"\n    lines = [\"Args:\"]\n    for name, text in params.items():\n        lines.append(f\"    {name}: {text}\")\n    return \"\\n\".join(lines)\n",
+  "explanation": "Генерация документации из данных гарантирует одинаковый формат во всём проекте.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def args_block(params):\n    lines = [\"Args:\"]\n    for name, text in params.items():\n        lines.append(f\"    {name}: {text}\")\n    return \"\\n\".join(lines)\n",
+      "why": "Для пустого словаря нужно «Args: нет»."
+    },
+    {
+      "code": "def args_block(params):\n    if not params:\n        return \"Args: нет\"\n    lines = [\"Args:\"]\n    for name, text in params.items():\n        lines.append(f\"  {name}: {text}\")\n    return \"\\n\".join(lines)\n",
+      "why": "Отступ должен быть четыре пробела."
+    }
+  ]
+}

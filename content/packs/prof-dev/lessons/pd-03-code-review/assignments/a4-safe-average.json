@@ -1,0 +1,89 @@
+{
+  "id": "a4-safe-average",
+  "type": "fix",
+  "title": "Правка по замечанию",
+  "statement": "Ревьюер написал: «`average([])` падает». Исправьте `average(numbers)`: для пустого списка верните `0.0`, иначе среднее значение.",
+  "goal": "Правка по замечанию",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def average(numbers):\n    return sum(numbers) / len(numbers)\n",
+  "hints": [
+    "Проверьте пустой список до деления.",
+    "Пустой список в условии ложен.",
+    "Для него нужно вернуть 0.0.",
+    "Для остальных случаев — обычное среднее.",
+    "Используйте деление, а не целочисленное."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "average",
+    "cases": [
+      {
+        "args": [
+          [
+            2,
+            4,
+            6
+          ]
+        ],
+        "id": "v1",
+        "expected": 4.0
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": 0.0
+      },
+      {
+        "args": [
+          [
+            10
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 10.0
+      },
+      {
+        "args": [
+          [
+            1,
+            2
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 1.5
+      },
+      {
+        "args": [
+          [
+            -3,
+            3
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 0.0
+      }
+    ]
+  },
+  "solution": "def average(numbers):\n    if not numbers:\n        return 0.0\n    return sum(numbers) / len(numbers)\n",
+  "explanation": "Защитная проверка до опасной операции — самое частое исправление после review.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def average(numbers):\n    return sum(numbers) / len(numbers)\n",
+      "why": "Падает на пустом списке."
+    },
+    {
+      "code": "def average(numbers):\n    if not numbers:\n        return 0\n    return sum(numbers) // len(numbers)\n",
+      "why": "Целочисленное деление теряет дробную часть."
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "id": "a2-parse-version",
+  "type": "function",
+  "title": "Разбор версии",
+  "statement": "Напишите `parse_version(text)`: из строки `\"1.12.3\"` получите список `[1, 12, 3]`. Если строка не состоит ровно из трёх неотрицательных целых чисел, разделённых точками, верните `None`.",
+  "goal": "Разбор версии",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Разделите строку по точкам.",
+    "Частей должно быть ровно три.",
+    "Каждая часть — целое число из цифр.",
+    "Если условия нарушены, верните None.",
+    "Иначе преобразуйте части в числа."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "parse_version",
+    "cases": [
+      {
+        "args": [
+          "1.12.3"
+        ],
+        "id": "v1",
+        "expected": [
+          1,
+          12,
+          3
+        ]
+      },
+      {
+        "args": [
+          "1.2"
+        ],
+        "id": "v2",
+        "expected": null
+      },
+      {
+        "args": [
+          "a.b.c"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": null
+      },
+      {
+        "args": [
+          "0.0.1"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          0,
+          0,
+          1
+        ]
+      },
+      {
+        "args": [
+          "1.2.3.4"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": null
+      },
+      {
+        "args": [
+          ""
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": null
+      },
+      {
+        "args": [
+          "1.-2.3"
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": null
+      },
+      {
+        "args": [
+          "10.20.30"
+        ],
+        "id": "h8",
+        "hidden": true,
+        "expected": [
+          10,
+          20,
+          30
+        ]
+      }
+    ]
+  },
+  "solution": "def parse_version(text):\n    parts = text.split(\".\")\n    if len(parts) != 3 or not all(p.isdigit() for p in parts):\n        return None\n    return [int(p) for p in parts]\n",
+  "explanation": "Проверка формата до преобразования защищает от ошибок на неверном вводе.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def parse_version(text):\n    return [int(p) for p in text.split(\".\")]\n",
+      "why": "Падает на нечисловых и неполных версиях."
+    },
+    {
+      "code": "def parse_version(text):\n    parts = text.split(\".\")\n    if not all(p.isdigit() for p in parts):\n        return None\n    return [int(p) for p in parts]\n",
+      "why": "Неполные и слишком длинные версии должны давать None."
+    }
+  ]
+}

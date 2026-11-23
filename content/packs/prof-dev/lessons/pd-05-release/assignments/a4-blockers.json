@@ -1,0 +1,103 @@
+{
+  "id": "a4-blockers",
+  "type": "function",
+  "title": "Что мешает выпуску",
+  "statement": "Напишите `blockers(checks)`: `checks` — словарь «проверка → результат» (`\"passed\"`, `\"failed\"` и т. д.). Верните список обязательных проверок `tests`, `lint`, `build` (в таком порядке), которые отсутствуют или не равны `\"passed\"`.",
+  "goal": "Что мешает выпуску",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Список обязательных проверок задан в условии.",
+    "Проверяйте каждую по порядку.",
+    "Блокирует и неудача, и отсутствие результата.",
+    "Для отсутствующего ключа удобен метод get.",
+    "Результат считается хорошим только при значении passed."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "blockers",
+    "cases": [
+      {
+        "args": [
+          {
+            "tests": "passed",
+            "lint": "passed",
+            "build": "passed"
+          }
+        ],
+        "id": "v1",
+        "expected": []
+      },
+      {
+        "args": [
+          {
+            "tests": "passed",
+            "build": "failed"
+          }
+        ],
+        "id": "v2",
+        "expected": [
+          "lint",
+          "build"
+        ]
+      },
+      {
+        "args": [
+          {}
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          "tests",
+          "lint",
+          "build"
+        ]
+      },
+      {
+        "args": [
+          {
+            "build": "passed",
+            "lint": "failed",
+            "tests": "passed"
+          }
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          "lint"
+        ]
+      },
+      {
+        "args": [
+          {
+            "tests": "skipped",
+            "lint": "passed",
+            "build": "passed",
+            "docs": "failed"
+          }
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          "tests"
+        ]
+      }
+    ]
+  },
+  "solution": "REQUIRED = [\"tests\", \"lint\", \"build\"]\n\n\ndef blockers(checks):\n    return [name for name in REQUIRED if checks.get(name) != \"passed\"]\n",
+  "explanation": "Выпуск разрешён, только если каждая обязательная проверка явно прошла; отсутствие результата — тоже блокер.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def blockers(checks):\n    return [name for name, result in checks.items() if result != \"passed\"]\n",
+      "why": "Отсутствующие проверки не учитываются, а лишние учитываются."
+    },
+    {
+      "code": "def blockers(checks):\n    return [name for name in [\"tests\", \"lint\", \"build\"] if checks.get(name) == \"failed\"]\n",
+      "why": "Пропущенные проверки тоже блокируют выпуск."
+    }
+  ]
+}

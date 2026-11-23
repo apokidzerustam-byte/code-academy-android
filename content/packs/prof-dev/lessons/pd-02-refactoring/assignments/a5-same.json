@@ -1,0 +1,97 @@
+{
+  "id": "a5-same",
+  "type": "function",
+  "title": "Тот же результат",
+  "statement": "Напишите `all_positive(numbers)`: `True`, если **все** числа списка положительные, иначе `False`; для пустого списка — `False`. Используйте `all`, но не забудьте про пустой список.",
+  "goal": "Тот же результат",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "all сам по себе истинен для пустого списка.",
+    "Для пустого списка нужен отдельный ответ.",
+    "Проверьте, что список не пуст.",
+    "Положительное — строго больше нуля.",
+    "Соедините обе проверки логическим «и»."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "all_positive",
+    "cases": [
+      {
+        "args": [
+          [
+            1,
+            2,
+            3
+          ]
+        ],
+        "id": "v1",
+        "expected": true
+      },
+      {
+        "args": [
+          [
+            1,
+            -2
+          ]
+        ],
+        "id": "v2",
+        "expected": false
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          [
+            0
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          [
+            5
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": true
+      },
+      {
+        "args": [
+          [
+            -1
+          ]
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": false
+      }
+    ]
+  },
+  "solution": "def all_positive(numbers):\n    return bool(numbers) and all(n > 0 for n in numbers)\n",
+  "explanation": "all([]) — True: при рефакторинге циклов в all важно отдельно обработать пустой ввод.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def all_positive(numbers):\n    return all(n > 0 for n in numbers)\n",
+      "why": "Для пустого списка вернётся True."
+    },
+    {
+      "code": "def all_positive(numbers):\n    return bool(numbers) and all(n >= 0 for n in numbers)\n",
+      "why": "Ноль не положительное число."
+    }
+  ]
+}

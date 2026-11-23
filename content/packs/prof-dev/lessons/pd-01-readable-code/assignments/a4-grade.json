@@ -1,0 +1,116 @@
+{
+  "id": "a4-grade",
+  "type": "function",
+  "title": "Оценка по баллам",
+  "statement": "Напишите `grade(score)` с ранними возвратами: для баллов вне диапазона 0–100 верните `\"error\"`; 90 и выше — `\"A\"`, 80 и выше — `\"B\"`, 70 и выше — `\"C\"`, 50 и выше — `\"D\"`, иначе `\"F\"`.",
+  "goal": "Оценка по баллам",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Сначала отсеките недопустимые значения.",
+    "Недопустимые — меньше нуля или больше ста.",
+    "Затем проверяйте от высшей оценки к низшей.",
+    "Каждая проверка — «не меньше порога».",
+    "Оценка F — всё, что осталось."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "grade",
+    "cases": [
+      {
+        "args": [
+          95
+        ],
+        "id": "v1",
+        "expected": "A"
+      },
+      {
+        "args": [
+          72
+        ],
+        "id": "v2",
+        "expected": "C"
+      },
+      {
+        "args": [
+          90
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "A"
+      },
+      {
+        "args": [
+          80
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "B"
+      },
+      {
+        "args": [
+          49
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": "F"
+      },
+      {
+        "args": [
+          50
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": "D"
+      },
+      {
+        "args": [
+          100
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": "A"
+      },
+      {
+        "args": [
+          101
+        ],
+        "id": "h8",
+        "hidden": true,
+        "expected": "error"
+      },
+      {
+        "args": [
+          -1
+        ],
+        "id": "h9",
+        "hidden": true,
+        "expected": "error"
+      },
+      {
+        "args": [
+          0
+        ],
+        "id": "h10",
+        "hidden": true,
+        "expected": "F"
+      }
+    ]
+  },
+  "solution": "def grade(score):\n    if score < 0 or score > 100:\n        return \"error\"\n    if score >= 90:\n        return \"A\"\n    if score >= 80:\n        return \"B\"\n    if score >= 70:\n        return \"C\"\n    if score >= 50:\n        return \"D\"\n    return \"F\"\n",
+  "explanation": "Ранние возвраты: особый случай — сразу, потом уровни по убыванию порогов; последняя строка — остаток.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def grade(score):\n    if score >= 90:\n        return \"A\"\n    if score >= 80:\n        return \"B\"\n    if score >= 70:\n        return \"C\"\n    if score >= 50:\n        return \"D\"\n    return \"F\"\n",
+      "why": "Нет проверки диапазона."
+    },
+    {
+      "code": "def grade(score):\n    if score < 0 or score > 100:\n        return \"error\"\n    if score > 90:\n        return \"A\"\n    if score > 80:\n        return \"B\"\n    if score > 70:\n        return \"C\"\n    if score > 50:\n        return \"D\"\n    return \"F\"\n",
+      "why": "Границы 90, 80, 70 и 50 не включены."
+    }
+  ]
+}

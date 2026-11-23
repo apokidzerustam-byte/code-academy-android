@@ -1,0 +1,107 @@
+{
+  "id": "a3-adults",
+  "type": "function",
+  "title": "Подсчёт совершеннолетних",
+  "statement": "Напишите `count_adults(people)`: сколько людей в списке словарей с ключом `\"age\"` имеют возраст **не меньше 18**. Используйте `sum` с генераторным выражением.",
+  "goal": "Подсчёт совершеннолетних",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Нужно посчитать подходящих людей.",
+    "Условие: возраст не меньше 18.",
+    "Для подсчёта удобно суммировать единицы.",
+    "Для каждого человека — единица, если условие выполнено.",
+    "Для пустого списка получится ноль."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "count_adults",
+    "cases": [
+      {
+        "args": [
+          [
+            {
+              "age": 17
+            },
+            {
+              "age": 30
+            },
+            {
+              "age": 18
+            }
+          ]
+        ],
+        "id": "v1",
+        "expected": 2
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": 0
+      },
+      {
+        "args": [
+          [
+            {
+              "age": 18
+            }
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 1
+      },
+      {
+        "args": [
+          [
+            {
+              "age": 5
+            },
+            {
+              "age": 6
+            }
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          [
+            {
+              "age": 40
+            },
+            {
+              "age": 41
+            },
+            {
+              "age": 17
+            }
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 2
+      }
+    ]
+  },
+  "solution": "def count_adults(people):\n    return sum(1 for p in people if p[\"age\"] >= 18)\n",
+  "explanation": "sum(1 for … if …) считает элементы, подходящие под условие, без отдельной переменной-счётчика.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def count_adults(people):\n    return sum(1 for p in people if p[\"age\"] > 18)\n",
+      "why": "Восемнадцатилетние не учтены."
+    },
+    {
+      "code": "def count_adults(people):\n    return len(people)\n",
+      "why": "Считаются все люди."
+    }
+  ]
+}

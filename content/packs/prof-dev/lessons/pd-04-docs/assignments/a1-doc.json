@@ -1,0 +1,41 @@
+{
+  "id": "a1-doc",
+  "type": "predict",
+  "title": "Что хранит функция",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Что хранит функция",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "def inc(x: int, step: int = 1) -> int:\n    \"\"\"Увеличивает x на step.\"\"\"\n    return x + step\n\n\nprint(inc.__doc__)\nprint(inc.__annotations__[\"return\"].__name__)\nprint(list(inc.__annotations__))\nprint(inc(1))\n",
+  "hints": [
+    "Атрибут doc хранит строку документации.",
+    "Первая строка — текст docstring.",
+    "Аннотация возврата — тип int, у него имя int.",
+    "Ключи аннотаций: x, step и return.",
+    "inc(1) использует step по умолчанию — единицу."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "Увеличивает x на step.\nint\n['x', 'step', 'return']\n2\n"
+  },
+  "solution": "Увеличивает x на step.\nint\n['x', 'step', 'return']\n2\n",
+  "explanation": "__doc__ и __annotations__ доступны во время работы программы; return добавляется в аннотации последним.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "Увеличивает x на step.\nint\n['x', 'step', 'return']\n1",
+      "answer": "Увеличивает x на step.\nint\n['x', 'step', 'return']\n1",
+      "why": "inc(1) возвращает 2, а не 1."
+    },
+    {
+      "code": "Увеличивает x на step.\nint\n['x', 'step']\n2",
+      "answer": "Увеличивает x на step.\nint\n['x', 'step']\n2",
+      "why": "В аннотациях есть и ключ return."
+    }
+  ]
+}

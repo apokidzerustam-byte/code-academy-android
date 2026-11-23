@@ -1,0 +1,36 @@
+{
+  "id": "prof-dev",
+  "version": "0.1.0",
+  "stage": 14,
+  "title": "Профессиональная разработка",
+  "description": "Code review, рефакторинг, читаемый код, документация, CI/CD и подпись APK — практика на коде.",
+  "language": "python",
+  "minAppVersion": 1,
+  "requiresPacks": [
+    "python-core"
+  ],
+  "lessons": [
+    "pd-01-readable-code",
+    "pd-02-refactoring",
+    "pd-03-code-review",
+    "pd-04-docs",
+    "pd-05-release"
+  ],
+  "skills": {
+    "pro.naming": "Названия и константы",
+    "pro.small-functions": "Небольшие функции",
+    "pro.early-return": "Ранний возврат",
+    "pro.refactoring": "Рефакторинг",
+    "pro.dry": "Устранение повторов",
+    "pro.compare": "Сравнение версий",
+    "pro.review": "Code review",
+    "pro.edge-cases": "Граничные случаи при проверке",
+    "pro.safe-input": "Безопасный ввод",
+    "pro.docstring": "Docstring и аннотации",
+    "pro.readme": "README",
+    "pro.changelog": "Журнал изменений",
+    "pro.semver": "Семантические версии",
+    "pro.ci": "CI и проверки выпуска",
+    "pro.signing": "Подпись приложения"
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "id": "a4-perimeter",
+  "type": "fix",
+  "title": "Периметр",
+  "statement": "Исправьте `perimeter(shape)`. Фигура — кортеж: `(\"rect\", w, h)` или `(\"square\", side)`. Периметр прямоугольника — `2 * (w + h)`, квадрата — `4 * side`. Уберите повтор: квадрат — частный случай прямоугольника.",
+  "goal": "Периметр",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def perimeter(shape):\n    if shape[0] == \"square\":\n        return shape[1] * shape[1]\n    return 2 * (shape[1] + shape[2])\n",
+  "hints": [
+    "Ошибка в формуле для квадрата.",
+    "Периметр — сумма длин всех сторон.",
+    "У квадрата четыре равные стороны.",
+    "Квадрат — это прямоугольник с равными сторонами.",
+    "Вынесите формулу прямоугольника в отдельную функцию."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "perimeter",
+    "cases": [
+      {
+        "args": [
+          [
+            "rect",
+            3,
+            4
+          ]
+        ],
+        "id": "v1",
+        "expected": 14
+      },
+      {
+        "args": [
+          [
+            "square",
+            5
+          ]
+        ],
+        "id": "v2",
+        "expected": 20
+      },
+      {
+        "args": [
+          [
+            "square",
+            1
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 4
+      },
+      {
+        "args": [
+          [
+            "rect",
+            10,
+            1
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 22
+      },
+      {
+        "args": [
+          [
+            "square",
+            0
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 0
+      }
+    ]
+  },
+  "solution": "def rect_perimeter(w, h):\n    return 2 * (w + h)\n\n\ndef perimeter(shape):\n    if shape[0] == \"square\":\n        return rect_perimeter(shape[1], shape[1])\n    return rect_perimeter(shape[1], shape[2])\n",
+  "explanation": "Квадрат — частный случай прямоугольника: одна формула вместо двух, и исправление в одном месте.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def perimeter(shape):\n    if shape[0] == \"square\":\n        return shape[1] * shape[1]\n    return 2 * (shape[1] + shape[2])\n",
+      "why": "Для квадрата считается площадь."
+    },
+    {
+      "code": "def perimeter(shape):\n    if shape[0] == \"square\":\n        return 2 * shape[1]\n    return 2 * (shape[1] + shape[2])\n",
+      "why": "Для квадрата нужно четыре стороны."
+    }
+  ]
+}
