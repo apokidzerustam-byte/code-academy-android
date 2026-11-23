@@ -1,0 +1,83 @@
+{
+  "id": "a1-greeting",
+  "type": "write",
+  "title": "Приветствие",
+  "statement": "Напишите функцию интерфейса `Greeting(name: String)`, которая показывает один элемент `Text` со строкой `Привет, <имя>!` (имя берётся из параметра). Импорты уже в шаблоне.",
+  "goal": "Объявить @Composable-функцию с параметром.",
+  "input": "name = «Аня»",
+  "expectedResult": "Один элемент Text: «Привет, Аня!».",
+  "constraints": [
+    "Функция ничего не возвращает: она вызывает Text."
+  ],
+  "starterCode": "import androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\n\n// Напишите функцию Greeting\n",
+  "hints": [
+    "Заголовок: fun Greeting(name: String), а перед ним нужна аннотация, отмечающая функции интерфейса.",
+    "Эта аннотация — слово Composable с символом @ в начале; её пишут отдельной строкой над fun.",
+    "Внутри вызовите Text(…): это элемент, показывающий строку.",
+    "Имя подставьте шаблоном строки: $name.",
+    "Тело: Text(\"Привет, $name!\")."
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "Greeting",
+        "paramTypes": [
+          "String"
+        ],
+        "returns": "Unit"
+      },
+      {
+        "id": "ann",
+        "type": "contains",
+        "pattern": "@Composable\\s+fun\\s+Greeting\\b",
+        "message": "Над функцией нужна аннотация @Composable",
+        "hint": "Аннотацию пишут прямо перед fun"
+      },
+      {
+        "id": "text",
+        "type": "contains",
+        "pattern": "\\bText\\s*\\(",
+        "message": "Покажите приветствие элементом Text(…)"
+      },
+      {
+        "id": "tpl",
+        "hidden": true,
+        "type": "contains",
+        "raw": true,
+        "pattern": "Привет,\\s*\\$(name|\\{\\s*name\\s*\\})\\s*!",
+        "message": "Строка должна быть «Привет, имя!» с подстановкой параметра name"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    println(stubs.ComposeLog.render { Greeting(\"Аня\") })\n}",
+      "expected_stdout": "Text(Привет, Аня!)"
+    }
+  },
+  "solution": "import androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\n\n@Composable\nfun Greeting(name: String) {\n    Text(\"Привет, $name!\")\n}\n",
+  "explanation": "Функция помечена @Composable, получает name и вызывает Text со строкой-шаблоном. Возвращать ничего не нужно: Text сам становится частью экрана.",
+  "criteria": [
+    "@Composable fun Greeting(name: String).",
+    "Text с шаблоном «Привет, $name!»."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\n\nfun Greeting(name: String) {\n    Text(\"Привет, $name!\")\n}\n",
+      "why": "Нет @Composable: в настоящем Compose Text нельзя вызвать вне такой функции."
+    },
+    {
+      "code": "import androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\n\n@Composable\nfun Greeting(name: String) {\n    Text(\"Привет, name!\")\n}\n",
+      "why": "Имя не подставлено: нужен шаблон $name."
+    },
+    {
+      "code": "import androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\n\n@Composable\nfun Greeting(name: String): String {\n    return \"Привет, $name!\"\n}\n",
+      "why": "Функция должна показывать Text, а не возвращать строку."
+    }
+  ]
+}

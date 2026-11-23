@@ -1,0 +1,44 @@
+{
+  "id": "kt-05-compose-basics",
+  "title": "Kotlin: основы Jetpack Compose",
+  "goal": "Описывать интерфейс функциями @Composable, собирать из Column и Row, добавлять кнопку и список LazyColumn.",
+  "skills": [
+    "kt.compose",
+    "kt.compose.layout",
+    "kt.compose.lists"
+  ],
+  "prerequisites": [
+    "kt-04-coroutines"
+  ],
+  "runner": "kotlin",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-greeting.json",
+    "assignments/a2-profile.json",
+    "assignments/a3-lazy.json",
+    "assignments/a4-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Нет аннотации @Composable",
+      "fix": "Поставьте @Composable над функцией интерфейса, иначе в ней нельзя вызывать Text и другие функции Compose."
+    },
+    {
+      "mistake": "Обычная переменная вместо состояния",
+      "fix": "Храните меняющееся значение в remember { mutableStateOf(…) }, иначе экран не обновится."
+    },
+    {
+      "mistake": "for внутри LazyColumn",
+      "fix": "Рисуйте строки через items(список) { элемент -> … }."
+    },
+    {
+      "mistake": "Нет импорта getValue/setValue при by",
+      "fix": "Добавьте import androidx.compose.runtime.getValue и setValue."
+    }
+  ]
+}

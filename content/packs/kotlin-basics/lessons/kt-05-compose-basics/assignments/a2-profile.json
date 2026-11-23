@@ -1,0 +1,87 @@
+{
+  "id": "a2-profile",
+  "type": "complete",
+  "title": "Карточка профиля",
+  "statement": "Допишите тело функции `ProfileCard(name, role)`: колонка `Column`, в которой сверху `Text` с именем, а под ним `Row` из двух `Text`: подписи `Роль: ` и должности `role`.",
+  "goal": "Собрать экран из Column и Row.",
+  "input": "name = «Аня», role = «Android-разработчик»",
+  "expectedResult": "Дерево: Column → Text(имя), Row → Text(«Роль: »), Text(должность).",
+  "constraints": [
+    "Порядок детей важен: имя, затем строка."
+  ],
+  "starterCode": "import androidx.compose.foundation.layout.Column\nimport androidx.compose.foundation.layout.Row\nimport androidx.compose.foundation.layout.padding\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.compose.ui.Modifier\nimport androidx.compose.ui.unit.dp\n\n@Composable\nfun ProfileCard(name: String, role: String) {\n    // Допишите: колонка с именем, под ним строка из подписи «Роль: » и должности\n}\n",
+  "hints": [
+    "Контейнеры принимают лямбду: Column { … }.",
+    "Внутри Column сначала Text(name).",
+    "Следом — Row { … }: дети будут стоять в одну строку.",
+    "В Row два Text: подпись и должность.",
+    "Column { Text(name); Row { Text(\"Роль: \"); Text(role) } } — каждый вызов с новой строки. Отступ по желанию: Column(modifier = Modifier.padding(16.dp))."
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "ProfileCard",
+        "paramTypes": [
+          "String",
+          "String"
+        ],
+        "returns": "Unit"
+      },
+      {
+        "id": "col",
+        "type": "contains",
+        "pattern": "\\bColumn\\s*[({]",
+        "message": "Верхний контейнер — Column"
+      },
+      {
+        "id": "row",
+        "type": "contains",
+        "pattern": "\\bRow\\s*[({]",
+        "message": "Подпись и должность поместите в Row"
+      },
+      {
+        "id": "texts",
+        "type": "contains",
+        "pattern": "\\bText\\s*\\([\\s\\S]*\\bText\\s*\\([\\s\\S]*\\bText\\s*\\(",
+        "message": "Нужно три элемента Text: имя, подпись и должность"
+      },
+      {
+        "id": "order",
+        "type": "contains",
+        "pattern": "\\bColumn\\s*[({][\\s\\S]*\\bText\\s*\\(\\s*name\\s*\\)[\\s\\S]*\\bRow\\s*[({]",
+        "message": "Имя должно стоять в Column выше строки Row с подписью и должностью"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    println(stubs.ComposeLog.render { ProfileCard(\"Аня\", \"Android-разработчик\") })\n}",
+      "expected_stdout": "Column\n  Text(Аня)\n  Row\n    Text(Роль: )\n    Text(Android-разработчик)"
+    }
+  },
+  "solution": "import androidx.compose.foundation.layout.Column\nimport androidx.compose.foundation.layout.Row\nimport androidx.compose.foundation.layout.padding\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.compose.ui.Modifier\nimport androidx.compose.ui.unit.dp\n\n@Composable\nfun ProfileCard(name: String, role: String) {\n    Column(modifier = Modifier.padding(16.dp)) {\n        Text(name)\n        Row {\n            Text(\"Роль: \")\n            Text(role)\n        }\n    }\n}\n",
+  "explanation": "Column выкладывает детей сверху вниз: имя, затем Row. Row ставит подпись и должность рядом.",
+  "criteria": [
+    "Column с именем.",
+    "Внутри Row с подписью и должностью."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import androidx.compose.foundation.layout.Column\nimport androidx.compose.foundation.layout.Row\nimport androidx.compose.foundation.layout.padding\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.compose.ui.Modifier\nimport androidx.compose.ui.unit.dp\n\n@Composable\nfun ProfileCard(name: String, role: String) {\n    Column {\n        Text(name)\n        Text(\"Роль: \")\n        Text(role)\n    }\n}\n",
+      "why": "Нет Row: подпись и должность должны стоять в одной строке."
+    },
+    {
+      "code": "import androidx.compose.foundation.layout.Column\nimport androidx.compose.foundation.layout.Row\nimport androidx.compose.foundation.layout.padding\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.compose.ui.Modifier\nimport androidx.compose.ui.unit.dp\n\n@Composable\nfun ProfileCard(name: String, role: String) {\n    Row {\n        Text(name)\n        Column {\n            Text(\"Роль: \")\n            Text(role)\n        }\n    }\n}\n",
+      "why": "Контейнеры перепутаны: верхний должен быть Column."
+    },
+    {
+      "code": "import androidx.compose.foundation.layout.Column\nimport androidx.compose.foundation.layout.Row\nimport androidx.compose.foundation.layout.padding\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.compose.ui.Modifier\nimport androidx.compose.ui.unit.dp\n\n@Composable\nfun ProfileCard(name: String, role: String) {\n    Column {\n        Row {\n            Text(\"Роль: \")\n            Text(role)\n        }\n        Text(name)\n    }\n}\n",
+      "why": "Порядок неверный: имя должно быть сверху."
+    }
+  ]
+}

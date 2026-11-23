@@ -1,0 +1,296 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Как рисуется интерфейс в Compose",
+      "narration": "Раньше экраны Андроида описывали в отдельных файлах разметки, а потом в коде искали нужные элементы по номеру и меняли им текст. Jetpack Compose устроен иначе: интерфейс описывается обычными функциями Kotlin. Вы пишете, что должно быть на экране при таких-то данных, а система сама перерисовывает его, когда данные меняются. Такой подход называется декларативным. Функция, которая рисует кусок экрана, помечается аннотацией Composable. Её имя пишут с большой буквы, как имя класса, потому что она изображает объект. Представьте конструктор: из маленьких одинаковых деталей вы строите всё, что угодно. Здесь то же самое: из маленьких функций собирают большие: кнопка, карточка, экран. Сегодня мы напишем первую такую функцию, соберём из элементов колонку и строку, добавим кнопку и прокручиваемый список.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "**Декларативный интерфейс**: вы описываете, *что* показать для данных, а не *как* менять элементы.",
+          "cue": 3
+        },
+        {
+          "type": "note",
+          "md": "`@Composable` · `Column` / `Row` · `Modifier` · `Button` · `LazyColumn`",
+          "cue": 8
+        }
+      ]
+    },
+    {
+      "id": "composable",
+      "title": "Первая функция Composable",
+      "narration": "Вот самая простая функция интерфейса. Над ней стоит аннотация Composable. Это метка для компилятора: внутри можно вызывать другие функции интерфейса. У функции есть параметр name, то есть данные, от которых зависит картинка. Внутри один вызов Text: это готовый элемент, который показывает строку. Мы подставляем в строку имя через шаблон. Обратите внимание: функция ничего не возвращает. Она не создаёт объект, а вызывает другие функции интерфейса, и всё, что они нарисуют, становится частью экрана. Импортировать нужно и аннотацию, и Text, иначе компилятор не найдёт их. Правила: имя с большой буквы, данные только через параметры, никаких долгих вычислений внутри.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "Main.kt"
+        },
+        {
+          "type": "type",
+          "text": "import androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\n\n@Composable\nfun Greeting(name: String) {\n    Text(\"Привет, $name!\")\n}\n",
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            4
+          ],
+          "file": "Main.kt",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            5
+          ],
+          "file": "Main.kt",
+          "cue": 3
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            6
+          ],
+          "file": "Main.kt",
+          "cue": 4
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            2
+          ],
+          "file": "Main.kt",
+          "cue": 8
+        }
+      ]
+    },
+    {
+      "id": "layout",
+      "title": "Колонка и строка",
+      "narration": "Один Text — это ещё не экран. Чтобы разместить элементы, используют контейнеры. Column выкладывает содержимое сверху вниз, Row слева направо. Контейнер принимает лямбду, внутри которой вы перечисляете детей. В нашей карточке профиля колонка содержит имя, а под ним строку, в которой стоят подпись и должность. Ещё у контейнера есть параметр modifier. Модификатор настраивает внешний вид и поведение: например, отступ padding в шестнадцать dp. Здесь dp — это независимая от плотности экрана единица, по ней размеры одинаковы на разных телефонах. Модификаторы можно цеплять цепочкой через точку, и порядок важен: отступ, поставленный до фона, и отступ после фона дают разную картинку.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "Main.kt"
+        },
+        {
+          "type": "type",
+          "text": "import androidx.compose.foundation.layout.Column\nimport androidx.compose.foundation.layout.Row\nimport androidx.compose.foundation.layout.padding\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.compose.ui.Modifier\nimport androidx.compose.ui.unit.dp\n\n@Composable\nfun ProfileCard(name: String, role: String) {\n    Column(modifier = Modifier.padding(16.dp)) {\n        Text(name)\n        Row {\n            Text(\"Роль: \")\n            Text(role)\n        }\n    }\n}\n",
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            1
+          ],
+          "file": "Main.kt",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            13
+          ],
+          "file": "Main.kt",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            11
+          ],
+          "file": "Main.kt",
+          "cue": 5
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            15
+          ],
+          "file": "Main.kt",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "state",
+      "title": "Кнопка и состояние",
+      "narration": "Теперь сделаем экран живым. Кнопка Button принимает onClick: функцию, которую вызовут при нажатии. Внутри кнопки лежит её содержимое, обычно Text. Но если просто увеличить обычную переменную, ничего не произойдёт: Compose не узнает, что надо перерисовать экран. Поэтому счётчик хранят в состоянии. Вызов mutableIntStateOf создаёт состояние, remember запоминает его между перерисовками, а слово by позволяет читать и менять его как обычную переменную. Когда значение меняется, Compose запускает перерисовку только тех функций, которые это значение читают. Для этого нужны два импорта: getValue и setValue. Без них конструкция by не скомпилируется. Это самая частая ошибка новичка.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "Main.kt"
+        },
+        {
+          "type": "type",
+          "text": "import androidx.compose.foundation.layout.Column\nimport androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.compose.runtime.mutableIntStateOf\nimport androidx.compose.runtime.remember\nimport androidx.compose.runtime.getValue\nimport androidx.compose.runtime.setValue\n\n@Composable\nfun Counter() {\n    var count by remember { mutableIntStateOf(0) }\n    Column {\n        Text(\"Нажато: $count\")\n        Button(onClick = { count++ }) {\n            Text(\"Ещё\")\n        }\n    }\n}\n",
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            15
+          ],
+          "file": "Main.kt",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            12
+          ],
+          "file": "Main.kt",
+          "cue": 4
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            15
+          ],
+          "file": "Main.kt",
+          "cue": 6
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            7,
+            8
+          ],
+          "file": "Main.kt",
+          "cue": 7
+        }
+      ]
+    },
+    {
+      "id": "lazy",
+      "title": "Длинные списки: LazyColumn",
+      "narration": "А если элементов сотня? Колонка создаст их все сразу, даже те, что за краем экрана. Для списков есть LazyColumn: он прокручивается и создаёт только видимые строки. Внутри него элементы описывают не вызовом Text подряд, а функцией items: ей передают список и лямбду, которая рисует одну строку по одному элементу. Здесь каждый продукт превращается в Text. Важная тонкость: лямбда содержимого LazyColumn не является функцией интерфейса, поэтому Text напрямую в ней вызвать нельзя, а в лямбде items можно. Если попробуете вставить цикл for прямо в LazyColumn, компилятор покажет ошибку.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "Main.kt"
+        },
+        {
+          "type": "type",
+          "text": "import androidx.compose.foundation.lazy.LazyColumn\nimport androidx.compose.foundation.lazy.items\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\n\n@Composable\nfun ShoppingList(products: List<String>) {\n    LazyColumn {\n        items(products) { product ->\n            Text(product)\n        }\n    }\n}\n",
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            8
+          ],
+          "file": "Main.kt",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            9
+          ],
+          "file": "Main.kt",
+          "cue": 3
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            10
+          ],
+          "file": "Main.kt",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "screen",
+      "title": "Из маленьких функций — целый экран",
+      "narration": "Главная сила Compose в том, что функции интерфейса вызывают друг друга, как обычные функции. Посмотрите на экран HomeScreen. Он состоит из трёх готовых кусочков: приветствия, карточки профиля и списка покупок. Каждый кусочек написан и проверен отдельно, а экран лишь собирает их в колонку. Это как конструктор: из одинаковых деталей получаются разные модели. Если завтра карточка понадобится на другом экране, вы просто вызовете её ещё раз с другими данными. Отдельно скажу про аннотацию Preview. Она позволяет посмотреть функцию в Android Studio, не запуская приложение на телефоне. Функция для просмотра не принимает параметров, поэтому для неё пишут маленькую обёртку с готовыми данными.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "Main.kt"
+        },
+        {
+          "type": "type",
+          "text": "// Greeting, ProfileCard и ShoppingList — функции из предыдущих примеров\n@Composable\nfun HomeScreen() {\n    Column {\n        Greeting(\"Аня\")\n        ProfileCard(\"Аня\", \"Android-разработчик\")\n        ShoppingList(listOf(\"Хлеб\", \"Сыр\"))\n    }\n}\n",
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            5
+          ],
+          "file": "Main.kt",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            6
+          ],
+          "file": "Main.kt",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            7
+          ],
+          "file": "Main.kt",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "mistakes",
+      "title": "Типичные ошибки",
+      "narration": "Разберём четыре типичные ошибки. Первая: забыли аннотацию Composable. Тогда другой код интерфейса не сможет вызвать вашу функцию, а внутри неё нельзя вызывать Text. Вторая: обычная переменная вместо состояния. Экран не обновится, потому что Compose не знает об изменении. Третья: цикл for прямо внутри LazyColumn. Используйте items. Четвёртая: забыли импорт getValue и setValue при использовании by: код с состоянием не соберётся. Сообщения компилятора на английском, но по ключевым словам их легко узнать: Composable invocations, Property delegate must have, и так далее.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "Ошибка 1: нет `@Composable` → нельзя вызывать `Text` и другие функции интерфейса.",
+          "cue": 1
+        },
+        {
+          "type": "note",
+          "md": "Ошибка 2: `var count = 0` вместо `remember { mutableIntStateOf(0) }` → экран не обновится.",
+          "cue": 3
+        },
+        {
+          "type": "note",
+          "md": "Ошибка 3: `for` внутри `LazyColumn` → используйте `items(список) { … }`.",
+          "cue": 5
+        },
+        {
+          "type": "note",
+          "md": "Ошибка 4: нет импортов `getValue` / `setValue` → `by` не компилируется.",
+          "cue": 7
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. Интерфейс в Compose описывают функциями с аннотацией Composable, имя пишут с большой буквы. Элементы собирают в Column и Row, внешний вид настраивают через modifier. Кнопке передают onClick, а то, что должно менять картинку, хранят в состоянии через remember и mutableStateOf. Длинные списки рисуют LazyColumn с функцией items. Помните: в нашем курсе код интерфейса проверяется на компьютере по упрощённой модели, а на телефоне вы его не запустите, потому что для этого нужен полноценный проект. В заданиях вы напишете функцию приветствия, соберёте карточку, исправите список с циклом и предскажете результат нажатий. Критерий прохождения: решить не меньше трёх заданий из четырёх.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`@Composable` · `Column { }` · `Row { }` · `Modifier.padding(16.dp)` · `Button(onClick = …) { }` · `LazyColumn { items(…) { … } }`",
+          "cue": 0
+        },
+        {
+          "type": "note",
+          "md": "Состояние: `var x by remember { mutableIntStateOf(0) }` + импорты `getValue`/`setValue`.",
+          "cue": 3
+        }
+      ]
+    }
+  ]
+}

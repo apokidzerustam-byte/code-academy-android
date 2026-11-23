@@ -10,7 +10,8 @@
     "kt-01-basics",
     "kt-02-classes",
     "kt-03-collections",
-    "kt-04-coroutines"
+    "kt-04-coroutines",
+    "kt-05-compose-basics"
   ],
   "skills": {
     "kt.basics": "Kotlin: main, val и var",
@@ -27,6 +28,9 @@
     "kt.hof": "map, filter, sorted и sum",
     "kt.suspend": "Функции suspend",
     "kt.async": "async, await и launch",
-    "kt.scope": "Области и диспетчеры корутин"
+    "kt.scope": "Области и диспетчеры корутин",
+    "kt.compose": "Основы Compose: @Composable",
+    "kt.compose.layout": "Column, Row и Modifier",
+    "kt.compose.lists": "Списки и кнопки в Compose"
   }
 }
