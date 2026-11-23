@@ -1,0 +1,57 @@
+{
+  "id": "a4-where",
+  "type": "fix",
+  "title": "Подмена не сработала",
+  "statement": "Программа читает число `value` и подменяет время на него, ожидая вывод `t=<число>`, но печатает настоящее время. Исправьте **функцию** `now_label` (подмену `patch` менять не нужно) так, чтобы подмена сработала.",
+  "goal": "Найти, почему подмена не сработала.",
+  "input": "Число value в первой строке.",
+  "expectedResult": "t=<value>",
+  "constraints": [],
+  "starterCode": "from time import time\nfrom unittest.mock import patch\n\n\ndef now_label():\n    return \"t=\" + str(int(time()))\n\n\nvalue = float(input())\nwith patch(\"time.time\", return_value=value):\n    print(now_label())\n",
+  "hints": [
+    "Подмена заменяет объект time.time в модуле time.",
+    "Но имя time в программе — собственная ссылка на настоящую функцию, взятая при импорте.",
+    "Ссылка не меняется, когда patch подменяет атрибут модуля.",
+    "Импортируйте целиком модуль, а не отдельную функцию из него.",
+    "Вызывайте time.time(), тогда Питон каждый раз ищет функцию в модуле."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "5\n",
+        "expected_stdout": "t=5\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "7\n",
+        "expected_stdout": "t=7\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "1234\n",
+        "expected_stdout": "t=1234\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "import time\nfrom unittest.mock import patch\n\n\ndef now_label():\n    return \"t=\" + str(int(time.time()))\n\n\nvalue = float(input())\nwith patch(\"time.time\", return_value=value):\n    print(now_label())\n",
+  "explanation": "После from time import time имя time указывает на настоящую функцию и не видит подмены. Если импортировать модуль и вызывать time.time(), поиск идёт в модуле при каждом вызове и находит двойника.",
+  "criteria": [
+    "Импортирован модуль time.",
+    "Вызов time.time()."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from time import time\nfrom unittest.mock import patch\n\n\ndef now_label():\n    return \"t=\" + str(int(time()))\n\n\nvalue = float(input())\nwith patch(\"time.time\", return_value=value):\n    print(now_label())\n",
+      "why": "Исходный код: функция time импортирована по имени, подмена её не задевает."
+    },
+    {
+      "code": "from time import time\nfrom unittest.mock import patch\n\n\ndef now_label():\n    return \"t=5\"\n\n\nvalue = float(input())\nwith patch(\"time.time\", return_value=value):\n    print(now_label())\n",
+      "why": "Число зашито в строку: результат не зависит от подмены."
+    }
+  ]
+}

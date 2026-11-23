@@ -1,0 +1,41 @@
+{
+  "id": "a5-predict",
+  "type": "predict",
+  "title": "Поведение мока",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Поведение мока",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "from unittest.mock import Mock\n\nm = Mock(side_effect=[1, 2])\nprint(m(), m())\nr = Mock(return_value=7)\nr(1, k=2)\nprint(r.call_args)\nprint(r.call_args.args, r.call_args.kwargs)\nprint(r.called, r.call_count)\n",
+  "hints": [
+    "side_effect со списком отдаёт значения по очереди: сначала 1, затем 2.",
+    "print(m(), m()) вызывает мок дважды и печатает оба значения.",
+    "call_args хранит последний вызов: позиционный 1 и именованный k=2.",
+    "args — кортеж позиционных аргументов, kwargs — словарь именованных.",
+    "called — был ли вызов, call_count — сколько раз: r вызван один раз."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "1 2\ncall(1, k=2)\n(1,) {'k': 2}\nTrue 1\n"
+  },
+  "solution": "1 2\ncall(1, k=2)\n(1,) {'k': 2}\nTrue 1\n",
+  "explanation": "side_effect со списком возвращает элементы по очереди. call_args запоминает аргументы последнего вызова, called и call_count — сам факт и число вызовов.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "1 2\ncall(1, k=2)\n(1, 2) {}\nTrue 1",
+      "answer": "1 2\ncall(1, k=2)\n(1, 2) {}\nTrue 1",
+      "why": "Аргументы разделяются на позиционные (args) и именованные (kwargs)."
+    },
+    {
+      "code": "1 2\ncall(1, k=2)\n(1,) {'k': 2}\nTrue 2",
+      "answer": "1 2\ncall(1, k=2)\n(1,) {'k': 2}\nTrue 2",
+      "why": "Мок r вызван один раз."
+    }
+  ]
+}

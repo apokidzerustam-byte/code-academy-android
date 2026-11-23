@@ -1,0 +1,49 @@
+{
+  "id": "a3-patch",
+  "type": "complete",
+  "title": "Замороженное время",
+  "statement": "Функция `elapsed(start)` возвращает `time.time() - start`. Подмените `time.time` так, чтобы он возвращал `1000.0`, и выведите `elapsed(400.0)` — внутри блока `with patch(...)`.",
+  "goal": "Подменить время на время теста.",
+  "input": "Определяется условием.",
+  "expectedResult": "600.0",
+  "constraints": [],
+  "starterCode": "import time\nfrom unittest.mock import patch\n\n\ndef elapsed(start):\n    return time.time() - start\n\n\n# подмените время и выведите elapsed(400.0)\n",
+  "hints": [
+    "Подмену на время теста делает patch из unittest.mock.",
+    "Он используется как менеджер контекста: with patch(...):.",
+    "Первый аргумент — полное имя подменяемого объекта: модуль, точка, имя.",
+    "Значение задаёт параметр return_value.",
+    "with patch(\"time.time\", return_value=1000.0): print(elapsed(400.0))"
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "",
+        "expected_stdout": "600.0\n"
+      }
+    ]
+  },
+  "solution": "import time\nfrom unittest.mock import patch\n\n\ndef elapsed(start):\n    return time.time() - start\n\n\nwith patch(\"time.time\", return_value=1000.0):\n    print(elapsed(400.0))\n",
+  "explanation": "Внутри блока with время всегда равно 1000.0, поэтому результат предсказуем: 1000.0 - 400.0 = 600.0. После блока подмена снимается сама.",
+  "criteria": [
+    "Использован patch как with.",
+    "Выведено 600.0."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import time\nfrom unittest.mock import patch\n\n\ndef elapsed(start):\n    return time.time() - start\n\n\nprint(elapsed(400.0))\n",
+      "why": "Подмены нет: время настоящее, результат огромный."
+    },
+    {
+      "code": "import time\nfrom unittest.mock import patch\n\n\ndef elapsed(start):\n    return time.time() - start\n\n\nwith patch(\"time.time\", return_value=500.0):\n    print(elapsed(400.0))\n",
+      "why": "Время должно быть 1000.0."
+    },
+    {
+      "code": "import time\nfrom unittest.mock import patch\n\n\ndef elapsed(start):\n    return time.time() - start\n\n\nwith patch(\"time.sleep\", return_value=1000.0):\n    print(elapsed(400.0))\n",
+      "why": "Подменено не то: нужен time.time."
+    }
+  ]
+}

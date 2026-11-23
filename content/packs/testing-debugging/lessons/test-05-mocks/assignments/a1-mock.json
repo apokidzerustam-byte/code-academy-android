@@ -1,0 +1,50 @@
+{
+  "id": "a1-mock",
+  "type": "write",
+  "title": "Двойник функции",
+  "statement": "Импортируйте `Mock` из `unittest.mock`. Создайте `fetch` — двойник, который при вызове возвращает словарь `{\"temp\": 12}`. Вызовите `fetch(\"Краков\")`, выведите из результата значение по ключу `temp`, а затем число вызовов `fetch.call_count`.",
+  "goal": "Создать мок и проверить его вызовы.",
+  "input": "Определяется условием.",
+  "expectedResult": "Две строки: 12 и 1.",
+  "constraints": [],
+  "starterCode": "",
+  "hints": [
+    "Mock импортируется из unittest.mock.",
+    "Что вернуть при вызове, задаёт параметр return_value.",
+    "Вызов двойника выглядит как вызов обычной функции: fetch(\"Краков\").",
+    "Из результата-словаря значение берут по ключу: [\"temp\"].",
+    "Число вызовов хранит атрибут call_count."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "",
+        "expected_stdout": "12\n1\n"
+      }
+    ]
+  },
+  "solution": "from unittest.mock import Mock\n\nfetch = Mock(return_value={\"temp\": 12})\nprint(fetch(\"Краков\")[\"temp\"])\nprint(fetch.call_count)\n",
+  "explanation": "Mock ведёт себя как функция: возвращает return_value и запоминает вызовы. call_count показывает, сколько раз его вызвали.",
+  "criteria": [
+    "Мок возвращает словарь.",
+    "Вызван один раз.",
+    "Выведены температура и число вызовов."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from unittest.mock import Mock\n\nfetch = Mock(return_value={\"temp\": 12})\nprint(fetch.return_value[\"temp\"])\nprint(fetch.call_count)\n",
+      "why": "Функцию не вызвали: call_count равен нулю."
+    },
+    {
+      "code": "from unittest.mock import Mock\n\nfetch = Mock(return_value={\"temp\": 21})\nprint(fetch(\"Краков\")[\"temp\"])\nprint(fetch.call_count)\n",
+      "why": "Двойник возвращает не ту температуру."
+    },
+    {
+      "code": "from unittest.mock import Mock\n\nfetch = Mock(return_value={\"temp\": 12})\nprint(fetch(\"Краков\")[\"temp\"])\nprint(fetch(\"Краков\")[\"temp\"])\nprint(fetch.call_count)\n",
+      "why": "Функция вызвана дважды: выведено лишнее."
+    }
+  ]
+}

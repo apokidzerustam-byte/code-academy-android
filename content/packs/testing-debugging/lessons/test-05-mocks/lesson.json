@@ -1,0 +1,45 @@
+{
+  "id": "test-05-mocks",
+  "title": "Моки: подменяем зависимости",
+  "goal": "Подменять время, сеть и другие зависимости двойниками из unittest.mock и проверять вызовы.",
+  "skills": [
+    "test.mock",
+    "test.side-effect",
+    "test.patch"
+  ],
+  "prerequisites": [
+    "test-04-debugging"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-mock.json",
+    "assignments/a2-side-effect.json",
+    "assignments/a3-patch.json",
+    "assignments/a4-where.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Подмена не в том месте",
+      "fix": "patch действует на имя, которое использует ваш код: импортируйте модуль целиком (import time) и вызывайте time.time()."
+    },
+    {
+      "mistake": "Опечатка в методе мока не даёт ошибки",
+      "fix": "Mock создаёт атрибуты на лету: проверяйте вызовы явно (assert_called_once_with)."
+    },
+    {
+      "mistake": "Подменили слишком много",
+      "fix": "Подменяйте только границы (сеть, время, случайность, диск), а не проверяемый код."
+    },
+    {
+      "mistake": "Подмена осталась включённой после теста",
+      "fix": "Используйте patch как менеджер контекста: with patch(...)."
+    }
+  ]
+}

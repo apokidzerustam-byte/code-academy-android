@@ -1,0 +1,45 @@
+{
+  "id": "a2-side-effect",
+  "type": "complete",
+  "title": "Сбой сети",
+  "statement": "Функция `load_temp(fetch, city)` возвращает `None`, если `fetch` выбросил `ConnectionError`. Допишите проверку этой ветки: создайте двойник `broken`, который **выбрасывает** `ConnectionError(\"нет сети\")` при вызове, и выведите `load_temp(broken, \"Краков\")`. Первая проверка уже есть.",
+  "goal": "Воспроизвести сбой через side_effect.",
+  "input": "Определяется условием.",
+  "expectedResult": "Две строки: 12 и None.",
+  "constraints": [],
+  "starterCode": "from unittest.mock import Mock\n\n\ndef load_temp(fetch, city):\n    try:\n        return fetch(city)[\"temp\"]\n    except ConnectionError:\n        return None\n\n\nok = Mock(return_value={\"temp\": 12})\nprint(load_temp(ok, \"Краков\"))\n\n# проверьте ветку со сбоем сети\n",
+  "hints": [
+    "Нужен двойник, который не возвращает значение, а выбрасывает ошибку.",
+    "За исключения отвечает параметр side_effect.",
+    "Передайте ему объект исключения: ConnectionError(\"нет сети\").",
+    "Потом передайте двойник в load_temp вместо настоящей fetch.",
+    "broken = Mock(side_effect=ConnectionError(\"нет сети\")); print(load_temp(broken, \"Краков\"))"
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "",
+        "expected_stdout": "12\nNone\n"
+      }
+    ]
+  },
+  "solution": "from unittest.mock import Mock\n\n\ndef load_temp(fetch, city):\n    try:\n        return fetch(city)[\"temp\"]\n    except ConnectionError:\n        return None\n\n\nok = Mock(return_value={\"temp\": 12})\nprint(load_temp(ok, \"Краков\"))\n\nbroken = Mock(side_effect=ConnectionError(\"нет сети\"))\nprint(load_temp(broken, \"Краков\"))\n",
+  "explanation": "side_effect с исключением заставляет мок выбросить его при вызове. Так проверяют обработку сбоев, которые трудно вызвать по-настоящему.",
+  "criteria": [
+    "Двойник выбрасывает ConnectionError.",
+    "Выведено None."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from unittest.mock import Mock\n\n\ndef load_temp(fetch, city):\n    try:\n        return fetch(city)[\"temp\"]\n    except ConnectionError:\n        return None\n\n\nok = Mock(return_value={\"temp\": 12})\nprint(load_temp(ok, \"Краков\"))\n\nbroken = Mock(return_value=None)\nprint(load_temp(broken, \"Краков\"))\n",
+      "why": "return_value не выбрасывает ошибку: нужно side_effect."
+    },
+    {
+      "code": "from unittest.mock import Mock\n\n\ndef load_temp(fetch, city):\n    try:\n        return fetch(city)[\"temp\"]\n    except ConnectionError:\n        return None\n\n\nok = Mock(return_value={\"temp\": 12})\nprint(load_temp(ok, \"Краков\"))\n\nbroken = Mock(side_effect=ValueError(\"плохое значение\"))\nprint(load_temp(broken, \"Краков\"))\n",
+      "why": "Функция ловит только ConnectionError: другое исключение её сломает."
+    }
+  ]
+}

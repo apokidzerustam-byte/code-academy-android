@@ -22,7 +22,7 @@ ROLLBACK TO step;      -- откат только до метки
 
 В приложении:
 
-```python
+```py
 with conn:      # COMMIT при успехе, ROLLBACK при исключении
     conn.execute("UPDATE accounts SET balance = balance - 100 WHERE id = 1")
     conn.execute("UPDATE accounts SET balance = balance + 100 WHERE id = 2")
