@@ -48,6 +48,17 @@ class SolutionGuard(
             .filter { bag -> baseBags.none { it.containsAll(bag) } }.distinct()
     }
 
+    /**
+     * Короткие строки эталона (меньше трёх слов: `return fullName`, `print(total)`): в обычном тексте безобидны, но в коде
+     * ответа это начало готового решения (модель 1.7B написала `function f(x) { return fullName.split(…)… }`).
+     * Сравнение — как в проверке утечек в тестах: без пробелов и регистра, кавычки одного вида. Строки, которые ученик
+     * уже видит (заготовка, условие, его код), не считаются.
+     */
+    private val shortNovel: List<String> = run {
+        val seen = baseText.lines().map(::squash).toSet()
+        solutionText.lines().map(::squash).filter { it.length >= 8 && it !in seen }.distinct()
+    }
+
     /** Длинные строки эталона с обезличенными именами: ловят переименование переменных. */
     private val novelAnonLines: List<String> = solutionLines.map(::anon).filter { it !in baseAnon && it.split(' ').size >= 6 }
 
@@ -99,6 +110,12 @@ class SolutionGuard(
             for (span in codeSpans(text)) {
                 val w = words(span)
                 novelBags.firstOrNull { w.containsAll(it) }?.let { return Verdict(true, "строка решения, записанная иначе: ${it.joinToString(" ")}") }
+            }
+        }
+        if (shortNovel.isNotEmpty()) {
+            for (span in codeSpans(text)) {
+                val squashed = squash(span)
+                shortNovel.firstOrNull { squashed.contains(it) }?.let { return Verdict(true, "строка решения в коде ответа: $it") }
             }
         }
         val anonTokens = replyTokens.map(::anonToken)
@@ -191,6 +208,9 @@ class SolutionGuard(
         /** Имя переменной/функции (не ключевое слово) → «_»: ловит решение с переименованными переменными. */
         fun anonToken(t: String): String =
             if (t.isNotEmpty() && (t[0].isLetter() || t[0] == '_') && t !in KEYWORDS) "_" else t
+
+        /** Строка без пробелов, в нижнем регистре, кавычки одного вида. */
+        private fun squash(line: String): String = line.replace(SPACES, "").replace('\'', '"').lowercase()
 
         private fun anon(line: String): String = line.split(' ').joinToString(" ") { anonToken(it) }
 
