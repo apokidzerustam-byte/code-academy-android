@@ -1,0 +1,164 @@
+{
+  "id": "a2-mergesort",
+  "type": "function",
+  "title": "Сортировка слиянием",
+  "statement": "Напишите `merge_sort(items)` — рекурсивную сортировку слиянием без `sorted`/`sort`. Возвращает новый список по возрастанию.",
+  "goal": "Сортировка слиянием",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Список из одного элемента уже отсортирован.",
+    "Разделите список пополам: items[:mid] и items[mid:].",
+    "Каждую половину отсортируйте рекурсивно.",
+    "Объедините результаты функцией слияния двух отсортированных списков.",
+    "return merge(merge_sort(left), merge_sort(right))."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "merge_sort",
+    "cases": [
+      {
+        "args": [
+          [
+            5,
+            2,
+            9,
+            1,
+            7,
+            3,
+            8
+          ]
+        ],
+        "id": "v1",
+        "expected": [
+          1,
+          2,
+          3,
+          5,
+          7,
+          8,
+          9
+        ]
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            1
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          1
+        ]
+      },
+      {
+        "args": [
+          [
+            2,
+            1
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          1,
+          2
+        ]
+      },
+      {
+        "args": [
+          [
+            3,
+            3,
+            3
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "args": [
+          [
+            9,
+            8,
+            7,
+            6,
+            5,
+            4,
+            3,
+            2,
+            1,
+            0
+          ]
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ]
+      },
+      {
+        "args": [
+          [
+            -5,
+            3,
+            0,
+            -5,
+            2
+          ]
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": [
+          -5,
+          -5,
+          0,
+          2,
+          3
+        ]
+      }
+    ]
+  },
+  "solution": "def merge(left, right):\n    result = []\n    i = j = 0\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            result.append(left[i])\n            i += 1\n        else:\n            result.append(right[j])\n            j += 1\n    result.extend(left[i:])\n    result.extend(right[j:])\n    return result\n\n\ndef merge_sort(items):\n    if len(items) <= 1:\n        return list(items)\n    mid = len(items) // 2\n    return merge(merge_sort(items[:mid]), merge_sort(items[mid:]))\n",
+  "explanation": "Базовый случай — список длиной до 1; слияние сортированных половин даёт сортированный результат.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def merge_sort(items):\n    if len(items) <= 1:\n        return list(items)\n    mid = len(items) // 2\n    return merge_sort(items[:mid]) + merge_sort(items[mid:])\n",
+      "why": "Половины склеены, а не слиты по порядку."
+    },
+    {
+      "code": "def merge_sort(items):\n    return list(items)\n",
+      "why": "Сортировка не выполняется."
+    },
+    {
+      "code": "def merge(left, right):\n    result = []\n    i = j = 0\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            result.append(left[i])\n            i += 1\n        else:\n            result.append(right[j])\n            j += 1\n    result.extend(left[i:])\n    result.extend(right[j:])\n    return result\n\n\ndef merge_sort(items):\n    if len(items) <= 1:\n        return list(items)\n    mid = len(items) // 2\n    return merge(items[:mid], items[mid:])\n",
+      "why": "Половины не отсортированы рекурсивно перед слиянием."
+    }
+  ]
+}

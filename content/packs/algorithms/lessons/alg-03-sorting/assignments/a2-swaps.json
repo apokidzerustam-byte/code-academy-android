@@ -1,0 +1,107 @@
+{
+  "id": "a2-swaps",
+  "type": "function",
+  "title": "Сколько перестановок",
+  "statement": "Напишите функцию `count_swaps(items)`: выполните сортировку пузырьком и верните **число перестановок** соседних элементов (при равенстве перестановки нет).\n\nПример: `count_swaps([3, 1, 2])` → `2`; `count_swaps([1, 2, 3])` → `0`.",
+  "goal": "Сколько перестановок",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Нужно выполнить саму сортировку и считать обмены.",
+    "Заведите счётчик swaps = 0.",
+    "Увеличивайте его только при реальном обмене.",
+    "При равенстве элементов обмена нет.",
+    "Верните swaps после завершения сортировки."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "count_swaps",
+    "cases": [
+      {
+        "args": [
+          [
+            3,
+            1,
+            2
+          ]
+        ],
+        "id": "v1",
+        "expected": 2
+      },
+      {
+        "args": [
+          [
+            1,
+            2,
+            3
+          ]
+        ],
+        "id": "v2",
+        "expected": 0
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          [
+            5,
+            4,
+            3,
+            2,
+            1
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 10
+      },
+      {
+        "args": [
+          [
+            2,
+            2,
+            1
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 2
+      },
+      {
+        "args": [
+          [
+            4,
+            1,
+            3,
+            2
+          ]
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": 4
+      }
+    ]
+  },
+  "solution": "def count_swaps(items):\n    items = list(items)\n    swaps = 0\n    swapped = True\n    while swapped:\n        swapped = False\n        for i in range(len(items) - 1):\n            if items[i] > items[i + 1]:\n                items[i], items[i + 1] = items[i + 1], items[i]\n                swaps += 1\n                swapped = True\n    return swaps\n",
+  "explanation": "Число перестановок в пузырьке равно числу инверсий — пар элементов, стоящих в неправильном порядке.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def count_swaps(items):\n    items = list(items)\n    comparisons = 0\n    swapped = True\n    while swapped:\n        swapped = False\n        for i in range(len(items) - 1):\n            comparisons += 1\n            if items[i] > items[i + 1]:\n                items[i], items[i + 1] = items[i + 1], items[i]\n                swapped = True\n    return comparisons\n",
+      "why": "Считаются сравнения, а не перестановки."
+    },
+    {
+      "code": "def count_swaps(items):\n    items = list(items)\n    swaps = 0\n    swapped = True\n    while swapped:\n        swapped = False\n        for i in range(len(items) - 1):\n            if items[i] >= items[i + 1]:\n                items[i], items[i + 1] = items[i + 1], items[i]\n                swaps += 1\n                if items[i] != items[i + 1]:\n                    swapped = True\n    return swaps\n",
+      "why": "Равные элементы тоже считаются перестановкой."
+    }
+  ]
+}

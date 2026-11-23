@@ -21,7 +21,8 @@
     "py-19-modules",
     "py-20-classes",
     "py-21-inheritance",
-    "py-22-async"
+    "py-22-async",
+    "py-23-http"
   ],
   "skills": {
     "python.functions": "Функции: def и вызов",
@@ -63,6 +64,9 @@
     "python.oop.dataclass": "Dataclass",
     "python.async": "async и await",
     "python.async.gather": "asyncio.gather",
-    "python.async.timeout": "Таймауты: wait_for"
+    "python.async.timeout": "Таймауты: wait_for",
+    "python.http": "Основы HTTP",
+    "python.http.url": "Адреса и параметры (urllib.parse)",
+    "python.http.status": "Коды состояния"
   }
 }

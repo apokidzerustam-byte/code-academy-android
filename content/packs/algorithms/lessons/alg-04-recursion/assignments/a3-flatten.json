@@ -1,0 +1,127 @@
+{
+  "id": "a3-flatten",
+  "type": "function",
+  "title": "Выпрямление списка",
+  "statement": "Напишите рекурсивную функцию `flatten(data)`: превратите произвольно вложенные списки в один плоский список в порядке следования элементов.\n\nПример: `flatten([1, [2, [3, 4]], 5])` → `[1, 2, 3, 4, 5]`.",
+  "goal": "Выпрямление списка",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Для каждого элемента решите: это список или одиночное значение.",
+    "Проверка: isinstance(item, list).",
+    "Для списка вызовите flatten рекурсивно.",
+    "Результат рекурсивного вызова нужно добавить целиком — extend, а не append.",
+    "Для одиночных значений используйте append."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "flatten",
+    "cases": [
+      {
+        "args": [
+          [
+            1,
+            [
+              2,
+              [
+                3,
+                4
+              ]
+            ],
+            5
+          ]
+        ],
+        "id": "v1",
+        "expected": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            [],
+            [
+              []
+            ]
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            [
+              [
+                "a"
+              ]
+            ],
+            "b",
+            [
+              "c",
+              [
+                "d"
+              ]
+            ]
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "args": [
+          [
+            1,
+            2,
+            3
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          1,
+          2,
+          3
+        ]
+      }
+    ]
+  },
+  "solution": "def flatten(data):\n    result = []\n    for item in data:\n        if isinstance(item, list):\n            result.extend(flatten(item))\n        else:\n            result.append(item)\n    return result\n",
+  "explanation": "extend присоединяет элементы вложенного результата, сохраняя порядок; рекурсия обрабатывает любую глубину.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def flatten(data):\n    result = []\n    for item in data:\n        if isinstance(item, list):\n            result.append(flatten(item))\n        else:\n            result.append(item)\n    return result\n",
+      "why": "Вложенный результат добавлен как список, а не развёрнут (append вместо extend)."
+    },
+    {
+      "code": "def flatten(data):\n    result = []\n    for item in data:\n        if isinstance(item, list):\n            result.extend(item)\n        else:\n            result.append(item)\n    return result\n",
+      "why": "Разворачивается только один уровень вложенности."
+    },
+    {
+      "code": "def flatten(data):\n    result = []\n    for item in data:\n        if isinstance(item, list):\n            result = flatten(item) + result\n        else:\n            result.append(item)\n    return result\n",
+      "why": "Вложенный список вставляется в начало: порядок нарушен."
+    }
+  ]
+}

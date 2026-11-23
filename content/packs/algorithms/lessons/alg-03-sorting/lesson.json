@@ -1,0 +1,44 @@
+{
+  "id": "alg-03-sorting",
+  "title": "Сортировки",
+  "goal": "Реализовать простые сортировки, понимать сложность O(n²) и пользоваться sorted с key.",
+  "skills": [
+    "algo.sort.simple",
+    "algo.sort.builtin"
+  ],
+  "prerequisites": [
+    "alg-02-search"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-bubble.json",
+    "assignments/a2-swaps.json",
+    "assignments/a3-insertion.json",
+    "assignments/a4-key.json",
+    "assignments/a5-stable.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Пишут собственную сортировку вместо sorted",
+      "fix": "Используйте sorted/sort: они быстрее и проверены временем."
+    },
+    {
+      "mistake": "Ожидают, что sort() возвращает список",
+      "fix": "sort() меняет список на месте и возвращает None; нужен новый список — sorted()."
+    },
+    {
+      "mistake": "Сортируют по убыванию через reverse там, где нужен смешанный порядок",
+      "fix": "Используйте кортеж в key: (-число, имя)."
+    },
+    {
+      "mistake": "Забывают, что сортировка пузырьком меняет исходный список",
+      "fix": "Сделайте копию: items = list(items)."
+    }
+  ]
+}

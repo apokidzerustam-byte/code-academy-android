@@ -1,0 +1,170 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Разделяй и властвуй",
+      "narration": "Простые сортировки сравнивают почти все пары элементов и поэтому медленны. Быстрые алгоритмы используют идею «разделяй и властвуй»: разбить задачу на части, решить каждую рекурсивно и объединить результаты. Сегодня разберём два алгоритма. Первый — сортировка слиянием, второй — быстрая сортировка. Оба работают за О от эн лог эн, что для миллиона элементов означает около двадцати миллионов операций вместо тысячи миллиардов у пузырька.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "**Разделяй и властвуй**: разбей → реши части рекурсивно → объедини",
+          "cue": 1
+        }
+      ]
+    },
+    {
+      "id": "merge",
+      "title": "Слияние двух отсортированных списков",
+      "narration": "Основа сортировки слиянием — умение объединять два уже отсортированных списка в один отсортированный. Заведём по указателю на каждый список. Сравниваем элементы, на которые они указывают, берём меньший и двигаем соответствующий указатель. Когда один из списков закончился, остаток другого просто дописываем в конец, потому что он уже отсортирован.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "def merge(left, right):\n    result = []\n    i = j = 0\n",
+          "cue": 1
+        },
+        {
+          "type": "type",
+          "text": "    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            result.append(left[i])\n            i += 1\n        else:\n            result.append(right[j])\n            j += 1\n",
+          "cue": 2
+        },
+        {
+          "type": "type",
+          "text": "    result.extend(left[i:])\n    result.extend(right[j:])\n    return result\n\nprint(merge([1, 4, 9], [2, 3, 10, 11]))\n",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "[1, 2, 3, 4, 9, 10, 11]\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "mergesort",
+      "title": "Сортировка слиянием",
+      "narration": "Теперь сама сортировка. Если в списке не больше одного элемента, он уже отсортирован — это базовый случай. Иначе делим список пополам, рекурсивно сортируем обе половины и сливаем результаты нашей функцией merge. Глубина рекурсии равна логарифму от числа элементов, а на каждом уровне слияние обрабатывает все элементы, откуда и берётся О от эн лог эн.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "def merge(left, right):\n    result = []\n    i = j = 0\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            result.append(left[i])\n            i += 1\n        else:\n            result.append(right[j])\n            j += 1\n    result.extend(left[i:])\n    result.extend(right[j:])\n    return result\n\n",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "def merge_sort(items):\n    if len(items) <= 1:\n        return list(items)\n",
+          "cue": 1
+        },
+        {
+          "type": "type",
+          "text": "    mid = len(items) // 2\n    return merge(merge_sort(items[:mid]), merge_sort(items[mid:]))\n\n",
+          "cue": 2
+        },
+        {
+          "type": "type",
+          "text": "print(merge_sort([5, 2, 9, 1, 7, 3, 8]))\n",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "[1, 2, 3, 5, 7, 8, 9]\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "quick",
+      "title": "Быстрая сортировка",
+      "narration": "Быстрая сортировка устроена иначе. Выбираем опорный элемент, например первый. Все элементы меньше опорного отправляем в левую группу, равные — в среднюю, большие — в правую. Затем рекурсивно сортируем левую и правую группы, а средняя уже на своём месте. Склеиваем три части. В среднем она очень быстрая, а в худшем случае, например при уже отсортированных данных и плохом выборе опорного, замедляется до О от эн в квадрате.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "def quick_sort(items):\n    if len(items) <= 1:\n        return list(items)\n    pivot = items[0]\n",
+          "cue": 1
+        },
+        {
+          "type": "type",
+          "text": "    less = [x for x in items if x < pivot]\n    equal = [x for x in items if x == pivot]\n    more = [x for x in items if x > pivot]\n",
+          "cue": 2
+        },
+        {
+          "type": "type",
+          "text": "    return quick_sort(less) + equal + quick_sort(more)\n\nprint(quick_sort([5, 2, 9, 1, 5, 7, 3]))\n",
+          "cue": 4
+        },
+        {
+          "type": "run",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "[1, 2, 3, 5, 5, 7, 9]\n",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "count",
+      "title": "Считаем операции",
+      "narration": "Сравним быстрые и простые алгоритмы по числу сравнений. Напишем сортировку слиянием со счётчиком сравнений и пузырёк с таким же счётчиком, и запустим оба на списке из двухсот элементов, расположенных в обратном порядке. Пузырёк выполнит около двадцати тысяч сравнений, слияние — менее двух тысяч. Чем больше данных, тем выше разрыв.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "def bubble_cmp(items):\n    items, n = list(items), 0\n    swapped = True\n    while swapped:\n        swapped = False\n        for i in range(len(items) - 1):\n            n += 1\n            if items[i] > items[i + 1]:\n                items[i], items[i + 1] = items[i + 1], items[i]\n                swapped = True\n    return n\n\n",
+          "cue": 1
+        },
+        {
+          "type": "type",
+          "text": "def merge_cmp(items):\n    if len(items) <= 1:\n        return list(items), 0\n    mid = len(items) // 2\n    left, a = merge_cmp(items[:mid])\n    right, b = merge_cmp(items[mid:])\n    res, i, j, n = [], 0, 0, 0\n    while i < len(left) and j < len(right):\n        n += 1\n        if left[i] <= right[j]:\n            res.append(left[i]); i += 1\n        else:\n            res.append(right[j]); j += 1\n    res += left[i:] + right[j:]\n    return res, a + b + n\n\n",
+          "cue": 1
+        },
+        {
+          "type": "type",
+          "text": "data = list(range(200, 0, -1))\nprint(bubble_cmp(data), merge_cmp(data)[1])\n",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "39800 812\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. Сортировка слиянием гарантированно работает за О от эн лог эн и устойчива, но требует дополнительной памяти. Быстрая сортировка в среднем быстра, но в плохих случаях деградирует. На практике используйте встроенный sorted, а идею разделяй и властвуй запомните: она встретится нам ещё в деревьях и бинарном поиске.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "Слияние: O(n log n), устойчивая · Быстрая: в среднем O(n log n), худший O(n²)",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}

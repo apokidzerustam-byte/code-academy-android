@@ -7,17 +7,29 @@
   "language": "python",
   "minAppVersion": 1,
   "requiresPacks": [
-    "python-basics"
+    "python-core"
   ],
   "lessons": [
     "alg-01-big-o",
-    "alg-02-search"
+    "alg-02-search",
+    "alg-03-sorting",
+    "alg-04-recursion",
+    "alg-05-fast-sorts",
+    "alg-06-stack-queue"
   ],
   "skills": {
     "algo.bigo": "Big O: рост числа шагов",
     "algo.bigo.classes": "Виды роста: O(1), O(log n), O(n), O(n²)",
     "algo.search.linear": "Линейный поиск",
     "algo.search.binary": "Бинарный поиск",
-    "algo.search.bisect": "Модуль bisect"
+    "algo.search.bisect": "Модуль bisect",
+    "algo.sort.simple": "Простые сортировки",
+    "algo.sort.builtin": "sorted, key и устойчивость",
+    "algo.recursion": "Рекурсия",
+    "algo.recursion.nested": "Рекурсия на вложенных структурах",
+    "algo.sort.merge": "Сортировка слиянием",
+    "algo.sort.quick": "Быстрая сортировка",
+    "algo.stack": "Стек",
+    "algo.queue": "Очередь (deque)"
   }
 }

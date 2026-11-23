@@ -1,0 +1,103 @@
+{
+  "id": "a1-power",
+  "type": "function",
+  "title": "Степень рекурсией",
+  "statement": "Напишите рекурсивную функцию `power(base, exp)`: возведение `base` в целую неотрицательную степень `exp` без оператора `**` и без `pow`. `power(2, 0)` → `1`.",
+  "goal": "Степень рекурсией",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Выразите base^exp через base^(exp - 1).",
+    "base^exp = base * base^(exp - 1).",
+    "Базовый случай: любая степень нуля равна 1.",
+    "Функция должна вызывать саму себя с уменьшенным exp.",
+    "if exp == 0: return 1; иначе return base * power(base, exp - 1)."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "power",
+    "cases": [
+      {
+        "args": [
+          2,
+          10
+        ],
+        "id": "v1",
+        "expected": 1024
+      },
+      {
+        "args": [
+          5,
+          0
+        ],
+        "id": "v2",
+        "expected": 1
+      },
+      {
+        "args": [
+          3,
+          1
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 3
+      },
+      {
+        "args": [
+          7,
+          3
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 343
+      },
+      {
+        "args": [
+          0,
+          5
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          1,
+          50
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": 1
+      },
+      {
+        "args": [
+          -2,
+          3
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": -8
+      }
+    ]
+  },
+  "solution": "def power(base, exp):\n    if exp == 0:\n        return 1\n    return base * power(base, exp - 1)\n",
+  "explanation": "Шаг рекурсии уменьшает показатель на единицу; базовый случай — нулевая степень.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def power(base, exp):\n    if exp == 1:\n        return base\n    return base * power(base, exp - 1)\n",
+      "why": "Нет базового случая для нулевой степени: бесконечная рекурсия."
+    },
+    {
+      "code": "def power(base, exp):\n    if exp == 0:\n        return 0\n    return base * power(base, exp - 1)\n",
+      "why": "База возвращает 0 вместо 1: всё умножается на ноль."
+    },
+    {
+      "code": "def power(base, exp):\n    if exp == 0:\n        return 1\n    return base + power(base, exp - 1)\n",
+      "why": "Вместо умножения используется сложение."
+    }
+  ]
+}

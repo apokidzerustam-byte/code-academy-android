@@ -1,0 +1,149 @@
+{
+  "id": "a1-merge",
+  "type": "function",
+  "title": "Слияние списков",
+  "statement": "Напишите функцию `merge(left, right)`: объедините два **отсортированных** списка в один отсортированный без `sorted` и `sort`.\n\nПример: `merge([1, 4, 9], [2, 3, 10, 11])` → `[1, 2, 3, 4, 9, 10, 11]`.",
+  "goal": "Слияние списков",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Заведите два указателя — по одному на каждый список.",
+    "Сравнивайте текущие элементы и берите меньший.",
+    "Двигайте указатель того списка, из которого взяли элемент.",
+    "Когда один список закончится, второй нужно дописать целиком.",
+    "result.extend(left[i:]); result.extend(right[j:])."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "merge",
+    "cases": [
+      {
+        "args": [
+          [
+            1,
+            4,
+            9
+          ],
+          [
+            2,
+            3,
+            10,
+            11
+          ]
+        ],
+        "id": "v1",
+        "expected": [
+          1,
+          2,
+          3,
+          4,
+          9,
+          10,
+          11
+        ]
+      },
+      {
+        "args": [
+          [],
+          []
+        ],
+        "id": "v2",
+        "expected": []
+      },
+      {
+        "args": [
+          [],
+          [
+            1,
+            2
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          1,
+          2
+        ]
+      },
+      {
+        "args": [
+          [
+            5
+          ],
+          []
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          5
+        ]
+      },
+      {
+        "args": [
+          [
+            1,
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          1,
+          1,
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "args": [
+          [
+            1,
+            2,
+            3
+          ],
+          [
+            4,
+            5,
+            6
+          ]
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ]
+      }
+    ]
+  },
+  "solution": "def merge(left, right):\n    result = []\n    i = j = 0\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            result.append(left[i])\n            i += 1\n        else:\n            result.append(right[j])\n            j += 1\n    result.extend(left[i:])\n    result.extend(right[j:])\n    return result\n",
+  "explanation": "Слияние за один проход: каждый элемент добавляется ровно один раз — сложность O(n+m).",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def merge(left, right):\n    result = []\n    i = j = 0\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            result.append(left[i])\n            i += 1\n        else:\n            result.append(right[j])\n            j += 1\n    return result\n",
+      "why": "Остаток непустого списка потерян."
+    },
+    {
+      "code": "def merge(left, right):\n    return left + right\n",
+      "why": "Списки просто склеены без сравнения."
+    },
+    {
+      "code": "def merge(left, right):\n    result = []\n    i = j = 0\n    while i < len(left) and j < len(right):\n        if left[i] < right[j]:\n            result.append(left[i])\n            i += 1\n        else:\n            result.append(right[j])\n            j += 1\n    result.extend(left[i:])\n    return result\n",
+      "why": "Остаток правого списка потерян."
+    }
+  ]
+}

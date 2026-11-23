@@ -1,0 +1,80 @@
+{
+  "id": "a2-build-url",
+  "type": "function",
+  "title": "Сборка адреса",
+  "statement": "Напишите функцию `build_url(base, params)`: добавляет параметры к адресу `base` (в котором параметров ещё нет) с помощью `urlencode`. Для пустого словаря верните `base` без вопросительного знака.\n\nПримеры: `build_url(\"https://x.com/search\", {\"q\": \"чай\", \"page\": 2})` → `\"https://x.com/search?q=%D1%87%D0%B0%D0%B9&page=2\"`; `build_url(\"https://x.com\", {})` → `\"https://x.com\"`.",
+  "goal": "Сборка адреса",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Параметры нельзя склеивать вручную: пробелы и спецсимволы сломают адрес.",
+    "В urllib.parse есть функция urlencode.",
+    "urlencode принимает словарь и возвращает строку параметров.",
+    "Между адресом и параметрами ставится вопросительный знак.",
+    "Если параметров нет, верните base без изменений."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "build_url",
+    "cases": [
+      {
+        "args": [
+          "https://x.com/search",
+          {
+            "q": "чай",
+            "page": 2
+          }
+        ],
+        "id": "v1",
+        "expected": "https://x.com/search?q=%D1%87%D0%B0%D0%B9&page=2"
+      },
+      {
+        "args": [
+          "https://x.com",
+          {}
+        ],
+        "id": "v2",
+        "expected": "https://x.com"
+      },
+      {
+        "args": [
+          "https://a.pl/p",
+          {
+            "name": "Аня Б",
+            "x": "a&b"
+          }
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "https://a.pl/p?name=%D0%90%D0%BD%D1%8F+%D0%91&x=a%26b"
+      },
+      {
+        "args": [
+          "https://a.pl/p",
+          {
+            "k": 1
+          }
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "https://a.pl/p?k=1"
+      }
+    ]
+  },
+  "solution": "from urllib.parse import urlencode\n\n\ndef build_url(base, params):\n    if not params:\n        return base\n    return base + \"?\" + urlencode(params)\n",
+  "explanation": "urlencode экранирует спецсимволы и кириллицу; без параметров вопросительный знак не нужен.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def build_url(base, params):\n    return base + \"?\" + \"&\".join(f\"{k}={v}\" for k, v in params.items())\n",
+      "why": "Параметры склеены вручную: нет экранирования и лишний «?» при пустом словаре."
+    },
+    {
+      "code": "from urllib.parse import urlencode\n\n\ndef build_url(base, params):\n    return base + \"?\" + urlencode(params)\n",
+      "why": "Для пустого словаря добавлен лишний вопросительный знак."
+    }
+  ]
+}

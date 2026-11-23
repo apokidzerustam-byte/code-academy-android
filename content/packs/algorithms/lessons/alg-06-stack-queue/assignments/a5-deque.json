@@ -1,0 +1,41 @@
+{
+  "id": "a5-deque",
+  "type": "predict",
+  "title": "Стек и очередь вместе",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Стек и очередь вместе",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "from collections import deque\n\nstack = []\nqueue = deque()\nfor x in [1, 2, 3]:\n    stack.append(x)\n    queue.append(x)\nprint(stack.pop(), queue.popleft())\nprint(stack, list(queue))\n",
+  "hints": [
+    "Оба контейнера получили 1, 2, 3 в одном порядке.",
+    "stack.pop() снимает последний положенный элемент.",
+    "queue.popleft() забирает первый положенный.",
+    "В стеке остаётся [1, 2], в очереди — [2, 3].",
+    "Первая строка: 3 1."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "3 1\n[1, 2] [2, 3]\n"
+  },
+  "solution": "3 1\n[1, 2] [2, 3]\n",
+  "explanation": "Стек отдаёт последний, очередь — первый; остатки в контейнерах различаются.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "1 3\n[1, 2] [2, 3]\n",
+      "answer": "1 3\n[1, 2] [2, 3]\n",
+      "why": "pop снимает с конца (3), popleft — с начала (1): наоборот."
+    },
+    {
+      "code": "3 1\n[2, 3] [1, 2]\n",
+      "answer": "3 1\n[2, 3] [1, 2]\n",
+      "why": "После pop из стека остаются первые элементы, а после popleft — последние."
+    }
+  ]
+}

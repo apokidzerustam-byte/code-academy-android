@@ -1,0 +1,45 @@
+{
+  "id": "py-23-http",
+  "title": "HTTP и работа с адресами",
+  "goal": "Разбирать адреса и параметры, понимать методы и коды состояния, читать сырой HTTP-ответ.",
+  "skills": [
+    "python.http",
+    "python.http.url",
+    "python.http.status"
+  ],
+  "prerequisites": [
+    "py-22-async"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-parse-url.json",
+    "assignments/a2-build-url.json",
+    "assignments/a3-status.json",
+    "assignments/a4-parse-response.json",
+    "assignments/a5-qs.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Склеивают адрес и параметры строками вручную",
+      "fix": "Используйте urlencode: он экранирует пробелы и спецсимволы."
+    },
+    {
+      "mistake": "Забывают, что значения parse_qs — списки",
+      "fix": "Берите нужный элемент: q['n'][0]."
+    },
+    {
+      "mistake": "Читают тело ответа, не проверив код состояния",
+      "fix": "Сначала проверьте status: при 4xx/5xx тело может быть сообщением об ошибке."
+    },
+    {
+      "mistake": "Сравнивают код состояния как строку",
+      "fix": "Преобразуйте в int: int('404')."
+    }
+  ]
+}

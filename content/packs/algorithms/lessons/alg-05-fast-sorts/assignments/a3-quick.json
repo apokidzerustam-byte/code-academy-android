@@ -1,0 +1,142 @@
+{
+  "id": "a3-quick",
+  "type": "function",
+  "title": "Быстрая сортировка",
+  "statement": "Напишите `quick_sort(items)`: быстрая сортировка с опорным элементом `items[0]`; без `sorted`/`sort`. **Дубликаты нельзя терять.**",
+  "goal": "Быстрая сортировка",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Выберите опорный элемент и разделите остальные на три группы.",
+    "Меньше опорного, равные опорному и больше опорного.",
+    "Две крайние группы отсортируйте рекурсивно.",
+    "Средняя группа (равные) уже на месте.",
+    "return quick_sort(less) + equal + quick_sort(more)."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "quick_sort",
+    "cases": [
+      {
+        "args": [
+          [
+            5,
+            2,
+            9,
+            1,
+            5,
+            7,
+            3
+          ]
+        ],
+        "id": "v1",
+        "expected": [
+          1,
+          2,
+          3,
+          5,
+          5,
+          7,
+          9
+        ]
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            4,
+            4,
+            4
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          4,
+          4,
+          4
+        ]
+      },
+      {
+        "args": [
+          [
+            2,
+            1,
+            2,
+            1
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "args": [
+          [
+            1,
+            2,
+            3,
+            4
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "args": [
+          [
+            4,
+            3,
+            2,
+            1
+          ]
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    ]
+  },
+  "solution": "def quick_sort(items):\n    if len(items) <= 1:\n        return list(items)\n    pivot = items[0]\n    less = [x for x in items if x < pivot]\n    equal = [x for x in items if x == pivot]\n    more = [x for x in items if x > pivot]\n    return quick_sort(less) + equal + quick_sort(more)\n",
+  "explanation": "Три группы гарантируют, что дубликаты не потеряются, а рекурсивные части строго меньше исходного списка.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def quick_sort(items):\n    if len(items) <= 1:\n        return list(items)\n    pivot = items[0]\n    less = [x for x in items if x < pivot]\n    more = [x for x in items if x > pivot]\n    return quick_sort(less) + [pivot] + quick_sort(more)\n",
+      "why": "Дубликаты опорного элемента теряются."
+    },
+    {
+      "code": "def quick_sort(items):\n    if len(items) <= 1:\n        return list(items)\n    pivot = items[0]\n    less = [x for x in items if x <= pivot]\n    more = [x for x in items if x > pivot]\n    return quick_sort(less) + quick_sort(more)\n",
+      "why": "Опорный элемент входит в левую группу: рекурсия не уменьшает задачу (бесконечная рекурсия)."
+    },
+    {
+      "code": "def quick_sort(items):\n    if len(items) <= 1:\n        return list(items)\n    pivot = items[0]\n    less = [x for x in items if x < pivot]\n    equal = [x for x in items if x == pivot]\n    more = [x for x in items if x > pivot]\n    return quick_sort(more) + equal + quick_sort(less)\n",
+      "why": "Группы склеены в обратном порядке."
+    }
+  ]
+}

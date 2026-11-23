@@ -1,0 +1,121 @@
+{
+  "id": "a3-potato",
+  "type": "function",
+  "title": "Горячая картошка",
+  "statement": "Напишите `winner(names, k)`: игроки стоят по кругу, картошку передают по кругу, каждый `k`-й по счёту выбывает (счёт продолжается со следующего). Верните имя последнего оставшегося. `k >= 1`.\n\nПример: `winner([\"Аня\", \"Борис\", \"Вера\", \"Глеб\", \"Дина\"], 3)` → `\"Глеб\"`.",
+  "goal": "Горячая картошка",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Круг удобно моделировать очередью: взять спереди и поставить в конец.",
+    "Пропустите k-1 игроков: каждого переставьте в конец.",
+    "k-го игрока уберите из очереди.",
+    "Повторяйте, пока не останется один игрок.",
+    "circle.append(circle.popleft()) — передача картошки; circle.popleft() — выбывание."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "winner",
+    "cases": [
+      {
+        "args": [
+          [
+            "Аня",
+            "Борис",
+            "Вера",
+            "Глеб",
+            "Дина"
+          ],
+          3
+        ],
+        "id": "v1",
+        "expected": "Глеб"
+      },
+      {
+        "args": [
+          [
+            "А",
+            "Б",
+            "В"
+          ],
+          1
+        ],
+        "id": "v2",
+        "expected": "В"
+      },
+      {
+        "args": [
+          [
+            "А"
+          ],
+          5
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "А"
+      },
+      {
+        "args": [
+          [
+            "А",
+            "Б"
+          ],
+          2
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "А"
+      },
+      {
+        "args": [
+          [
+            "А",
+            "Б",
+            "В",
+            "Г",
+            "Д",
+            "Е"
+          ],
+          2
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": "Д"
+      },
+      {
+        "args": [
+          [
+            "А",
+            "Б",
+            "В",
+            "Г"
+          ],
+          7
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": "Б"
+      }
+    ]
+  },
+  "solution": "from collections import deque\n\n\ndef winner(names, k):\n    circle = deque(names)\n    while len(circle) > 1:\n        for _ in range(k - 1):\n            circle.append(circle.popleft())\n        circle.popleft()\n    return circle[0]\n",
+  "explanation": "deque.popleft и append моделируют круг: передача — это перенос первого в конец.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from collections import deque\n\n\ndef winner(names, k):\n    circle = deque(names)\n    while len(circle) > 1:\n        for _ in range(k):\n            circle.append(circle.popleft())\n        circle.popleft()\n    return circle[0]\n",
+      "why": "Сдвиг на k вместо k-1: выбывает не тот игрок."
+    },
+    {
+      "code": "def winner(names, k):\n    items = list(names)\n    return items[-1]\n",
+      "why": "Возвращается последний элемент без моделирования игры."
+    },
+    {
+      "code": "from collections import deque\n\n\ndef winner(names, k):\n    circle = deque(names)\n    while len(circle) > 1:\n        for _ in range(k - 1):\n            circle.append(circle.popleft())\n        circle.pop()\n    return circle[0]\n",
+      "why": "Выбывает игрок с конца очереди, а не спереди."
+    }
+  ]
+}

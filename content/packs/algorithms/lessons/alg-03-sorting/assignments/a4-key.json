@@ -1,0 +1,138 @@
+{
+  "id": "a4-key",
+  "type": "function",
+  "title": "Сортировка по ключу",
+  "statement": "Напишите функцию `rank(students)`: `students` — список пар `[имя, оценка]`. Верните список имён: сначала по **убыванию оценки**, при равных оценках — по **алфавиту**.\n\nПример: `rank([[\"Борис\", 4], [\"Аня\", 5], [\"Вера\", 4]])` → `[\"Аня\", \"Борис\", \"Вера\"]`.",
+  "goal": "Сортировка по ключу",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Ключ сортировки может быть кортежем: сравнение идёт по первому элементу, потом по второму.",
+    "Для убывания числа используйте отрицательное значение.",
+    "key=lambda s: (-s[1], s[0]).",
+    "Результат sorted — список пар, а нужны только имена.",
+    "Верните [name for name, _ in ordered]."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "rank",
+    "cases": [
+      {
+        "args": [
+          [
+            [
+              "Борис",
+              4
+            ],
+            [
+              "Аня",
+              5
+            ],
+            [
+              "Вера",
+              4
+            ]
+          ]
+        ],
+        "id": "v1",
+        "expected": [
+          "Аня",
+          "Борис",
+          "Вера"
+        ]
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            [
+              "Яна",
+              3
+            ],
+            [
+              "Аня",
+              3
+            ]
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          "Аня",
+          "Яна"
+        ]
+      },
+      {
+        "args": [
+          [
+            [
+              "Глеб",
+              2
+            ],
+            [
+              "Дина",
+              5
+            ],
+            [
+              "Ева",
+              5
+            ],
+            [
+              "Антон",
+              2
+            ]
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          "Дина",
+          "Ева",
+          "Антон",
+          "Глеб"
+        ]
+      },
+      {
+        "args": [
+          [
+            [
+              "Ольга",
+              1
+            ]
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          "Ольга"
+        ]
+      }
+    ]
+  },
+  "solution": "def rank(students):\n    ordered = sorted(students, key=lambda s: (-s[1], s[0]))\n    return [name for name, _ in ordered]\n",
+  "explanation": "Кортеж в key сортирует по нескольким критериям; минус превращает убывание в возрастание.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def rank(students):\n    ordered = sorted(students, key=lambda s: (s[1], s[0]))\n    return [name for name, _ in ordered]\n",
+      "why": "Сортировка по возрастанию оценки."
+    },
+    {
+      "code": "def rank(students):\n    ordered = sorted(students, key=lambda s: s[1], reverse=True)\n    return [name for name, _ in ordered]\n",
+      "why": "При равных оценках порядок исходный, а нужен алфавитный."
+    },
+    {
+      "code": "def rank(students):\n    ordered = sorted(students, key=lambda s: (-s[1], s[0]), reverse=True)\n    return [name for name, _ in ordered]\n",
+      "why": "reverse=True разворачивает и алфавитный порядок."
+    }
+  ]
+}

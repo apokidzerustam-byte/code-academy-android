@@ -1,0 +1,45 @@
+{
+  "id": "alg-05-fast-sorts",
+  "title": "Быстрые сортировки",
+  "goal": "Реализовать сортировку слиянием и быструю сортировку, понимать идею «разделяй и властвуй».",
+  "skills": [
+    "algo.sort.merge",
+    "algo.sort.quick"
+  ],
+  "prerequisites": [
+    "alg-04-recursion",
+    "alg-03-sorting"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-merge.json",
+    "assignments/a2-mergesort.json",
+    "assignments/a3-quick.json",
+    "assignments/a4-inversions.json",
+    "assignments/a5-merge.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Теряют дубликаты в быстрой сортировке",
+      "fix": "Отдельная группа equal для элементов, равных опорному."
+    },
+    {
+      "mistake": "Забывают дописать остаток при слиянии",
+      "fix": "После цикла extend для обоих списков."
+    },
+    {
+      "mistake": "Опорный элемент попадает в обе рекурсивные группы",
+      "fix": "Каждая часть должна быть строго меньше исходного списка."
+    },
+    {
+      "mistake": "Используют быструю сортировку на отсортированных данных с первым опорным",
+      "fix": "Берите опорный из середины или случайный."
+    }
+  ]
+}

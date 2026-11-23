@@ -1,0 +1,104 @@
+{
+  "id": "a1-balanced",
+  "type": "function",
+  "title": "Правильные скобки",
+  "statement": "Напишите `is_balanced(s)`: `True`, если скобки `()`, `[]`, `{}` в строке расставлены правильно (каждая закрывающая имеет парную открывающую, и вложенность не нарушена). Остальные символы игнорируйте.",
+  "goal": "Правильные скобки",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Для вложенности нужна структура «последним вошёл — первым вышел».",
+    "Открывающие скобки кладите в стек.",
+    "Закрывающая должна совпасть с верхней открывающей.",
+    "Если стек пуст при закрывающей — строка неправильная.",
+    "В конце стек должен быть пуст: return not stack."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "is_balanced",
+    "cases": [
+      {
+        "args": [
+          "{[()]}"
+        ],
+        "id": "v1",
+        "expected": true
+      },
+      {
+        "args": [
+          "([)]"
+        ],
+        "id": "v2",
+        "expected": false
+      },
+      {
+        "args": [
+          ""
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": true
+      },
+      {
+        "args": [
+          "(("
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          "))"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          "a(b)c[d]"
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": true
+      },
+      {
+        "args": [
+          "(]"
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          "{[}]"
+        ],
+        "id": "h8",
+        "hidden": true,
+        "expected": false
+      }
+    ]
+  },
+  "solution": "def is_balanced(s):\n    pairs = {\")\": \"(\", \"]\": \"[\", \"}\": \"{\"}\n    stack = []\n    for ch in s:\n        if ch in \"([{\":\n            stack.append(ch)\n        elif ch in pairs:\n            if not stack or stack.pop() != pairs[ch]:\n                return False\n    return not stack\n",
+  "explanation": "Стек запоминает порядок открытых скобок; закрывающая обязана соответствовать последней открытой.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def is_balanced(s):\n    return s.count(\"(\") == s.count(\")\") and s.count(\"[\") == s.count(\"]\") and s.count(\"{\") == s.count(\"}\")\n",
+      "why": "Считаются только количества: порядок и вложенность не проверяются."
+    },
+    {
+      "code": "def is_balanced(s):\n    pairs = {\")\": \"(\", \"]\": \"[\", \"}\": \"{\"}\n    stack = []\n    for ch in s:\n        if ch in \"([{\":\n            stack.append(ch)\n        elif ch in pairs:\n            if not stack or stack.pop() != pairs[ch]:\n                return False\n    return True\n",
+      "why": "Не проверено, что стек пуст: незакрытые скобки пропускаются."
+    },
+    {
+      "code": "def is_balanced(s):\n    pairs = {\")\": \"(\", \"]\": \"[\", \"}\": \"{\"}\n    stack = []\n    for ch in s:\n        if ch in \"([{\":\n            stack.append(ch)\n        elif ch in pairs:\n            stack.pop()\n    return not stack\n",
+      "why": "Снятая скобка не сравнивается с парной; на пустом стеке pop падает."
+    }
+  ]
+}

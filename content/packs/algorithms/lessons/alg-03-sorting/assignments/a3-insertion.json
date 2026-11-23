@@ -1,0 +1,128 @@
+{
+  "id": "a3-insertion",
+  "type": "function",
+  "title": "Вставками",
+  "statement": "Напишите `insertion_sort(items)`: сортировка вставками без `sorted`/`sort`, возвращает новый список по **убыванию**.",
+  "goal": "Вставками",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Левая часть списка всегда уже отсортирована.",
+    "Берите элементы по очереди, начиная со второго.",
+    "Сдвигайте элемент влево, пока он больше левого соседа (для убывания).",
+    "Нужен именно while: сдвигов может быть несколько.",
+    "Условие: while j > 0 and items[j - 1] < items[j]."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "insertion_sort",
+    "cases": [
+      {
+        "args": [
+          [
+            5,
+            2,
+            9,
+            1,
+            7
+          ]
+        ],
+        "id": "v1",
+        "expected": [
+          9,
+          7,
+          5,
+          2,
+          1
+        ]
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            1,
+            2,
+            3
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          3,
+          2,
+          1
+        ]
+      },
+      {
+        "args": [
+          [
+            3,
+            3,
+            1
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          3,
+          3,
+          1
+        ]
+      },
+      {
+        "args": [
+          [
+            10
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          10
+        ]
+      },
+      {
+        "args": [
+          [
+            1,
+            5,
+            2,
+            5,
+            0
+          ]
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": [
+          5,
+          5,
+          2,
+          1,
+          0
+        ]
+      }
+    ]
+  },
+  "solution": "def insertion_sort(items):\n    items = list(items)\n    for i in range(1, len(items)):\n        j = i\n        while j > 0 and items[j - 1] < items[j]:\n            items[j - 1], items[j] = items[j], items[j - 1]\n            j -= 1\n    return items\n",
+  "explanation": "Для убывания элемент сдвигается влево, пока левый сосед меньше него; строгое сравнение сохраняет устойчивость.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def insertion_sort(items):\n    items = list(items)\n    for i in range(1, len(items)):\n        j = i\n        while j > 0 and items[j - 1] > items[j]:\n            items[j - 1], items[j] = items[j], items[j - 1]\n            j -= 1\n    return items\n",
+      "why": "Сортирует по возрастанию, а нужно по убыванию."
+    },
+    {
+      "code": "def insertion_sort(items):\n    items = list(items)\n    for i in range(1, len(items)):\n        j = i\n        if j > 0 and items[j - 1] < items[j]:\n            items[j - 1], items[j] = items[j], items[j - 1]\n    return items\n",
+      "why": "Элемент сдвигается не до конца (if вместо while)."
+    }
+  ]
+}

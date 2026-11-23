@@ -1,0 +1,142 @@
+{
+  "id": "a1-bubble",
+  "type": "function",
+  "title": "Пузырьком",
+  "statement": "Напишите функцию `bubble_sort(items)` без использования `sorted` и `sort`: верните **новый** отсортированный по возрастанию список; исходный список менять нельзя.",
+  "goal": "Пузырьком",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Сравнивайте соседние элементы и меняйте их, если левый больше правого.",
+    "Один проход поднимает самый большой элемент в конец.",
+    "Повторяйте проходы, пока есть хотя бы одна перестановка (флаг swapped).",
+    "Сначала скопируйте список: items = list(items).",
+    "Обмен: items[i], items[i + 1] = items[i + 1], items[i]."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "bubble_sort",
+    "cases": [
+      {
+        "args": [
+          [
+            5,
+            2,
+            9,
+            1,
+            7
+          ]
+        ],
+        "id": "v1",
+        "expected": [
+          1,
+          2,
+          5,
+          7,
+          9
+        ]
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            1
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          1
+        ]
+      },
+      {
+        "args": [
+          [
+            3,
+            3,
+            1,
+            2,
+            2
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          1,
+          2,
+          2,
+          3,
+          3
+        ]
+      },
+      {
+        "args": [
+          [
+            9,
+            8,
+            7,
+            6,
+            5,
+            4,
+            3,
+            2,
+            1
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ]
+      },
+      {
+        "args": [
+          [
+            -1,
+            5,
+            0,
+            -7
+          ]
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": [
+          -7,
+          -1,
+          0,
+          5
+        ]
+      }
+    ]
+  },
+  "solution": "def bubble_sort(items):\n    items = list(items)\n    swapped = True\n    while swapped:\n        swapped = False\n        for i in range(len(items) - 1):\n            if items[i] > items[i + 1]:\n                items[i], items[i + 1] = items[i + 1], items[i]\n                swapped = True\n    return items\n",
+  "explanation": "Проходы повторяются, пока список не станет упорядоченным; копия защищает исходные данные.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def bubble_sort(items):\n    items = list(items)\n    for i in range(len(items) - 1):\n        if items[i] > items[i + 1]:\n            items[i], items[i + 1] = items[i + 1], items[i]\n    return items\n",
+      "why": "Сделан лишь один проход: список упорядочен не полностью."
+    },
+    {
+      "code": "def bubble_sort(items):\n    items = list(items)\n    swapped = True\n    while swapped:\n        swapped = False\n        for i in range(len(items) - 1):\n            if items[i] >= items[i + 1]:\n                items[i], items[i + 1] = items[i + 1], items[i]\n                swapped = True\n    return items\n",
+      "why": "Условие «>=» меняет равные элементы бесконечно (цикл не завершается)."
+    }
+  ]
+}

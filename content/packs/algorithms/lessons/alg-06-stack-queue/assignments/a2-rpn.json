@@ -1,0 +1,114 @@
+{
+  "id": "a2-rpn",
+  "type": "function",
+  "title": "Обратная польская запись",
+  "statement": "В обратной польской записи оператор стоит после операндов: `[\"3\", \"4\", \"+\"]` = 3 + 4. Напишите `eval_rpn(tokens)` для операций `+`, `-`, `*` над целыми числами и верните результат.\n\nПример: `eval_rpn([\"2\", \"3\", \"4\", \"*\", \"+\"])` → `14`.",
+  "goal": "Обратная польская запись",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Числа кладите в стек, операторы применяйте к верхним двум элементам.",
+    "Оператор снимает два числа и возвращает один результат.",
+    "Первым снимается правый операнд b, потом левый a.",
+    "Результат операции снова кладётся в стек.",
+    "В конце единственный элемент стека — ответ."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "eval_rpn",
+    "cases": [
+      {
+        "args": [
+          [
+            "2",
+            "3",
+            "4",
+            "*",
+            "+"
+          ]
+        ],
+        "id": "v1",
+        "expected": 14
+      },
+      {
+        "args": [
+          [
+            "3",
+            "4",
+            "+"
+          ]
+        ],
+        "id": "v2",
+        "expected": 7
+      },
+      {
+        "args": [
+          [
+            "7"
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 7
+      },
+      {
+        "args": [
+          [
+            "10",
+            "2",
+            "-"
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 8
+      },
+      {
+        "args": [
+          [
+            "5",
+            "1",
+            "2",
+            "+",
+            "4",
+            "*",
+            "+",
+            "3",
+            "-"
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 14
+      },
+      {
+        "args": [
+          [
+            "2",
+            "-3",
+            "*"
+          ]
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": -6
+      }
+    ]
+  },
+  "solution": "def eval_rpn(tokens):\n    stack = []\n    for token in tokens:\n        if token in (\"+\", \"-\", \"*\"):\n            b = stack.pop()\n            a = stack.pop()\n            if token == \"+\":\n                stack.append(a + b)\n            elif token == \"-\":\n                stack.append(a - b)\n            else:\n                stack.append(a * b)\n        else:\n            stack.append(int(token))\n    return stack[0]\n",
+  "explanation": "Стек хранит промежуточные результаты; порядок снятия операндов важен для некоммутативных операций.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def eval_rpn(tokens):\n    stack = []\n    for token in tokens:\n        if token in (\"+\", \"-\", \"*\"):\n            a = stack.pop()\n            b = stack.pop()\n            if token == \"+\":\n                stack.append(a + b)\n            elif token == \"-\":\n                stack.append(a - b)\n            else:\n                stack.append(a * b)\n        else:\n            stack.append(int(token))\n    return stack[0]\n",
+      "why": "Операнды сняты в обратном порядке: вычитание даёт неверный знак."
+    },
+    {
+      "code": "def eval_rpn(tokens):\n    stack = []\n    for token in tokens:\n        if token in (\"+\", \"-\", \"*\"):\n            b = stack.pop()\n            a = stack.pop()\n            stack.append(a + b)\n        else:\n            stack.append(int(token))\n    return stack[0]\n",
+      "why": "Любая операция выполняется как сложение."
+    }
+  ]
+}

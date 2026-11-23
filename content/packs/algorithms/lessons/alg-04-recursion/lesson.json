@@ -1,0 +1,45 @@
+{
+  "id": "alg-04-recursion",
+  "title": "Рекурсия",
+  "goal": "Писать рекурсивные функции с базовым случаем, понимать стек вызовов и использовать рекурсию для вложенных данных.",
+  "skills": [
+    "algo.recursion",
+    "algo.recursion.nested"
+  ],
+  "prerequisites": [
+    "alg-03-sorting"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-power.json",
+    "assignments/a2-digits.json",
+    "assignments/a3-flatten.json",
+    "assignments/a4-palindrome.json",
+    "assignments/a5-trace.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Забывают базовый случай",
+      "fix": "Сначала напишите условие остановки.",
+      "errorType": "RecursionError"
+    },
+    {
+      "mistake": "Шаг рекурсии не приближает к базовому случаю",
+      "fix": "Проверьте, что аргумент действительно уменьшается."
+    },
+    {
+      "mistake": "Используют рекурсию для очень больших n",
+      "fix": "Лимит глубины ~1000: замените циклом."
+    },
+    {
+      "mistake": "Не возвращают результат рекурсивного вызова",
+      "fix": "Пишите return f(...), иначе получите None."
+    }
+  ]
+}

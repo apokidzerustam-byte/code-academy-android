@@ -1,0 +1,91 @@
+{
+  "id": "a4-parse-response",
+  "type": "function",
+  "title": "Разбор ответа сервера",
+  "statement": "Напишите функцию `parse_response(raw)`: `raw` — текст ответа. Первая строка `HTTP/1.1 КОД ТЕКСТ`, затем заголовки `Имя: значение`, пустая строка и тело. Верните словарь `{\"status\": код (int), \"headers\": словарь заголовков, \"body\": тело (строка)}`. Тело может быть пустым.",
+  "goal": "Разбор ответа сервера",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Ответ делится на голову и тело пустой строкой.",
+    "Голова — это первая строка (статус) и заголовки.",
+    "raw.partition('\\n\\n') делит только по первому разделителю и не падает, если тела нет.",
+    "Код — второе слово первой строки; превратите в int.",
+    "Заголовки: dict(line.split(': ', 1) for line in остальные_строки)."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "parse_response",
+    "cases": [
+      {
+        "args": [
+          "HTTP/1.1 200 OK\nContent-Type: text/plain\n\nпривет"
+        ],
+        "id": "v1",
+        "expected": {
+          "status": 200,
+          "headers": {
+            "Content-Type": "text/plain"
+          },
+          "body": "привет"
+        }
+      },
+      {
+        "args": [
+          "HTTP/1.1 404 Not Found\nContent-Length: 0\n\n"
+        ],
+        "id": "v2",
+        "expected": {
+          "status": 404,
+          "headers": {
+            "Content-Length": "0"
+          },
+          "body": ""
+        }
+      },
+      {
+        "args": [
+          "HTTP/1.1 201 Created\nContent-Type: application/json\nX-Id: 7\n\n{\"id\": 7}"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": {
+          "status": 201,
+          "headers": {
+            "Content-Type": "application/json",
+            "X-Id": "7"
+          },
+          "body": "{\"id\": 7}"
+        }
+      },
+      {
+        "args": [
+          "HTTP/1.1 500 Server Error\n\nошибка\n\nна сервере"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": {
+          "status": 500,
+          "headers": {},
+          "body": "ошибка\n\nна сервере"
+        }
+      }
+    ]
+  },
+  "solution": "def parse_response(raw):\n    head, _, body = raw.partition(\"\\n\\n\")\n    lines = head.split(\"\\n\")\n    status = int(lines[0].split()[1])\n    headers = dict(line.split(\": \", 1) for line in lines[1:] if line)\n    return {\"status\": status, \"headers\": headers, \"body\": body}\n",
+  "explanation": "partition делит по первому разделителю, поэтому тело может содержать пустые строки; код состояния превращаем в число для сравнений.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def parse_response(raw):\n    head, body = raw.split(\"\\n\\n\")\n    lines = head.split(\"\\n\")\n    headers = dict(line.split(\": \", 1) for line in lines[1:])\n    return {\"status\": int(lines[0].split()[1]), \"headers\": headers, \"body\": body}\n",
+      "why": "Разделение по всем пустым строкам ломает тело с пустой строкой внутри, а при отсутствии заголовков падает."
+    },
+    {
+      "code": "def parse_response(raw):\n    head, _, body = raw.partition(\"\\n\\n\")\n    lines = head.split(\"\\n\")\n    headers = dict(line.split(\": \", 1) for line in lines[1:] if line)\n    return {\"status\": lines[0].split()[1], \"headers\": headers, \"body\": body}\n",
+      "why": "Код состояния оставлен строкой, а нужно число."
+    }
+  ]
+}

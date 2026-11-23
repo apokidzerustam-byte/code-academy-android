@@ -1,0 +1,41 @@
+{
+  "id": "a5-qs",
+  "type": "predict",
+  "title": "Параметры запроса",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Параметры запроса",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "from urllib.parse import urlparse, parse_qs\n\nparts = urlparse(\"https://x.org/a/b?tag=py&tag=sql&n=3\")\nq = parse_qs(parts.query)\nprint(parts.path, q[\"tag\"], int(q[\"n\"][0]) + 1)\n",
+  "hints": [
+    "path — это часть адреса после хоста.",
+    "parse_qs возвращает словарь со значениями-списками.",
+    "tag встречается дважды, поэтому в списке два значения.",
+    "q['n'] — список ['3'], берём первый элемент.",
+    "int('3') + 1 = 4."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "/a/b ['py', 'sql'] 4\n"
+  },
+  "solution": "/a/b ['py', 'sql'] 4\n",
+  "explanation": "parse_qs собирает повторяющиеся параметры в список; значения всегда строки.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "/a/b py 4\n",
+      "answer": "/a/b py 4\n",
+      "why": "Значения parse_qs — списки: q['tag'] печатается как список."
+    },
+    {
+      "code": "/a/b ['py', 'sql'] 3\n",
+      "answer": "/a/b ['py', 'sql'] 3\n",
+      "why": "К n прибавляется единица: 3 + 1 = 4."
+    }
+  ]
+}

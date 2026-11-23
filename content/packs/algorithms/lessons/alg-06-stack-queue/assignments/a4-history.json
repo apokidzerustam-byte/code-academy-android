@@ -1,0 +1,98 @@
+{
+  "id": "a4-history",
+  "type": "function",
+  "title": "История браузера",
+  "statement": "Страницы браузера хранятся в стеке. Команды: `\"visit X\"` — открыть страницу X, `\"back\"` — вернуться на предыдущую (если предыдущей нет, ничего не меняется). Начальная страница — `\"home\"`. Напишите `browse(commands)`, верните название **текущей** страницы после всех команд.\n\nПример: `browse([\"visit a\", \"visit b\", \"back\"])` → `\"a\"`.",
+  "goal": "История браузера",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "История — это стек страниц, текущая страница на вершине.",
+    "Начните со стека [\"home\"].",
+    "visit X — положить X на вершину.",
+    "back — снять вершину, но не опустошайте стек полностью.",
+    "Ответ — stack[-1]."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "browse",
+    "cases": [
+      {
+        "args": [
+          [
+            "visit a",
+            "visit b",
+            "back"
+          ]
+        ],
+        "id": "v1",
+        "expected": "a"
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": "home"
+      },
+      {
+        "args": [
+          [
+            "back",
+            "back"
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "home"
+      },
+      {
+        "args": [
+          [
+            "visit x",
+            "back",
+            "back",
+            "visit y"
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "y"
+      },
+      {
+        "args": [
+          [
+            "visit a",
+            "visit b",
+            "visit c",
+            "back",
+            "back"
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": "a"
+      }
+    ]
+  },
+  "solution": "def browse(commands):\n    stack = [\"home\"]\n    for command in commands:\n        if command == \"back\":\n            if len(stack) > 1:\n                stack.pop()\n        else:\n            stack.append(command.split(\" \", 1)[1])\n    return stack[-1]\n",
+  "explanation": "Стек естественно моделирует историю: вернуться — значит снять верхнюю страницу.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def browse(commands):\n    stack = [\"home\"]\n    for command in commands:\n        if command == \"back\":\n            stack.pop()\n        else:\n            stack.append(command.split(\" \", 1)[1])\n    return stack[-1]\n",
+      "why": "Возврат с домашней страницы приводит к ошибке: стек опустошается."
+    },
+    {
+      "code": "def browse(commands):\n    stack = [\"home\"]\n    for command in commands:\n        if command == \"back\":\n            if len(stack) > 1:\n                stack.pop(0)\n        else:\n            stack.append(command.split(\" \", 1)[1])\n    return stack[-1]\n",
+      "why": "Снимается страница с начала, а не с вершины."
+    },
+    {
+      "code": "def browse(commands):\n    page = \"home\"\n    for command in commands:\n        if command != \"back\":\n            page = command.split(\" \", 1)[1]\n    return page\n",
+      "why": "Нет истории: команда back ничего не делает."
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "id": "alg-06-stack-queue",
+  "title": "Стек и очередь",
+  "goal": "Использовать стек и очередь, решать задачи на скобки и моделирование очередей.",
+  "skills": [
+    "algo.stack",
+    "algo.queue"
+  ],
+  "prerequisites": [
+    "alg-05-fast-sorts",
+    "alg-04-recursion"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-balanced.json",
+    "assignments/a2-rpn.json",
+    "assignments/a3-potato.json",
+    "assignments/a4-history.json",
+    "assignments/a5-deque.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Берут из пустого стека",
+      "fix": "Проверьте if stack: перед pop().",
+      "errorType": "IndexError"
+    },
+    {
+      "mistake": "Используют list.pop(0) как очередь",
+      "fix": "Для очередей берите deque.popleft(): pop(0) работает за O(n)."
+    },
+    {
+      "mistake": "Путают порядок операндов при снятии со стека",
+      "fix": "Первым снимается правый операнд."
+    },
+    {
+      "mistake": "Забывают проверить пустоту стека в конце",
+      "fix": "Для скобок: return not stack."
+    }
+  ]
+}

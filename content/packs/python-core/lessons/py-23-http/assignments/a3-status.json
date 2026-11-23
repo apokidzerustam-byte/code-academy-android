@@ -1,0 +1,128 @@
+{
+  "id": "a3-status",
+  "type": "function",
+  "title": "Что делать с кодом",
+  "statement": "Напишите функцию `action(code)`: для кодов 200–299 вернуть `\"ok\"`, для 301 и 302 — `\"redirect\"`, для 404 — `\"not_found\"`, для остальных 400–499 — `\"client_error\"`, для 500–599 — `\"retry\"`, для всего прочего — `\"unknown\"`.",
+  "goal": "Что делать с кодом",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Код определяет, как действовать: принять, перейти, исправить запрос или повторить.",
+    "Диапазоны удобно записывать цепочкой сравнений: 200 <= code < 300.",
+    "Конкретные коды (301, 302, 404) проверяйте раньше общих диапазонов.",
+    "Правая граница диапазона не включается: 300 уже не успех.",
+    "В конце верните «unknown» для всего, что не подошло."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "action",
+    "cases": [
+      {
+        "args": [
+          200
+        ],
+        "id": "v1",
+        "expected": "ok"
+      },
+      {
+        "args": [
+          404
+        ],
+        "id": "v2",
+        "expected": "not_found"
+      },
+      {
+        "args": [
+          500
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "retry"
+      },
+      {
+        "args": [
+          201
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "ok"
+      },
+      {
+        "args": [
+          299
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": "ok"
+      },
+      {
+        "args": [
+          300
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": "unknown"
+      },
+      {
+        "args": [
+          302
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": "redirect"
+      },
+      {
+        "args": [
+          403
+        ],
+        "id": "h8",
+        "hidden": true,
+        "expected": "client_error"
+      },
+      {
+        "args": [
+          503
+        ],
+        "id": "h9",
+        "hidden": true,
+        "expected": "retry"
+      },
+      {
+        "args": [
+          100
+        ],
+        "id": "h10",
+        "hidden": true,
+        "expected": "unknown"
+      },
+      {
+        "args": [
+          600
+        ],
+        "id": "h11",
+        "hidden": true,
+        "expected": "unknown"
+      }
+    ]
+  },
+  "solution": "def action(code):\n    if 200 <= code < 300:\n        return \"ok\"\n    if code in (301, 302):\n        return \"redirect\"\n    if code == 404:\n        return \"not_found\"\n    if 400 <= code < 500:\n        return \"client_error\"\n    if 500 <= code < 600:\n        return \"retry\"\n    return \"unknown\"\n",
+  "explanation": "Сначала частные случаи (404), потом общий диапазон (4xx) — иначе частный случай никогда не сработает.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def action(code):\n    if 200 <= code < 300:\n        return \"ok\"\n    if code in (301, 302):\n        return \"redirect\"\n    if 400 <= code < 500:\n        return \"client_error\"\n    if code == 404:\n        return \"not_found\"\n    if 500 <= code < 600:\n        return \"retry\"\n    return \"unknown\"\n",
+      "why": "Проверка 4xx стоит раньше 404, поэтому «not_found» недостижим."
+    },
+    {
+      "code": "def action(code):\n    if 200 <= code <= 300:\n        return \"ok\"\n    if code in (301, 302):\n        return \"redirect\"\n    if code == 404:\n        return \"not_found\"\n    if 400 <= code < 500:\n        return \"client_error\"\n    if 500 <= code < 600:\n        return \"retry\"\n    return \"unknown\"\n",
+      "why": "Граница включает код 300 (он не успех)."
+    },
+    {
+      "code": "def action(code):\n    if 200 <= code < 300:\n        return \"ok\"\n    if code in (301, 302):\n        return \"redirect\"\n    if code == 404:\n        return \"not_found\"\n    if 400 <= code < 500:\n        return \"client_error\"\n    if 500 <= code <= 600:\n        return \"retry\"\n    return \"unknown\"\n",
+      "why": "Граница включает код 600, которого не существует среди серверных ошибок."
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "id": "a2-digits",
+  "type": "function",
+  "title": "Сумма цифр",
+  "statement": "Напишите рекурсивную функцию `sum_digits(n)` для целого `n >= 0`: сумма десятичных цифр числа без преобразования в строку.\n\nПример: `sum_digits(1234)` → `10`.",
+  "goal": "Сумма цифр",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Последняя цифра — n % 10, остальное — n // 10.",
+    "Сумма цифр = последняя цифра + сумма цифр остальной части.",
+    "Базовый случай: число меньше 10 — это одна цифра.",
+    "Для рекурсивного вызова используйте n // 10.",
+    "return n % 10 + sum_digits(n // 10)."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "sum_digits",
+    "cases": [
+      {
+        "args": [
+          1234
+        ],
+        "id": "v1",
+        "expected": 10
+      },
+      {
+        "args": [
+          0
+        ],
+        "id": "v2",
+        "expected": 0
+      },
+      {
+        "args": [
+          9
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 9
+      },
+      {
+        "args": [
+          100
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 1
+      },
+      {
+        "args": [
+          987654321
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 45
+      },
+      {
+        "args": [
+          10
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": 1
+      }
+    ]
+  },
+  "solution": "def sum_digits(n):\n    if n < 10:\n        return n\n    return n % 10 + sum_digits(n // 10)\n",
+  "explanation": "Остаток от деления на 10 даёт последнюю цифру, целочисленное деление отбрасывает её.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def sum_digits(n):\n    if n < 10:\n        return n\n    return n % 10 + sum_digits(n // 100)\n",
+      "why": "Отбрасываются две цифры за шаг."
+    },
+    {
+      "code": "def sum_digits(n):\n    if n < 10:\n        return 0\n    return n % 10 + sum_digits(n // 10)\n",
+      "why": "Последняя цифра теряется: база возвращает 0."
+    }
+  ]
+}

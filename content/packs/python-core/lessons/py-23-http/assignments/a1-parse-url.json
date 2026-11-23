@@ -1,0 +1,103 @@
+{
+  "id": "a1-parse-url",
+  "type": "function",
+  "title": "Разбор адреса",
+  "statement": "Напишите функцию `parse_url(url)`, которая возвращает словарь с ключами `\"host\"` (имя сервера), `\"path\"` и `\"params\"` (словарь параметров запроса, где значение — **строка**, а при повторе параметра берётся первое значение).\n\nПример: `parse_url(\"https://api.example.com/tasks?status=open&limit=5\")` → `{\"host\": \"api.example.com\", \"path\": \"/tasks\", \"params\": {\"status\": \"open\", \"limit\": \"5\"}}`.",
+  "goal": "Разбор адреса",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Адрес состоит из схемы, хоста, пути и параметров.",
+    "Для разбора есть urllib.parse.urlparse.",
+    "Поле netloc — хост, path — путь, query — строка параметров.",
+    "parse_qs превращает строку параметров в словарь со значениями-списками.",
+    "Возьмите у каждого списка первый элемент: {k: v[0] ...}."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "parse_url",
+    "cases": [
+      {
+        "args": [
+          "https://api.example.com/tasks?status=open&limit=5"
+        ],
+        "id": "v1",
+        "expected": {
+          "host": "api.example.com",
+          "path": "/tasks",
+          "params": {
+            "status": "open",
+            "limit": "5"
+          }
+        }
+      },
+      {
+        "args": [
+          "http://site.org/"
+        ],
+        "id": "v2",
+        "expected": {
+          "host": "site.org",
+          "path": "/",
+          "params": {}
+        }
+      },
+      {
+        "args": [
+          "https://a.b/c/d?x=1&x=2"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": {
+          "host": "a.b",
+          "path": "/c/d",
+          "params": {
+            "x": "1"
+          }
+        }
+      },
+      {
+        "args": [
+          "https://shop.pl/items?q=%D1%87%D0%B0%D0%B9"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": {
+          "host": "shop.pl",
+          "path": "/items",
+          "params": {
+            "q": "чай"
+          }
+        }
+      },
+      {
+        "args": [
+          "https://h.com/p"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": {
+          "host": "h.com",
+          "path": "/p",
+          "params": {}
+        }
+      }
+    ]
+  },
+  "solution": "from urllib.parse import urlparse, parse_qs\n\n\ndef parse_url(url):\n    parts = urlparse(url)\n    params = {key: values[0] for key, values in parse_qs(parts.query).items()}\n    return {\"host\": parts.netloc, \"path\": parts.path, \"params\": params}\n",
+  "explanation": "urlparse разбирает адрес, parse_qs — параметры и одновременно декодирует экранированные символы.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from urllib.parse import urlparse, parse_qs\n\n\ndef parse_url(url):\n    parts = urlparse(url)\n    return {\"host\": parts.netloc, \"path\": parts.path, \"params\": parse_qs(parts.query)}\n",
+      "why": "Значения параметров остались списками вместо строк."
+    },
+    {
+      "code": "from urllib.parse import urlparse, parse_qs\n\n\ndef parse_url(url):\n    parts = urlparse(url)\n    params = {key: values[-1] for key, values in parse_qs(parts.query).items()}\n    return {\"host\": parts.netloc, \"path\": parts.path, \"params\": params}\n",
+      "why": "При повторе параметра берётся последнее значение, а нужно первое."
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "id": "a4-inversions",
+  "type": "function",
+  "title": "Беспорядок в списке",
+  "statement": "Инверсия — пара позиций `i < j`, где `items[i] > items[j]`. Напишите `count_inversions(items)`, возвращающую число инверсий (можно любым способом).\n\nПример: `count_inversions([3, 1, 2])` → `2` (пары 3>1 и 3>2).",
+  "goal": "Беспорядок в списке",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Нужно посчитать пары, которые стоят «не в том порядке».",
+    "Пара определяется двумя индексами i < j.",
+    "Переберите все такие пары двумя вложенными циклами.",
+    "Инверсия — строгое «больше»: items[i] > items[j].",
+    "Увеличивайте счётчик для каждой такой пары."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "count_inversions",
+    "cases": [
+      {
+        "args": [
+          [
+            3,
+            1,
+            2
+          ]
+        ],
+        "id": "v1",
+        "expected": 2
+      },
+      {
+        "args": [
+          [
+            1,
+            2,
+            3
+          ]
+        ],
+        "id": "v2",
+        "expected": 0
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          [
+            3,
+            2,
+            1
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 3
+      },
+      {
+        "args": [
+          [
+            2,
+            2,
+            1
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 2
+      },
+      {
+        "args": [
+          [
+            1,
+            3,
+            2,
+            4,
+            0
+          ]
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": 5
+      }
+    ]
+  },
+  "solution": "def count_inversions(items):\n    count = 0\n    for i in range(len(items)):\n        for j in range(i + 1, len(items)):\n            if items[i] > items[j]:\n                count += 1\n    return count\n",
+  "explanation": "Перебор всех пар работает за O(n²); сортировка слиянием позволяет считать инверсии за O(n log n).",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def count_inversions(items):\n    return sum(1 for i in range(len(items) - 1) if items[i] > items[i + 1])\n",
+      "why": "Считаются только соседние пары."
+    },
+    {
+      "code": "def count_inversions(items):\n    count = 0\n    for i in range(len(items)):\n        for j in range(i + 1, len(items)):\n            if items[i] >= items[j]:\n                count += 1\n    return count\n",
+      "why": "Равные элементы тоже считаются инверсией."
+    }
+  ]
+}

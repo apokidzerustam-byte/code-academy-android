@@ -1,0 +1,100 @@
+{
+  "id": "a4-palindrome",
+  "type": "function",
+  "title": "Палиндром рекурсией",
+  "statement": "Напишите рекурсивную функцию `is_pal(s)`: `True`, если строка читается одинаково в обе стороны. Регистр важен, пробелы считаются символами. Пустая строка и один символ — палиндромы.",
+  "goal": "Палиндром рекурсией",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Палиндром: первый символ равен последнему, а середина — тоже палиндром.",
+    "Базовый случай: в строке меньше двух символов.",
+    "Если s[0] != s[-1], ответ False.",
+    "Иначе проверьте середину: s[1:-1].",
+    "return is_pal(s[1:-1])."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "is_pal",
+    "cases": [
+      {
+        "args": [
+          "топот"
+        ],
+        "id": "v1",
+        "expected": true
+      },
+      {
+        "args": [
+          "abc"
+        ],
+        "id": "v2",
+        "expected": false
+      },
+      {
+        "args": [
+          ""
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": true
+      },
+      {
+        "args": [
+          "a"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": true
+      },
+      {
+        "args": [
+          "abba"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": true
+      },
+      {
+        "args": [
+          "abca"
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          "ab"
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          "аА"
+        ],
+        "id": "h8",
+        "hidden": true,
+        "expected": false
+      }
+    ]
+  },
+  "solution": "def is_pal(s):\n    if len(s) < 2:\n        return True\n    if s[0] != s[-1]:\n        return False\n    return is_pal(s[1:-1])\n",
+  "explanation": "Каждый шаг сравнивает крайние символы и сводит задачу к строке на два символа короче.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def is_pal(s):\n    if len(s) < 2:\n        return True\n    return is_pal(s[1:-1])\n",
+      "why": "Крайние символы не сравниваются."
+    },
+    {
+      "code": "def is_pal(s):\n    if len(s) < 2:\n        return True\n    if s[0] != s[-1]:\n        return False\n    return is_pal(s[1:])\n",
+      "why": "Срез обрезает только левый край."
+    }
+  ]
+}
