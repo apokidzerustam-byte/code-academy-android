@@ -1,0 +1,92 @@
+{
+  "id": "a2-order",
+  "type": "function",
+  "title": "Порядок завершения",
+  "statement": "Напишите функцию `finish_order(delays)`: запустите задачи с задержками (в миллисекундах) одновременно и верните список **индексов** задач в порядке их завершения (задержки в тестах различаются не менее чем на 40 мс).\n\nПример: `finish_order([100, 20, 60])` → `[1, 2, 0]`.",
+  "goal": "Порядок завершения",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Каждая задача должна отметить себя, когда закончит ожидание.",
+    "Заведите общий список done и дописывайте в него индекс после sleep.",
+    "Запустите все задачи через gather — они ждут одновременно.",
+    "Задача с меньшей задержкой дописывается раньше.",
+    "return done после await gather(...)."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "finish_order",
+    "cases": [
+      {
+        "args": [
+          [
+            100,
+            20,
+            60
+          ]
+        ],
+        "id": "v1",
+        "expected": [
+          1,
+          2,
+          0
+        ]
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            40
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          0
+        ]
+      },
+      {
+        "args": [
+          [
+            120,
+            40,
+            80,
+            160,
+            0
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          4,
+          1,
+          2,
+          0,
+          3
+        ]
+      }
+    ]
+  },
+  "solution": "import asyncio\n\n\nasync def worker(i, ms, done):\n    await asyncio.sleep(ms / 1000)\n    done.append(i)\n\n\nasync def main(delays):\n    done = []\n    await asyncio.gather(*(worker(i, d, done) for i, d in enumerate(delays)))\n    return done\n\n\ndef finish_order(delays):\n    return asyncio.run(main(delays))\n",
+  "explanation": "Порядок завершения определяется задержками, а не порядком запуска: короткие задачи заканчиваются раньше.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def finish_order(delays):\n    return list(range(len(delays)))\n",
+      "why": "Возвращён порядок запуска, а не завершения."
+    },
+    {
+      "code": "def finish_order(delays):\n    return sorted(range(len(delays)), key=lambda i: -delays[i])\n",
+      "why": "Порядок от самой долгой задачи к самой короткой — наоборот."
+    }
+  ]
+}

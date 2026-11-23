@@ -17,7 +17,11 @@
     "py-15-comprehensions",
     "py-16-exceptions",
     "py-17-files",
-    "py-18-json"
+    "py-18-json",
+    "py-19-modules",
+    "py-20-classes",
+    "py-21-inheritance",
+    "py-22-async"
   ],
   "skills": {
     "python.functions": "Функции: def и вызов",
@@ -46,6 +50,19 @@
     "python.files.parse": "Разбор строк файла",
     "python.json": "Модуль json: dumps и loads",
     "python.json.files": "JSON и файлы: dump и load",
-    "python.json.errors": "Ошибки разбора JSON"
+    "python.json.errors": "Ошибки разбора JSON",
+    "python.modules": "Модули и import",
+    "python.stdlib.math": "Модуль math",
+    "python.stdlib.datetime": "Модуль datetime",
+    "python.stdlib.collections": "Counter и defaultdict",
+    "python.oop.class": "Классы и объекты",
+    "python.oop.methods": "Методы и self",
+    "python.oop.str": "Специальный метод __str__",
+    "python.oop.inheritance": "Наследование",
+    "python.oop.polymorphism": "Полиморфизм",
+    "python.oop.dataclass": "Dataclass",
+    "python.async": "async и await",
+    "python.async.gather": "asyncio.gather",
+    "python.async.timeout": "Таймауты: wait_for"
   }
 }

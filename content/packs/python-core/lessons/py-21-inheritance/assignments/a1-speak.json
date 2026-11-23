@@ -1,0 +1,94 @@
+{
+  "id": "a1-speak",
+  "type": "function",
+  "title": "Хор животных",
+  "statement": "Напишите классы `Animal` (метод `speak()` возвращает `\"...\"`), `Dog` (`\"Гав\"`), `Cat` (`\"Мяу\"`) и функцию `chorus(kinds)`: для каждого названия из списка (`\"dog\"`, `\"cat\"` или любое другое) создайте животное соответствующего класса (для неизвестных — `Animal`) и верните список их звуков.\n\nПример: `chorus([\"dog\", \"cat\", \"cow\"])` → `[\"Гав\", \"Мяу\", \"...\"]`.",
+  "goal": "Хор животных",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Каждое животное — объект своего класса, звук зависит от класса.",
+    "Родитель Animal отвечает «...», потомки переопределяют speak.",
+    "Сопоставьте названия классам в словаре: «dog» → Dog.",
+    "classes.get(kind, Animal) вернёт класс (Animal, если названия нет в словаре).",
+    "Создайте объект вызовом класса и вызовите speak: classes.get(kind, Animal)().speak()."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "chorus",
+    "cases": [
+      {
+        "args": [
+          [
+            "dog",
+            "cat",
+            "cow"
+          ]
+        ],
+        "id": "v1",
+        "expected": [
+          "Гав",
+          "Мяу",
+          "..."
+        ]
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            "cat",
+            "cat"
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          "Мяу",
+          "Мяу"
+        ]
+      },
+      {
+        "args": [
+          [
+            "fish",
+            "dog",
+            "dog"
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          "...",
+          "Гав",
+          "Гав"
+        ]
+      }
+    ]
+  },
+  "solution": "class Animal:\n    def speak(self):\n        return \"...\"\n\n\nclass Dog(Animal):\n    def speak(self):\n        return \"Гав\"\n\n\nclass Cat(Animal):\n    def speak(self):\n        return \"Мяу\"\n\n\ndef chorus(kinds):\n    classes = {\"dog\": Dog, \"cat\": Cat}\n    return [classes.get(kind, Animal)().speak() for kind in kinds]\n",
+  "explanation": "Полиморфизм: один вызов speak() у объектов разных классов даёт разные ответы; словарь заменяет цепочку if.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "class Animal:\n    def speak(self):\n        return \"...\"\n\n\nclass Dog(Animal):\n    def speak(self):\n        return \"Гав\"\n\n\nclass Cat(Animal):\n    pass\n\n\ndef chorus(kinds):\n    classes = {\"dog\": Dog, \"cat\": Cat}\n    return [classes.get(kind, Animal)().speak() for kind in kinds]\n",
+      "why": "Cat не переопределяет speak и говорит «...» вместо «Мяу»."
+    },
+    {
+      "code": "class Animal:\n    def speak(self):\n        return \"...\"\n\n\nclass Dog(Animal):\n    def speak(self):\n        return \"Гав\"\n\n\nclass Cat(Animal):\n    def speak(self):\n        return \"Мяу\"\n\n\ndef chorus(kinds):\n    return [\"Гав\" if k == \"dog\" else \"Мяу\" for k in kinds]\n",
+      "why": "Классы не используются, и неизвестные животные получают «Мяу» вместо «...»."
+    },
+    {
+      "code": "class Animal:\n    def speak(self):\n        return \"...\"\n\n\nclass Dog(Animal):\n    def speak(self):\n        return \"Гав\"\n\n\nclass Cat(Animal):\n    def speak(self):\n        return \"Мяу\"\n\n\ndef chorus(kinds):\n    classes = {\"dog\": Dog, \"cat\": Cat}\n    return [classes.get(kind, Animal) for kind in kinds]\n",
+      "why": "Не созданы объекты и не вызван speak: возвращаются сами классы."
+    }
+  ]
+}

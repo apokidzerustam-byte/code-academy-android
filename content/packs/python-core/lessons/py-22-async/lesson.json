@@ -1,0 +1,45 @@
+{
+  "id": "py-22-async",
+  "title": "Асинхронность",
+  "goal": "Писать корутины, запускать несколько задач через gather и ограничивать ожидание таймаутом.",
+  "skills": [
+    "python.async",
+    "python.async.gather",
+    "python.async.timeout"
+  ],
+  "prerequisites": [
+    "py-21-inheritance"
+  ],
+  "runner": "A",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-gather.json",
+    "assignments/a2-order.json",
+    "assignments/a3-timeout.json",
+    "assignments/a4-gather-order.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Вызывают async-функцию как обычную: greet('Аня')",
+      "fix": "Это создаст только корутину. Запустите через asyncio.run(...) или await."
+    },
+    {
+      "mistake": "Используют await вне async def",
+      "fix": "await допустим только внутри асинхронной функции.",
+      "errorType": "SyntaxError"
+    },
+    {
+      "mistake": "Используют time.sleep внутри async вместо asyncio.sleep",
+      "fix": "time.sleep блокирует всё приложение; ждите через await asyncio.sleep."
+    },
+    {
+      "mistake": "Ждут ускорения тяжёлых вычислений",
+      "fix": "Асинхронность ускоряет ожидание, а не расчёты."
+    }
+  ]
+}

@@ -1,0 +1,129 @@
+{
+  "id": "a2-account",
+  "type": "function",
+  "title": "Класс «Счёт»",
+  "statement": "Напишите класс `Account` (начальный баланс 0) с методами `deposit(amount)` и `withdraw(amount)`; снятие больше баланса вызывает `ValueError`. Затем функцию `run(operations)`: `operations` — список пар `[\"d\" или \"w\", сумма]`. Верните итоговый баланс, а если какая-то операция вызвала ошибку — строку `\"ошибка\"`.\n\nПример: `run([[\"d\", 100], [\"w\", 30]])` → `70`, `run([[\"w\", 5]])` → `\"ошибка\"`.",
+  "goal": "Класс «Счёт»",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Состояние счёта — это баланс, а операции — методы.",
+    "В __init__ создайте self.balance.",
+    "В withdraw сравните сумму с балансом и вызовите ValueError, если денег не хватает.",
+    "В run создайте счёт и примените операции в цикле; ValueError перехватите.",
+    "Если исключение возникло — верните «ошибка», иначе acc.balance."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "run",
+    "cases": [
+      {
+        "args": [
+          [
+            [
+              "d",
+              100
+            ],
+            [
+              "w",
+              30
+            ]
+          ]
+        ],
+        "id": "v1",
+        "expected": 70
+      },
+      {
+        "args": [
+          [
+            [
+              "w",
+              5
+            ]
+          ]
+        ],
+        "id": "v2",
+        "expected": "ошибка"
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          [
+            [
+              "d",
+              50
+            ],
+            [
+              "w",
+              50
+            ]
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          [
+            [
+              "d",
+              10
+            ],
+            [
+              "w",
+              11
+            ]
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": "ошибка"
+      },
+      {
+        "args": [
+          [
+            [
+              "d",
+              5
+            ],
+            [
+              "d",
+              5
+            ],
+            [
+              "w",
+              3
+            ]
+          ]
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": 7
+      }
+    ]
+  },
+  "solution": "class Account:\n    def __init__(self, balance=0):\n        self.balance = balance\n\n    def deposit(self, amount):\n        self.balance += amount\n\n    def withdraw(self, amount):\n        if amount > self.balance:\n            raise ValueError(\"недостаточно средств\")\n        self.balance -= amount\n\n\ndef run(operations):\n    acc = Account()\n    try:\n        for kind, amount in operations:\n            if kind == \"d\":\n                acc.deposit(amount)\n            else:\n                acc.withdraw(amount)\n    except ValueError:\n        return \"ошибка\"\n    return acc.balance\n",
+  "explanation": "Класс сам проверяет допустимость операций и сообщает о нарушении исключением; функция run только применяет операции и обрабатывает ошибку.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "class Account:\n    def __init__(self, balance=0):\n        self.balance = balance\n\n    def deposit(self, amount):\n        self.balance += amount\n\n    def withdraw(self, amount):\n        self.balance -= amount\n\n\ndef run(operations):\n    acc = Account()\n    try:\n        for kind, amount in operations:\n            if kind == \"d\":\n                acc.deposit(amount)\n            else:\n                acc.withdraw(amount)\n    except ValueError:\n        return \"ошибка\"\n    return acc.balance\n",
+      "why": "Нет проверки: баланс уходит в минус, ошибка не возникает."
+    },
+    {
+      "code": "class Account:\n    def __init__(self, balance=0):\n        self.balance = balance\n\n    def deposit(self, amount):\n        self.balance += amount\n\n    def withdraw(self, amount):\n        if amount >= self.balance:\n            raise ValueError(\"недостаточно средств\")\n        self.balance -= amount\n\n\ndef run(operations):\n    acc = Account()\n    try:\n        for kind, amount in operations:\n            if kind == \"d\":\n                acc.deposit(amount)\n            else:\n                acc.withdraw(amount)\n    except ValueError:\n        return \"ошибка\"\n    return acc.balance\n",
+      "why": "Снять ровно весь баланс разрешено, а проверка с >= это запрещает."
+    }
+  ]
+}

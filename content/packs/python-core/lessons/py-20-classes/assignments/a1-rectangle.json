@@ -1,0 +1,100 @@
+{
+  "id": "a1-rectangle",
+  "type": "function",
+  "title": "Класс «Прямоугольник»",
+  "statement": "Напишите класс `Rectangle` с конструктором `Rectangle(width, height)` и методами `area()` и `perimeter()`. Затем функцию `rect_info(width, height)`, которая создаёт прямоугольник и возвращает список `[площадь, периметр]`.\n\nПример: `rect_info(3, 4)` → `[12, 14]`.",
+  "goal": "Класс «Прямоугольник»",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Класс хранит ширину и высоту, а методы вычисляют по ним результаты.",
+    "В __init__ сохраните параметры в атрибуты self.width и self.height.",
+    "Методы area и perimeter принимают только self и читают атрибуты.",
+    "Площадь — произведение сторон, периметр — удвоенная сумма.",
+    "rect_info создаёт Rectangle(width, height) и возвращает [r.area(), r.perimeter()]."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "rect_info",
+    "cases": [
+      {
+        "args": [
+          3,
+          4
+        ],
+        "id": "v1",
+        "expected": [
+          12,
+          14
+        ]
+      },
+      {
+        "args": [
+          1,
+          1
+        ],
+        "id": "v2",
+        "expected": [
+          1,
+          4
+        ]
+      },
+      {
+        "args": [
+          10,
+          2
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          20,
+          24
+        ]
+      },
+      {
+        "args": [
+          0,
+          5
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          0,
+          10
+        ]
+      },
+      {
+        "args": [
+          2.5,
+          4
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          10.0,
+          13.0
+        ]
+      }
+    ]
+  },
+  "solution": "class Rectangle:\n    def __init__(self, width, height):\n        self.width = width\n        self.height = height\n\n    def area(self):\n        return self.width * self.height\n\n    def perimeter(self):\n        return 2 * (self.width + self.height)\n\n\ndef rect_info(width, height):\n    r = Rectangle(width, height)\n    return [r.area(), r.perimeter()]\n",
+  "explanation": "Методы читают данные объекта через self. Функция rect_info — обёртка, которая создаёт экземпляр и использует его методы.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "class Rectangle:\n    def __init__(self, width, height):\n        self.width = width\n        self.height = height\n\n    def area(self):\n        return self.width * self.height\n\n    def perimeter(self):\n        return self.width + self.height\n\n\ndef rect_info(width, height):\n    r = Rectangle(width, height)\n    return [r.area(), r.perimeter()]\n",
+      "why": "Периметр посчитан как сумма двух сторон вместо удвоенной суммы."
+    },
+    {
+      "code": "class Rectangle:\n    def __init__(self, width, height):\n        self.width = width\n        self.height = height\n\n    def area(self):\n        return self.width + self.height\n\n    def perimeter(self):\n        return 2 * (self.width + self.height)\n\n\ndef rect_info(width, height):\n    r = Rectangle(width, height)\n    return [r.area(), r.perimeter()]\n",
+      "why": "Площадь посчитана как сумма сторон."
+    },
+    {
+      "code": "class Rectangle:\n    def __init__(self, width, height):\n        self.width = width\n        self.height = height\n\n    def area(self):\n        return self.width * self.height\n\n    def perimeter(self):\n        return 2 * (self.width + self.height)\n\n\ndef rect_info(width, height):\n    r = Rectangle(width, height)\n    return [r.perimeter(), r.area()]\n",
+      "why": "Значения возвращены в обратном порядке."
+    }
+  ]
+}

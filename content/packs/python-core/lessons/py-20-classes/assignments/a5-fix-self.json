@@ -1,0 +1,69 @@
+{
+  "id": "a5-fix-self",
+  "type": "fix",
+  "title": "Исправь класс",
+  "statement": "В классе `Counter` забыты `self`, и `counter_after(n)` падает с `TypeError`. Исправьте класс. Функция `counter_after(n)` создаёт счётчик, вызывает `increment()` ровно `n` раз и возвращает значение.",
+  "goal": "Исправь класс",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "class Counter:\n    def __init__():\n        value = 0\n\n    def increment():\n        value += 1\n\n\ndef counter_after(n):\n    c = Counter()\n    for _ in range(n):\n        c.increment()\n    return c.value\n",
+  "hints": [
+    "Сообщение TypeError говорит, что методу передан лишний аргумент.",
+    "Каждый метод класса получает объект первым параметром.",
+    "Этот параметр принято называть self.",
+    "Добавьте self в объявления __init__ и increment.",
+    "def __init__(self): self.value = 0; def increment(self): self.value += 1."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "counter_after",
+    "cases": [
+      {
+        "args": [
+          3
+        ],
+        "id": "v1",
+        "expected": 3
+      },
+      {
+        "args": [
+          0
+        ],
+        "id": "v2",
+        "expected": 0
+      },
+      {
+        "args": [
+          10
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 10
+      },
+      {
+        "args": [
+          1
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 1
+      }
+    ]
+  },
+  "solution": "class Counter:\n    def __init__(self):\n        self.value = 0\n\n    def increment(self):\n        self.value += 1\n\n\ndef counter_after(n):\n    c = Counter()\n    for _ in range(n):\n        c.increment()\n    return c.value\n",
+  "explanation": "Python автоматически передаёт объект первым аргументом метода; параметр self принимает его. Без self вызов c.increment() передаёт на один аргумент больше, чем объявлено.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "class Counter:\n    def __init__(self):\n        self.value = 0\n\n    def increment(self):\n        self.value += 2\n\n\ndef counter_after(n):\n    c = Counter()\n    for _ in range(n):\n        c.increment()\n    return c.value\n",
+      "why": "Шаг счётчика равен 2, а не 1."
+    },
+    {
+      "code": "class Counter:\n    def __init__(self):\n        self.value = 1\n\n    def increment(self):\n        self.value += 1\n\n\ndef counter_after(n):\n    c = Counter()\n    for _ in range(n):\n        c.increment()\n    return c.value\n",
+      "why": "Начальное значение 1, а не 0."
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "id": "a5-fix-super",
+  "type": "fix",
+  "title": "Забытый super",
+  "statement": "Класс `Student` не вызывает `__init__` родителя, поэтому `card(name, school)` падает с `AttributeError`. Исправьте класс; `card` возвращает строку вида `Аня (Гимназия 5)`.",
+  "goal": "Забытый super",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "class Person:\n    def __init__(self, name):\n        self.name = name\n\n\nclass Student(Person):\n    def __init__(self, name, school):\n        self.school = school\n\n\ndef card(name, school):\n    s = Student(name, school)\n    return f\"{s.name} ({s.school})\"\n",
+  "hints": [
+    "Атрибут name создаёт конструктор родителя.",
+    "Если у потомка свой __init__, родительский не вызывается автоматически.",
+    "Родителя вызывают через функцию super().",
+    "Вызов должен передать имя.",
+    "super().__init__(name) — первой строкой в __init__ потомка."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "card",
+    "cases": [
+      {
+        "args": [
+          "Аня",
+          "Гимназия 5"
+        ],
+        "id": "v1",
+        "expected": "Аня (Гимназия 5)"
+      },
+      {
+        "args": [
+          "Борис",
+          "Лицей"
+        ],
+        "id": "v2",
+        "expected": "Борис (Лицей)"
+      },
+      {
+        "args": [
+          "Вера",
+          "Школа 1"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "Вера (Школа 1)"
+      },
+      {
+        "args": [
+          "Ёж",
+          "Н"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "Ёж (Н)"
+      }
+    ]
+  },
+  "solution": "class Person:\n    def __init__(self, name):\n        self.name = name\n\n\nclass Student(Person):\n    def __init__(self, name, school):\n        super().__init__(name)\n        self.school = school\n\n\ndef card(name, school):\n    s = Student(name, school)\n    return f\"{s.name} ({s.school})\"\n",
+  "explanation": "Без вызова super().__init__(name) атрибут name не создаётся, а при обращении к s.name возникает AttributeError.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "class Person:\n    def __init__(self, name):\n        self.name = name\n\n\nclass Student(Person):\n    def __init__(self, name, school):\n        super().__init__(school)\n        self.school = school\n\n\ndef card(name, school):\n    s = Student(name, school)\n    return f\"{s.name} ({s.school})\"\n",
+      "why": "Родителю передана школа вместо имени."
+    }
+  ]
+}

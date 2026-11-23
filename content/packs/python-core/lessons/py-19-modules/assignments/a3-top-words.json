@@ -1,0 +1,121 @@
+{
+  "id": "a3-top-words",
+  "type": "function",
+  "title": "Самые частые слова",
+  "statement": "Напишите функцию `top_words(text, n)`: верните список из `n` самых частых слов (в нижнем регистре) в виде пар `[слово, количество]`, от самых частых. При равенстве частот слова идут в порядке первого появления в тексте.\n\nПример: `top_words(\"да нет Да нет да ой\", 2)` → `[[\"да\", 3], [\"нет\", 2]]`.",
+  "goal": "Самые частые слова",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Для подсчёта частот в стандартной библиотеке есть готовый инструмент.",
+    "Нужен Counter из модуля collections.",
+    "Передайте ему список слов: text.lower().split().",
+    "Метод most_common(n) возвращает n самых частых пар.",
+    "return [[w, c] for w, c in counts.most_common(n)]."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "top_words",
+    "cases": [
+      {
+        "args": [
+          "да нет Да нет да ой",
+          2
+        ],
+        "id": "v1",
+        "expected": [
+          [
+            "да",
+            3
+          ],
+          [
+            "нет",
+            2
+          ]
+        ]
+      },
+      {
+        "args": [
+          "а б в",
+          5
+        ],
+        "id": "v2",
+        "expected": [
+          [
+            "а",
+            1
+          ],
+          [
+            "б",
+            1
+          ],
+          [
+            "в",
+            1
+          ]
+        ]
+      },
+      {
+        "args": [
+          "",
+          3
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": []
+      },
+      {
+        "args": [
+          "к к л л м",
+          2
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          [
+            "к",
+            2
+          ],
+          [
+            "л",
+            2
+          ]
+        ]
+      },
+      {
+        "args": [
+          "Кот кот КОТ пёс Пёс",
+          1
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          [
+            "кот",
+            3
+          ]
+        ]
+      }
+    ]
+  },
+  "solution": "from collections import Counter\n\ndef top_words(text, n):\n    counts = Counter(text.lower().split())\n    return [[w, c] for w, c in counts.most_common(n)]\n",
+  "explanation": "Counter считает элементы, most_common сортирует по убыванию частоты, сохраняя порядок первого появления при равенстве.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from collections import Counter\n\ndef top_words(text, n):\n    counts = Counter(text.split())\n    return [[w, c] for w, c in counts.most_common(n)]\n",
+      "why": "Регистр не приведён к нижнему."
+    },
+    {
+      "code": "from collections import Counter\n\ndef top_words(text, n):\n    counts = Counter(text.lower().split())\n    return [[w, c] for w, c in counts.most_common()]\n",
+      "why": "Возвращаются все слова, а не n самых частых."
+    },
+    {
+      "code": "from collections import Counter\n\ndef top_words(text, n):\n    counts = Counter(text.lower().split())\n    return [w for w, c in counts.most_common(n)]\n",
+      "why": "Возвращены только слова без количества."
+    }
+  ]
+}

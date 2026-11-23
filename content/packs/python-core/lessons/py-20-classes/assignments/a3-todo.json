@@ -1,0 +1,68 @@
+{
+  "id": "a3-todo",
+  "type": "write",
+  "title": "Список дел",
+  "statement": "Реализуйте класс `Todo` с методами `add(text)`, `done(index)` (отметить дело с номером `index`, нумерация с 0) и `pending()` (список невыполненных дел). Программа читает `n` команд: `add текст` или `done номер`, а в конце выводит невыполненные дела, каждое на новой строке, или `все дела сделаны`.\n\nВвод:\n```\n3\nadd хлеб\nadd молоко\ndone 0\n```\nВывод:\n```\nмолоко\n```",
+  "goal": "Список дел",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "",
+  "hints": [
+    "Состояние — список дел; у каждого дела есть признак «сделано».",
+    "Храните пары [текст, сделано] в атрибуте items.",
+    "done меняет признак у дела с номером index, но не удаляет его.",
+    "pending возвращает тексты дел, у которых признак ложен.",
+    "В конце: если список пуст — сообщение, иначе дела через перевод строки."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "3\nadd хлеб\nadd молоко\ndone 0\n",
+        "expected_stdout": "молоко\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "2\nadd а\ndone 0\n",
+        "expected_stdout": "все дела сделаны\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "0\n",
+        "expected_stdout": "все дела сделаны\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "4\nadd один\nadd два\nadd три\ndone 1\n",
+        "expected_stdout": "один\nтри\n",
+        "hidden": true
+      },
+      {
+        "id": "h5",
+        "stdin": "5\nadd а\nadd б\nadd в\ndone 0\ndone 1\n",
+        "expected_stdout": "в\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "class Todo:\n    def __init__(self):\n        self.items = []\n\n    def add(self, text):\n        self.items.append([text, False])\n\n    def done(self, index):\n        self.items[index][1] = True\n\n    def pending(self):\n        return [text for text, ok in self.items if not ok]\n\n\ntodo = Todo()\nfor _ in range(int(input())):\n    command, arg = input().split(\" \", 1)\n    if command == \"add\":\n        todo.add(arg)\n    else:\n        todo.done(int(arg))\nrest = todo.pending()\nprint(\"\\n\".join(rest) if rest else \"все дела сделаны\")\n",
+  "explanation": "Класс скрывает устройство списка: программа вызывает add, done и pending и не думает о парах внутри.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "class Todo:\n    def __init__(self):\n        self.items = []\n\n    def add(self, text):\n        self.items.append([text, False])\n\n    def done(self, index):\n        self.items.pop(index)\n\n    def pending(self):\n        return [text for text, ok in self.items if not ok]\n\n\ntodo = Todo()\nfor _ in range(int(input())):\n    command, arg = input().split(\" \", 1)\n    if command == \"add\":\n        todo.add(arg)\n    else:\n        todo.done(int(arg))\nrest = todo.pending()\nprint(\"\\n\".join(rest) if rest else \"все дела сделаны\")\n",
+      "why": "done удаляет дело, поэтому номера следующих дел сдвигаются."
+    },
+    {
+      "code": "class Todo:\n    def __init__(self):\n        self.items = []\n\n    def add(self, text):\n        self.items.append([text, False])\n\n    def done(self, index):\n        self.items[index][1] = True\n\n    def pending(self):\n        return [text for text, ok in self.items if not ok]\n\n\ntodo = Todo()\nfor _ in range(int(input())):\n    command, arg = input().split(\" \", 1)\n    if command == \"add\":\n        todo.add(arg)\n    else:\n        todo.done(int(arg))\nprint(\"\\n\".join(todo.pending()))\n",
+      "why": "Если все дела сделаны, выводится пустая строка вместо сообщения."
+    }
+  ]
+}

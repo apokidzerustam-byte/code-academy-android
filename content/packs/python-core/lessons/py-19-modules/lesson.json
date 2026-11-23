@@ -1,0 +1,48 @@
+{
+  "id": "py-19-modules",
+  "title": "Модули и стандартная библиотека",
+  "goal": "Подключать модули тремя способами и пользоваться math, random, datetime и collections.",
+  "skills": [
+    "python.modules",
+    "python.stdlib.math",
+    "python.stdlib.datetime",
+    "python.stdlib.collections"
+  ],
+  "prerequisites": [
+    "py-18-json"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-circle.json",
+    "assignments/a2-days-between.json",
+    "assignments/a3-top-words.json",
+    "assignments/a4-math-date.json",
+    "assignments/a5-group.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Файл назвали так же, как модуль (random.py, math.py)",
+      "fix": "Не называйте свои файлы именами стандартных модулей: импорт подхватит ваш файл.",
+      "errorType": "ImportError"
+    },
+    {
+      "mistake": "Забыли import перед использованием модуля",
+      "fix": "Подключите модуль в начале файла.",
+      "errorType": "NameError"
+    },
+    {
+      "mistake": "from module import * в большом файле",
+      "fix": "Импортируйте конкретные имена — так видно, откуда они."
+    },
+    {
+      "mistake": "Рассчитывают на конкретные случайные числа в тестах",
+      "fix": "Проверяйте свойства результата или фиксируйте random.seed()."
+    }
+  ]
+}

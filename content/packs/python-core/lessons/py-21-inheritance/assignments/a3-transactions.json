@@ -1,0 +1,127 @@
+{
+  "id": "a3-transactions",
+  "type": "function",
+  "title": "Транзакции на dataclass",
+  "statement": "Опишите `@dataclass class Transaction` с полями `title: str` и `amount: float`. Функция `summary(items)` получает список пар `[название, сумма]`, создаёт из них транзакции и возвращает список `[итого, название самой крупной по модулю суммы]`. Для пустого списка верните `[0, None]`.\n\nПример: `summary([[\"кофе\", -150], [\"зарплата\", 5000], [\"такси\", -400]])` → `[4450, \"зарплата\"]`.",
+  "goal": "Транзакции на dataclass",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Сначала превратите пары в объекты Transaction.",
+    "Декоратор @dataclass сам создаст __init__ по полям с типами.",
+    "Итого — сумма атрибутов amount.",
+    "Самая крупная по модулю: max(..., key=lambda t: abs(t.amount)).",
+    "Не забудьте обработать пустой список заранее."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "summary",
+    "cases": [
+      {
+        "args": [
+          [
+            [
+              "кофе",
+              -150
+            ],
+            [
+              "зарплата",
+              5000
+            ],
+            [
+              "такси",
+              -400
+            ]
+          ]
+        ],
+        "id": "v1",
+        "expected": [
+          4450,
+          "зарплата"
+        ]
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": [
+          0,
+          null
+        ]
+      },
+      {
+        "args": [
+          [
+            [
+              "долг",
+              -900
+            ],
+            [
+              "аванс",
+              300
+            ]
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          -600,
+          "долг"
+        ]
+      },
+      {
+        "args": [
+          [
+            [
+              "а",
+              1
+            ]
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          1,
+          "а"
+        ]
+      },
+      {
+        "args": [
+          [
+            [
+              "р",
+              10
+            ],
+            [
+              "с",
+              -10
+            ]
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          0,
+          "р"
+        ]
+      }
+    ]
+  },
+  "solution": "from dataclasses import dataclass\n\n\n@dataclass\nclass Transaction:\n    title: str\n    amount: float\n\n\ndef summary(items):\n    transactions = [Transaction(title, amount) for title, amount in items]\n    if not transactions:\n        return [0, None]\n    biggest = max(transactions, key=lambda t: abs(t.amount))\n    return [sum(t.amount for t in transactions), biggest.title]\n",
+  "explanation": "dataclass убирает шаблонный код; max с key по модулю суммы выбирает самую крупную операцию независимо от знака.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from dataclasses import dataclass\n\n\n@dataclass\nclass Transaction:\n    title: str\n    amount: float\n\n\ndef summary(items):\n    transactions = [Transaction(title, amount) for title, amount in items]\n    if not transactions:\n        return [0, None]\n    biggest = max(transactions, key=lambda t: t.amount)\n    return [sum(t.amount for t in transactions), biggest.title]\n",
+      "why": "Крупнейшая сумма выбрана без модуля: большой расход не учтён."
+    },
+    {
+      "code": "from dataclasses import dataclass\n\n\n@dataclass\nclass Transaction:\n    title: str\n    amount: float\n\n\ndef summary(items):\n    transactions = [Transaction(title, amount) for title, amount in items]\n    biggest = max(transactions, key=lambda t: abs(t.amount))\n    return [sum(t.amount for t in transactions), biggest.title]\n",
+      "why": "Для пустого списка max вызывает ошибку."
+    }
+  ]
+}

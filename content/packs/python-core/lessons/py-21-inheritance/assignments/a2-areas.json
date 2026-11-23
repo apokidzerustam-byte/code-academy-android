@@ -1,0 +1,116 @@
+{
+  "id": "a2-areas",
+  "type": "complete",
+  "title": "Общая площадь фигур",
+  "statement": "Заготовлены классы `Shape` → `Circle(r)`, `Rectangle(w, h)` и `Square(a)` (наследует Rectangle). Напишите функцию `total_area(shapes)`: `shapes` — список `[\"circle\", r]`, `[\"rect\", w, h]` или `[\"square\", a]`; верните сумму площадей, округлённую до 2 знаков (`round`).\n\nПример: `total_area([[\"rect\", 2, 3], [\"square\", 2]])` → `10`.",
+  "goal": "Общая площадь фигур",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "import math\n\n\nclass Shape:\n    def area(self):\n        return 0\n\n\nclass Circle(Shape):\n    def __init__(self, r):\n        self.r = r\n\n    def area(self):\n        return math.pi * self.r ** 2\n\n\nclass Rectangle(Shape):\n    def __init__(self, w, h):\n        self.w = w\n        self.h = h\n\n    def area(self):\n        return self.w * self.h\n\n\nclass Square(Rectangle):\n    def __init__(self, a):\n        super().__init__(a, a)\n\n\ndef total_area(shapes):\n    # создайте фигуры и сложите площади\n    pass\n",
+  "hints": [
+    "Для каждого вида фигуры есть свой класс с методом area().",
+    "Сначала по первому элементу выберите класс и создайте объект, передав остальные элементы.",
+    "*args собирает оставшиеся элементы списка: kind, *args = shape.",
+    "Складывайте shape.area() для каждой фигуры.",
+    "return round(total, 2)."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "total_area",
+    "cases": [
+      {
+        "args": [
+          [
+            [
+              "rect",
+              2,
+              3
+            ],
+            [
+              "square",
+              2
+            ]
+          ]
+        ],
+        "id": "v1",
+        "expected": 10
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": 0
+      },
+      {
+        "args": [
+          [
+            [
+              "circle",
+              1
+            ]
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 3.14
+      },
+      {
+        "args": [
+          [
+            [
+              "circle",
+              2
+            ],
+            [
+              "rect",
+              1,
+              1
+            ],
+            [
+              "square",
+              3
+            ]
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 22.57
+      },
+      {
+        "args": [
+          [
+            [
+              "square",
+              5
+            ]
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 25
+      }
+    ],
+    "tolerance": 1e-09
+  },
+  "solution": "import math\n\n\nclass Shape:\n    def area(self):\n        return 0\n\n\nclass Circle(Shape):\n    def __init__(self, r):\n        self.r = r\n\n    def area(self):\n        return math.pi * self.r ** 2\n\n\nclass Rectangle(Shape):\n    def __init__(self, w, h):\n        self.w = w\n        self.h = h\n\n    def area(self):\n        return self.w * self.h\n\n\nclass Square(Rectangle):\n    def __init__(self, a):\n        super().__init__(a, a)\n\n\ndef total_area(shapes):\n    total = 0\n    for kind, *args in shapes:\n        if kind == \"circle\":\n            shape = Circle(*args)\n        elif kind == \"rect\":\n            shape = Rectangle(*args)\n        else:\n            shape = Square(*args)\n        total += shape.area()\n    return round(total, 2)\n",
+  "explanation": "Все фигуры одинаково отвечают на area(), поэтому цикл не зависит от вида фигуры; Square переиспользует Rectangle через super().",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import math\n\n\nclass Shape:\n    def area(self):\n        return 0\n\n\nclass Circle(Shape):\n    def __init__(self, r):\n        self.r = r\n\n    def area(self):\n        return math.pi * self.r ** 2\n\n\nclass Rectangle(Shape):\n    def __init__(self, w, h):\n        self.w = w\n        self.h = h\n\n    def area(self):\n        return self.w * self.h\n\n\nclass Square(Rectangle):\n    def __init__(self, a):\n        self.w = a\n        self.h = 1\n\n\ndef total_area(shapes):\n    total = 0\n    for kind, *args in shapes:\n        if kind == \"circle\":\n            shape = Circle(*args)\n        elif kind == \"rect\":\n            shape = Rectangle(*args)\n        else:\n            shape = Square(*args)\n        total += shape.area()\n    return round(total, 2)\n",
+      "why": "Квадрат создан неверно: высота равна 1, а не стороне."
+    },
+    {
+      "code": "import math\n\n\nclass Shape:\n    def area(self):\n        return 0\n\n\nclass Circle(Shape):\n    def __init__(self, r):\n        self.r = r\n\n    def area(self):\n        return math.pi * self.r ** 2\n\n\nclass Rectangle(Shape):\n    def __init__(self, w, h):\n        self.w = w\n        self.h = h\n\n    def area(self):\n        return self.w * self.h\n\n\nclass Square(Rectangle):\n    def __init__(self, a):\n        super().__init__(a, a)\n\n\ndef total_area(shapes):\n    total = 0\n    for kind, *args in shapes:\n        if kind == \"circle\":\n            shape = Circle(*args)\n        elif kind == \"rect\":\n            shape = Rectangle(*args)\n        else:\n            shape = Square(*args)\n        total += shape.area()\n    return total\n",
+      "why": "Сумма не округлена до двух знаков."
+    },
+    {
+      "code": "import math\n\n\nclass Shape:\n    def area(self):\n        return 0\n\n\nclass Circle(Shape):\n    def __init__(self, r):\n        self.r = r\n\n    def area(self):\n        return math.pi * self.r ** 2\n\n\nclass Rectangle(Shape):\n    def __init__(self, w, h):\n        self.w = w\n        self.h = h\n\n    def area(self):\n        return self.w * self.h\n\n\nclass Square(Rectangle):\n    def __init__(self, a):\n        super().__init__(a, a)\n\n\ndef total_area(shapes):\n    return round(sum(s[1] ** 2 for s in shapes), 2)\n",
+      "why": "Площадь считается как квадрат первого числа, классы не использованы."
+    }
+  ]
+}

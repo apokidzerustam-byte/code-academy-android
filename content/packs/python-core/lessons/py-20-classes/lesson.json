@@ -1,0 +1,47 @@
+{
+  "id": "py-20-classes",
+  "title": "Классы и объекты",
+  "goal": "Объявлять классы с атрибутами и методами, создавать объекты и защищать их данные проверками.",
+  "skills": [
+    "python.oop.class",
+    "python.oop.methods",
+    "python.oop.str"
+  ],
+  "prerequisites": [
+    "py-19-modules"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-rectangle.json",
+    "assignments/a2-account.json",
+    "assignments/a3-todo.json",
+    "assignments/a4-objects.json",
+    "assignments/a5-fix-self.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Забывают self в объявлении метода",
+      "fix": "Первый параметр любого метода — self.",
+      "errorType": "TypeError"
+    },
+    {
+      "mistake": "Пишут value вместо self.value внутри метода",
+      "fix": "Атрибуты объекта доступны только через self.",
+      "errorType": "NameError"
+    },
+    {
+      "mistake": "Думают, что b = a делает копию объекта",
+      "fix": "Присваивание создаёт вторую ссылку на тот же объект."
+    },
+    {
+      "mistake": "Меняют баланс напрямую, обходя проверки",
+      "fix": "Меняйте состояние через методы класса."
+    }
+  ]
+}

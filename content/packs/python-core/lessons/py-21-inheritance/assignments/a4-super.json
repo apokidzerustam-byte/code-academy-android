@@ -1,0 +1,41 @@
+{
+  "id": "a4-super",
+  "type": "predict",
+  "title": "Цепочка super",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Цепочка super",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "class A:\n    def hello(self):\n        return \"A\"\n\nclass B(A):\n    def hello(self):\n        return \"B\" + super().hello()\n\nclass C(B):\n    pass\n\nprint(C().hello(), isinstance(C(), A), isinstance(A(), B))\n",
+  "hints": [
+    "C не переопределяет hello, значит, берётся метод B.",
+    "Метод B возвращает «B» плюс результат родителя.",
+    "Родитель A возвращает «A».",
+    "isinstance(C(), A): C наследует от B, а B — от A.",
+    "isinstance(A(), B): объект родителя не является экземпляром потомка."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "BA True False\n"
+  },
+  "solution": "BA True False\n",
+  "explanation": "Поиск метода идёт вверх по цепочке C → B → A. Объект потомка является экземпляром родителя, но не наоборот.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "B True True\n",
+      "answer": "B True True\n",
+      "why": "Метод B вызывает super().hello() и добавляет «A»; а объект A не является B."
+    },
+    {
+      "code": "BA True True\n",
+      "answer": "BA True True\n",
+      "why": "Родитель не знает о потомках: isinstance(A(), B) — False."
+    }
+  ]
+}

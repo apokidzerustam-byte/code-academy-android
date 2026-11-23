@@ -1,0 +1,41 @@
+{
+  "id": "a4-gather-order",
+  "type": "predict",
+  "title": "Кто закончит первым",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Кто закончит первым",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "import asyncio\n\nasync def worker(name, delay):\n    await asyncio.sleep(delay)\n    print(name)\n    return name.lower()\n\nasync def main():\n    results = await asyncio.gather(worker(\"A\", 0.06), worker(\"B\", 0.02), worker(\"C\", 0.04))\n    print(results)\n\nasyncio.run(main())\n",
+  "hints": [
+    "Каждая задача печатает имя после ожидания.",
+    "Меньшая задержка — раньше печать.",
+    "Порядок печати: B, C, A.",
+    "Список results собирается gather по порядку аргументов.",
+    "Это ['a', 'b', 'c']."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "B\nC\nA\n['a', 'b', 'c']\n"
+  },
+  "solution": "B\nC\nA\n['a', 'b', 'c']\n",
+  "explanation": "Печать происходит по мере завершения задач, а итоговый список gather сохраняет порядок вызова.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "A\nB\nC\n['a', 'b', 'c']\n",
+      "answer": "A\nB\nC\n['a', 'b', 'c']\n",
+      "why": "Печать идёт в порядке завершения: B (0.02), C (0.04), A (0.06)."
+    },
+    {
+      "code": "B\nC\nA\n['b', 'c', 'a']\n",
+      "answer": "B\nC\nA\n['b', 'c', 'a']\n",
+      "why": "gather возвращает результаты в порядке передачи задач, а не завершения."
+    }
+  ]
+}

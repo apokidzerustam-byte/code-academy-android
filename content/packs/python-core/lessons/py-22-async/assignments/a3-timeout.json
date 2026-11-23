@@ -1,0 +1,81 @@
+{
+  "id": "a3-timeout",
+  "type": "function",
+  "title": "С таймаутом",
+  "statement": "Напишите функцию `try_wait(ms, limit)`: запускает ожидание `ms` миллисекунд с ограничением `limit` миллисекунд (`asyncio.wait_for`). Верните `\"ok\"`, если уложились, и `\"timeout\"`, если нет. Задержки в тестах различаются не менее чем на 40 мс.\n\nПримеры: `try_wait(10, 100)` → `\"ok\"`, `try_wait(200, 20)` → `\"timeout\"`.",
+  "goal": "С таймаутом",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Нужно ограничить ожидание по времени.",
+    "Для этого есть asyncio.wait_for(корутина, секунды).",
+    "Лимит задан в миллисекундах — переведите в секунды.",
+    "При превышении возникает asyncio.TimeoutError — перехватите его.",
+    "except asyncio.TimeoutError: return 'timeout'."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "try_wait",
+    "cases": [
+      {
+        "args": [
+          10,
+          100
+        ],
+        "id": "v1",
+        "expected": "ok"
+      },
+      {
+        "args": [
+          200,
+          20
+        ],
+        "id": "v2",
+        "expected": "timeout"
+      },
+      {
+        "args": [
+          0,
+          60
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "ok"
+      },
+      {
+        "args": [
+          300,
+          100
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "timeout"
+      },
+      {
+        "args": [
+          50,
+          150
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": "ok"
+      }
+    ]
+  },
+  "solution": "import asyncio\n\n\nasync def slow(ms):\n    await asyncio.sleep(ms / 1000)\n    return \"ok\"\n\n\nasync def main(ms, limit):\n    try:\n        return await asyncio.wait_for(slow(ms), limit / 1000)\n    except asyncio.TimeoutError:\n        return \"timeout\"\n\n\ndef try_wait(ms, limit):\n    return asyncio.run(main(ms, limit))\n",
+  "explanation": "wait_for отменяет задачу, если она не уложилась в лимит, и вызывает исключение, которое мы превращаем в ответ.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import asyncio\n\n\nasync def slow(ms):\n    await asyncio.sleep(ms / 1000)\n    return \"ok\"\n\n\ndef try_wait(ms, limit):\n    return asyncio.run(slow(ms))\n",
+      "why": "Таймаут не применяется: на долгое ожидание вернётся «ok»."
+    },
+    {
+      "code": "import asyncio\n\n\nasync def slow(ms):\n    await asyncio.sleep(ms / 1000)\n    return \"ok\"\n\n\nasync def main(ms, limit):\n    try:\n        return await asyncio.wait_for(slow(ms), limit / 1000)\n    except asyncio.TimeoutError:\n        return \"ok\"\n\n\ndef try_wait(ms, limit):\n    return asyncio.run(main(ms, limit))\n",
+      "why": "При таймауте возвращается «ok»."
+    }
+  ]
+}

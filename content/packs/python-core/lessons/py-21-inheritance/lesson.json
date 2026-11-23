@@ -1,0 +1,46 @@
+{
+  "id": "py-21-inheritance",
+  "title": "Наследование и dataclass",
+  "goal": "Создавать классы-потомки, переопределять методы, пользоваться super и dataclass.",
+  "skills": [
+    "python.oop.inheritance",
+    "python.oop.polymorphism",
+    "python.oop.dataclass"
+  ],
+  "prerequisites": [
+    "py-20-classes"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-speak.json",
+    "assignments/a2-areas.json",
+    "assignments/a3-transactions.json",
+    "assignments/a4-super.json",
+    "assignments/a5-fix-super.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Не вызывают super().__init__() в конструкторе потомка",
+      "fix": "Вызывайте init родителя первой строкой.",
+      "errorType": "AttributeError"
+    },
+    {
+      "mistake": "Строят глубокие цепочки наследования ради повторного использования кода",
+      "fix": "Если связь не «является», рассмотрите композицию: объект внутри объекта."
+    },
+    {
+      "mistake": "Проверяют тип через type(x) == Dog",
+      "fix": "Используйте isinstance(x, Dog): он учитывает потомков."
+    },
+    {
+      "mistake": "Забывают про типы в dataclass",
+      "fix": "Поля dataclass объявляются с аннотацией: title: str."
+    }
+  ]
+}

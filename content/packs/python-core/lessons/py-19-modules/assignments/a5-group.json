@@ -1,0 +1,106 @@
+{
+  "id": "a5-group",
+  "type": "function",
+  "title": "Группировка по первой букве",
+  "statement": "Напишите функцию `group_by_letter(words)`: верните словарь «первая буква → список слов» (слова в исходном порядке, буквы как в слове). Используйте `defaultdict(list)` и верните обычный `dict`.\n\nПример: `group_by_letter([\"арбуз\", \"банан\", \"абрикос\"])` → `{\"а\": [\"арбуз\", \"абрикос\"], \"б\": [\"банан\"]}`.",
+  "goal": "Группировка по первой букве",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Для каждой буквы нужен свой список слов.",
+    "defaultdict(list) сам создаёт пустой список для нового ключа.",
+    "Первая буква слова — w[0].",
+    "Добавляйте слово в список методом append.",
+    "groups[w[0]].append(w); в конце return dict(groups)."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "group_by_letter",
+    "cases": [
+      {
+        "args": [
+          [
+            "арбуз",
+            "банан",
+            "абрикос"
+          ]
+        ],
+        "id": "v1",
+        "expected": {
+          "а": [
+            "арбуз",
+            "абрикос"
+          ],
+          "б": [
+            "банан"
+          ]
+        }
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": {}
+      },
+      {
+        "args": [
+          [
+            "кот"
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": {
+          "к": [
+            "кот"
+          ]
+        }
+      },
+      {
+        "args": [
+          [
+            "дом",
+            "дым",
+            "лес",
+            "лук",
+            "дно"
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": {
+          "д": [
+            "дом",
+            "дым",
+            "дно"
+          ],
+          "л": [
+            "лес",
+            "лук"
+          ]
+        }
+      }
+    ]
+  },
+  "solution": "from collections import defaultdict\n\ndef group_by_letter(words):\n    groups = defaultdict(list)\n    for w in words:\n        groups[w[0]].append(w)\n    return dict(groups)\n",
+  "explanation": "defaultdict избавляет от проверки «есть ли ключ»: для новой буквы список создаётся автоматически.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from collections import defaultdict\n\ndef group_by_letter(words):\n    groups = defaultdict(list)\n    for w in words:\n        groups[w[0]] = w\n    return dict(groups)\n",
+      "why": "Слово заменяет предыдущее вместо добавления в список."
+    },
+    {
+      "code": "def group_by_letter(words):\n    return {w[0]: [w] for w in words}\n",
+      "why": "Слова на одну букву перезаписывают друг друга."
+    },
+    {
+      "code": "from collections import defaultdict\n\ndef group_by_letter(words):\n    groups = defaultdict(list)\n    for w in words:\n        groups[w[-1]].append(w)\n    return dict(groups)\n",
+      "why": "Группировка по последней букве вместо первой."
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "id": "a2-days-between",
+  "type": "function",
+  "title": "Дней между датами",
+  "statement": "Напишите функцию `days_between(first, second)`: обе даты — строки `ГГГГ-ММ-ДД`; верните количество дней от первой до второй (может быть отрицательным).\n\nПример: `days_between(\"2026-11-23\", \"2026-12-31\")` → `38`.",
+  "goal": "Дней между датами",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Подойдёт модуль datetime.",
+    "Из строки вида ГГГГ-ММ-ДД получают дату методом date.fromisoformat.",
+    "Разность двух дат — объект timedelta.",
+    "Количество дней хранится в атрибуте days.",
+    "return (date.fromisoformat(second) - date.fromisoformat(first)).days."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "days_between",
+    "cases": [
+      {
+        "args": [
+          "2026-11-23",
+          "2026-12-31"
+        ],
+        "id": "v1",
+        "expected": 38
+      },
+      {
+        "args": [
+          "2026-01-01",
+          "2026-01-01"
+        ],
+        "id": "v2",
+        "expected": 0
+      },
+      {
+        "args": [
+          "2026-03-01",
+          "2026-02-01"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": -28
+      },
+      {
+        "args": [
+          "2024-02-28",
+          "2024-03-01"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 2
+      },
+      {
+        "args": [
+          "2020-12-31",
+          "2021-01-01"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 1
+      }
+    ]
+  },
+  "solution": "from datetime import date\n\ndef days_between(first, second):\n    return (date.fromisoformat(second) - date.fromisoformat(first)).days\n",
+  "explanation": "Вычитание дат учитывает разную длину месяцев и високосные годы, а .days отдаёт число дней.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from datetime import date\n\ndef days_between(first, second):\n    return (date.fromisoformat(first) - date.fromisoformat(second)).days\n",
+      "why": "Даты вычтены в обратном порядке: знак результата неверный."
+    },
+    {
+      "code": "def days_between(first, second):\n    return int(second[-2:]) - int(first[-2:])\n",
+      "why": "Сравниваются только числа месяца, а не полные даты."
+    },
+    {
+      "code": "from datetime import date\n\ndef days_between(first, second):\n    return date.fromisoformat(second) - date.fromisoformat(first)\n",
+      "why": "Возвращён объект timedelta, а не число дней."
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "id": "a1-gather",
+  "type": "function",
+  "title": "Результаты всех задач",
+  "statement": "Напишите функцию `double_all(delays)`: для каждой задержки в миллисекундах запустите асинхронно (`asyncio.gather`) задачу, которая ждёт `delay / 1000` секунд и возвращает `delay * 2`. Верните список результатов **в порядке исходного списка**. Функция синхронная: внутри запускайте `asyncio.run`.\n\nПример: `double_all([60, 20, 40])` → `[120, 40, 80]`.",
+  "goal": "Результаты всех задач",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Нужна корутина, которая ждёт и возвращает результат.",
+    "Корутину объявляют через async def, ожидание — await asyncio.sleep(...).",
+    "Все корутины запускают одной командой asyncio.gather(*корутины).",
+    "gather сам сохраняет порядок результатов.",
+    "В обычной функции вызовите asyncio.run(main(delays))."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "double_all",
+    "cases": [
+      {
+        "args": [
+          [
+            60,
+            20,
+            40
+          ]
+        ],
+        "id": "v1",
+        "expected": [
+          120,
+          40,
+          80
+        ]
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            10
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          20
+        ]
+      },
+      {
+        "args": [
+          [
+            50,
+            10,
+            30,
+            20
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          100,
+          20,
+          60,
+          40
+        ]
+      }
+    ]
+  },
+  "solution": "import asyncio\n\n\nasync def double(ms):\n    await asyncio.sleep(ms / 1000)\n    return ms * 2\n\n\nasync def main(delays):\n    return list(await asyncio.gather(*(double(d) for d in delays)))\n\n\ndef double_all(delays):\n    return asyncio.run(main(delays))\n",
+  "explanation": "gather возвращает результаты в порядке передачи задач независимо от того, какая закончилась первой.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import asyncio\n\n\nasync def double(ms):\n    await asyncio.sleep(ms / 1000)\n    return ms * 2\n\n\nasync def main(delays):\n    results = await asyncio.gather(*(double(d) for d in delays))\n    return sorted(results)\n\n\ndef double_all(delays):\n    return asyncio.run(main(delays))\n",
+      "why": "Результаты отсортированы вместо исходного порядка."
+    },
+    {
+      "code": "import asyncio\n\n\nasync def double(ms):\n    await asyncio.sleep(ms / 1000)\n    return ms\n\n\nasync def main(delays):\n    return list(await asyncio.gather(*(double(d) for d in delays)))\n\n\ndef double_all(delays):\n    return asyncio.run(main(delays))\n",
+      "why": "Задержка не удвоена."
+    }
+  ]
+}
