@@ -1,0 +1,45 @@
+{
+  "id": "sec-06-https-headers",
+  "title": "HTTPS, куки и заголовки безопасности",
+  "goal": "Понимать, что даёт HTTPS, и настраивать защитные флаги куки, заголовки ответа и перенаправление на защищённое соединение.",
+  "skills": [
+    "sec.https",
+    "sec.cookie-flags",
+    "sec.headers"
+  ],
+  "prerequisites": [
+    "sec-05-secrets-csrf"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-redirect.json",
+    "assignments/a2-audit-cookie.json",
+    "assignments/a3-make-cookie.json",
+    "assignments/a4-weak-headers.json",
+    "assignments/a5-insecure-resources.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Замок в браузере принимают за гарантию честности сайта",
+      "fix": "Замок защищает канал; читайте имя сайта и проверяйте, тот ли это сайт."
+    },
+    {
+      "mistake": "Сессионная кука без Secure и HttpOnly",
+      "fix": "Включайте Secure, HttpOnly и SameSite для сессионных кук."
+    },
+    {
+      "mistake": "HTTPS есть, но нет перенаправления и HSTS",
+      "fix": "Перенаправляйте с HTTP и включайте Strict-Transport-Security."
+    },
+    {
+      "mistake": "Скрипты и картинки по HTTP на HTTPS-странице",
+      "fix": "Все ресурсы загружайте по HTTPS."
+    }
+  ]
+}

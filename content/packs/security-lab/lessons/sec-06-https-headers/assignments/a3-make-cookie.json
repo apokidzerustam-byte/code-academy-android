@@ -1,0 +1,99 @@
+{
+  "id": "a3-make-cookie",
+  "type": "fix",
+  "title": "Куки с флагами наоборот",
+  "statement": "Функция `make_cookie` собирает заголовок `Set-Cookie`, но флаги работают **наоборот**: `Secure` и `HttpOnly` добавляются, когда их просили отключить. Кроме того, при `max_age=None` (сессионная кука) в заголовке не должно быть `Max-Age`. Исправьте функцию.",
+  "goal": "Исправить сборку куки.",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def make_cookie(name, value, max_age=3600, secure=True, http_only=True, same_site=\"Lax\"):\n    parts = [f\"{name}={value}\", \"Path=/\", f\"Max-Age={max_age}\"]\n    if not secure:\n        parts.append(\"Secure\")\n    if not http_only:\n        parts.append(\"HttpOnly\")\n    if same_site:\n        parts.append(f\"SameSite={same_site}\")\n    return \"; \".join(parts)\n",
+  "hints": [
+    "Запустите функцию с разными параметрами и сравните заголовок с ожидаемым.",
+    "Флаг Secure добавляется, когда secure истинно, а не наоборот.",
+    "То же с HttpOnly: он нужен, когда http_only истинно.",
+    "Max-Age добавляется только если max_age не None.",
+    "Условие для Max-Age: if max_age is not None."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "make_cookie",
+    "cases": [
+      {
+        "args": [
+          "sid",
+          "abc"
+        ],
+        "id": "v1",
+        "expected": "sid=abc; Path=/; Max-Age=3600; Secure; HttpOnly; SameSite=Lax"
+      },
+      {
+        "args": [
+          "theme",
+          "dark",
+          86400,
+          true,
+          false
+        ],
+        "id": "v2",
+        "expected": "theme=dark; Path=/; Max-Age=86400; Secure; SameSite=Lax"
+      },
+      {
+        "args": [
+          "tmp",
+          "1",
+          null
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "tmp=1; Path=/; Secure; HttpOnly; SameSite=Lax"
+      },
+      {
+        "args": [
+          "a",
+          "b",
+          60,
+          false,
+          false,
+          null
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "a=b; Path=/; Max-Age=60"
+      },
+      {
+        "args": [
+          "s",
+          "x",
+          0,
+          true,
+          true,
+          "Strict"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": "s=x; Path=/; Max-Age=0; Secure; HttpOnly; SameSite=Strict"
+      }
+    ]
+  },
+  "solution": "def make_cookie(name, value, max_age=3600, secure=True, http_only=True, same_site=\"Lax\"):\n    parts = [f\"{name}={value}\", \"Path=/\"]\n    if max_age is not None:\n        parts.append(f\"Max-Age={max_age}\")\n    if secure:\n        parts.append(\"Secure\")\n    if http_only:\n        parts.append(\"HttpOnly\")\n    if same_site:\n        parts.append(f\"SameSite={same_site}\")\n    return \"; \".join(parts)\n",
+  "explanation": "Флаги безопасности включаются по запросу, а не по обратному условию. Отсутствие max_age означает сессионную куку без Max-Age: добавлять «Max-Age=None» нельзя.",
+  "criteria": [
+    "Secure и HttpOnly по запросу.",
+    "Max-Age только если задан."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def make_cookie(name, value, max_age=3600, secure=True, http_only=True, same_site=\"Lax\"):\n    parts = [f\"{name}={value}\", \"Path=/\", f\"Max-Age={max_age}\"]\n    if not secure:\n        parts.append(\"Secure\")\n    if not http_only:\n        parts.append(\"HttpOnly\")\n    if same_site:\n        parts.append(f\"SameSite={same_site}\")\n    return \"; \".join(parts)\n",
+      "why": "Исходная функция: флаги инвертированы, при None печатается «Max-Age=None»."
+    },
+    {
+      "code": "def make_cookie(name, value, max_age=3600, secure=True, http_only=True, same_site=\"Lax\"):\n    parts = [f\"{name}={value}\", \"Path=/\", f\"Max-Age={max_age}\"]\n    if secure:\n        parts.append(\"Secure\")\n    if http_only:\n        parts.append(\"HttpOnly\")\n    if same_site:\n        parts.append(f\"SameSite={same_site}\")\n    return \"; \".join(parts)\n",
+      "why": "Флаги исправлены, но при max_age=None в заголовке остаётся «Max-Age=None»."
+    },
+    {
+      "code": "def make_cookie(name, value, max_age=3600, secure=True, http_only=True, same_site=\"Lax\"):\n    parts = [f\"{name}={value}\", \"Path=/\"]\n    parts.append(f\"Max-Age={max_age}\")\n    if secure:\n        parts.append(\"Secure\")\n    if http_only:\n        parts.append(\"HttpOnly\")\n    if same_site:\n        parts.append(f\"SameSite={same_site}\")\n    return \"; \".join(parts)\n",
+      "why": "При max_age=None в заголовке не должно быть Max-Age."
+    }
+  ]
+}

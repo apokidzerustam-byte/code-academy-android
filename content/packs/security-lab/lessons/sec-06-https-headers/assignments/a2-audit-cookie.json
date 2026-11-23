@@ -1,0 +1,112 @@
+{
+  "id": "a2-audit-cookie",
+  "type": "write",
+  "title": "Проверка куки",
+  "statement": "Напишите `audit_cookie(header)`: принимает строку заголовка `Set-Cookie` и возвращает список проблем (в этом порядке): `\"нет Secure\"`, `\"нет HttpOnly\"`, `\"нет SameSite\"`, `\"SameSite=None без Secure\"` (последняя — когда `SameSite=None`, а `Secure` нет). Имена флагов нечувствительны к регистру. Первая часть заголовка (`имя=значение`) флагом не считается.",
+  "goal": "Найти слабые места куки.",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def audit_cookie(header):\n    # Верните список проблем: \"нет Secure\", \"нет HttpOnly\", \"нет SameSite\", \"SameSite=None без Secure\" (в этом порядке)\n    pass\n",
+  "hints": [
+    "Заголовок делят по точке с запятой: первая часть — имя и значение, остальные — флаги.",
+    "Флаги удобно привести к нижнему регистру и убрать пробелы.",
+    "Secure и HttpOnly — флаги без значения: проверьте, есть ли они в списке.",
+    "SameSite имеет вид samesite=значение: ищите флаг, который с этого начинается.",
+    "SameSite=None без Secure браузеры отвергают: проверьте это отдельно, когда SameSite есть."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "audit_cookie",
+    "cases": [
+      {
+        "args": [
+          "sid=abc; Path=/; Secure; HttpOnly; SameSite=Lax"
+        ],
+        "id": "v1",
+        "expected": []
+      },
+      {
+        "args": [
+          "sid=abc; Path=/"
+        ],
+        "id": "v2",
+        "expected": [
+          "нет Secure",
+          "нет HttpOnly",
+          "нет SameSite"
+        ]
+      },
+      {
+        "args": [
+          "sid=abc; secure; httponly; samesite=strict"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": []
+      },
+      {
+        "args": [
+          "sid=abc; HttpOnly; SameSite=None"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          "нет Secure",
+          "SameSite=None без Secure"
+        ]
+      },
+      {
+        "args": [
+          "sid=abc; Secure; SameSite=None"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          "нет HttpOnly"
+        ]
+      },
+      {
+        "args": [
+          "samesite=1; Secure; HttpOnly"
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": [
+          "нет SameSite"
+        ]
+      },
+      {
+        "args": [
+          "sid=abc; Path=/; Max-Age=60; Secure; HttpOnly"
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": [
+          "нет SameSite"
+        ]
+      }
+    ]
+  },
+  "solution": "def audit_cookie(header):\n    attrs = [part.strip().lower() for part in header.split(\";\")[1:]]\n    problems = []\n    if \"secure\" not in attrs:\n        problems.append(\"нет Secure\")\n    if \"httponly\" not in attrs:\n        problems.append(\"нет HttpOnly\")\n    same_site = [a for a in attrs if a.startswith(\"samesite=\")]\n    if not same_site:\n        problems.append(\"нет SameSite\")\n    elif same_site[0] == \"samesite=none\" and \"secure\" not in attrs:\n        problems.append(\"SameSite=None без Secure\")\n    return problems\n",
+  "explanation": "Проверка куки разбирает заголовок на части и ищет нужные флаги. Имя куки не должно путаться с флагами, а сочетание SameSite=None без Secure небезопасно.",
+  "criteria": [
+    "Флаги ищутся без учёта регистра.",
+    "Имя куки не считается флагом.",
+    "Проверено SameSite=None."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def audit_cookie(header):\n    attrs = [part.strip() for part in header.split(\";\")[1:]]\n    problems = []\n    if \"secure\" not in attrs:\n        problems.append(\"нет Secure\")\n    if \"httponly\" not in attrs:\n        problems.append(\"нет HttpOnly\")\n    same_site = [a for a in attrs if a.startswith(\"samesite=\")]\n    if not same_site:\n        problems.append(\"нет SameSite\")\n    elif same_site[0] == \"samesite=none\" and \"secure\" not in attrs:\n        problems.append(\"SameSite=None без Secure\")\n    return problems\n",
+      "why": "Флаги проверяются с учётом регистра: secure не распознаётся как Secure."
+    },
+    {
+      "code": "def audit_cookie(header):\n    attrs = [part.strip().lower() for part in header.split(\";\")[1:]]\n    problems = []\n    if \"secure\" not in attrs:\n        problems.append(\"нет Secure\")\n    if \"httponly\" not in attrs:\n        problems.append(\"нет HttpOnly\")\n    same_site = [p.strip().lower() for p in header.split(\";\") if p.strip().lower().startswith(\"samesite=\")]\n    if not same_site:\n        problems.append(\"нет SameSite\")\n    elif same_site[0] == \"samesite=none\" and \"secure\" not in attrs:\n        problems.append(\"SameSite=None без Secure\")\n    return problems\n",
+      "why": "Первая часть «имя=значение» тоже считается флагом: кука с именем samesite ошибочно проходит проверку."
+    },
+    {
+      "code": "def audit_cookie(header):\n    attrs = [part.strip().lower() for part in header.split(\";\")[1:]]\n    problems = []\n    if \"secure\" not in attrs:\n        problems.append(\"нет Secure\")\n    if \"httponly\" not in attrs:\n        problems.append(\"нет HttpOnly\")\n    same_site = [a for a in attrs if a.startswith(\"samesite=\")]\n    if not same_site:\n        problems.append(\"нет SameSite\")\n    return problems\n",
+      "why": "Не проверено сочетание SameSite=None без Secure."
+    }
+  ]
+}

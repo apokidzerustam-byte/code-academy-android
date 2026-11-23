@@ -1,0 +1,41 @@
+{
+  "id": "a1-redirect",
+  "type": "predict",
+  "title": "Перенаправление на HTTPS",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Перенаправление на HTTPS",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "from urllib.parse import urlsplit, urlunsplit\n\n\ndef https_redirect(url):\n    parts = urlsplit(url)\n    if parts.scheme == \"https\":\n        return 200, None\n    return 301, urlunsplit(parts._replace(scheme=\"https\"))\n\n\nfor url in [\"http://a.com/x?y=1#top\", \"https://a.com/x\", \"HTTP://A.com/x\", \"ftp://a.com/f\"]:\n    print(https_redirect(url))\n",
+  "hints": [
+    "Функция меняет только схему: адрес после неё остаётся прежним.",
+    "Запрос после вопросительного знака и фрагмент после решётки сохраняются.",
+    "urlsplit приводит схему к нижнему регистру: HTTP даёт http, но имя сайта остаётся как есть.",
+    "Схема https даёт (200, None) без перенаправления.",
+    "Любая другая схема, в том числе ftp, считается небезопасной и тоже заменяется на https."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "(301, 'https://a.com/x?y=1#top')\n(200, None)\n(301, 'https://A.com/x')\n(301, 'https://a.com/f')\n"
+  },
+  "solution": "(301, 'https://a.com/x?y=1#top')\n(200, None)\n(301, 'https://A.com/x')\n(301, 'https://a.com/f')\n",
+  "explanation": "Функция заменяет схему на https для любой схемы, кроме https, и сохраняет остальные части адреса, в том числе регистр имени сайта, запрос и фрагмент.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "(301, 'https://a.com/x?y=1#top')\n(200, None)\n(301, 'https://a.com/x')\n(200, None)",
+      "answer": "(301, 'https://a.com/x?y=1#top')\n(200, None)\n(301, 'https://a.com/x')\n(200, None)",
+      "why": "Имя сайта сохраняет регистр: A.com не меняется на a.com; а ftp не равно https, поэтому тоже перенаправляется."
+    },
+    {
+      "code": "(301, 'https://a.com/x?y=1')\n(200, None)\n(301, 'https://A.com/x')\n(301, 'https://a.com/f')",
+      "answer": "(301, 'https://a.com/x?y=1')\n(200, None)\n(301, 'https://A.com/x')\n(301, 'https://a.com/f')",
+      "why": "Фрагмент после решётки не теряется: urlunsplit возвращает его на место."
+    }
+  ]
+}

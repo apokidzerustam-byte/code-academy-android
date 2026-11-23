@@ -1,0 +1,95 @@
+{
+  "id": "a5-insecure-resources",
+  "type": "write",
+  "title": "Небезопасные ресурсы",
+  "statement": "Напишите `insecure_resources(html)`: верните список адресов из атрибутов **`src`** (картинки, скрипты, фреймы), которые начинаются с `http://`, в порядке появления. Учтите: кавычки бывают двойные и одинарные, имя атрибута — в любом регистре, вокруг `=` могут быть пробелы. Ссылки `href` на другие страницы смешанным содержимым не считаются.",
+  "goal": "Найти ресурсы, загружаемые по HTTP.",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "import re\n\n\ndef insecure_resources(html):\n    # Верните список адресов из src, которые начинаются с http://\n    pass\n",
+  "hints": [
+    "Подойдёт регулярное выражение: re.findall.",
+    "Ищем слово src, затем знак равенства, возможно с пробелами: \\s*=\\s*.",
+    "Значение в кавычках: двойных или одинарных — [\"'].",
+    "Само значение начинается с http:// и тянется до закрывающей кавычки: [^\"']+ .",
+    "Регистр: добавьте флаг re.IGNORECASE; адрес оберните в скобки, чтобы findall вернул только его."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "insecure_resources",
+    "cases": [
+      {
+        "args": [
+          "<img src=\"http://a.example/x.png\"><script src=\"https://b.example/app.js\"></script><iframe src=\"http://c.example/f\"></iframe>"
+        ],
+        "id": "v1",
+        "expected": [
+          "http://a.example/x.png",
+          "http://c.example/f"
+        ]
+      },
+      {
+        "args": [
+          "<IMG SRC='http://d.example/y.png'> <a href=\"http://e.example/\">link</a> <img src = \"http://f.example/z.png\">"
+        ],
+        "id": "v2",
+        "expected": [
+          "http://d.example/y.png",
+          "http://f.example/z.png"
+        ]
+      },
+      {
+        "args": [
+          "<p>без ресурсов</p>"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": []
+      },
+      {
+        "args": [
+          "<img src=\"https://ok.example/a.png\">"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": []
+      },
+      {
+        "args": [
+          "<script src='http://x.example/a.js'></script><img src=\"/local.png\">"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          "http://x.example/a.js"
+        ]
+      }
+    ]
+  },
+  "solution": "import re\n\n\ndef insecure_resources(html):\n    return re.findall(r'''src\\s*=\\s*[\"'](http://[^\"']+)[\"']''', html, re.IGNORECASE)\n",
+  "explanation": "Регулярное выражение должно допускать реальные вариации разметки: регистр, пробелы и оба вида кавычек. Скобки выделяют нужную часть, поэтому findall возвращает адреса.",
+  "criteria": [
+    "Учтены оба вида кавычек.",
+    "Регистр и пробелы не важны.",
+    "href не считается."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import re\n\n\ndef insecure_resources(html):\n    return re.findall(r'''src\\s*=\\s*\"(http://[^\"]+)\\\"''', html, re.IGNORECASE)\n",
+      "why": "Одинарные кавычки не учтены."
+    },
+    {
+      "code": "import re\n\n\ndef insecure_resources(html):\n    return re.findall(r'''src\\s*=\\s*[\"'](http://[^\"']+)[\"']''', html)\n",
+      "why": "Имя атрибута в верхнем регистре (SRC) не найдено."
+    },
+    {
+      "code": "import re\n\n\ndef insecure_resources(html):\n    return re.findall(r'''(?:src|href)\\s*=\\s*[\"'](http://[^\"']+)[\"']''', html, re.IGNORECASE)\n",
+      "why": "Ссылки href не считаются смешанным содержимым."
+    },
+    {
+      "code": "import re\n\n\ndef insecure_resources(html):\n    return re.findall(r'''src=[\"'](http://[^\"']+)[\"']''', html, re.IGNORECASE)\n",
+      "why": "Пробелы вокруг знака равенства не учтены."
+    }
+  ]
+}

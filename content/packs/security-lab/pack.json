@@ -14,7 +14,8 @@
     "sec-02-passwords",
     "sec-03-sql-injection",
     "sec-04-xss",
-    "sec-05-secrets-csrf"
+    "sec-05-secrets-csrf",
+    "sec-06-https-headers"
   ],
   "skills": {
     "sec.model": "Модель угроз",
@@ -31,6 +32,9 @@
     "sec.urls": "Проверка адресов",
     "sec.secrets": "Секреты и окружение",
     "sec.csrf": "CSRF",
-    "sec.hmac": "HMAC-токены"
+    "sec.hmac": "HMAC-токены",
+    "sec.https": "HTTPS и перенаправление",
+    "sec.cookie-flags": "Флаги безопасности куки",
+    "sec.headers": "Заголовки безопасности"
   }
 }

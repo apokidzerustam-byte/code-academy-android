@@ -1,0 +1,152 @@
+{
+  "id": "a4-weak-headers",
+  "type": "write",
+  "title": "Слабые заголовки",
+  "statement": "Напишите `weak_headers(headers)`: принимает словарь заголовков ответа и возвращает список **слабых или отсутствующих** (в нижнем регистре, в этом порядке): `strict-transport-security` (нужен `max-age` не меньше 31536000), `x-content-type-options` (должен быть `nosniff`), `x-frame-options` (`DENY` или `SAMEORIGIN`). Имена и значения сравниваются без учёта регистра.",
+  "goal": "Найти слабые заголовки безопасности.",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def weak_headers(headers):\n    # Верните список слабых или отсутствующих заголовков (в нижнем регистре, в порядке из условия)\n    pass\n",
+  "hints": [
+    "Сначала приведите имена и значения к нижнему регистру: так проще сравнивать.",
+    "Для nosniff достаточно сравнить значение со строкой.",
+    "X-Frame-Options допускает два значения: deny и sameorigin.",
+    "В HSTS нужно найти часть max-age=число: разделите значение по точке с запятой.",
+    "Число переведите в int; если max-age нет или он меньше 31536000, заголовок слабый."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "weak_headers",
+    "cases": [
+      {
+        "args": [
+          {
+            "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+            "X-Content-Type-Options": "nosniff",
+            "X-Frame-Options": "DENY"
+          }
+        ],
+        "id": "v1",
+        "expected": []
+      },
+      {
+        "args": [
+          {}
+        ],
+        "id": "v2",
+        "expected": [
+          "strict-transport-security",
+          "x-content-type-options",
+          "x-frame-options"
+        ]
+      },
+      {
+        "args": [
+          {
+            "Strict-Transport-Security": "max-age=600",
+            "X-Content-Type-Options": "nosniff",
+            "X-Frame-Options": "DENY"
+          }
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          "strict-transport-security"
+        ]
+      },
+      {
+        "args": [
+          {
+            "x-frame-options": "sameorigin",
+            "X-CONTENT-TYPE-OPTIONS": "NoSniff",
+            "strict-transport-security": "includeSubDomains; max-age=63072000"
+          }
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": []
+      },
+      {
+        "args": [
+          {
+            "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+            "X-Content-Type-Options": "nosniff",
+            "X-Frame-Options": "ALLOWALL"
+          }
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          "x-frame-options"
+        ]
+      },
+      {
+        "args": [
+          {
+            "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+            "X-Content-Type-Options": "sniff",
+            "X-Frame-Options": "DENY"
+          }
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": [
+          "x-content-type-options"
+        ]
+      },
+      {
+        "args": [
+          {
+            "Strict-Transport-Security": "max-age=abc",
+            "X-Content-Type-Options": "nosniff",
+            "X-Frame-Options": "DENY"
+          }
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": [
+          "strict-transport-security"
+        ]
+      },
+      {
+        "args": [
+          {
+            "Strict-Transport-Security": "max-age=31536000"
+          }
+        ],
+        "id": "h8",
+        "hidden": true,
+        "expected": [
+          "x-content-type-options",
+          "x-frame-options"
+        ]
+      }
+    ]
+  },
+  "solution": "def weak_headers(headers):\n    h = {name.lower(): value.strip().lower() for name, value in headers.items()}\n    weak = []\n    hsts = h.get(\"strict-transport-security\")\n    max_age = 0\n    if hsts:\n        for part in hsts.split(\";\"):\n            part = part.strip()\n            if part.startswith(\"max-age=\"):\n                value = part[len(\"max-age=\"):]\n                max_age = int(value) if value.isdigit() else 0\n    if max_age < 31536000:\n        weak.append(\"strict-transport-security\")\n    if h.get(\"x-content-type-options\") != \"nosniff\":\n        weak.append(\"x-content-type-options\")\n    if h.get(\"x-frame-options\") not in (\"deny\", \"sameorigin\"):\n        weak.append(\"x-frame-options\")\n    return weak\n",
+  "explanation": "Мало просто иметь заголовок: значение должно быть защитным. Имена нечувствительны к регистру, а у HSTS важен срок max-age.",
+  "criteria": [
+    "Имена без учёта регистра.",
+    "Проверены значения.",
+    "Срок HSTS не меньше года."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def weak_headers(headers):\n    h = {name: value.strip().lower() for name, value in headers.items()}\n    weak = []\n    hsts = h.get(\"strict-transport-security\")\n    max_age = 0\n    if hsts:\n        for part in hsts.split(\";\"):\n            part = part.strip()\n            if part.startswith(\"max-age=\"):\n                value = part[len(\"max-age=\"):]\n                max_age = int(value) if value.isdigit() else 0\n    if max_age < 31536000:\n        weak.append(\"strict-transport-security\")\n    if h.get(\"x-content-type-options\") != \"nosniff\":\n        weak.append(\"x-content-type-options\")\n    if h.get(\"x-frame-options\") not in (\"deny\", \"sameorigin\"):\n        weak.append(\"x-frame-options\")\n    return weak\n",
+      "why": "Имена сравниваются с учётом регистра."
+    },
+    {
+      "code": "def weak_headers(headers):\n    h = {name.lower(): value.strip().lower() for name, value in headers.items()}\n    weak = []\n    hsts = h.get(\"strict-transport-security\")\n    max_age = 0\n    if hsts:\n        for part in hsts.split(\";\"):\n            part = part.strip()\n            if part.startswith(\"max-age=\"):\n                value = part[len(\"max-age=\"):]\n                max_age = int(value) if value.isdigit() else 0\n    if not hsts:\n        weak.append(\"strict-transport-security\")\n    if h.get(\"x-content-type-options\") != \"nosniff\":\n        weak.append(\"x-content-type-options\")\n    if h.get(\"x-frame-options\") not in (\"deny\", \"sameorigin\"):\n        weak.append(\"x-frame-options\")\n    return weak\n",
+      "why": "Слишком короткий max-age тоже слабая настройка."
+    },
+    {
+      "code": "def weak_headers(headers):\n    h = {name.lower(): value.strip().lower() for name, value in headers.items()}\n    weak = []\n    hsts = h.get(\"strict-transport-security\")\n    max_age = 0\n    if hsts:\n        for part in hsts.split(\";\"):\n            part = part.strip()\n            if part.startswith(\"max-age=\"):\n                value = part[len(\"max-age=\"):]\n                max_age = int(value) if value.isdigit() else 0\n    if max_age < 31536000:\n        weak.append(\"strict-transport-security\")\n    if h.get(\"x-content-type-options\") != \"nosniff\":\n        weak.append(\"x-content-type-options\")\n    if h.get(\"x-frame-options\") not in (\"deny\",):\n        weak.append(\"x-frame-options\")\n    return weak\n",
+      "why": "SAMEORIGIN допустим."
+    },
+    {
+      "code": "def weak_headers(headers):\n    h = {name.lower(): value.strip().lower() for name, value in headers.items()}\n    weak = []\n    hsts = h.get(\"strict-transport-security\")\n    max_age = 0\n    if hsts:\n        for part in hsts.split(\";\"):\n            part = part.strip()\n            if part.startswith(\"max-age=\"):\n                value = part[len(\"max-age=\"):]\n                max_age = int(value) if value.isdigit() else 0\n    if max_age < 31536000:\n        weak.append(\"strict-transport-security\")\n    if \"x-content-type-options\" not in h:\n        weak.append(\"x-content-type-options\")\n    if h.get(\"x-frame-options\") not in (\"deny\", \"sameorigin\"):\n        weak.append(\"x-frame-options\")\n    return weak\n",
+      "why": "Значение должно быть именно nosniff."
+    }
+  ]
+}

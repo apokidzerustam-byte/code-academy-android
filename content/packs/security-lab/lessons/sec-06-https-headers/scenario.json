@@ -1,0 +1,294 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Что даёт HTTPS",
+      "narration": "Обычный протокол HTTP передаёт всё открытым текстом. Пароль, который вы отправили в кафе по общему вайфаю, может прочитать любой, кто сидит в той же сети. HTTPS это тот же HTTP, но внутри защищённого соединения TLS. Оно даёт три гарантии. Первая: тайна, то есть посторонний видит только набор бессмысленных байтов. Вторая: целостность, то есть данные нельзя незаметно подменить по дороге. Третья: подлинность. Сертификат доказывает, что вы разговариваете именно с этим сайтом, а не с подделкой. Значок замка в браузере означает, что все три гарантии выполняются для адреса, который вы видите. Но он не означает, что сам сайт честный: мошенник тоже может получить сертификат на своё название. Поэтому защита сайта всегда состоит из нескольких слоёв: шифрованное соединение, правильные куки, заголовки безопасности и внимательность самого пользователя. Сегодня мы разберём каждый слой и научимся проверять его кодом.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "**HTTPS** = HTTP + TLS: тайна · целостность · подлинность",
+          "cue": 2
+        },
+        {
+          "type": "note",
+          "md": "Замок = соединение защищено. Он **не** значит «сайт честный»",
+          "cue": 8
+        }
+      ]
+    },
+    {
+      "id": "url",
+      "title": "Схема и настоящее имя сайта",
+      "narration": "Первое, что нужно уметь, это правильно читать адрес. У адреса есть схема, то есть начало до двоеточия: http или https. Затем идёт имя сайта. Давайте разберём три адреса стандартной функцией. Первый защищён и принадлежит банку. Второй тот же сайт, но по незащищённой схеме, и в нём нельзя вводить пароль. А в третьем есть обман: слово bank example стоит в начале, но имя сайта заканчивается на evil test, значит, это совсем другой сайт. Смотреть нужно на имя перед первой косой чертой, а не на красивое начало. Этот приём пригодится и вам как разработчику: когда вы проверяете, куда ведёт адрес, например при перенаправлении после входа, всегда сверяйте полное имя сайта, а не только его начало. Иначе мошенник подставит свой сайт.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "from urllib.parse import urlsplit\n\nfor url in [\n    \"https://bank.example/login\",\n    \"http://bank.example/login\",\n    \"https://bank.example.evil.test/login\",\n]:\n    parts = urlsplit(url)\n    print(parts.scheme, parts.hostname)\n",
+          "cue": 3
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            4
+          ],
+          "cue": 4
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            5
+          ],
+          "cue": 5
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            6
+          ],
+          "cue": 6
+        },
+        {
+          "type": "run",
+          "cue": 7
+        },
+        {
+          "type": "output",
+          "text": "https bank.example\nhttp bank.example\nhttps bank.example.evil.test\n",
+          "cue": 7
+        }
+      ]
+    },
+    {
+      "id": "redirect",
+      "title": "Переход на HTTPS и HSTS",
+      "narration": "Сервер не должен отвечать на пароли по HTTP. Поэтому для незащищённых запросов он возвращает перенаправление: код триста один и новый адрес с защищённой схемой. Функция https redirect делает именно это: если схема уже https, всё хорошо, иначе заменяет её и сохраняет остальную часть адреса. Запустим на двух адресах. Но первый запрос всё равно уходит открытым, и этим может воспользоваться перехватчик. Поэтому сайт добавляет заголовок Strict Transport Security, сокращённо HSTS: он велит браузеру на год вперёд ходить на сайт только по HTTPS, даже если пользователь наберёт http. Тогда первый открытый запрос остаётся только при самом первом визите на сайт, а дальше перехватчику ловить нечего.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "from urllib.parse import urlsplit, urlunsplit\n\n\ndef https_redirect(url):\n    parts = urlsplit(url)\n    if parts.scheme == \"https\":\n        return 200, None\n    return 301, urlunsplit(parts._replace(scheme=\"https\"))\n\n\nprint(https_redirect(\"http://shop.example/cart?id=5\"))\nprint(https_redirect(\"https://shop.example/cart?id=5\"))\n",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "(301, 'https://shop.example/cart?id=5')\n(200, None)\n",
+          "cue": 3
+        },
+        {
+          "type": "note",
+          "md": "`Strict-Transport-Security: max-age=31536000; includeSubDomains` — «год ходи только по HTTPS»",
+          "cue": 5
+        }
+      ]
+    },
+    {
+      "id": "cookies",
+      "title": "Куки: флаги безопасности",
+      "narration": "Сервер запоминает вошедшего пользователя в куки, и эта кука стоит дороже пароля: кто её украл, тот и вошёл. Поэтому у неё есть защитные флаги. Secure: кука отправляется только по HTTPS. HttpOnly: скрипты на странице не могут её прочитать, а значит, украсть её через внедрённый код будет сложнее. SameSite: кука не отправляется со сторонних сайтов, и это защита от подделки запросов. И Max-Age: у куки ограниченный срок жизни. Функция make cookie собирает заголовок Set Cookie с такими флагами. Для сессии оставляем всё включённым. А безобидной настройке, вроде темы оформления, можно разрешить чтение скриптом: флаг HttpOnly отключён. Хорошее правило: давайте куке минимум возможностей. Если скрипту читать её не нужно, пусть не читает. Если она нужна только на вашем сайте, пусть не уходит на чужие. Лишние возможности это лишняя поверхность для атаки.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "def make_cookie(name, value, max_age=3600, secure=True, http_only=True, same_site=\"Lax\"):\n    parts = [f\"{name}={value}\", \"Path=/\"]\n    if max_age is not None:\n        parts.append(f\"Max-Age={max_age}\")\n    if secure:\n        parts.append(\"Secure\")\n    if http_only:\n        parts.append(\"HttpOnly\")\n    if same_site:\n        parts.append(f\"SameSite={same_site}\")\n    return \"; \".join(parts)\n\n\n",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            5,
+            6
+          ],
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            7,
+            8
+          ],
+          "cue": 3
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            9,
+            10
+          ],
+          "cue": 4
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            3,
+            4
+          ],
+          "cue": 5
+        },
+        {
+          "type": "type",
+          "text": "print(make_cookie(\"sid\", \"abc123\"))\nprint(make_cookie(\"theme\", \"dark\", max_age=86400, http_only=False))\n",
+          "cue": 7
+        },
+        {
+          "type": "run",
+          "cue": 8
+        },
+        {
+          "type": "output",
+          "text": "sid=abc123; Path=/; Max-Age=3600; Secure; HttpOnly; SameSite=Lax\ntheme=dark; Path=/; Max-Age=86400; Secure; SameSite=Lax\n",
+          "cue": 8
+        }
+      ]
+    },
+    {
+      "id": "headers",
+      "title": "Заголовки безопасности",
+      "narration": "Ещё один слой защиты, заголовки ответа. Они говорят браузеру, как себя вести. X Content Type Options со значением nosniff запрещает браузеру угадывать тип файла. X Frame Options запрещает показывать сайт внутри чужой страницы, и это защита от обмана кликами. Политика Content Security Policy задаёт, откуда страница может загружать скрипты: значение default src self разрешает только свой сайт. А Referrer Policy решает, сколько информации об адресе отправлять другим сайтам. Проверка очень простая: сравниваем нужные заголовки с теми, что вернул сервер. Имена заголовков нечувствительны к регистру, поэтому приводим их к нижнему. Здесь не хватает четырёх из пяти. Для начала включите хотя бы эти заголовки: они ничего не ломают в обычном сайте, а закрывают целые классы атак. Политику Content Security Policy вводят осторожно: сначала в режиме наблюдения, чтобы не заблокировать собственные скрипты.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "REQUIRED = {\n    \"strict-transport-security\": \"max-age=31536000; includeSubDomains\",\n    \"x-content-type-options\": \"nosniff\",\n    \"x-frame-options\": \"DENY\",\n    \"content-security-policy\": \"default-src 'self'\",\n    \"referrer-policy\": \"no-referrer\",\n}\n\n\ndef missing_headers(headers):\n    present = {name.lower() for name in headers}\n    return [name for name in REQUIRED if name not in present]\n\n\n",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            3
+          ],
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            4
+          ],
+          "cue": 3
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            5
+          ],
+          "cue": 4
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            6
+          ],
+          "cue": 5
+        },
+        {
+          "type": "type",
+          "text": "response = {\"Content-Type\": \"text/html\", \"X-Frame-Options\": \"DENY\"}\nprint(missing_headers(response))\n",
+          "cue": 6
+        },
+        {
+          "type": "run",
+          "cue": 8
+        },
+        {
+          "type": "output",
+          "text": "['strict-transport-security', 'x-content-type-options', 'content-security-policy', 'referrer-policy']\n",
+          "cue": 8
+        }
+      ]
+    },
+    {
+      "id": "mixed",
+      "title": "Смешанное содержимое",
+      "narration": "Последняя ловушка: страница загружена по HTTPS, но подтягивает картинку или скрипт по обычному HTTP. Это называется смешанным содержимым. Скрипт по открытому каналу злоумышленник может подменить, и вся защита страницы превращается в видимость. Браузеры такое блокируют, но лучше не допускать. Найти такие ссылки можно регулярным выражением: ищем атрибуты src или href, значение которых начинается с http двоеточие две косые черты. Ссылка на https пропускается, а картинка и скрипт попадают в список. Такую проверку полезно запускать перед выпуском сайта: найденные адреса остаётся заменить на https, и страница станет полностью защищённой.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "import re\n\n\ndef insecure_links(html):\n    return re.findall(r'(?:src|href)=\"(http://[^\"]+)\"', html)\n\n\npage = (\n    '<img src=\"http://cdn.example/logo.png\">'\n    '<a href=\"https://ok.example/\">ok</a>'\n    '<script src=\"http://cdn.example/app.js\"></script>'\n)\nprint(insecure_links(page))\n",
+          "cue": 4
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            5
+          ],
+          "cue": 4
+        },
+        {
+          "type": "run",
+          "cue": 5
+        },
+        {
+          "type": "output",
+          "text": "['http://cdn.example/logo.png', 'http://cdn.example/app.js']\n",
+          "cue": 5
+        }
+      ]
+    },
+    {
+      "id": "mistakes",
+      "title": "Типичные ошибки",
+      "narration": "Четыре типичные ошибки. Первая: считать замок гарантией честности сайта. Вторая: сессионная кука без флагов Secure и HttpOnly. Третья: включить HTTPS и забыть про перенаправление и HSTS, так что открытый вход остаётся. Четвёртая: подключать скрипты и картинки по HTTP на защищённой странице.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "Ошибка 1: замок = «сайт честный».",
+          "cue": 1
+        },
+        {
+          "type": "note",
+          "md": "Ошибка 2: сессионная кука без `Secure` и `HttpOnly`.",
+          "cue": 2
+        },
+        {
+          "type": "note",
+          "md": "Ошибка 3: нет перенаправления и HSTS.",
+          "cue": 3
+        },
+        {
+          "type": "note",
+          "md": "Ошибка 4: ресурсы по HTTP на HTTPS-странице.",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. HTTPS даёт тайну, целостность и подлинность. Читайте адрес целиком: важно имя сайта, а не красивое начало. Сервер перенаправляет на HTTPS и включает HSTS. Сессионной куке нужны флаги Secure, HttpOnly и SameSite. Заголовки безопасности запрещают браузеру опасные догадки. Ресурсы на защищённой странице тоже загружаются по HTTPS. В заданиях вы предскажете перенаправление, проверите куку, исправите сборку куки, найдёте слабые заголовки и найдёте небезопасные ресурсы. Критерий прохождения: решить не меньше четырёх заданий из пяти.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "HTTPS · редирект + HSTS · куки `Secure`/`HttpOnly`/`SameSite` · заголовки · без HTTP-ресурсов",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}
