@@ -17,8 +17,15 @@ annotation class Dao
 @Target(AnnotationTarget.FUNCTION)
 annotation class Query(val value: String)
 
+/** Значения как в настоящем Room: REPLACE = 1, ABORT = 3, IGNORE = 5. */
+object OnConflictStrategy {
+    const val REPLACE = 1
+    const val ABORT = 3
+    const val IGNORE = 5
+}
+
 @Target(AnnotationTarget.FUNCTION)
-annotation class Insert
+annotation class Insert(val onConflict: Int = OnConflictStrategy.ABORT)
 
 @Target(AnnotationTarget.FUNCTION)
 annotation class Update

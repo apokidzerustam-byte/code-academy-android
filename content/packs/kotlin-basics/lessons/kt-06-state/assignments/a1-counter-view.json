@@ -1,0 +1,92 @@
+{
+  "id": "a1-counter-view",
+  "type": "write",
+  "title": "Счётчик без состояния",
+  "statement": "Напишите функцию интерфейса `CounterView(count: Int, onIncrement: () -> Unit)`: в `Column` элемент `Text` со строкой `Счёт: <count>` и кнопка `Button`, в которой лежит `Text(\"+1\")`. Кнопка должна вызывать `onIncrement` при нажатии. Собственного состояния у функции быть не должно.",
+  "goal": "Написать функцию без состояния: данные вниз, события вверх.",
+  "input": "count = 3",
+  "expectedResult": "Column → Text(«Счёт: 3»), Button → Text(«+1»); два нажатия вызывают onIncrement дважды.",
+  "constraints": [
+    "Импорты уже в шаблоне."
+  ],
+  "starterCode": "import androidx.compose.foundation.layout.Column\nimport androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\n\n// Напишите функцию CounterView\n",
+  "hints": [
+    "Состояние здесь не хранится: count приходит параметром.",
+    "Кнопка принимает onClick — функцию, которую вызовут при нажатии.",
+    "У вас уже есть такая функция: параметр onIncrement.",
+    "Передайте её кнопке как есть, не вызывая: onClick = onIncrement.",
+    "Column { Text(\"Счёт: $count\"); Button(onClick = onIncrement) { Text(\"+1\") } } — каждый вызов с новой строки."
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "CounterView",
+        "paramTypes": [
+          "Int",
+          "() -> Unit"
+        ],
+        "returns": "Unit"
+      },
+      {
+        "id": "ann",
+        "type": "contains",
+        "pattern": "@Composable\\s+fun\\s+CounterView\\b",
+        "message": "Нужна аннотация @Composable"
+      },
+      {
+        "id": "btn",
+        "type": "contains",
+        "pattern": "\\bButton\\s*\\(\\s*onClick\\s*=\\s*onIncrement\\b(?!\\s*\\()",
+        "message": "Передайте onIncrement кнопке: Button(onClick = onIncrement)",
+        "hint": "Функцию-событие не вызывают, а передают дальше"
+      },
+      {
+        "id": "nostate",
+        "hidden": true,
+        "type": "not_contains",
+        "pattern": "\\bremember\\b|\\bmutableStateOf\\b|\\bmutableIntStateOf\\b",
+        "message": "Функция без состояния: значение приходит параметром, remember здесь не нужен"
+      },
+      {
+        "id": "txt",
+        "hidden": true,
+        "type": "contains",
+        "raw": true,
+        "pattern": "Счёт:\\s*\\$(count|\\{\\s*count\\s*\\})",
+        "message": "Покажите «Счёт: <count>» через шаблон строки"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    var clicks = 0\n    println(stubs.ComposeLog.render { CounterView(3) { clicks++ } })\n    stubs.ComposeLog.click(0)\n    stubs.ComposeLog.click(0)\n    println(\"Нажатий: $clicks\")\n}",
+      "expected_stdout": "Column\n  Text(Счёт: 3)\n  Button\n    Text(+1)\nНажатий: 2"
+    }
+  },
+  "solution": "import androidx.compose.foundation.layout.Column\nimport androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\n\n@Composable\nfun CounterView(count: Int, onIncrement: () -> Unit) {\n    Column {\n        Text(\"Счёт: $count\")\n        Button(onClick = onIncrement) {\n            Text(\"+1\")\n        }\n    }\n}\n",
+  "explanation": "Функция только показывает переданный count и отдаёт нажатие наверх через onIncrement. Состояния внутри нет.",
+  "criteria": [
+    "@Composable fun CounterView(count, onIncrement).",
+    "Button(onClick = onIncrement).",
+    "Без remember."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import androidx.compose.foundation.layout.Column\nimport androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\n\n@Composable\nfun CounterView(count: Int, onIncrement: () -> Unit) {\n    Column {\n        Text(\"Счёт: $count\")\n        Button(onClick = { }) {\n            Text(\"+1\")\n        }\n    }\n}\n",
+      "why": "Кнопка ничего не делает: onIncrement не подключён."
+    },
+    {
+      "code": "import androidx.compose.foundation.layout.Column\nimport androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\n\n@Composable\nfun CounterView(count: Int, onIncrement: () -> Unit) {\n    Column {\n        Text(\"Счёт: $count\")\n        Button(onClick = onIncrement()) {\n            Text(\"+1\")\n        }\n    }\n}\n",
+      "why": "onIncrement() вызывает функцию сразу, а кнопке нужно передать саму функцию."
+    },
+    {
+      "code": "import androidx.compose.foundation.layout.Column\nimport androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\n\n@Composable\nfun CounterView(count: Int, onIncrement: () -> Unit) {\n    Column {\n        Button(onClick = onIncrement) {\n            Text(\"+1\")\n        }\n    }\n}\n",
+      "why": "Нет Text со счётом."
+    }
+  ]
+}

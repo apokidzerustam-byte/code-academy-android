@@ -1,0 +1,269 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Интерфейс как функция от состояния",
+      "narration": "Начнём с картинки. Представьте табло на вокзале. Диспетчер меняет в таблице время отправления, а табло само показывает новое число. Он не бегает и не стирает цифры вручную. Интерфейс в Compose устроен так же. Есть состояние: данные, от которых зависит картинка, например счётчик, список задач или введённый текст. А есть функции интерфейса, которые по состоянию рисуют экран. Когда состояние меняется, Compose заново вызывает те функции, которые его читают, и экран обновляется. Формула такая: интерфейс равен функции от состояния. Всё, что нужно запомнить: данные хранятся в одном понятном месте, а события, например нажатие, их меняют. Сегодня разберём, где хранить состояние, как передавать события вверх и как описывать состояние неизменяемым объектом.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "**Интерфейс = функция(состояние)**. Меняете состояние — Compose перерисовывает читающие его функции.",
+          "cue": 8
+        },
+        {
+          "type": "note",
+          "md": "`remember` · подъём состояния · `data class` + `copy()`",
+          "cue": 10
+        }
+      ]
+    },
+    {
+      "id": "remember",
+      "title": "Состояние внутри функции",
+      "narration": "Начнём с простого счётчика. Состояние создаёт вызов mutableIntStateOf с начальным значением ноль. Но сама функция интерфейса может вызываться много раз при перерисовке, и обычная переменная каждый раз обнулялась бы. Чтобы значение пережило перерисовку, его оборачивают в remember: он запоминает объект и отдаёт тот же самый при следующем вызове. Слово by позволяет работать с состоянием как с обычной переменной: читать count и писать count плюс плюс. Для этого нужны импорты getValue и setValue. Нажатие кнопки увеличивает значение, Compose замечает изменение и заново вызывает те части, которые читают count. Остальные не трогаются.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "Main.kt"
+        },
+        {
+          "type": "type",
+          "text": "import androidx.compose.foundation.layout.Column\nimport androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.compose.runtime.getValue\nimport androidx.compose.runtime.mutableIntStateOf\nimport androidx.compose.runtime.remember\nimport androidx.compose.runtime.setValue\n\n@Composable\nfun Counter() {\n    var count by remember { mutableIntStateOf(0) }\n    Column {\n        Text(\"Счёт: $count\")\n        Button(onClick = { count++ }) {\n            Text(\"+1\")\n        }\n    }\n}\n",
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            12
+          ],
+          "file": "Main.kt",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            7
+          ],
+          "file": "Main.kt",
+          "cue": 3
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "file": "Main.kt",
+          "cue": 5
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            15
+          ],
+          "file": "Main.kt",
+          "cue": 6
+        }
+      ]
+    },
+    {
+      "id": "hoist",
+      "title": "Подъём состояния",
+      "narration": "У такого счётчика есть недостаток: состояние спрятано внутри. Родитель не может узнать, чему равен счёт, а проверить функцию в изоляции сложно. Решение называется подъёмом состояния. Мы делаем функцию CounterView без собственного состояния: значение приходит параметром count, а о нажатии она сообщает через параметр onIncrement, это функция без аргументов. Сама она ничего не меняет и не помнит. Такую функцию называют без состояния, и её очень удобно проверять: передали число, посмотрели, что нарисовано. Правило звучит так: состояние течёт вниз, события вверх. Данные идут в функцию через параметры, а действия пользователя поднимаются наверх через функции-обратные вызовы. Это похоже на кассу в магазине: касса показывает сумму и принимает деньги, но цены задаёт кто-то другой.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "Main.kt"
+        },
+        {
+          "type": "type",
+          "text": "import androidx.compose.foundation.layout.Column\nimport androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\n\n@Composable\nfun CounterView(count: Int, onIncrement: () -> Unit) {\n    Column {\n        Text(\"Счёт: $count\")\n        Button(onClick = onIncrement) {\n            Text(\"+1\")\n        }\n    }\n}\n",
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            7
+          ],
+          "file": "Main.kt",
+          "cue": 3
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            7
+          ],
+          "file": "Main.kt",
+          "cue": 3
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            9
+          ],
+          "file": "Main.kt",
+          "cue": 7
+        }
+      ]
+    },
+    {
+      "id": "owner",
+      "title": "Кто владеет состоянием",
+      "narration": "Кто же тогда хранит число? Родитель. Функция CounterScreen создаёт состояние, а потом вызывает CounterView, передавая ей текущее значение и функцию, которая увеличивает счёт. Когда пользователь нажимает кнопку, срабатывает onIncrement, состояние меняется, и Compose перерисовывает всё, что зависит от count. Выгода в том, что одну и ту же CounterView можно показать на разных экранах, с разным владельцем состояния, и даже без Android: функция видит только число и функцию. Состояние стараются поднимать на тот уровень, где оно нужно сразу нескольким функциям, и не выше.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "Main.kt"
+        },
+        {
+          "type": "type",
+          "text": "import androidx.compose.foundation.layout.Column\nimport androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.compose.runtime.getValue\nimport androidx.compose.runtime.mutableIntStateOf\nimport androidx.compose.runtime.remember\nimport androidx.compose.runtime.setValue\n\n@Composable\nfun CounterScreen() {\n    var count by remember { mutableIntStateOf(0) }\n    CounterView(count = count, onIncrement = { count++ })\n}\n",
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            12
+          ],
+          "file": "Main.kt",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            13
+          ],
+          "file": "Main.kt",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            13
+          ],
+          "file": "Main.kt",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "immutable",
+      "title": "Неизменяемое состояние",
+      "narration": "Когда в состоянии несколько полей, его описывают классом данных. Например, задача: название и отметка о выполнении. Важное правило: поля делают неизменяемыми, через val. Чтобы поменять отметку, мы не правим старый объект, а создаём копию методом copy и меняем в ней нужное поле. Compose сравнивает старое и новое состояние, и если объекты различаются, перерисовывает экран. Так исключаются случайные изменения из разных мест. Запустим пример: исходная задача остаётся невыполненной, а копия получает отметку «готово». Сравнение через равенство даёт ложь, потому что поля разные. Заметьте ещё, что строковое представление класса данных печатает все поля: это удобно при отладке, когда нужно быстро увидеть, что лежит в состоянии.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "Main.kt"
+        },
+        {
+          "type": "type",
+          "text": "data class TaskUi(val title: String, val done: Boolean)\n\nfun main() {\n    val first = TaskUi(\"Купить хлеб\", false)\n    val second = first.copy(done = true)\n    println(first)\n    println(second)\n    println(first == second)\n}\n",
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            1
+          ],
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            5
+          ],
+          "file": "Main.kt",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "Main.kt",
+          "cue": 6
+        },
+        {
+          "type": "output",
+          "text": "TaskUi(title=Купить хлеб, done=false)\nTaskUi(title=Купить хлеб, done=true)\nfalse\n",
+          "cue": 6
+        }
+      ]
+    },
+    {
+      "id": "rotate",
+      "title": "Поворот экрана и ViewModel",
+      "narration": "Есть тонкость, о которой нельзя промолчать. Когда пользователь поворачивает телефон, Андроид пересоздаёт экран, и значение в обычном remember теряется: счётчик снова ноль. Если это неприятно, например теряется введённый текст, берут rememberSaveable: он сохраняет значение при повороте. Для данных посерьёзнее, например списка, загруженного из сети, состояние кладут в ViewModel. Это отдельный класс, который живёт дольше экрана и переживает поворот. Им мы займёмся в одном из следующих уроков. А пока запомните правило: remember переживает перерисовку, rememberSaveable переживает ещё и поворот, ViewModel хранит то, что нельзя терять.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "Main.kt"
+        },
+        {
+          "type": "note",
+          "md": "`remember` — переживает перерисовку",
+          "cue": 6
+        },
+        {
+          "type": "note",
+          "md": "`rememberSaveable` — переживает и поворот экрана",
+          "cue": 6
+        },
+        {
+          "type": "note",
+          "md": "`ViewModel` — хранит данные, которые нельзя терять (следующий урок)",
+          "cue": 6
+        }
+      ]
+    },
+    {
+      "id": "mistakes",
+      "title": "Типичные ошибки",
+      "narration": "Четыре типичные ошибки. Первая: обычная переменная вместо состояния. Экран не обновится, потому что Compose не знает об изменении. Вторая: состояние без remember. При каждой перерисовке оно создаётся заново, и счётчик снова ноль. Третья: изменяемые объекты внутри состояния. Вы поменяли поле, но ссылка прежняя, и Compose не видит разницы. Создавайте копию через copy. Четвёртая: состояние внутри каждой маленькой функции. Тогда значения разъезжаются. Держите его в одном месте и передавайте параметрами.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "Ошибка 1: `var count = 0` вместо `remember { mutableIntStateOf(0) }` → экран не обновится.",
+          "cue": 1
+        },
+        {
+          "type": "note",
+          "md": "Ошибка 2: `mutableStateOf` без `remember` → при перерисовке значение сбрасывается.",
+          "cue": 3
+        },
+        {
+          "type": "note",
+          "md": "Ошибка 3: меняете поля объекта на месте → используйте `copy()` и неизменяемые поля.",
+          "cue": 5
+        },
+        {
+          "type": "note",
+          "md": "Ошибка 4: состояние в каждой функции → поднимите его к родителю.",
+          "cue": 8
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. Состояние — это данные, от которых зависит экран. Чтобы Compose увидел изменение, его хранят в mutableStateOf, а чтобы оно пережило перерисовку, оборачивают в remember. Функции интерфейса лучше делать без состояния: данные приходят параметрами, события уходят вверх через функции. Родитель владеет состоянием и передаёт его детям. Сложное состояние описывают классом данных с неизменяемыми полями и обновляют через copy. В заданиях вы напишете функцию без состояния с кнопкой, обновите задачу через copy, исправите счётчик без remember и предскажете результат. Критерий прохождения: решить не меньше трёх заданий из четырёх. Как и в прошлом уроке, код интерфейса проверяется на компьютере по упрощённой модели Compose.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "Состояние вниз, события вверх: `CounterView(count, onIncrement)` + владелец с `remember { mutableIntStateOf(0) }`.",
+          "cue": 0
+        },
+        {
+          "type": "note",
+          "md": "Сложное состояние: `data class` с `val` и `state.copy(поле = …)`.",
+          "cue": 5
+        }
+      ]
+    }
+  ]
+}

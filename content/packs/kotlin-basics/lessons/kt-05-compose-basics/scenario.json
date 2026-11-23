@@ -101,18 +101,18 @@
         {
           "type": "highlight",
           "lines": [
-            11
-          ],
-          "file": "Main.kt",
-          "cue": 5
-        },
-        {
-          "type": "highlight",
-          "lines": [
             15
           ],
           "file": "Main.kt",
           "cue": 4
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            11
+          ],
+          "file": "Main.kt",
+          "cue": 5
         }
       ]
     },

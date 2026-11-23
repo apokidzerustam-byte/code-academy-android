@@ -1,0 +1,273 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Зачем нужна ViewModel",
+      "narration": "В прошлом уроке состояние жило прямо в функции интерфейса. Для счётчика этого хватит, но в настоящем приложении есть список задач, загрузка из сети, сохранение в базу. Если держать всё это в функциях интерфейса, они превратятся в свалку: вперемешку рисование, правила и работа с данными, и ни одну часть нельзя проверить отдельно. Кроме того, при повороте экрана Андроид пересоздаёт всё, и обычное состояние теряется. Для этого в Андроиде придумали ViewModel. Это обычный класс, который хранит состояние экрана и логику его изменения. Он живёт дольше экрана и переживает повороты. Функции интерфейса лишь показывают то, что лежит во ViewModel, и сообщают ей о действиях пользователя. Состояние, которое она отдаёт наружу, обычно описывают потоком StateFlow.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "**ViewModel**: хранит состояние экрана и логику; переживает поворот; не знает про кнопки и текст.",
+          "cue": 5
+        },
+        {
+          "type": "note",
+          "md": "`ViewModel` · `MutableStateFlow` / `StateFlow` · `update { it.copy(…) }` · `collectAsState()`",
+          "cue": 8
+        }
+      ]
+    },
+    {
+      "id": "stateflow",
+      "title": "Класс ViewModel и StateFlow",
+      "narration": "Вот ViewModel счётчика. Она наследует класс ViewModel. Внутри лежит MutableStateFlow: это ячейка, которая хранит значение и сообщает подписчикам, когда оно меняется. Начальное значение ноль. Ячейку делают приватной, и по договорённости её имя начинают с подчёркивания. Наружу отдают только чтение: свойство count типа StateFlow, которое получают вызовом asStateFlow. Так экран может смотреть значение, но не может подменить его снаружи. Любое изменение проходит через методы ViewModel, например increment. В этом порядок: один владелец данных и один способ их менять.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "Main.kt"
+        },
+        {
+          "type": "type",
+          "text": "import androidx.lifecycle.ViewModel\nimport kotlinx.coroutines.flow.MutableStateFlow\nimport kotlinx.coroutines.flow.StateFlow\nimport kotlinx.coroutines.flow.asStateFlow\n\nclass CounterViewModel : ViewModel() {\n    private val _count = MutableStateFlow(0)\n    val count: StateFlow<Int> = _count.asStateFlow()\n\n    fun increment() {\n        _count.value += 1\n    }\n}\n",
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            6
+          ],
+          "file": "Main.kt",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            7
+          ],
+          "file": "Main.kt",
+          "cue": 4
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            8
+          ],
+          "file": "Main.kt",
+          "cue": 5
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            10,
+            11,
+            12
+          ],
+          "file": "Main.kt",
+          "cue": 7
+        }
+      ]
+    },
+    {
+      "id": "update",
+      "title": "Обновление состояния через update",
+      "narration": "Состояние экрана обычно состоит из нескольких полей, и его описывают классом данных, например, список задач и признак загрузки. Чтобы изменить одно поле, берут текущее состояние и делают копию. Для этого у MutableStateFlow есть функция update: она получает лямбду, в которой it — старое состояние, и записывает то, что лямбда вернула. Здесь мы создаём копию с задачей, добавленной в конец списка. Старый список не меняется, потому что плюс создаёт новый. Запустим пример: после двух добавлений в списке две задачи, а признак загрузки остался ложью. Функция update ещё и безопасна, если несколько корутин меняют состояние одновременно.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "Main.kt"
+        },
+        {
+          "type": "type",
+          "text": "import androidx.lifecycle.ViewModel\nimport kotlinx.coroutines.flow.MutableStateFlow\nimport kotlinx.coroutines.flow.StateFlow\nimport kotlinx.coroutines.flow.asStateFlow\nimport kotlinx.coroutines.flow.update\n\ndata class TasksUiState(val tasks: List<String> = emptyList(), val loading: Boolean = false)\n\nclass TasksViewModel : ViewModel() {\n    private val _state = MutableStateFlow(TasksUiState())\n    val state: StateFlow<TasksUiState> = _state.asStateFlow()\n\n    fun add(title: String) {\n        _state.update { it.copy(tasks = it.tasks + title) }\n    }\n}\n\nfun main() {\n    val vm = TasksViewModel()\n    vm.add(\"Хлеб\")\n    vm.add(\"Сыр\")\n    println(vm.state.value.tasks)\n    println(vm.state.value.loading)\n}\n",
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            7
+          ],
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            14
+          ],
+          "file": "Main.kt",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            14
+          ],
+          "file": "Main.kt",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "Main.kt",
+          "cue": 5
+        },
+        {
+          "type": "output",
+          "text": "[Хлеб, Сыр]\nfalse\n",
+          "cue": 5
+        }
+      ]
+    },
+    {
+      "id": "collect",
+      "title": "Экран подписывается на состояние",
+      "narration": "Осталось показать значение на экране. Функция интерфейса получает ViewModel и вызывает collectAsState. Она превращает поток в состояние Compose: когда значение в потоке меняется, экран перерисовывается. Слово by позволяет читать счёт как обычную переменную, но не забудьте импорт getValue. Нажатие кнопки вызывает метод ViewModel. Заметьте цикл: экран показывает состояние, пользователь нажимает, событие уходит во ViewModel, она меняет состояние, и экран снова показывает новое значение. Данные движутся по кругу в одном направлении, поэтому такой подход называют однонаправленным потоком данных. Если прочитать count.value напрямую, экран не узнает об изменениях: подписки не будет.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "Main.kt"
+        },
+        {
+          "type": "type",
+          "text": "import androidx.compose.foundation.layout.Column\nimport androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.compose.runtime.collectAsState\nimport androidx.compose.runtime.getValue\n\n@Composable\nfun CounterScreen(viewModel: CounterViewModel) {\n    val count by viewModel.count.collectAsState()\n    Column {\n        Text(\"Счёт: $count\")\n        Button(onClick = { viewModel.increment() }) {\n            Text(\"+1\")\n        }\n    }\n}\n",
+          "file": "Main.kt",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            5
+          ],
+          "file": "Main.kt",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            12
+          ],
+          "file": "Main.kt",
+          "cue": 3
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            13
+          ],
+          "file": "Main.kt",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "get",
+      "title": "Как экран получает ViewModel",
+      "narration": "Откуда экран берёт ViewModel? Создавать её вручную через конструктор нельзя: тогда при повороте появится новая, и данные потеряются. Её просит у системы функция viewModel: система создаёт объект один раз и возвращает тот же после поворота. Если ViewModel нужны зависимости, например репозиторий, подключают фабрику или внедрение зависимостей. Эти приёмы обычно изучают в Android Studio на настоящем проекте. Здесь важна идея: экран не создаёт и не уничтожает ViewModel, а лишь получает её. Для запуска долгой работы у ViewModel есть viewModelScope, о котором мы говорили в уроке про корутины: корутины в нём отменяются, когда ViewModel больше не нужна.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "Main.kt"
+        },
+        {
+          "type": "note",
+          "md": "`val vm: CounterViewModel = viewModel()` — система создаёт объект один раз и сохраняет при повороте.",
+          "cue": 2
+        },
+        {
+          "type": "note",
+          "md": "`viewModelScope.launch { … }` — корутины отменяются вместе с ViewModel.",
+          "cue": 6
+        }
+      ]
+    },
+    {
+      "id": "testing",
+      "title": "ViewModel легко проверить",
+      "narration": "Ещё одно достоинство ViewModel: это обычный класс, и проверять его можно без телефона и без экрана. Достаточно создать объект, вызвать метод и посмотреть на значение. Если оно не совпало с ожидаемым, функция check бросит исключение с вашим сообщением. Запустим такой пример: создаём счётчик, нажимаем один раз и проверяем, что значение равно единице. Проверка проходит, и мы видим сообщение. Именно поэтому логику стараются держать во ViewModel, а не в функциях интерфейса: её можно проверять быстро и автоматически на обычном компьютере, а затем уже подключать к экрану. В настоящих проектах для этого пишут тесты на JUnit, но идея та же: подготовить данные, выполнить действие и сравнить результат.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "Main.kt"
+        },
+        {
+          "type": "type",
+          "text": "import androidx.lifecycle.ViewModel\nimport kotlinx.coroutines.flow.MutableStateFlow\nimport kotlinx.coroutines.flow.StateFlow\nimport kotlinx.coroutines.flow.asStateFlow\n\nclass CounterViewModel : ViewModel() {\n    private val _count = MutableStateFlow(0)\n    val count: StateFlow<Int> = _count.asStateFlow()\n\n    fun increment() {\n        _count.value += 1\n    }\n}\n\nfun main() {\n    val vm = CounterViewModel()\n    vm.increment()\n    check(vm.count.value == 1) { \"ожидали 1\" }\n    println(\"Проверка прошла\")\n}\n",
+          "file": "Main.kt",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            17
+          ],
+          "file": "Main.kt",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            18
+          ],
+          "file": "Main.kt",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "Main.kt",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "Проверка прошла\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "mistakes",
+      "title": "Типичные ошибки",
+      "narration": "Четыре типичные ошибки. Первая: отдавать наружу изменяемый MutableStateFlow. Тогда любой экран может подменить данные. Отдавайте StateFlow через asStateFlow. Вторая: читать value напрямую вместо collectAsState. Экран не перерисуется. Третья: менять список на месте, например добавлять элемент в изменяемый список внутри состояния. Ссылка прежняя, и подписчики не видят изменения. Создавайте копию через copy и плюс. Четвёртая: хранить во ViewModel ссылки на экран или кнопки. ViewModel живёт дольше экрана, и ссылки приведут к утечке памяти.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "Ошибка 1: публичный `MutableStateFlow` → приватный `_state` + публичный `StateFlow` через `asStateFlow()`.",
+          "cue": 1
+        },
+        {
+          "type": "note",
+          "md": "Ошибка 2: `viewModel.count.value` в функции интерфейса → `by viewModel.count.collectAsState()`.",
+          "cue": 4
+        },
+        {
+          "type": "note",
+          "md": "Ошибка 3: правка списка на месте → `copy(tasks = it.tasks + title)`.",
+          "cue": 6
+        },
+        {
+          "type": "note",
+          "md": "Ошибка 4: ссылки на экран во ViewModel → утечка памяти.",
+          "cue": 9
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. ViewModel хранит состояние экрана и логику, переживает поворот и не знает ни про кнопки, ни про текст. Состояние хранят в приватном MutableStateFlow, а наружу отдают StateFlow. Изменения делают через update и copy. Экран подписывается через collectAsState и посылает события методам ViewModel. Данные идут по кругу в одном направлении: состояние вниз, события вверх. В заданиях вы напишете ViewModel счётчика, добавите обновление списка, исправите экран без подписки и предскажете результат. Критерий прохождения: решить не меньше трёх заданий из четырёх. Помните: проверка идёт на компьютере по упрощённым моделям ViewModel и StateFlow, настоящее поведение потоков проверяется только в готовом проекте.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`private val _state = MutableStateFlow(…)` + `val state: StateFlow<…> = _state.asStateFlow()`",
+          "cue": 2
+        },
+        {
+          "type": "note",
+          "md": "Экран: `val s by vm.state.collectAsState()`; события: `vm.метод()`.",
+          "cue": 4
+        }
+      ]
+    }
+  ]
+}

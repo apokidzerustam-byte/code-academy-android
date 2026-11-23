@@ -1,6 +1,8 @@
 package kotlinx.coroutines.flow
 
-interface StateFlow<out T> {
+interface Flow<out T>
+
+interface StateFlow<out T> : Flow<T> {
     val value: T
 }
 

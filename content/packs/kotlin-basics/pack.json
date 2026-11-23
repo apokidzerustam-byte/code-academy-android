@@ -11,7 +11,9 @@
     "kt-02-classes",
     "kt-03-collections",
     "kt-04-coroutines",
-    "kt-05-compose-basics"
+    "kt-05-compose-basics",
+    "kt-06-state",
+    "kt-07-viewmodel"
   ],
   "skills": {
     "kt.basics": "Kotlin: main, val и var",
@@ -31,6 +33,12 @@
     "kt.scope": "Области и диспетчеры корутин",
     "kt.compose": "Основы Compose: @Composable",
     "kt.compose.layout": "Column, Row и Modifier",
-    "kt.compose.lists": "Списки и кнопки в Compose"
+    "kt.compose.lists": "Списки и кнопки в Compose",
+    "kt.state": "Состояние и remember",
+    "kt.hoisting": "Подъём состояния",
+    "kt.immutable": "Неизменяемое состояние (copy)",
+    "kt.viewmodel": "ViewModel и StateFlow",
+    "kt.udf": "Однонаправленный поток данных",
+    "kt.collect": "Подписка экрана на состояние"
   }
 }

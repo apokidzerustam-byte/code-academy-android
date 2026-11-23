@@ -1,0 +1,98 @@
+{
+  "id": "a3-collect",
+  "type": "fix",
+  "title": "Экран не обновляется",
+  "statement": "Экран счётчика читает `viewModel.count.value` напрямую, поэтому после нажатия не перерисовывается: подписки на поток нет. Исправьте функцию `CounterScreen`: получите счёт через `val count by viewModel.count.collectAsState()` и добавьте импорты `collectAsState` и `getValue` из `androidx.compose.runtime`.",
+  "goal": "Подписывать экран на StateFlow.",
+  "input": "—",
+  "expectedResult": "Первый показ: «Счёт: 0»; нажатие вызывает increment.",
+  "constraints": [
+    "Класс CounterViewModel менять не нужно."
+  ],
+  "starterCode": "import androidx.lifecycle.ViewModel\nimport androidx.compose.foundation.layout.Column\nimport androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport kotlinx.coroutines.flow.MutableStateFlow\nimport kotlinx.coroutines.flow.StateFlow\nimport kotlinx.coroutines.flow.asStateFlow\n\nclass CounterViewModel : ViewModel() {\n    private val _count = MutableStateFlow(0)\n    val count: StateFlow<Int> = _count.asStateFlow()\n    fun increment() {\n        _count.value += 1\n    }\n}\n\n@Composable\nfun CounterScreen(viewModel: CounterViewModel) {\n    val count = viewModel.count.value\n    Column {\n        Text(\"Счёт: $count\")\n        Button(onClick = { viewModel.increment() }) {\n            Text(\"+1\")\n        }\n    }\n}\n",
+  "hints": [
+    "Compose перерисовывает функцию, только когда меняется состояние Compose, а чтение .value потока таким состоянием не является.",
+    "Поток нужно превратить в состояние Compose.",
+    "Для этого у StateFlow есть функция collectAsState().",
+    "Результат читают через by, как обычную переменную, поэтому нужен ещё один импорт.",
+    "val count by viewModel.count.collectAsState() и импорты collectAsState и getValue."
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "CounterScreen",
+        "paramTypes": [
+          "CounterViewModel"
+        ],
+        "returns": "Unit"
+      },
+      {
+        "id": "collect",
+        "type": "contains",
+        "pattern": "viewModel\\.count\\.collectAsState\\s*\\(\\s*\\)",
+        "message": "Подпишитесь на поток: viewModel.count.collectAsState()",
+        "hint": "Чтение .value не подписывает экран на изменения"
+      },
+      {
+        "id": "by",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "\\bval\\s+count\\s+by\\b",
+        "message": "Объявите val count by viewModel.count.collectAsState()"
+      },
+      {
+        "id": "noval",
+        "hidden": true,
+        "type": "not_contains",
+        "pattern": "\\.count\\.value",
+        "message": "Не читайте .value в функции интерфейса: экран не перерисуется"
+      },
+      {
+        "id": "imp1",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "import\\s+androidx\\.compose\\.runtime\\.collectAsState\\b",
+        "message": "Добавьте import androidx.compose.runtime.collectAsState"
+      },
+      {
+        "id": "imp2",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "import\\s+androidx\\.compose\\.runtime\\.getValue\\b",
+        "message": "Для by нужен import androidx.compose.runtime.getValue"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    val vm = CounterViewModel()\n    println(stubs.ComposeLog.render { CounterScreen(vm) })\n    stubs.ComposeLog.click(0)\n    println(vm.count.value)\n}",
+      "expected_stdout": "Column\n  Text(Счёт: 0)\n  Button\n    Text(+1)\n1"
+    }
+  },
+  "solution": "import androidx.lifecycle.ViewModel\nimport androidx.compose.foundation.layout.Column\nimport androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport kotlinx.coroutines.flow.MutableStateFlow\nimport kotlinx.coroutines.flow.StateFlow\nimport kotlinx.coroutines.flow.asStateFlow\nimport androidx.compose.runtime.collectAsState\nimport androidx.compose.runtime.getValue\n\nclass CounterViewModel : ViewModel() {\n    private val _count = MutableStateFlow(0)\n    val count: StateFlow<Int> = _count.asStateFlow()\n    fun increment() {\n        _count.value += 1\n    }\n}\n\n@Composable\nfun CounterScreen(viewModel: CounterViewModel) {\n    val count by viewModel.count.collectAsState()\n    Column {\n        Text(\"Счёт: $count\")\n        Button(onClick = { viewModel.increment() }) {\n            Text(\"+1\")\n        }\n    }\n}\n",
+  "explanation": "collectAsState подписывает экран на StateFlow и превращает его в состояние Compose. Когда ViewModel меняет значение, экран перерисуется.",
+  "criteria": [
+    "Подписка collectAsState.",
+    "by с нужными импортами.",
+    "Нет чтения .value."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import androidx.lifecycle.ViewModel\nimport androidx.compose.foundation.layout.Column\nimport androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport kotlinx.coroutines.flow.MutableStateFlow\nimport kotlinx.coroutines.flow.StateFlow\nimport kotlinx.coroutines.flow.asStateFlow\n\nclass CounterViewModel : ViewModel() {\n    private val _count = MutableStateFlow(0)\n    val count: StateFlow<Int> = _count.asStateFlow()\n    fun increment() {\n        _count.value += 1\n    }\n}\n\n@Composable\nfun CounterScreen(viewModel: CounterViewModel) {\n    val count = viewModel.count.value\n    Column {\n        Text(\"Счёт: $count\")\n        Button(onClick = { viewModel.increment() }) {\n            Text(\"+1\")\n        }\n    }\n}\n",
+      "why": "Ошибка осталась: .value не подписывает экран на изменения."
+    },
+    {
+      "code": "import androidx.lifecycle.ViewModel\nimport androidx.compose.foundation.layout.Column\nimport androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport kotlinx.coroutines.flow.MutableStateFlow\nimport kotlinx.coroutines.flow.StateFlow\nimport kotlinx.coroutines.flow.asStateFlow\nimport androidx.compose.runtime.collectAsState\n\nclass CounterViewModel : ViewModel() {\n    private val _count = MutableStateFlow(0)\n    val count: StateFlow<Int> = _count.asStateFlow()\n    fun increment() {\n        _count.value += 1\n    }\n}\n\n@Composable\nfun CounterScreen(viewModel: CounterViewModel) {\n    val count = viewModel.count.collectAsState()\n    Column {\n        Text(\"Счёт: ${count.value}\")\n        Button(onClick = { viewModel.increment() }) {\n            Text(\"+1\")\n        }\n    }\n}\n",
+      "why": "Работает, но без by: объявите val count by … и импорт getValue."
+    },
+    {
+      "code": "import androidx.lifecycle.ViewModel\nimport androidx.compose.foundation.layout.Column\nimport androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport kotlinx.coroutines.flow.MutableStateFlow\nimport kotlinx.coroutines.flow.StateFlow\nimport kotlinx.coroutines.flow.asStateFlow\nimport androidx.compose.runtime.getValue\n\nclass CounterViewModel : ViewModel() {\n    private val _count = MutableStateFlow(0)\n    val count: StateFlow<Int> = _count.asStateFlow()\n    fun increment() {\n        _count.value += 1\n    }\n}\n\n@Composable\nfun CounterScreen(viewModel: CounterViewModel) {\n    val count by viewModel.count\n    Column {\n        Text(\"Счёт: $count\")\n    }\n}\n",
+      "why": "Нет collectAsState и кнопки."
+    }
+  ]
+}

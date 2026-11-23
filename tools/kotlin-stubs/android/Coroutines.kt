@@ -10,8 +10,14 @@ interface CoroutineScope
 
 private object StubScope : CoroutineScope
 
+/** Общая область для заглушек (viewModelScope и т.п.). */
+object StubScopes {
+    val shared: CoroutineScope = StubScope
+}
+
 interface Job {
     suspend fun join()
+    fun cancel() {}
 }
 
 interface Deferred<out T> : Job {
@@ -48,3 +54,5 @@ suspend fun delay(timeMillis: Long) {}
 suspend fun <T> withContext(context: CoroutineContext, block: suspend CoroutineScope.() -> T): T = StubScope.block()
 
 suspend fun <T> coroutineScope(block: suspend CoroutineScope.() -> T): T = StubScope.block()
+
+fun CoroutineScope.ensureActive() {}

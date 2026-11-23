@@ -1,0 +1,76 @@
+{
+  "id": "a2-toggle",
+  "type": "write",
+  "title": "Переключить задачу",
+  "statement": "Класс `TaskUi(title, done)` неизменяемый. Напишите функцию `toggle(task: TaskUi): TaskUi`, которая возвращает **новую** задачу с тем же названием и **противоположной** отметкой `done`. Исходный объект менять нельзя.",
+  "goal": "Обновлять неизменяемое состояние через copy.",
+  "input": "TaskUi(\"хлеб\", false)",
+  "expectedResult": "TaskUi(title=хлеб, done=true).",
+  "constraints": [
+    "Поля data class объявлены как val: присвоить новое значение нельзя."
+  ],
+  "starterCode": "data class TaskUi(val title: String, val done: Boolean)\n\n// Напишите функцию toggle\n",
+  "hints": [
+    "Поля заданы через val, их не изменить.",
+    "Для data class есть метод copy: он делает новый объект.",
+    "В copy указывают только то поле, которое меняется.",
+    "Противоположное значение Boolean получают оператором !.",
+    "fun toggle(task: TaskUi): TaskUi = task.copy(done = !task.done)."
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "toggle",
+        "paramTypes": [
+          "TaskUi"
+        ],
+        "returns": "TaskUi"
+      },
+      {
+        "id": "copy",
+        "type": "contains",
+        "pattern": "\\.copy\\s*\\(",
+        "message": "Создайте новую задачу методом copy: task.copy(…)",
+        "hint": "Неизменяемое состояние обновляют копией"
+      },
+      {
+        "id": "not",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "!\\s*task\\.done",
+        "message": "Отметка должна поменяться на противоположную: !task.done"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    val a = TaskUi(\"хлеб\", false)\n    val b = toggle(a)\n    println(\"$a $b ${toggle(b)}\")\n}",
+      "expected_stdout": "TaskUi(title=хлеб, done=false) TaskUi(title=хлеб, done=true) TaskUi(title=хлеб, done=false)"
+    }
+  },
+  "solution": "data class TaskUi(val title: String, val done: Boolean)\n\nfun toggle(task: TaskUi): TaskUi = task.copy(done = !task.done)\n",
+  "explanation": "copy создаёт новый объект с теми же полями, кроме done. Исходная задача не меняется, и Compose увидит разницу между старым и новым состоянием.",
+  "criteria": [
+    "Возвращается новая задача.",
+    "done инвертировано."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "data class TaskUi(val title: String, val done: Boolean)\n\nfun toggle(task: TaskUi): TaskUi = task.copy(done = true)\n",
+      "why": "done всегда true: отметка должна меняться на противоположную."
+    },
+    {
+      "code": "data class TaskUi(val title: String, val done: Boolean)\n\nfun toggle(task: TaskUi): TaskUi = task\n",
+      "why": "Задача не изменилась: нужна копия с инвертированной отметкой."
+    },
+    {
+      "code": "data class TaskUi(val title: String, val done: Boolean)\n\nfun toggle(task: TaskUi): TaskUi = TaskUi(\"хлеб\", !task.done)\n",
+      "why": "Название зашито в код вместо task.title."
+    }
+  ]
+}

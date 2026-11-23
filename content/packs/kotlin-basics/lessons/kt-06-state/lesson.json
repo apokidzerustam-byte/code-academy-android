@@ -1,0 +1,44 @@
+{
+  "id": "kt-06-state",
+  "title": "Kotlin: состояние и события в Compose",
+  "goal": "Хранить состояние через remember, поднимать его к родителю и обновлять неизменяемые данные через copy.",
+  "skills": [
+    "kt.state",
+    "kt.hoisting",
+    "kt.immutable"
+  ],
+  "prerequisites": [
+    "kt-05-compose-basics"
+  ],
+  "runner": "kotlin",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-counter-view.json",
+    "assignments/a2-toggle.json",
+    "assignments/a3-remember.json",
+    "assignments/a4-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Обычная переменная вместо состояния",
+      "fix": "Используйте var x by remember { mutableStateOf(…) }."
+    },
+    {
+      "mistake": "Состояние без remember",
+      "fix": "Оберните его в remember, иначе оно сбрасывается при перерисовке."
+    },
+    {
+      "mistake": "Изменение полей объекта на месте",
+      "fix": "Делайте поля val и обновляйте объект через copy."
+    },
+    {
+      "mistake": "onClick = onIncrement()",
+      "fix": "Передайте функцию, а не её результат: onClick = onIncrement."
+    }
+  ]
+}

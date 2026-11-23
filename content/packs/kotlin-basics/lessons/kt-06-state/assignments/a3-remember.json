@@ -1,0 +1,89 @@
+{
+  "id": "a3-remember",
+  "type": "fix",
+  "title": "Счётчик не обновляется",
+  "statement": "Счётчик не обновляет экран: `count` — обычная переменная, Compose о её изменении не узнаёт. Исправьте функцию `Counter`: храните счёт в состоянии `var count by remember { mutableIntStateOf(0) }` и добавьте нужные импорты (`mutableIntStateOf`, `remember`, `getValue`, `setValue` из `androidx.compose.runtime`).",
+  "goal": "Хранить меняющееся значение в состоянии.",
+  "input": "—",
+  "expectedResult": "Первый показ: «Счёт: 0».",
+  "constraints": [
+    "Остальной код функции менять не нужно."
+  ],
+  "starterCode": "import androidx.compose.foundation.layout.Column\nimport androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\n\n@Composable\nfun Counter() {\n    var count = 0\n    Column {\n        Text(\"Счёт: $count\")\n        Button(onClick = { count++ }) {\n            Text(\"+1\")\n        }\n    }\n}\n",
+  "hints": [
+    "Compose перерисовывает экран, только когда меняется состояние.",
+    "Обычная переменная — не состояние.",
+    "Состояние создаёт mutableIntStateOf, а чтобы оно пережило перерисовку, его оборачивают в remember.",
+    "Слово by позволяет читать и менять состояние как обычную переменную, но требует импортов getValue и setValue.",
+    "var count by remember { mutableIntStateOf(0) } — и четыре импорта из androidx.compose.runtime."
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "fn",
+        "type": "function",
+        "name": "Counter",
+        "paramTypes": [],
+        "returns": "Unit"
+      },
+      {
+        "id": "rem",
+        "type": "contains",
+        "pattern": "\\bremember\\s*\\{\\s*(mutableIntStateOf|mutableStateOf)\\s*\\(\\s*0\\s*\\)\\s*\\}",
+        "message": "Храните счётчик в состоянии: remember { mutableIntStateOf(0) }",
+        "hint": "Обычная переменная не заставит Compose перерисовать экран"
+      },
+      {
+        "id": "by",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "\\bvar\\s+count\\s+by\\b",
+        "message": "Объявите var count by remember { … }, чтобы работать со значением как с обычной переменной"
+      },
+      {
+        "id": "imp1",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "import\\s+androidx\\.compose\\.runtime\\.getValue\\b",
+        "message": "Для by нужен импорт androidx.compose.runtime.getValue"
+      },
+      {
+        "id": "imp2",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "import\\s+androidx\\.compose\\.runtime\\.setValue\\b",
+        "message": "Для by нужен импорт androidx.compose.runtime.setValue"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    println(stubs.ComposeLog.render { Counter() })\n}",
+      "expected_stdout": "Column\n  Text(Счёт: 0)\n  Button\n    Text(+1)"
+    }
+  },
+  "solution": "import androidx.compose.foundation.layout.Column\nimport androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.compose.runtime.getValue\nimport androidx.compose.runtime.mutableIntStateOf\nimport androidx.compose.runtime.remember\nimport androidx.compose.runtime.setValue\n\n@Composable\nfun Counter() {\n    var count by remember { mutableIntStateOf(0) }\n    Column {\n        Text(\"Счёт: $count\")\n        Button(onClick = { count++ }) {\n            Text(\"+1\")\n        }\n    }\n}\n",
+  "explanation": "remember сохраняет состояние между перерисовками, mutableIntStateOf делает его наблюдаемым, а by с импортами getValue и setValue даёт синтаксис обычной переменной.",
+  "criteria": [
+    "Состояние в remember.",
+    "Импорты для by.",
+    "Остальной код сохранён."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import androidx.compose.foundation.layout.Column\nimport androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\n\n@Composable\nfun Counter() {\n    var count = 0\n    Column {\n        Text(\"Счёт: $count\")\n        Button(onClick = { count++ }) {\n            Text(\"+1\")\n        }\n    }\n}\n",
+      "why": "Ошибка осталась: обычная переменная вместо состояния."
+    },
+    {
+      "code": "import androidx.compose.foundation.layout.Column\nimport androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.compose.runtime.getValue\nimport androidx.compose.runtime.mutableIntStateOf\nimport androidx.compose.runtime.remember\nimport androidx.compose.runtime.setValue\n\n@Composable\nfun Counter() {\n    var count by mutableIntStateOf(0)\n    Column {\n        Text(\"Счёт: $count\")\n        Button(onClick = { count++ }) {\n            Text(\"+1\")\n        }\n    }\n}\n",
+      "why": "Состояние без remember: при перерисовке оно сбросится в ноль."
+    },
+    {
+      "code": "import androidx.compose.foundation.layout.Column\nimport androidx.compose.material3.Button\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.compose.runtime.mutableIntStateOf\nimport androidx.compose.runtime.remember\n\n@Composable\nfun Counter() {\n    var count by remember { mutableIntStateOf(0) }\n    Column {\n        Text(\"Счёт: $count\")\n        Button(onClick = { count++ }) {\n            Text(\"+1\")\n        }\n    }\n}\n",
+      "why": "Нет импортов getValue и setValue: by не скомпилируется."
+    }
+  ]
+}

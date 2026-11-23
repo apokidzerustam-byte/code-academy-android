@@ -1,0 +1,44 @@
+{
+  "id": "a4-predict",
+  "type": "predict",
+  "title": "Старое и новое состояние",
+  "statement": "Что выведет программа? Каждая строка вывода — с новой строки (список печатается в квадратных скобках через запятую с пробелом).",
+  "goal": "Понять, что update создаёт новое состояние, а старое остаётся прежним.",
+  "input": "—",
+  "expectedResult": "Три строки.",
+  "constraints": [],
+  "code": "import kotlinx.coroutines.flow.MutableStateFlow\nimport kotlinx.coroutines.flow.update\n\ndata class Ui(val items: List<String>, val loading: Boolean)\n\nfun main() {\n    val state = MutableStateFlow(Ui(emptyList(), true))\n    state.update { it.copy(items = it.items + \"хлеб\") }\n    state.update { it.copy(items = it.items + \"сыр\", loading = false) }\n    val old = state.value\n    state.update { it.copy(items = emptyList()) }\n    println(old.items)\n    println(state.value.items.size)\n    println(state.value.loading)\n}\n",
+  "hints": [
+    "update создаёт новое состояние через copy и не меняет старое.",
+    "После двух update в списке две задачи, loading стал false.",
+    "Переменная old хранит состояние на момент второго update.",
+    "Третий update опустошает список в новом состоянии, а old остаётся прежним.",
+    "Первая строка — старый список, вторая — размер нового списка, третья — loading."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "[хлеб, сыр]\n0\nfalse"
+  },
+  "solution": "[хлеб, сыр]\n0\nfalse",
+  "explanation": "После двух update: [хлеб, сыр] и loading = false. old сохраняет это состояние, а третий update делает копию с пустым списком: размер 0, loading остаётся false.",
+  "criteria": [
+    "Все три строки верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "[]\n0\nfalse",
+      "answer": "[]\n0\nfalse",
+      "why": "old — прежнее состояние: оно не изменилось третьим update."
+    },
+    {
+      "code": "[хлеб, сыр]\n2\nfalse",
+      "answer": "[хлеб, сыр]\n2\nfalse",
+      "why": "Размер считается по новому состоянию: после третьего update список пуст."
+    },
+    {
+      "code": "[хлеб, сыр]\n0\ntrue",
+      "answer": "[хлеб, сыр]\n0\ntrue",
+      "why": "Второй update поставил loading = false, и третий копирует это значение."
+    }
+  ]
+}

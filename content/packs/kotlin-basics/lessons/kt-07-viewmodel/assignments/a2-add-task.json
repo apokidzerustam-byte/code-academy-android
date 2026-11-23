@@ -1,0 +1,87 @@
+{
+  "id": "a2-add-task",
+  "type": "complete",
+  "title": "Добавить задачу",
+  "statement": "В `TasksViewModel` допишите метод `add(title: String)`: он должен добавить задачу в **конец** списка `tasks` состояния. Меняйте состояние через `_state.update { … }` и создавайте копию `copy`, не изменяя старый список.",
+  "goal": "Обновлять состояние ViewModel через update и copy.",
+  "input": "add(\"Хлеб\"), add(\"Сыр\")",
+  "expectedResult": "tasks = [Хлеб, Сыр], loading = false.",
+  "constraints": [
+    "Остальной код класса не меняйте."
+  ],
+  "starterCode": "import androidx.lifecycle.ViewModel\nimport kotlinx.coroutines.flow.MutableStateFlow\nimport kotlinx.coroutines.flow.StateFlow\nimport kotlinx.coroutines.flow.asStateFlow\nimport kotlinx.coroutines.flow.update\n\ndata class TasksUiState(val tasks: List<String> = emptyList(), val loading: Boolean = false)\n\nclass TasksViewModel : ViewModel() {\n    private val _state = MutableStateFlow(TasksUiState())\n    val state: StateFlow<TasksUiState> = _state.asStateFlow()\n\n    // Допишите метод add(title: String): добавьте задачу в конец списка\n}\n",
+  "hints": [
+    "Состояние хранится в _state; менять его нужно не присваиванием полей, а функцией update.",
+    "В лямбде update параметр it — старое состояние.",
+    "Новое состояние — копия старого: it.copy(…).",
+    "В копии заменяется поле tasks: it.tasks + title создаёт новый список с добавленной задачей.",
+    "_state.update { it.copy(tasks = it.tasks + title) }."
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "cls",
+        "type": "class",
+        "name": "TasksViewModel"
+      },
+      {
+        "id": "add",
+        "type": "function",
+        "name": "add",
+        "paramTypes": [
+          "String"
+        ],
+        "returns": "Unit"
+      },
+      {
+        "id": "upd",
+        "type": "contains",
+        "pattern": "_state\\.update\\s*\\{",
+        "message": "Меняйте состояние через _state.update { … }",
+        "hint": "update безопасно заменяет состояние результатом лямбды"
+      },
+      {
+        "id": "copy",
+        "type": "contains",
+        "pattern": "it\\.copy\\s*\\(\\s*tasks\\s*=",
+        "message": "Создайте копию состояния: it.copy(tasks = …)"
+      },
+      {
+        "id": "plus",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "it\\.tasks\\s*\\+\\s*title",
+        "message": "Новый список получают операцией it.tasks + title (старый не меняется)"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    val vm = TasksViewModel()\n    vm.add(\"Хлеб\")\n    vm.add(\"Сыр\")\n    println(vm.state.value.tasks)\n    println(vm.state.value.loading)\n}",
+      "expected_stdout": "[Хлеб, Сыр]\nfalse"
+    }
+  },
+  "solution": "import androidx.lifecycle.ViewModel\nimport kotlinx.coroutines.flow.MutableStateFlow\nimport kotlinx.coroutines.flow.StateFlow\nimport kotlinx.coroutines.flow.asStateFlow\nimport kotlinx.coroutines.flow.update\n\ndata class TasksUiState(val tasks: List<String> = emptyList(), val loading: Boolean = false)\n\nclass TasksViewModel : ViewModel() {\n    private val _state = MutableStateFlow(TasksUiState())\n    val state: StateFlow<TasksUiState> = _state.asStateFlow()\n\n    fun add(title: String) {\n        _state.update { it.copy(tasks = it.tasks + title) }\n    }\n}\n",
+  "explanation": "update передаёт в лямбду старое состояние и сохраняет её результат. copy делает новое состояние, а плюс создаёт новый список: старые объекты не меняются.",
+  "criteria": [
+    "Метод add.",
+    "Состояние обновляется через update и copy."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import androidx.lifecycle.ViewModel\nimport kotlinx.coroutines.flow.MutableStateFlow\nimport kotlinx.coroutines.flow.StateFlow\nimport kotlinx.coroutines.flow.asStateFlow\nimport kotlinx.coroutines.flow.update\n\ndata class TasksUiState(val tasks: List<String> = emptyList(), val loading: Boolean = false)\n\nclass TasksViewModel : ViewModel() {\n    private val _state = MutableStateFlow(TasksUiState())\n    val state: StateFlow<TasksUiState> = _state.asStateFlow()\n\n    fun add(title: String) {\n        _state.update { it.copy(tasks = listOf(title)) }\n    }\n}\n",
+      "why": "Список заменяется целиком: прежние задачи теряются."
+    },
+    {
+      "code": "import androidx.lifecycle.ViewModel\nimport kotlinx.coroutines.flow.MutableStateFlow\nimport kotlinx.coroutines.flow.StateFlow\nimport kotlinx.coroutines.flow.asStateFlow\nimport kotlinx.coroutines.flow.update\n\ndata class TasksUiState(val tasks: List<String> = emptyList(), val loading: Boolean = false)\n\nclass TasksViewModel : ViewModel() {\n    private val _state = MutableStateFlow(TasksUiState())\n    val state: StateFlow<TasksUiState> = _state.asStateFlow()\n\n    fun add(title: String) {\n        _state.value = _state.value.copy(tasks = _state.value.tasks + title)\n    }\n}\n",
+      "why": "Работает, но состояние нужно менять через update: так безопаснее при одновременных изменениях."
+    },
+    {
+      "code": "import androidx.lifecycle.ViewModel\nimport kotlinx.coroutines.flow.MutableStateFlow\nimport kotlinx.coroutines.flow.StateFlow\nimport kotlinx.coroutines.flow.asStateFlow\nimport kotlinx.coroutines.flow.update\n\ndata class TasksUiState(val tasks: List<String> = emptyList(), val loading: Boolean = false)\n\nclass TasksViewModel : ViewModel() {\n    private val _state = MutableStateFlow(TasksUiState())\n    val state: StateFlow<TasksUiState> = _state.asStateFlow()\n\n    fun add(title: String) {\n        _state.update { it.copy(tasks = title + it.tasks) }\n    }\n}\n",
+      "why": "Задача добавляется не в конец, и тип не сходится."
+    }
+  ]
+}

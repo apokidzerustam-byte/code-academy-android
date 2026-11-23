@@ -1,0 +1,91 @@
+{
+  "id": "a1-counter-vm",
+  "type": "write",
+  "title": "ViewModel счётчика",
+  "statement": "Напишите класс `CounterViewModel`, наследующий `ViewModel`. Внутри: приватное состояние `_count` (`MutableStateFlow` со значением 0), публичное только для чтения свойство `count: StateFlow<Int>` (через `asStateFlow()`) и метод `increment()`, который увеличивает счёт на 1.",
+  "goal": "Хранить состояние во ViewModel и скрывать изменяемую часть.",
+  "input": "—",
+  "expectedResult": "После двух вызовов increment() значение count равно 2.",
+  "constraints": [
+    "Импорты уже в шаблоне."
+  ],
+  "starterCode": "import androidx.lifecycle.ViewModel\nimport kotlinx.coroutines.flow.MutableStateFlow\nimport kotlinx.coroutines.flow.StateFlow\nimport kotlinx.coroutines.flow.asStateFlow\n\n// Напишите класс CounterViewModel\n",
+  "hints": [
+    "Класс наследует ViewModel: после имени ставят двоеточие и ViewModel().",
+    "Изменяемая ячейка нужна только внутри класса, поэтому она private.",
+    "Её создаёт MutableStateFlow(0); имя по договорённости начинается с подчёркивания.",
+    "Наружу отдают тот же поток, но с типом StateFlow<Int>: у MutableStateFlow для этого есть asStateFlow().",
+    "Метод increment() делает _count.value += 1."
+  ],
+  "tests": {
+    "kind": "kotlin",
+    "cases": [
+      {
+        "id": "syntax",
+        "type": "syntax"
+      },
+      {
+        "id": "cls",
+        "type": "class",
+        "name": "CounterViewModel"
+      },
+      {
+        "id": "base",
+        "type": "contains",
+        "pattern": "class\\s+CounterViewModel\\s*:\\s*ViewModel\\s*\\(\\s*\\)",
+        "message": "Класс должен наследовать ViewModel: class CounterViewModel : ViewModel()"
+      },
+      {
+        "id": "priv",
+        "type": "contains",
+        "pattern": "private\\s+val\\s+_count\\s*=\\s*MutableStateFlow\\s*\\(\\s*0\\s*\\)",
+        "message": "Изменяемое состояние — приватное: private val _count = MutableStateFlow(0)"
+      },
+      {
+        "id": "pub",
+        "type": "contains",
+        "pattern": "val\\s+count\\s*:\\s*StateFlow\\s*<\\s*Int\\s*>\\s*=\\s*_count\\.asStateFlow\\s*\\(\\s*\\)",
+        "message": "Наружу отдайте только чтение: val count: StateFlow<Int> = _count.asStateFlow()"
+      },
+      {
+        "id": "inc",
+        "type": "function",
+        "name": "increment",
+        "paramTypes": [],
+        "returns": "Unit"
+      },
+      {
+        "id": "logic",
+        "hidden": true,
+        "type": "contains",
+        "pattern": "_count\\s*\\.\\s*(value\\s*(\\+=\\s*1|=\\s*_count\\s*\\.\\s*value\\s*\\+\\s*1)|update\\s*\\{)",
+        "message": "increment должен увеличивать значение на 1: _count.value += 1"
+      }
+    ],
+    "jvm": {
+      "main": "fun main() {\n    val vm = CounterViewModel()\n    vm.increment()\n    vm.increment()\n    println(vm.count.value)\n}",
+      "expected_stdout": "2"
+    }
+  },
+  "solution": "import androidx.lifecycle.ViewModel\nimport kotlinx.coroutines.flow.MutableStateFlow\nimport kotlinx.coroutines.flow.StateFlow\nimport kotlinx.coroutines.flow.asStateFlow\n\nclass CounterViewModel : ViewModel() {\n    private val _count = MutableStateFlow(0)\n    val count: StateFlow<Int> = _count.asStateFlow()\n\n    fun increment() {\n        _count.value += 1\n    }\n}\n",
+  "explanation": "Изменяемое состояние спрятано внутри, наружу виден только StateFlow. Любое изменение проходит через метод increment.",
+  "criteria": [
+    "Класс наследует ViewModel.",
+    "Приватный _count и публичный count.",
+    "Метод increment."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import androidx.lifecycle.ViewModel\nimport kotlinx.coroutines.flow.MutableStateFlow\nimport kotlinx.coroutines.flow.StateFlow\nimport kotlinx.coroutines.flow.asStateFlow\n\nclass CounterViewModel : ViewModel() {\n    val count = MutableStateFlow(0)\n    fun increment() {\n        count.value += 1\n    }\n}\n",
+      "why": "Наружу отдан MutableStateFlow: любой код сможет подменить значение."
+    },
+    {
+      "code": "import androidx.lifecycle.ViewModel\nimport kotlinx.coroutines.flow.MutableStateFlow\nimport kotlinx.coroutines.flow.StateFlow\nimport kotlinx.coroutines.flow.asStateFlow\n\nclass CounterViewModel {\n    private val _count = MutableStateFlow(0)\n    val count: StateFlow<Int> = _count.asStateFlow()\n    fun increment() {\n        _count.value += 1\n    }\n}\n",
+      "why": "Класс не наследует ViewModel."
+    },
+    {
+      "code": "import androidx.lifecycle.ViewModel\nimport kotlinx.coroutines.flow.MutableStateFlow\nimport kotlinx.coroutines.flow.StateFlow\nimport kotlinx.coroutines.flow.asStateFlow\n\nclass CounterViewModel : ViewModel() {\n    private val _count = MutableStateFlow(0)\n    val count: StateFlow<Int> = _count.asStateFlow()\n    fun increment() {\n        _count.value = 1\n    }\n}\n",
+      "why": "Метод всегда записывает 1 вместо увеличения на 1."
+    }
+  ]
+}

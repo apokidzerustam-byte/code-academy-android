@@ -1,0 +1,44 @@
+{
+  "id": "kt-07-viewmodel",
+  "title": "Kotlin: ViewModel и StateFlow",
+  "goal": "Хранить состояние экрана во ViewModel, менять его через update и copy и подписывать экран через collectAsState.",
+  "skills": [
+    "kt.viewmodel",
+    "kt.udf",
+    "kt.collect"
+  ],
+  "prerequisites": [
+    "kt-06-state"
+  ],
+  "runner": "kotlin",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-counter-vm.json",
+    "assignments/a2-add-task.json",
+    "assignments/a3-collect.json",
+    "assignments/a4-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Публичный MutableStateFlow",
+      "fix": "Сделайте его приватным (_state) и отдайте наружу StateFlow через asStateFlow()."
+    },
+    {
+      "mistake": "Чтение .value в функции интерфейса",
+      "fix": "Используйте by viewModel.state.collectAsState(): так экран перерисуется."
+    },
+    {
+      "mistake": "Правка списка на месте",
+      "fix": "Создавайте копию через copy и операцию +."
+    },
+    {
+      "mistake": "Ссылки на экран во ViewModel",
+      "fix": "ViewModel живёт дольше экрана: не храните View, Context активности и кнопки."
+    }
+  ]
+}
