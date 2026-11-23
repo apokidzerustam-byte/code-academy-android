@@ -1,0 +1,45 @@
+{
+  "id": "web-04-forms",
+  "title": "Смысловая вёрстка и формы",
+  "goal": "Размечать страницу тегами со смыслом и собирать формы с подписями, типами полей и проверкой в браузере.",
+  "skills": [
+    "web.semantic",
+    "web.forms",
+    "web.validation"
+  ],
+  "prerequisites": [
+    "web-03-layout"
+  ],
+  "runner": "html",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-semantic.json",
+    "assignments/a2-form.json",
+    "assignments/a3-select.json",
+    "assignments/a4-fix.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Везде div вместо смысловых тегов",
+      "fix": "Используйте header, nav, main, section, footer: структура понятна людям и программам."
+    },
+    {
+      "mistake": "for подписи не равен id поля",
+      "fix": "Копируйте значение id в for: нажатие на подпись должно ставить курсор в поле."
+    },
+    {
+      "mistake": "Поле без атрибута name",
+      "fix": "Без name данные поля не попадут в отправляемую форму."
+    },
+    {
+      "mistake": "Доверяют только проверке в браузере",
+      "fix": "Сервер всегда проверяет данные формы заново."
+    }
+  ]
+}

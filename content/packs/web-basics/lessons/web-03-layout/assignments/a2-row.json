@@ -1,0 +1,68 @@
+{
+  "id": "a2-row",
+  "type": "write",
+  "title": "Меню в ряд",
+  "statement": "Ссылки меню (`nav` с классом `menu`) сейчас стоят столбиком. Добавьте правило для `.menu`: выстройте ссылки **в ряд** с промежутком **20px** между ними.\n\nПравило `a { display: block; }` не трогайте.",
+  "goal": "Включать flexbox у родителя и задавать gap.",
+  "input": "Страница с меню из трёх ссылок.",
+  "expectedResult": "Три ссылки в ряд, промежуток 20px.",
+  "constraints": [
+    "Правило для a не меняйте.",
+    "Менять нужно родителя, а не ссылки."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    a { display: block; }\n  </style>\n</head>\n<body>\n  <nav class=\"menu\">\n    <a href=\"#\">Главная</a>\n    <a href=\"#\">Курсы</a>\n    <a href=\"#\">Контакты</a>\n  </nav>\n</body>\n</html>\n",
+  "hints": [
+    "Элементы в ряд выстраивает Flexbox.",
+    "Раскладку включают у родителя: display: flex.",
+    "Селектор родителя — .menu.",
+    "Промежуток между детьми задаёт gap.",
+    ".menu { display: flex; gap: 20px; }"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "row",
+        "expr": "(() => { const r = [...document.querySelectorAll('.menu a')].map(a => a.getBoundingClientRect()); return r.every(x => Math.round(x.top) === Math.round(r[0].top)) && r[1].left > r[0].right && r[2].left > r[1].right; })()",
+        "expected": true
+      },
+      {
+        "id": "gap",
+        "expr": "(() => { const r = [...document.querySelectorAll('.menu a')].map(a => a.getBoundingClientRect()); return Math.round(r[1].left - r[0].right); })()",
+        "expected": 20
+      },
+      {
+        "id": "disp",
+        "hidden": true,
+        "expr": "getComputedStyle(document.querySelector('.menu')).display",
+        "expected": "flex",
+        "hint": "Раскладка включается у родителя меню"
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    a { display: block; }\n    .menu {\n      display: flex;\n      gap: 20px;\n    }\n  </style>\n</head>\n<body>\n  <nav class=\"menu\">\n    <a href=\"#\">Главная</a>\n    <a href=\"#\">Курсы</a>\n    <a href=\"#\">Контакты</a>\n  </nav>\n</body>\n</html>\n",
+  "explanation": "display: flex у родителя ставит детей в ряд, gap добавляет промежуток между ними.",
+  "criteria": [
+    "Ссылки в одном ряду.",
+    "Промежуток 20px."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    a { display: block; }\n    .menu {\n      gap: 20px;\n    }\n  </style>\n</head>\n<body>\n  <nav class=\"menu\">\n    <a href=\"#\">Главная</a>\n    <a href=\"#\">Курсы</a>\n    <a href=\"#\">Контакты</a>\n  </nav>\n</body>\n</html>\n",
+      "why": "Нет display: flex: gap без него не работает."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    a { display: block; }\n    .menu {\n      display: flex;\n    }\n  </style>\n</head>\n<body>\n  <nav class=\"menu\">\n    <a href=\"#\">Главная</a>\n    <a href=\"#\">Курсы</a>\n    <a href=\"#\">Контакты</a>\n  </nav>\n</body>\n</html>\n",
+      "why": "Ряд есть, но нет промежутка."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    a { display: block; }\n    .menu a {\n      display: flex;\n      gap: 20px;\n    }\n  </style>\n</head>\n<body>\n  <nav class=\"menu\">\n    <a href=\"#\">Главная</a>\n    <a href=\"#\">Курсы</a>\n    <a href=\"#\">Контакты</a>\n  </nav>\n</body>\n</html>\n",
+      "why": "Раскладка включена у ссылок, а не у родителя."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    a { display: block; }\n    .menu {\n      display: flex;\n      gap: 10px;\n    }\n  </style>\n</head>\n<body>\n  <nav class=\"menu\">\n    <a href=\"#\">Главная</a>\n    <a href=\"#\">Курсы</a>\n    <a href=\"#\">Контакты</a>\n  </nav>\n</body>\n</html>\n",
+      "why": "Промежуток не 20px."
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "id": "a5-predict",
+  "type": "predict",
+  "title": "Сколько полей неверны?",
+  "statement": "Сколько полей из пяти браузер сочтёт **неверными** (`:invalid`)? Ответьте числом.",
+  "goal": "Понимать проверку полей формы.",
+  "input": "—",
+  "expectedResult": "Одно число.",
+  "constraints": [],
+  "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <form id=\"f\">\n    <input id=\"a\" required value=\"\">\n    <input id=\"b\" type=\"email\" value=\"ann@site.ru\">\n    <input id=\"c\" type=\"email\" value=\"ann@\">\n    <input id=\"d\" type=\"number\" min=\"1\" max=\"10\" value=\"12\">\n    <input id=\"e\" type=\"text\" value=\"ok\">\n  </form>\n</body>\n</html>\n",
+  "hints": [
+    "Проверьте каждое поле по очереди.",
+    "Пустое обязательное поле неверно.",
+    "Почта должна содержать домен после «@».",
+    "Число не должно выходить за min и max.",
+    "Неверны три поля, кроме ann@site.ru и ok."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "3"
+  },
+  "solution": "3",
+  "explanation": "Неверны: пустое обязательное (a), «ann@» (c) и число 12 больше max=10 (d). Остальные два в порядке.",
+  "criteria": [
+    "Верное число."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "1",
+      "answer": "1",
+      "why": "Неверных полей больше одного."
+    },
+    {
+      "code": "2",
+      "answer": "2",
+      "why": "Пропущено число за пределами min/max."
+    },
+    {
+      "code": "5",
+      "answer": "5",
+      "why": "Часть полей корректна: ann@site.ru и текст ok."
+    }
+  ]
+}

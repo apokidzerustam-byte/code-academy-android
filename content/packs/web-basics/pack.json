@@ -3,12 +3,14 @@
   "version": "0.1.0",
   "stage": 6,
   "title": "Веб: HTML, CSS и JavaScript",
-  "description": "Страницы во встроенном браузере без интернета: разметка, оформление и поведение. Пилот этапа 6.",
+  "description": "Страницы во встроенном браузере без интернета: разметка, оформление, раскладка, формы и поведение.",
   "language": "html",
   "minAppVersion": 1,
   "lessons": [
     "web-01-html-css",
-    "web-02-js"
+    "web-02-js",
+    "web-03-layout",
+    "web-04-forms"
   ],
   "skills": {
     "web.html": "HTML: теги и структура страницы",
@@ -19,7 +21,13 @@
     "js.basics": "JavaScript: переменные и вывод",
     "js.functions": "Функции JavaScript",
     "js.dom": "Работа со страницей (DOM)",
-    "js.events": "События: нажатие кнопки"
+    "js.events": "События: нажатие кнопки",
+    "web.boxmodel": "Блочная модель: padding, border, margin",
+    "web.flex": "Flexbox: ряд и выравнивание",
+    "web.layout": "Раскладка страницы",
+    "web.semantic": "Смысловые теги страницы",
+    "web.forms": "Формы: label, input, select",
+    "web.validation": "Проверка полей в браузере"
   },
   "projects": [
     "card"

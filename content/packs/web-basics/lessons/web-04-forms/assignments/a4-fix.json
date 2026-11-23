@@ -1,0 +1,62 @@
+{
+  "id": "a4-fix",
+  "type": "fix",
+  "title": "Почта не связывается",
+  "statement": "В форме три ошибки: подпись «Почта» не связана с полем, а у почты и возраста неподходящие типы. Найдите и исправьте. Менять `id` полей и `name` не нужно.",
+  "goal": "Чинить связь label и типы полей.",
+  "input": "Страница с двумя полями.",
+  "expectedResult": "Подписи связаны, типы email и number.",
+  "constraints": [
+    "id и name полей не менять."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <label for=\"mail\">Почта</label>\n  <input id=\"email\" name=\"email\" type=\"text\">\n  <label for=\"age\">Возраст</label>\n  <input id=\"age\" name=\"age\" type=\"text\">\n</body>\n</html>\n",
+  "hints": [
+    "Нажмите на подпись «Почта»: курсор попадёт в поле?",
+    "for подписи должен совпадать с id поля.",
+    "У подписи сейчас for=\"mail\", а поле называется email.",
+    "Тип поля для почты — email, для возраста — number.",
+    "Исправьте for и два type."
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "mail-link",
+        "expr": "(document.querySelector('label') || {}).control ? document.querySelector('label').control.id : null",
+        "expected": "email"
+      },
+      {
+        "id": "mail-type",
+        "expr": "document.getElementById('email').type",
+        "expected": "email"
+      },
+      {
+        "id": "age-type",
+        "expr": "document.getElementById('age').type",
+        "expected": "number"
+      },
+      {
+        "id": "age-link",
+        "hidden": true,
+        "expr": "document.querySelector('label[for=\"age\"]').control === document.getElementById('age')",
+        "expected": true
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <label for=\"email\">Почта</label>\n  <input id=\"email\" name=\"email\" type=\"email\">\n  <label for=\"age\">Возраст</label>\n  <input id=\"age\" name=\"age\" type=\"number\">\n</body>\n</html>\n",
+  "explanation": "Связь label for ↔ input id работает только при точном совпадении. Правильный type включает проверку и удобную клавиатуру на телефоне.",
+  "criteria": [
+    "Подпись связана, типы верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <label for=\"mail\">Почта</label>\n  <input id=\"email\" name=\"email\" type=\"email\">\n  <label for=\"age\">Возраст</label>\n  <input id=\"age\" name=\"age\" type=\"number\">\n</body>\n</html>\n",
+      "why": "Типы исправлены, а подпись по-прежнему не связана."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <label for=\"email\">Почта</label>\n  <input id=\"email\" name=\"email\" type=\"text\">\n  <label for=\"age\">Возраст</label>\n  <input id=\"age\" name=\"age\" type=\"text\">\n</body>\n</html>\n",
+      "why": "Связь исправлена, но типы остались text."
+    }
+  ]
+}

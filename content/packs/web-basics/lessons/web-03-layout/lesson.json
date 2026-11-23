@@ -1,0 +1,45 @@
+{
+  "id": "web-03-layout",
+  "title": "CSS: блочная модель и flexbox",
+  "goal": "Понимать размеры блока (padding, рамка, margin) и выстраивать элементы в ряд и по центру через flexbox.",
+  "skills": [
+    "web.boxmodel",
+    "web.flex",
+    "web.layout"
+  ],
+  "prerequisites": [
+    "web-01-html-css"
+  ],
+  "runner": "html",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-box.json",
+    "assignments/a2-row.json",
+    "assignments/a3-center.json",
+    "assignments/a4-fix.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "display: flex у детей, а не у родителя",
+      "fix": "Раскладку включают у контейнера; дети подчиняются сами."
+    },
+    {
+      "mistake": "gap или justify-content без display: flex",
+      "fix": "Эти свойства работают только у flex-контейнера."
+    },
+    {
+      "mistake": "Рамка без вида линии",
+      "fix": "Пишите border: 3px solid black — без solid рамка не нарисуется."
+    },
+    {
+      "mistake": "Ширину считают без padding и рамки",
+      "fix": "Полная ширина = width + 2·padding + 2·border."
+    }
+  ]
+}

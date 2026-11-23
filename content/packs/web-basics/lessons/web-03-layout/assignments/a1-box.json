@@ -1,0 +1,67 @@
+{
+  "id": "a1-box",
+  "type": "write",
+  "title": "Карточка с отступами",
+  "statement": "Разметку менять не нужно. В `style` оформите элемент с классом `card`:\n\n- внутренний отступ **12px** со всех сторон;\n- рамка толщиной **3px**, сплошная (`solid`), чёрная;\n- внешний отступ **16px**.",
+  "goal": "Использовать padding, border и margin.",
+  "input": "Страница с одной карточкой.",
+  "expectedResult": "Карточка с нужными отступами и рамкой.",
+  "constraints": [
+    "Разметку body не меняйте."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <div class=\"card\">Карточка</div>\n</body>\n</html>\n",
+  "hints": [
+    "Внутренний отступ — padding, внешний — margin.",
+    "Рамка записывается тремя словами: толщина, вид линии, цвет.",
+    "Селектор по классу начинается с точки: .card.",
+    "Значения с единицей измерения: 12px.",
+    "padding: 12px; border: 3px solid black; margin: 16px;"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "pad",
+        "expr": "getComputedStyle(document.querySelector('.card')).paddingTop + ' ' + getComputedStyle(document.querySelector('.card')).paddingLeft",
+        "expected": "12px 12px"
+      },
+      {
+        "id": "border",
+        "expr": "getComputedStyle(document.querySelector('.card')).borderTopWidth + ' ' + getComputedStyle(document.querySelector('.card')).borderTopStyle",
+        "expected": "3px solid"
+      },
+      {
+        "id": "margin",
+        "expr": "getComputedStyle(document.querySelector('.card')).marginBottom",
+        "expected": "16px"
+      },
+      {
+        "id": "all",
+        "hidden": true,
+        "expr": "[...['Top','Right','Bottom','Left']].map(s => getComputedStyle(document.querySelector('.card'))['padding' + s]).join(' ')",
+        "expected": "12px 12px 12px 12px",
+        "hint": "Отступ одинаков со всех сторон"
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .card {\n      padding: 12px;\n      border: 3px solid black;\n      margin: 16px;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"card\">Карточка</div>\n</body>\n</html>\n",
+  "explanation": "padding — внутри рамки, margin — снаружи; рамку одним свойством border задают толщина, вид и цвет.",
+  "criteria": [
+    "Три нужных свойства применены."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .card {\n      margin: 12px;\n      border: 3px solid black;\n      padding: 16px;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"card\">Карточка</div>\n</body>\n</html>\n",
+      "why": "Отступы перепутаны местами."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .card {\n      padding: 12px;\n      border: 3px;\n      margin: 16px;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"card\">Карточка</div>\n</body>\n</html>\n",
+      "why": "У рамки не указан вид линии: без solid она не рисуется."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    card {\n      padding: 12px;\n      border: 3px solid black;\n      margin: 16px;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"card\">Карточка</div>\n</body>\n</html>\n",
+      "why": "Селектор без точки ищет тег card."
+    }
+  ]
+}

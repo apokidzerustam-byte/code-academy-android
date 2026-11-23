@@ -1,0 +1,57 @@
+{
+  "id": "a4-fix",
+  "type": "fix",
+  "title": "Вкладки не встают в ряд",
+  "statement": "Вкладки должны стоять в одном ряду и быть разнесены по краям. Правило написано, но вкладки стоят столбиком. Найдите причину и исправьте.",
+  "goal": "Находить забытое display: flex.",
+  "input": "Страница с вкладками.",
+  "expectedResult": "Три вкладки в одном ряду.",
+  "constraints": [
+    "Лишних свойств не добавляйте."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .tabs span { display: block; }\n    .tabs {\n      justify-content: space-between;\n      align-items: center;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"tabs\">\n    <span>Один</span>\n    <span>Два</span>\n    <span>Три</span>\n  </div>\n</body>\n</html>\n",
+  "hints": [
+    "Раскладка в ряд включается не сама собой.",
+    "Посмотрите: чего не хватает в правиле для .tabs?",
+    "justify-content и align-items работают только внутри flex-контейнера.",
+    "Нужно объявить .tabs flex-контейнером.",
+    "display: flex;"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "row",
+        "expr": "(() => { const r = [...document.querySelectorAll('.tabs span')].map(a => a.getBoundingClientRect()); return r.every(x => Math.round(x.top) === Math.round(r[0].top)); })()",
+        "expected": true
+      },
+      {
+        "id": "spread",
+        "expr": "(() => { const r = [...document.querySelectorAll('.tabs span')].map(a => a.getBoundingClientRect()); return Math.round(r[2].right) === innerWidth - 8; })()",
+        "expected": true
+      },
+      {
+        "id": "disp",
+        "hidden": true,
+        "expr": "getComputedStyle(document.querySelector('.tabs')).display",
+        "expected": "flex"
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .tabs span { display: block; }\n    .tabs {\n      display: flex;\n      justify-content: space-between;\n      align-items: center;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"tabs\">\n    <span>Один</span>\n    <span>Два</span>\n    <span>Три</span>\n  </div>\n</body>\n</html>\n",
+  "explanation": "justify-content и align-items — свойства flex-контейнера. Без display: flex у родителя они не действуют.",
+  "criteria": [
+    "Вкладки в ряд."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .tabs span { display: block; }\n    .tabs {\n      display: block;\n      justify-content: space-between;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"tabs\">\n    <span>Один</span>\n    <span>Два</span>\n    <span>Три</span>\n  </div>\n</body>\n</html>\n",
+      "why": "display: block — не раскладка в ряд."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .tabs span { display: block; }\n    .tabs span {\n      display: flex;\n    }\n    .tabs {\n      justify-content: space-between;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"tabs\">\n    <span>Один</span>\n    <span>Два</span>\n    <span>Три</span>\n  </div>\n</body>\n</html>\n",
+      "why": "Flex включён у вкладок, а не у контейнера."
+    }
+  ]
+}

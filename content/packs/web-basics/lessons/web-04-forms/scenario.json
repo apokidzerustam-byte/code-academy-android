@@ -1,0 +1,232 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Теги со смыслом",
+      "narration": "Страницу можно собрать из одних div, но тогда ни поисковик, ни программа для чтения с экрана не поймут, где заголовок сайта, где меню, а где основное содержимое. Поэтому в HTML есть теги со смыслом: header — шапка, nav — навигация, main — главное содержимое, section — раздел, article — самостоятельная запись, footer — подвал. Выглядят они как обычные блоки, зато страница становится понятной и людям, и программам.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`header` · `nav` · `main` · `section` · `article` · `footer` — теги со смыслом вместо одинаковых `div`.",
+          "cue": 1
+        }
+      ]
+    },
+    {
+      "id": "semantic",
+      "title": "Смысловой каркас",
+      "narration": "Соберём каркас блога. В шапке заголовок h1 и меню nav с двумя ссылками. Внутри main раздел section с заголовком второго уровня и статьёй article. В конце footer с подписью. Запускаем: для глаза всё то же, что и с div, но структура страницы теперь читается из самих тегов. Заголовок h1 на странице один, ниже идут h2 и h3 по порядку.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "index.html"
+        },
+        {
+          "type": "type",
+          "text": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <header>\n    <h1>Мой блог</h1>\n    <nav><a href=\"#posts\">Записи</a> <a href=\"#about\">Обо мне</a></nav>\n  </header>\n  <main>\n    <section id=\"posts\">\n      <h2>Записи</h2>\n      <article><h3>Первый пост</h3><p>Привет, мир!</p></article>\n    </section>\n  </main>\n  <footer>© 2026, Аня</footer>\n</body>\n</html>\n",
+          "file": "index.html",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "file": "index.html",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            12,
+            13,
+            14,
+            15,
+            16
+          ],
+          "file": "index.html",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            18
+          ],
+          "file": "index.html",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "index.html",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "Предпросмотр страницы:\nМой блог\nЗаписи Обо мне\nЗаписи\nПервый пост\n\nПривет, мир!\n\n© 2026, Аня",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "form",
+      "title": "Форма",
+      "narration": "Теперь форма. Тег form объединяет поля. Каждому полю нужна подпись label. Связываем их так: у подписи атрибут for, у поля id с тем же значением. Тогда нажатие на подпись ставит курсор в поле, а программа для чтения с экрана правильно озвучивает поле. Тип поля задаёт атрибут type: text, email, number, checkbox. Слово required делает поле обязательным. Для выбора из списка есть select с вариантами option, а кнопка отправки — button с типом submit.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "index.html"
+        },
+        {
+          "type": "type",
+          "text": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <form>\n    <label for=\"name\">Имя</label>\n    <input id=\"name\" name=\"name\" type=\"text\" required>\n\n    <label for=\"email\">Почта</label>\n    <input id=\"email\" name=\"email\" type=\"email\" required>\n\n    <label for=\"plan\">Тариф</label>\n    <select id=\"plan\" name=\"plan\">\n      <option value=\"free\">Бесплатный</option>\n      <option value=\"pro\">Про</option>\n    </select>\n\n    <label><input type=\"checkbox\" name=\"agree\"> Согласен с правилами</label>\n    <button type=\"submit\">Отправить</button>\n  </form>\n</body>\n</html>\n",
+          "file": "index.html",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            8,
+            9
+          ],
+          "file": "index.html",
+          "cue": 3
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            9
+          ],
+          "file": "index.html",
+          "cue": 5
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            9
+          ],
+          "file": "index.html",
+          "cue": 6
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            14,
+            15,
+            16,
+            17,
+            18
+          ],
+          "file": "index.html",
+          "cue": 7
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            21
+          ],
+          "file": "index.html",
+          "cue": 7
+        },
+        {
+          "type": "run",
+          "file": "index.html",
+          "cue": 7
+        },
+        {
+          "type": "output",
+          "text": "Предпросмотр страницы:\nИмя  Почта  Тариф \nБесплатный\nПро\n  Согласен с правилами Отправить",
+          "cue": 7
+        }
+      ]
+    },
+    {
+      "id": "valid",
+      "title": "Проверка прямо в браузере",
+      "narration": "Браузер умеет проверять поля сам. Обязательное пустое поле или почта без домена считаются неверными. У формы есть метод checkValidity: он вернёт ложь, если хоть одно поле неверно. Посчитаем неверные поля на примере из трёх: пустое обязательное и почта без домена дают два. Но помните: проверка в браузере — лишь удобство для пользователя. Серверу доверять данным из формы нельзя, он проверяет их заново.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "index.html"
+        },
+        {
+          "type": "type",
+          "text": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <form id=\"f\">\n    <input id=\"a\" required value=\"\">\n    <input id=\"b\" type=\"email\" value=\"ann@site.ru\">\n    <input id=\"c\" type=\"email\" value=\"ann@\">\n  </form>\n</body>\n</html>\n",
+          "file": "index.html",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "index.html",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "Предпросмотр страницы:\n  ",
+          "cue": 3
+        },
+        {
+          "type": "note",
+          "md": "Измерили: неверных полей — **2** (пустое обязательное и «ann@»).",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "label",
+      "title": "Подпись не связана с полем",
+      "narration": "Типичная ошибка: у подписи for один, а у поля id другой. Визуально всё выглядит нормально, но связи нет: нажатие на подпись не работает, программа чтения не знает, что к чему. Проверка в заданиях именно это и смотрит: у подписи должно быть связанное поле. Чтобы избежать ошибки, копируйте значение id в for.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "index.html"
+        },
+        {
+          "type": "type",
+          "text": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <label for=\"mail\">Почта</label>\n  <input id=\"email\" type=\"text\">\n</body>\n</html>\n",
+          "file": "index.html",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            8,
+            9
+          ],
+          "file": "index.html",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "index.html",
+          "cue": 1
+        },
+        {
+          "type": "output",
+          "text": "Предпросмотр страницы:\nПочта ",
+          "cue": 1
+        },
+        {
+          "type": "note",
+          "md": "Измерили: у подписи связанного поля нет — `label.control === null`.",
+          "cue": 1
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. Смысловые теги header, nav, main, section, article и footer делают структуру понятной. В форме у каждого поля есть подпись label с атрибутом for, равным id поля. Тип поля задаёт type, обязательность — required, а кнопку отправки делает button с типом submit. Проверка в браузере удобна для людей, но не заменяет проверку на сервере.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`label for=\"x\"` ↔ `input id=\"x\"` · `type` · `required` · `select/option` · `button type=\"submit\"`",
+          "cue": 2
+        }
+      ]
+    }
+  ]
+}

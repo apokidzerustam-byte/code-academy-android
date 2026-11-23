@@ -1,0 +1,66 @@
+{
+  "id": "a3-select",
+  "type": "write",
+  "title": "Выпадающий список",
+  "statement": "Добавьте подписанный выпадающий список: `select` с `id` и `name` равными `lang` и подписью «Любимый язык». Три варианта: значения `py`, `js`, `kt` с текстами `Python`, `JavaScript`, `Kotlin` — по порядку.",
+  "goal": "Использовать select и option.",
+  "input": "Пустая страница.",
+  "expectedResult": "Список из трёх вариантов с подписью.",
+  "constraints": [
+    "Значение (value) и видимый текст различаются."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <!-- Ваш список -->\n</body>\n</html>\n",
+  "hints": [
+    "Выпадающий список — тег select, варианты — option внутри него.",
+    "Видимый текст — между тегами option, а значение для программы — атрибут value.",
+    "Подпись связывается с select через for и id.",
+    "У select не забудьте name.",
+    "<option value=\"py\">Python</option>"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "link",
+        "expr": "(document.querySelector('label[for=\"lang\"]') || {}).control && document.querySelector('label[for=\"lang\"]').control.tagName",
+        "expected": "SELECT"
+      },
+      {
+        "id": "values",
+        "expr": "[...document.querySelectorAll('select#lang > option')].map(o => o.value).join(',')",
+        "expected": "py,js,kt"
+      },
+      {
+        "id": "texts",
+        "expr": "[...document.querySelectorAll('select#lang > option')].map(o => o.textContent.trim()).join(',')",
+        "expected": "Python,JavaScript,Kotlin"
+      },
+      {
+        "id": "name",
+        "hidden": true,
+        "expr": "(document.getElementById('lang') || {}).name",
+        "expected": "lang"
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <label for=\"lang\">Любимый язык</label>\n  <select id=\"lang\" name=\"lang\">\n    <option value=\"py\">Python</option>\n    <option value=\"js\">JavaScript</option>\n    <option value=\"kt\">Kotlin</option>\n  </select>\n</body>\n</html>\n",
+  "explanation": "В option value уходит программе, а текст видит человек. label for связывает подпись с select.",
+  "criteria": [
+    "Три варианта по порядку, подпись связана."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <label for=\"lang\">Любимый язык</label>\n  <select id=\"lang\" name=\"lang\">\n    <option>Python</option>\n    <option>JavaScript</option>\n    <option>Kotlin</option>\n  </select>\n</body>\n</html>\n",
+      "why": "Нет значений value: вместо py, js, kt уходят тексты."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <label for=\"lang\">Любимый язык</label>\n  <select id=\"lang\" name=\"lang\">\n    <option value=\"kt\">Kotlin</option>\n    <option value=\"js\">JavaScript</option>\n    <option value=\"py\">Python</option>\n  </select>\n</body>\n</html>\n",
+      "why": "Порядок вариантов перепутан."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <label>Любимый язык</label>\n  <select id=\"lang\" name=\"lang\">\n    <option value=\"py\">Python</option>\n    <option value=\"js\">JavaScript</option>\n    <option value=\"kt\">Kotlin</option>\n  </select>\n</body>\n</html>\n",
+      "why": "Подпись не связана со списком."
+    }
+  ]
+}

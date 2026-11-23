@@ -1,0 +1,242 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Всё на странице — коробки",
+      "narration": "Если разглядеть любую страницу, окажется, что она сложена из прямоугольных коробок: заголовок — коробка, абзац — коробка, кнопка — тоже. Чтобы красиво расставить их, нужно понять две вещи. Как устроена одна коробка: у неё есть отступы и рамка. И как расположить несколько коробок рядом друг с другом. Сегодня разберём обе.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "Каждый элемент — **прямоугольная коробка**. CSS управляет её размерами, отступами и положением.",
+          "cue": 1
+        }
+      ]
+    },
+    {
+      "id": "box",
+      "title": "Блочная модель",
+      "narration": "У коробки четыре слоя. В центре содержимое, и его размер задаёт width. Вокруг него padding — внутренний отступ. Дальше идёт рамка, border, и снаружи margin — внешний отступ, который отодвигает соседей. Возьмём блок шириной сто пикселей, с отступом десять, рамкой пять и внешним отступом двадцать. Запускаем и измеряем. Полная ширина с рамкой получилась сто тридцать: сто плюс два раза по десять плюс два раза по пять. Margin в неё не входит, он только раздвигает соседей.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "index.html"
+        },
+        {
+          "type": "type",
+          "text": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .card {\n      width: 100px;\n      padding: 10px;\n      border: 5px solid teal;\n      margin: 20px;\n      background: lightyellow;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"card\" id=\"b\">Блок</div>\n</body>\n</html>\n",
+          "file": "index.html",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ],
+          "file": "index.html",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            8
+          ],
+          "file": "index.html",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            9
+          ],
+          "file": "index.html",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            10
+          ],
+          "file": "index.html",
+          "cue": 3
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            11
+          ],
+          "file": "index.html",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "index.html",
+          "cue": 5
+        },
+        {
+          "type": "output",
+          "text": "Предпросмотр страницы:\nБлок",
+          "cue": 6
+        },
+        {
+          "type": "note",
+          "md": "Измерили в браузере: ширина блока с рамкой — **130 px**, вместе с margin — **170 px**.",
+          "cue": 6
+        }
+      ]
+    },
+    {
+      "id": "flex",
+      "title": "Flexbox: ряд из элементов",
+      "narration": "Теперь расположим несколько элементов в ряд. Возьмём меню из трёх ссылок. Достаточно одному родителю, элементу nav, написать display: flex, и его дети выстраиваются в строку. Свойство gap задаёт промежуток между ними. Запускаем: вертикальные координаты всех трёх ссылок одинаковы, они стоят в одном ряду.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "index.html"
+        },
+        {
+          "type": "type",
+          "text": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .menu {\n      display: flex;\n      gap: 12px;\n    }\n    .menu a {\n      padding: 6px 10px;\n      background: #e0f2f1;\n    }\n  </style>\n</head>\n<body>\n  <nav class=\"menu\">\n    <a href=\"#\">Главная</a>\n    <a href=\"#\">Курсы</a>\n    <a href=\"#\">Контакты</a>\n  </nav>\n</body>\n</html>\n",
+          "file": "index.html",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            8
+          ],
+          "file": "index.html",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            9
+          ],
+          "file": "index.html",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "index.html",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "Предпросмотр страницы:\nГлавная\nКурсы\nКонтакты",
+          "cue": 4
+        },
+        {
+          "type": "note",
+          "md": "Измерили: вертикальные координаты трёх ссылок — **[8,8,8]**, все одинаковые.",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "justify",
+      "title": "Выравнивание: justify и align",
+      "narration": "Flexbox умеет выравнивать. Свойство justify-content распределяет элементы вдоль ряда: к началу, к центру, по краям или с равными промежутками. А align-items выравнивает их поперёк ряда. Самый частый приём: поставить блок ровно по центру страницы. Родителю, то есть body, даём display flex, justify-content center и align-items center, а высоту делаем во весь экран, min-height сто vh. Запускаем: центр блока находится ровно посередине экрана шириной триста шестьдесят и высотой шестьсот сорок пикселей.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "index.html"
+        },
+        {
+          "type": "type",
+          "text": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    body {\n      margin: 0;\n      min-height: 100vh;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n    }\n    .box { width: 120px; height: 60px; background: teal; }\n  </style>\n</head>\n<body>\n  <div class=\"box\" id=\"c\"></div>\n</body>\n</html>\n",
+          "file": "index.html",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            11
+          ],
+          "file": "index.html",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            12
+          ],
+          "file": "index.html",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            9
+          ],
+          "file": "index.html",
+          "cue": 4
+        },
+        {
+          "type": "run",
+          "file": "index.html",
+          "cue": 5
+        },
+        {
+          "type": "output",
+          "text": "Предпросмотр страницы:\n",
+          "cue": 5
+        },
+        {
+          "type": "note",
+          "md": "Измерили: центр блока — точка **180,320**, а центр экрана — (180, 320).",
+          "cue": 5
+        }
+      ]
+    },
+    {
+      "id": "stack",
+      "title": "Забыли display: flex",
+      "narration": "Самая частая ошибка новичка: написать gap или justify-content, но забыть display flex у родителя. Тогда свойства просто не работают: элементы остаются обычными. Если ссылки стоят в столбик, хотя вы ждали ряд, сначала проверьте, есть ли display flex у их родителя. Здесь для наглядности ссылки сделаны блочными: запускаем, и координаты у всех разные.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "index.html"
+        },
+        {
+          "type": "type",
+          "text": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .menu {\n      gap: 12px;\n    }\n    .menu a {\n      display: block;\n      padding: 6px 10px;\n      background: #e0f2f1;\n    }\n  </style>\n</head>\n<body>\n  <nav class=\"menu\">\n    <a href=\"#\">Главная</a>\n    <a href=\"#\">Курсы</a>\n    <a href=\"#\">Контакты</a>\n  </nav>\n</body>\n</html>\n",
+          "file": "index.html",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "index.html",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "Предпросмотр страницы:\nГлавная\nКурсы\nКонтакты",
+          "cue": 3
+        },
+        {
+          "type": "note",
+          "md": "Измерили: вертикальные координаты — **[8,38,68]**, все разные: ссылки в столбик.",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. У каждого элемента есть содержимое, внутренний отступ padding, рамка border и внешний отступ margin. Чтобы выстроить элементы в ряд, дайте родителю display flex, а промежуток задайте через gap. justify-content выравнивает вдоль ряда, align-items поперёк. Если свойства не действуют, проверьте display flex у родителя.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`display: flex` — у **родителя** · `gap` · `justify-content` · `align-items`",
+          "cue": 2
+        }
+      ]
+    }
+  ]
+}

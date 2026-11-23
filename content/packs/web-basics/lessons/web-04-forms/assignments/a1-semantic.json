@@ -1,0 +1,72 @@
+{
+  "id": "a1-semantic",
+  "type": "write",
+  "title": "Каркас сайта",
+  "statement": "Соберите каркас сайта кофейни из смысловых тегов:\n\n- `header` с заголовком `h1` «Кофейня» и `nav` из **двух** ссылок (тексты любые);\n- `main` с абзацем «Свежий кофе каждый день.»;\n- `footer` с текстом «Работаем с 8 до 20».",
+  "goal": "Использовать смысловые теги.",
+  "input": "Пустая страница.",
+  "expectedResult": "Шапка с меню, основное содержимое, подвал.",
+  "constraints": [
+    "Заголовок h1 один."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <!-- Ваш каркас -->\n</body>\n</html>\n",
+  "hints": [
+    "Вместо одинаковых div — теги со смыслом.",
+    "Шапка — header, в ней h1 и nav.",
+    "Основное содержимое — main, подвал — footer.",
+    "В nav две ссылки a с href.",
+    "<header><h1>Кофейня</h1><nav>…</nav></header>"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "head",
+        "expr": "((document.querySelector('header h1') || {}).textContent || '').trim()",
+        "expected": "Кофейня"
+      },
+      {
+        "id": "nav",
+        "expr": "document.querySelectorAll('header nav a').length",
+        "expected": 2
+      },
+      {
+        "id": "main",
+        "expr": "((document.querySelector('main p') || {}).textContent || '').trim()",
+        "expected": "Свежий кофе каждый день."
+      },
+      {
+        "id": "foot",
+        "expr": "((document.querySelector('footer') || {}).textContent || '').trim()",
+        "expected": "Работаем с 8 до 20"
+      },
+      {
+        "id": "one",
+        "hidden": true,
+        "expr": "document.querySelectorAll('h1, header, main, footer, nav').length",
+        "expected": 5,
+        "hint": "Каждый смысловой блок должен быть на странице один раз"
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <header>\n    <h1>Кофейня</h1>\n    <nav><a href=\"#menu\">Меню</a> <a href=\"#contacts\">Контакты</a></nav>\n  </header>\n  <main>\n    <p>Свежий кофе каждый день.</p>\n  </main>\n  <footer>Работаем с 8 до 20</footer>\n</body>\n</html>\n",
+  "explanation": "header, nav, main и footer не меняют вид, но объясняют структуру страницы людям и программам.",
+  "criteria": [
+    "Все четыре блока на месте."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <div>\n    <h1>Кофейня</h1>\n    <div><a href=\"#a\">Меню</a> <a href=\"#b\">Контакты</a></div>\n  </div>\n  <div><p>Свежий кофе каждый день.</p></div>\n  <div>Работаем с 8 до 20</div>\n</body>\n</html>\n",
+      "why": "Везде div вместо смысловых тегов."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <header>\n    <h1>Кофейня</h1>\n    <nav><a href=\"#menu\">Меню</a></nav>\n  </header>\n  <main><p>Свежий кофе каждый день.</p></main>\n  <footer>Работаем с 8 до 20</footer>\n</body>\n</html>\n",
+      "why": "В меню одна ссылка вместо двух."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <header>\n    <h1>Кофейня</h1>\n    <nav><a href=\"#a\">Меню</a> <a href=\"#b\">Контакты</a></nav>\n    <p>Свежий кофе каждый день.</p>\n  </header>\n  <footer>Работаем с 8 до 20</footer>\n</body>\n</html>\n",
+      "why": "Нет main: абзац лежит в шапке."
+    }
+  ]
+}

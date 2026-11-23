@@ -1,0 +1,61 @@
+{
+  "id": "a3-center",
+  "type": "write",
+  "title": "Блок по центру экрана",
+  "statement": "Квадрат `.box` должен стоять **ровно по центру** экрана — и по горизонтали, и по вертикали. Размеры блока и правило `body` уже заданы; допишите свойства так, чтобы блок оказался по центру.",
+  "goal": "Центрировать flexbox-ом.",
+  "input": "Страница с блоком.",
+  "expectedResult": "Центр блока совпадает с центром экрана.",
+  "constraints": [
+    "Размеры блока не меняйте."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    body { margin: 0; min-height: 100vh; }\n    .box { width: 120px; height: 60px; background: teal; }\n  </style>\n</head>\n<body>\n  <div class=\"box\" id=\"c\"></div>\n</body>\n</html>\n",
+  "hints": [
+    "Центрирует Flexbox.",
+    "Включить его нужно у родителя блока — у body.",
+    "Выравнивание вдоль ряда — justify-content.",
+    "Выравнивание поперёк — align-items.",
+    "Оба — center, а у body ещё display: flex."
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "center",
+        "expr": "(() => { const r = document.getElementById('c').getBoundingClientRect(); return Math.round(r.left + r.width / 2) + ',' + Math.round(r.top + r.height / 2); })()",
+        "expected": "180,320"
+      },
+      {
+        "id": "size",
+        "hidden": true,
+        "expr": "document.getElementById('c').offsetWidth + 'x' + document.getElementById('c').offsetHeight",
+        "expected": "120x60",
+        "hint": "Размер блока менять не нужно"
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    body { margin: 0; min-height: 100vh; }\n    .box { width: 120px; height: 60px; background: teal; }\n    body {\n      display: flex;\n      justify-content: center;\n      align-items: center;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"box\" id=\"c\"></div>\n</body>\n</html>\n",
+  "explanation": "У родителя: display flex включает раскладку, justify-content: center центрирует по горизонтали, align-items: center — по вертикали.",
+  "criteria": [
+    "Блок по центру в обоих направлениях."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    body { margin: 0; min-height: 100vh; }\n    .box { width: 120px; height: 60px; background: teal; }\n    body {\n      display: flex;\n      justify-content: center;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"box\" id=\"c\"></div>\n</body>\n</html>\n",
+      "why": "Блок по центру только по горизонтали."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    body { margin: 0; min-height: 100vh; }\n    .box { width: 120px; height: 60px; background: teal; }\n    body {\n      display: flex;\n      align-items: center;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"box\" id=\"c\"></div>\n</body>\n</html>\n",
+      "why": "Блок по центру только по вертикали."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    body { margin: 0; min-height: 100vh; }\n    .box { width: 120px; height: 60px; background: teal; }\n    body {\n      justify-content: center;\n      align-items: center;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"box\" id=\"c\"></div>\n</body>\n</html>\n",
+      "why": "Нет display: flex: выравнивание не работает."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    body { margin: 0; min-height: 100vh; }\n    .box { width: 120px; height: 60px; background: teal; }\n    .box {\n      display: flex;\n      justify-content: center;\n      align-items: center;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"box\" id=\"c\"></div>\n</body>\n</html>\n",
+      "why": "Раскладку включили у самого блока, а не у родителя."
+    }
+  ]
+}

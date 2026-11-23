@@ -1,0 +1,82 @@
+{
+  "id": "a2-form",
+  "type": "write",
+  "title": "Форма регистрации",
+  "statement": "Сделайте форму из двух **обязательных** полей и кнопки:\n\n- `Имя` — текстовое поле, `id` и `name` равны `name`;\n- `Почта` — поле типа `email`, `id` и `name` равны `email`;\n- кнопка отправки с текстом `Отправить`.\n\nУ каждого поля — подпись `label`, связанная с ним.",
+  "goal": "Собрать форму с подписями.",
+  "input": "Пустая страница.",
+  "expectedResult": "Форма с двумя связанными полями и кнопкой.",
+  "constraints": [
+    "Подпись связывается атрибутом for."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <!-- Ваша форма -->\n</body>\n</html>\n",
+  "hints": [
+    "Все поля пишут внутри тега form.",
+    "Подпись: <label for=\"name\">; поле: <input id=\"name\">.",
+    "Тип почты — type=\"email\", обязательность — required.",
+    "Кнопка: <button type=\"submit\">Отправить</button>.",
+    "У поля нужны id (для label) и name (для отправки)."
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "name",
+        "expr": "(document.querySelector('label[for=\"name\"]') || {}).control && document.querySelector('label[for=\"name\"]').control.type",
+        "expected": "text"
+      },
+      {
+        "id": "email",
+        "expr": "(document.querySelector('label[for=\"email\"]') || {}).control && document.querySelector('label[for=\"email\"]').control.type",
+        "expected": "email"
+      },
+      {
+        "id": "req",
+        "expr": "[...document.querySelectorAll('input')].every(i => i.required)",
+        "expected": true
+      },
+      {
+        "id": "btn",
+        "expr": "((document.querySelector('form button[type=\"submit\"]') || {}).textContent || '').trim()",
+        "expected": "Отправить"
+      },
+      {
+        "id": "names",
+        "hidden": true,
+        "expr": "[...document.querySelectorAll('input')].map(i => i.name).join(',')",
+        "expected": "name,email",
+        "hint": "У полей должны быть атрибуты name: name и email"
+      },
+      {
+        "id": "labels",
+        "hidden": true,
+        "expr": "document.querySelectorAll('label').length",
+        "expected": 2
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <form>\n    <label for=\"name\">Имя</label>\n    <input id=\"name\" name=\"name\" type=\"text\" required>\n    <label for=\"email\">Почта</label>\n    <input id=\"email\" name=\"email\" type=\"email\" required>\n    <button type=\"submit\">Отправить</button>\n  </form>\n</body>\n</html>\n",
+  "explanation": "label for связывается с id поля; type задаёт вид поля, required — обязательность, name — имя при отправке.",
+  "criteria": [
+    "Подписи связаны, поля обязательны, кнопка есть."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <form>\n    <label>Имя</label>\n    <input id=\"name\" name=\"name\" type=\"text\" required>\n    <label>Почта</label>\n    <input id=\"email\" name=\"email\" type=\"email\" required>\n    <button type=\"submit\">Отправить</button>\n  </form>\n</body>\n</html>\n",
+      "why": "Подписи не связаны с полями (нет for)."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <form>\n    <label for=\"name\">Имя</label>\n    <input id=\"name\" name=\"name\" type=\"text\" required>\n    <label for=\"email\">Почта</label>\n    <input id=\"email\" name=\"email\" type=\"text\" required>\n    <button type=\"submit\">Отправить</button>\n  </form>\n</body>\n</html>\n",
+      "why": "У почты тип text, а нужен email."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <form>\n    <label for=\"name\">Имя</label>\n    <input id=\"name\" name=\"name\" type=\"text\">\n    <label for=\"email\">Почта</label>\n    <input id=\"email\" name=\"email\" type=\"email\">\n    <button type=\"submit\">Отправить</button>\n  </form>\n</body>\n</html>\n",
+      "why": "Поля не обязательны: нет required."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <form>\n    <label for=\"name\">Имя</label>\n    <input id=\"name\" type=\"text\" required>\n    <label for=\"email\">Почта</label>\n    <input id=\"email\" type=\"email\" required>\n    <button type=\"submit\">Отправить</button>\n  </form>\n</body>\n</html>\n",
+      "why": "У полей нет name — данные не отправятся."
+    }
+  ]
+}
