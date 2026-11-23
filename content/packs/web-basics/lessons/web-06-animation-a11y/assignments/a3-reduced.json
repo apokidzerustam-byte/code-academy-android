@@ -1,0 +1,57 @@
+{
+  "id": "a3-reduced",
+  "type": "write",
+  "title": "Уважать настройку движения",
+  "statement": "У точки `.dot` есть анимация пульсации. Добавьте в конец стилей медиазапрос `(prefers-reduced-motion: reduce)`, внутри которого анимация точки **отключается**. Обычная анимация (без настройки) должна остаться.",
+  "goal": "Отключать анимацию при включённом уменьшении движения.",
+  "input": "Страница с пульсирующей точкой.",
+  "expectedResult": "Медиазапрос с animation: none; обычная анимация сохранена.",
+  "constraints": [
+    "Основное правило .dot не меняйте."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    @keyframes pulse {\n      from { transform: scale(1); }\n      to   { transform: scale(1.15); }\n    }\n    .dot {\n      width: 24px;\n      height: 24px;\n      border-radius: 50%;\n      background: tomato;\n      animation: pulse 1s ease-in-out infinite alternate;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"dot\"></div>\n</body>\n</html>\n",
+  "hints": [
+    "Настройку системы читает медиазапрос prefers-reduced-motion.",
+    "Нужное значение — reduce: пользователь просит меньше движения.",
+    "Запись: @media (prefers-reduced-motion: reduce) { … }.",
+    "Внутри пишут правило для .dot.",
+    "@media (prefers-reduced-motion: reduce) { .dot { animation: none; } }"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "base",
+        "expr": "getComputedStyle(document.querySelector('.dot')).animationName",
+        "expected": "pulse"
+      },
+      {
+        "id": "media",
+        "expr": "[...document.styleSheets].flatMap(s => [...s.cssRules]).some(r => r.media && /prefers-reduced-motion:\\s*reduce/.test(r.conditionText || r.media.mediaText) && [...r.cssRules].some(x => x.style && x.style.animationName === 'none'))",
+        "expected": true,
+        "hint": "Внутри медиазапроса анимация должна отключаться: animation: none"
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    @keyframes pulse {\n      from { transform: scale(1); }\n      to   { transform: scale(1.15); }\n    }\n    .dot {\n      width: 24px;\n      height: 24px;\n      border-radius: 50%;\n      background: tomato;\n      animation: pulse 1s ease-in-out infinite alternate;\n    }\n    @media (prefers-reduced-motion: reduce) {\n      .dot {\n        animation: none;\n      }\n    }\n  </style>\n</head>\n<body>\n  <div class=\"dot\"></div>\n</body>\n</html>\n",
+  "explanation": "Медиазапрос prefers-reduced-motion срабатывает у людей, включивших уменьшение движения; в нём анимацию отключают, а остальным она остаётся.",
+  "criteria": [
+    "Медиазапрос с animation: none.",
+    "Обычная анимация осталась."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    @keyframes pulse {\n      from { transform: scale(1); }\n      to   { transform: scale(1.15); }\n    }\n    .dot {\n      width: 24px;\n      height: 24px;\n      border-radius: 50%;\n      background: tomato;\n      animation: pulse 1s ease-in-out infinite alternate;\n    }\n    @media (prefers-no-preferenced-motion: no-preference) {\n      .dot {\n        animation: none;\n      }\n    }\n  </style>\n</head>\n<body>\n  <div class=\"dot\"></div>\n</body>\n</html>\n",
+      "why": "Условие no-preference срабатывает у тех, кто движения не ограничивал."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    @keyframes pulse {\n      from { transform: scale(1); }\n      to   { transform: scale(1.15); }\n    }\n    .dot {\n      width: 24px;\n      height: 24px;\n      border-radius: 50%;\n      background: tomato;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"dot\"></div>\n</body>\n</html>\n",
+      "why": "Анимация удалена совсем: у всех пользователей точка неподвижна."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    @keyframes pulse {\n      from { transform: scale(1); }\n      to   { transform: scale(1.15); }\n    }\n    .dot {\n      width: 24px;\n      height: 24px;\n      border-radius: 50%;\n      background: tomato;\n      animation: pulse 1s ease-in-out infinite alternate;\n    }\n    @media (prefers-reduced-motion: reduce) {\n      .dot {\n        transition: none;\n      }\n    }\n  </style>\n</head>\n<body>\n  <div class=\"dot\"></div>\n</body>\n</html>\n",
+      "why": "Отключён transition, а анимация осталась."
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "id": "a1-transition",
+  "type": "write",
+  "title": "Плавная кнопка",
+  "statement": "Кнопка при наведении меняет фон на `darkcyan` (правило `.btn:hover` уже есть), но делает это резко. Сделайте изменение **плавным**: за `0.3s`, для фона. Правило `:hover` не меняйте.",
+  "goal": "Добавить transition в нужное место.",
+  "input": "Страница с кнопкой.",
+  "expectedResult": "У кнопки в обычном состоянии задан переход фона на 0.3 секунды.",
+  "constraints": [
+    "Только CSS."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .btn {\n      background: teal;\n      color: white;\n      border: 0;\n      padding: 10px 16px;\n    }\n    .btn:hover {\n      background: darkcyan;\n    }\n  </style>\n</head>\n<body>\n  <button class=\"btn\">Сохранить</button>\n</body>\n</html>\n",
+  "hints": [
+    "Плавность задаёт свойство transition.",
+    "В нём указывают, что менять и сколько длится: свойство и время.",
+    "Для фона: background, для 0.3 секунды: 0.3s.",
+    "Писать его нужно в правило .btn, а не в .btn:hover.",
+    "transition: background 0.3s;"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "duration",
+        "expr": "getComputedStyle(document.querySelector('.btn')).transitionDuration",
+        "expected": "0.3s"
+      },
+      {
+        "id": "prop",
+        "expr": "/^(all|background(-color)?)$/.test(getComputedStyle(document.querySelector('.btn')).transitionProperty)",
+        "expected": true
+      },
+      {
+        "id": "hover",
+        "hidden": true,
+        "expr": "[...document.styleSheets].flatMap(s => [...s.cssRules]).some(r => r.selectorText === '.btn:hover' && r.style.backgroundColor !== '')",
+        "expected": true,
+        "hint": "Правило :hover трогать не нужно"
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .btn {\n      background: teal;\n      color: white;\n      border: 0;\n      padding: 10px 16px;\n      transition: background 0.3s;\n    }\n    .btn:hover {\n      background: darkcyan;\n    }\n  </style>\n</head>\n<body>\n  <button class=\"btn\">Сохранить</button>\n</body>\n</html>\n",
+  "explanation": "transition в обычном состоянии плавно меняет значение и при наведении, и при возврате; в :hover он работал бы только в одну сторону.",
+  "criteria": [
+    "Переход 0.3s задан в .btn."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .btn {\n      background: teal;\n      color: white;\n      border: 0;\n      padding: 10px 16px;\n    }\n    .btn:hover {\n      background: darkcyan;\n      transition: background 0.3s;\n    }\n  </style>\n</head>\n<body>\n  <button class=\"btn\">Сохранить</button>\n</body>\n</html>\n",
+      "why": "transition записан в :hover: у кнопки в обычном состоянии перехода нет."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .btn {\n      background: teal;\n      color: white;\n      border: 0;\n      padding: 10px 16px;\n      transition: background 3s;\n    }\n    .btn:hover {\n      background: darkcyan;\n    }\n  </style>\n</head>\n<body>\n  <button class=\"btn\">Сохранить</button>\n</body>\n</html>\n",
+      "why": "Длительность 3 секунды вместо 0.3."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    .btn {\n      background: teal;\n      color: white;\n      border: 0;\n      padding: 10px 16px;\n      transition: color 0.3s;\n    }\n    .btn:hover {\n      background: darkcyan;\n    }\n  </style>\n</head>\n<body>\n  <button class=\"btn\">Сохранить</button>\n</body>\n</html>\n",
+      "why": "Плавно меняется цвет текста, а не фон."
+    }
+  ]
+}

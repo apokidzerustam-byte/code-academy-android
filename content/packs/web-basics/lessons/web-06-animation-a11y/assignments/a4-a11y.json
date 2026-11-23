@@ -1,0 +1,78 @@
+{
+  "id": "a4-a11y",
+  "type": "fix",
+  "title": "Недоступная страница",
+  "statement": "На странице четыре проблемы доступности. Исправьте их, не удаляя элементов: у **картинки** нет описания (`alt`, не пустое); у **поля** `#q` нет подписи (добавьте `label` с `for` или `aria-label`); у **кнопки** `.icon` только значок, дайте ей `aria-label`; правило `button:focus { outline: none; }` **убирает контур фокуса** — уберите его или замените видимым контуром (например, `:focus-visible`).",
+  "goal": "Находить и исправлять проблемы доступности.",
+  "input": "Страница с картинкой, полем и кнопкой.",
+  "expectedResult": "Описание, подпись, название кнопки и видимый фокус.",
+  "constraints": [
+    "Элементы img, input и button должны остаться."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    button:focus {\n      outline: none;\n    }\n  </style>\n</head>\n<body>\n  <header><h1>Мой сайт</h1></header>\n  <main>\n    <img class=\"photo\" src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='40'%3E%3Crect width='80' height='40' fill='%2380cbc4'/%3E%3C/svg%3E\">\n    <input id=\"q\" type=\"text\" placeholder=\"Поиск\">\n    <button class=\"icon\">🔍</button>\n  </main>\n</body>\n</html>\n",
+  "hints": [
+    "Программа чтения нуждается в тексте там, где смысл передан картинкой или значком.",
+    "У содержательной картинки нужен непустой alt.",
+    "Подпись поля: label с for, равным id поля, либо aria-label.",
+    "Кнопке со значком — aria-label с названием действия.",
+    "outline: none убирает контур: замените правилом button:focus-visible { outline: 3px solid orange; }"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "alt",
+        "expr": "((document.querySelector('img.photo') || {}).alt || '').trim().length > 0",
+        "expected": true
+      },
+      {
+        "id": "label",
+        "expr": "(() => { const i = document.getElementById('q'); return (i.labels && i.labels.length > 0) || !!(i.getAttribute('aria-label') || '').trim(); })()",
+        "expected": true
+      },
+      {
+        "id": "btn",
+        "expr": "((document.querySelector('button.icon') || {}).getAttribute('aria-label') || '').trim().length > 0",
+        "expected": true
+      },
+      {
+        "id": "focus",
+        "expr": "![...document.styleSheets].flatMap(s => [...s.cssRules]).some(r => r.selectorText && /:focus/.test(r.selectorText) && r.style && r.style.outlineStyle === 'none')",
+        "expected": true,
+        "hint": "Контур фокуса нельзя просто убирать"
+      },
+      {
+        "id": "same",
+        "hidden": true,
+        "expr": "document.querySelectorAll('img, input, button').length",
+        "expected": 3,
+        "hint": "Элементы удалять не нужно"
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    button:focus-visible {\n      outline: 3px solid orange;\n    }\n  </style>\n</head>\n<body>\n  <header><h1>Мой сайт</h1></header>\n  <main>\n    <img class=\"photo\" src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='40'%3E%3Crect width='80' height='40' fill='%2380cbc4'/%3E%3C/svg%3E\" alt=\"Фото команды\">\n    <label for=\"q\">Поиск по сайту</label> <input id=\"q\" type=\"text\" placeholder=\"Поиск\">\n    <button class=\"icon\" aria-label=\"Поиск\">🔍</button>\n  </main>\n</body>\n</html>\n",
+  "explanation": "Тексты alt и aria-label озвучиваются программой чтения, label связывает подпись с полем, а видимый фокус нужен людям, которые работают с клавиатурой.",
+  "criteria": [
+    "Картинка, поле и кнопка получили названия.",
+    "Фокус виден."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    button:focus-visible {\n      outline: 3px solid orange;\n    }\n  </style>\n</head>\n<body>\n  <header><h1>Мой сайт</h1></header>\n  <main>\n    <img class=\"photo\" src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='40'%3E%3Crect width='80' height='40' fill='%2380cbc4'/%3E%3C/svg%3E\" alt=\"\">\n    <label for=\"q\">Поиск по сайту</label> <input id=\"q\" type=\"text\" placeholder=\"Поиск\">\n    <button class=\"icon\" aria-label=\"Поиск\">🔍</button>\n  </main>\n</body>\n</html>\n",
+      "why": "Пустой alt: картинка содержательная, а пустое описание — для декоративных."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    button:focus-visible {\n      outline: 3px solid orange;\n    }\n  </style>\n</head>\n<body>\n  <header><h1>Мой сайт</h1></header>\n  <main>\n    <img class=\"photo\" src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='40'%3E%3Crect width='80' height='40' fill='%2380cbc4'/%3E%3C/svg%3E\" alt=\"Фото команды\">\n    <input id=\"q\" type=\"text\" placeholder=\"Поиск\">\n    <button class=\"icon\" aria-label=\"Поиск\">🔍</button>\n  </main>\n</body>\n</html>\n",
+      "why": "У поля нет подписи: placeholder её не заменяет."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    button:focus-visible {\n      outline: 3px solid orange;\n    }\n  </style>\n</head>\n<body>\n  <header><h1>Мой сайт</h1></header>\n  <main>\n    <img class=\"photo\" src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='40'%3E%3Crect width='80' height='40' fill='%2380cbc4'/%3E%3C/svg%3E\" alt=\"Фото команды\">\n    <label for=\"q\">Поиск по сайту</label> <input id=\"q\" type=\"text\" placeholder=\"Поиск\">\n    <button class=\"icon\">🔍</button>\n  </main>\n</body>\n</html>\n",
+      "why": "У кнопки со значком нет названия."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    button:focus {\n      outline: none;\n    }\n  </style>\n</head>\n<body>\n  <header><h1>Мой сайт</h1></header>\n  <main>\n    <img class=\"photo\" src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='40'%3E%3Crect width='80' height='40' fill='%2380cbc4'/%3E%3C/svg%3E\" alt=\"Фото команды\">\n    <label for=\"q\">Поиск по сайту</label> <input id=\"q\" type=\"text\" placeholder=\"Поиск\">\n    <button class=\"icon\" aria-label=\"Поиск\">🔍</button>\n  </main>\n</body>\n</html>\n",
+      "why": "Контур фокуса по-прежнему убран."
+    }
+  ]
+}

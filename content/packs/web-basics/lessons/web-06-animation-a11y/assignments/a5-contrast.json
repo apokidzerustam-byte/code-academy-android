@@ -1,0 +1,89 @@
+{
+  "id": "a5-contrast",
+  "type": "write",
+  "title": "Расчёт контрастности",
+  "statement": "Реализуйте `contrastRatio(fg, bg)`: цвета заданы строками `#rrggbb`. Формулы:\n\n- каналу `c` (0–255) сопоставьте `v = c / 255`, затем `v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4`;\n- относительная яркость `L = 0.2126·R + 0.7152·G + 0.0722·B` (по преобразованным каналам);\n- отношение `(L светлого + 0.05) / (L тёмного + 0.05)`.\n\nВерните число, округлённое до **двух знаков** (тип number). Порядок аргументов не важен.",
+  "goal": "Посчитать отношение контраста по формуле.",
+  "input": "Два цвета.",
+  "expectedResult": "Число — отношение контраста.",
+  "constraints": [
+    "Без библиотек."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <script>\n    function contrastRatio(fg, bg) {\n      // ваш код\n    }\n  </script>\n</body>\n</html>\n",
+  "hints": [
+    "Сначала нужна яркость каждого цвета, потом отношение.",
+    "Цвет #rrggbb разберите на три канала: parseInt(hex.slice(1), 16) и сдвиги битов (>> 16, >> 8, & 255).",
+    "Канал: v = c / 255; v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4).",
+    "Яркость: 0.2126 * R + 0.7152 * G + 0.0722 * B.",
+    "(max + 0.05) / (min + 0.05) и Number(x.toFixed(2))."
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "bw",
+        "expr": "contrastRatio('#000000', '#ffffff')",
+        "expected": 21
+      },
+      {
+        "id": "gray",
+        "expr": "contrastRatio('#777777', '#ffffff')",
+        "expected": 4.48
+      },
+      {
+        "id": "swap",
+        "expr": "contrastRatio('#ffffff', '#767676')",
+        "expected": 4.54,
+        "hint": "Порядок аргументов не важен: делится светлый на тёмный"
+      },
+      {
+        "id": "same",
+        "hidden": true,
+        "expr": "contrastRatio('#ffffff', '#ffffff')",
+        "expected": 1
+      },
+      {
+        "id": "red",
+        "hidden": true,
+        "expr": "contrastRatio('#ff0000', '#ffffff')",
+        "expected": 4
+      },
+      {
+        "id": "teal",
+        "hidden": true,
+        "expr": "contrastRatio('#008080', '#000000')",
+        "expected": 4.4
+      },
+      {
+        "id": "blue",
+        "hidden": true,
+        "expr": "contrastRatio('#0000ff', '#ffffff')",
+        "expected": 8.59
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <script>\n    function channel(c) {\n      c = c / 255;\n      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);\n    }\n    function luminance(hex) {\n      const n = parseInt(hex.slice(1), 16);\n      return 0.2126 * channel(n >> 16) + 0.7152 * channel((n >> 8) & 255) + 0.0722 * channel(n & 255);\n    }\n    function contrastRatio(fg, bg) {\n      const a = luminance(fg), b = luminance(bg);\n      const ratio = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);\n      return Number(ratio.toFixed(2));\n    }\n  </script>\n</body>\n</html>\n",
+  "explanation": "Яркость считается по линейным каналам с коэффициентами для красного, зелёного и синего; отношение берут от более светлого к более тёмному, поэтому порядок аргументов не важен.",
+  "criteria": [
+    "Верные значения на всех наборах."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <script>\n    function channel(c) {\n      c = c / 255;\n      return c;\n    }\n    function luminance(hex) {\n      const n = parseInt(hex.slice(1), 16);\n      return 0.2126 * channel(n >> 16) + 0.7152 * channel((n >> 8) & 255) + 0.0722 * channel(n & 255);\n    }\n    function contrastRatio(fg, bg) {\n      const a = luminance(fg), b = luminance(bg);\n      const ratio = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);\n      return Number(ratio.toFixed(2));\n    }\n  </script>\n</body>\n</html>\n",
+      "why": "Не учтена гамма: канал берётся линейно."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <script>\n    function channel(c) {\n      c = c / 255;\n      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);\n    }\n    function luminance(hex) {\n      const n = parseInt(hex.slice(1), 16);\n      return 0.2126 * channel(n >> 16) + 0.7152 * channel((n >> 8) & 255) + 0.0722 * channel(n & 255);\n    }\n    function contrastRatio(fg, bg) {\n      const a = luminance(fg), b = luminance(bg);\n      const ratio = (a + 0.05) / (b + 0.05);\n      return Number(ratio.toFixed(2));\n    }\n  </script>\n</body>\n</html>\n",
+      "why": "Нет упорядочивания: при светлом втором цвете получается меньше единицы."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <script>\n    function channel(c) {\n      c = c / 255;\n      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);\n    }\n    function luminance(hex) {\n      const n = parseInt(hex.slice(1), 16);\n      return 0.2126 * channel(n >> 16) + 0.7152 * channel((n >> 8) & 255) + 0.0722 * channel(n & 255);\n    }\n    function contrastRatio(fg, bg) {\n      const a = luminance(fg), b = luminance(bg);\n      const ratio = (Math.max(a, b)) / (Math.min(a, b));\n      return Number(ratio.toFixed(2));\n    }\n  </script>\n</body>\n</html>\n",
+      "why": "Забыта добавка 0.05: для чёрного получается деление на ноль."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <script>\n    function channel(c) {\n      c = c / 255;\n      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);\n    }\n    function luminance(hex) {\n      const n = parseInt(hex.slice(1), 16);\n      return 0.7152 * channel(n >> 16) + 0.2126 * channel((n >> 8) & 255) + 0.0722 * channel(n & 255);\n    }\n    function contrastRatio(fg, bg) {\n      const a = luminance(fg), b = luminance(bg);\n      const ratio = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);\n      return Number(ratio.toFixed(2));\n    }\n  </script>\n</body>\n</html>\n",
+      "why": "Коэффициенты красного и зелёного перепутаны."
+    }
+  ]
+}

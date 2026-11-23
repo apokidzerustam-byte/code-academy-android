@@ -1,0 +1,45 @@
+{
+  "id": "web-06-animation-a11y",
+  "title": "Анимации и доступность",
+  "goal": "Делать плавные анимации с учётом настроек пользователя и делать страницу доступной для всех.",
+  "skills": [
+    "web.animation",
+    "web.a11y",
+    "web.contrast"
+  ],
+  "prerequisites": [
+    "web-05-grid-responsive"
+  ],
+  "runner": "html",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-transition.json",
+    "assignments/a2-spin.json",
+    "assignments/a3-reduced.json",
+    "assignments/a4-a11y.json",
+    "assignments/a5-contrast.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "transition записан в :hover",
+      "fix": "Пишите transition в обычное состояние, тогда плавны оба направления."
+    },
+    {
+      "mistake": "Картинка без alt и поле без подписи",
+      "fix": "Описывайте содержательные картинки и подписывайте поля через label."
+    },
+    {
+      "mistake": "outline: none без замены",
+      "fix": "Замените контур своим через :focus-visible."
+    },
+    {
+      "mistake": "Анимация игнорирует prefers-reduced-motion",
+      "fix": "Отключайте её в медиазапросе для уменьшенного движения."
+    }
+  ]
+}
