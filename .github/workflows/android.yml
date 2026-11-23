@@ -191,18 +191,43 @@ jobs:
         with:
           name: code-academy-apk
           path: app/build/outputs/apk/**/*.apk
-      - name: Опубликовать APK в ветку apk (для установки на телефон)
+      - name: Опубликовать APK для установки на телефон
         if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_run')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p /tmp/apk && cp app/build/outputs/apk/release/app-release.apk /tmp/apk/code-academy-proto.apk
           cd /tmp/apk
           sha256sum code-academy-proto.apk > SHA256SUMS.txt
           echo "commit ${GITHUB_SHA}" >> SHA256SUMS.txt
-          git init -q -b apk
-          git config user.name "github-actions"
-          git config user.email "github-actions@users.noreply.github.com"
-          git add -A && git commit -q -m "APK ${GITHUB_SHA::7}"
-          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" apk
+          SIZE=$(stat -c %s code-academy-proto.apk)
+          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}"
+          if [ "$SIZE" -lt 95000000 ]; then
+            # Помещается в git (лимит GitHub — 100 МБ на файл): ветка apk, прямая ссылка из руководства.
+            git init -q -b apk
+            git config user.name "github-actions"
+            git config user.email "github-actions@users.noreply.github.com"
+            git add -A && git commit -q -m "APK ${GITHUB_SHA::7}"
+            git push -f "$REMOTE" apk
+          else
+            # Озвучка курса сделала APK больше лимита git: файл уходит в ЧЕРНОВИК релиза «Прототип (последняя сборка)»
+            # (видим только владельцу репозитория; публикует его владелец), а в ветке apk остаётся записка вместо устаревшего APK.
+            echo "APK $((SIZE / 1048576)) МБ не помещается в git (лимит 100 МБ): публикую в черновик релиза."
+            TITLE="Прототип (последняя сборка)"
+            for id in $(gh api "repos/${GITHUB_REPOSITORY}/releases?per_page=100" --jq ".[] | select(.draft and .name==\"${TITLE}\") | .id"); do
+              gh api -X DELETE "repos/${GITHUB_REPOSITORY}/releases/${id}"
+            done
+            gh release create "proto-${GITHUB_SHA::7}" --draft --target "${GITHUB_SHA}" --title "${TITLE}" \
+              --notes "Сборка коммита ${GITHUB_SHA::7}. Установка: скачайте code-academy-proto.apk на телефон и откройте; подробности — docs/USER_GUIDE.md. Контрольная сумма — в SHA256SUMS.txt." \
+              code-academy-proto.apk SHA256SUMS.txt
+            NOTE_DIR=$(mktemp -d) && cd "$NOTE_DIR"
+            printf 'APK (%s МБ) больше лимита git 100 МБ и лежит в черновике релиза «Прототип (последняя сборка)»:\nhttps://github.com/%s/releases\nКоммит сборки: %s\n' "$((SIZE / 1048576))" "${GITHUB_REPOSITORY}" "${GITHUB_SHA}" > README.txt
+            git init -q -b apk
+            git config user.name "github-actions"
+            git config user.email "github-actions@users.noreply.github.com"
+            git add -A && git commit -q -m "APK перенесён в черновик релиза (${GITHUB_SHA::7})"
+            git push -f "$REMOTE" apk
+          fi
 
   mentor-model:
     name: Наставник с моделью (${{ matrix.title }}, 20 провокаций)

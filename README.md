@@ -9,9 +9,11 @@
 подробная честная картина — в [docs/ACCEPTANCE.md](docs/ACCEPTANCE.md) и [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md).
 
 ## Установка на телефон
-Инструкция по шагам — [docs/USER_GUIDE.md](docs/USER_GUIDE.md). Коротко: скачать
-[code-academy-proto.apk](https://github.com/apokidzerustam-byte/code-academy-android/raw/apk/code-academy-proto.apk) (ветка `apk`,
-обновляется после каждой успешной сборки), открыть, разрешить установку из этого источника. Новая версия ставится поверх старой.
+Инструкция по шагам — [docs/USER_GUIDE.md](docs/USER_GUIDE.md). Коротко: APK с озвучкой курса весит около 180 МБ и не
+помещается в git (лимит 100 МБ на файл), поэтому каждая успешная сборка `main` кладёт его в
+[черновик релиза «Прототип (последняя сборка)»](https://github.com/apokidzerustam-byte/code-academy-android/releases) —
+он виден владельцу репозитория после входа в GitHub. Скачать `code-academy-proto.apk`, открыть, разрешить установку из этого
+источника. Новая версия ставится поверх старой.
 
 ## Что внутри
 | Папка | Назначение |
