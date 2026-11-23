@@ -1,0 +1,44 @@
+{
+  "id": "a1-module",
+  "type": "predict",
+  "title": "Что покажет модуль",
+  "statement": "Что выведет программа? Каждая строка вывода — с новой строки.",
+  "goal": "Что покажет модуль",
+  "input": "—",
+  "expectedResult": "Строки вывода.",
+  "constraints": [],
+  "code": "const bank = (function () {\n  let balance = 100;\n  return {\n    deposit(n) {\n      balance += n;\n    },\n    get() {\n      return balance;\n    },\n  };\n})();\n\nbank.deposit(50);\nbank.balance = 1;\nbank.deposit(25);\nconsole.log(bank.get());\nconsole.log(bank.balance);\nconsole.log(typeof balance);\n",
+  "hints": [
+    "Внутри функции balance — закрытая переменная, у неё 100.",
+    "deposit(50) и deposit(25) меняют именно её: 100 + 50 + 25.",
+    "Запись bank.balance = 1 создаёт новое свойство у возвращённого объекта, оно не связано с balance.",
+    "Поэтому bank.balance равно 1, а get() возвращает 175.",
+    "Имя balance снаружи не объявлено: typeof даёт undefined."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "175\n1\nundefined"
+  },
+  "solution": "175\n1\nundefined",
+  "explanation": "Закрытая переменная меняется только методами модуля. Свойство с таким же именем, добавленное снаружи, к ней не относится, а сама переменная снаружи не видна.",
+  "criteria": [
+    "Все строки верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "175\n1\nnumber",
+      "answer": "175\n1\nnumber",
+      "why": "Поле bank.balance — новое свойство объекта, а внутренняя переменная balance снаружи не видна."
+    },
+    {
+      "code": "1\n1\nundefined",
+      "answer": "1\n1\nundefined",
+      "why": "Запись bank.balance = 1 создаёт отдельное свойство и не меняет закрытую переменную."
+    },
+    {
+      "code": "175\nundefined\nundefined",
+      "answer": "175\nundefined\nundefined",
+      "why": "Свойство bank.balance присвоено, поэтому оно есть и равно 1."
+    }
+  ]
+}

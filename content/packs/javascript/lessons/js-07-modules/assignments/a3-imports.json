@@ -1,0 +1,96 @@
+{
+  "id": "a3-imports",
+  "type": "write",
+  "title": "Зависимости из текста файла",
+  "statement": "Напишите `importedModules(source)`: `source` — текст JavaScript-файла. Найдите строки вида `import ... from \"путь\"` (кавычки двойные или одинарные, перед `import` могут быть пробелы) и верните **отсортированный по алфавиту** массив путей **без повторов**. Строки, которые только упоминают слово import (например, в комментарии `// import x from \"a\"` или в строке), не считаются.",
+  "goal": "Читать зависимости модуля из его текста.",
+  "input": "Текст файла.",
+  "expectedResult": "Возвращаемое значение.",
+  "constraints": [],
+  "starterCode": "function importedModules(source) {\n  // ваш код\n}\n",
+  "hints": [
+    "Обработайте текст построчно: source.split(\"\\n\").",
+    "Нужные строки начинаются с import (перед ним допустимы пробелы): шаблон ^\\s*import.",
+    "Путь стоит после слова from в кавычках: from\\s+[\"']([^\"']+)[\"'].",
+    "Повторы уберёт Set, а отсортировать массив нужно в конце.",
+    "Строки, где import в комментарии, не начинаются с import: якорь ^ их отсекает."
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "importedModules",
+        "args": [
+          "import a from \"./a.js\";\nimport { b, c } from './b.js';\nconsole.log(a);"
+        ],
+        "expected": [
+          "./a.js",
+          "./b.js"
+        ]
+      },
+      {
+        "id": "v2",
+        "function": "importedModules",
+        "args": [
+          "const x = 1;"
+        ],
+        "expected": []
+      },
+      {
+        "id": "h3",
+        "function": "importedModules",
+        "args": [
+          "import * as m from \"./m.js\";\nimport m2 from \"./m.js\";"
+        ],
+        "expected": [
+          "./m.js"
+        ],
+        "hidden": true,
+        "hint": "Повторы убираем"
+      },
+      {
+        "id": "h4",
+        "function": "importedModules",
+        "args": [
+          "  import z from \"./z.js\";\n// import hidden from \"./hidden.js\";\nimport a from \"./a.js\""
+        ],
+        "expected": [
+          "./a.js",
+          "./z.js"
+        ],
+        "hidden": true,
+        "hint": "Комментарий не считается"
+      },
+      {
+        "id": "h5",
+        "function": "importedModules",
+        "args": [
+          ""
+        ],
+        "expected": [],
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "function importedModules(source) {\n  const found = new Set();\n  for (const line of source.split(\"\\n\")) {\n    const m = /^\\s*import\\b[^\\n]*?\\bfrom\\s+[\"']([^\"']+)[\"']/.exec(line);\n    if (m) found.add(m[1]);\n  }\n  return [...found].sort();\n}\n",
+  "explanation": "Якорь начала строки отсекает комментарии, а Set и sort дают список без повторов в стабильном порядке. Так инструменты сборки находят зависимости модулей.",
+  "criteria": [
+    "Результат верен на всех наборах, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "function importedModules(source) {\n  const found = [];\n  for (const line of source.split(\"\\n\")) {\n    const m = /import\\b[^\\n]*?\\bfrom\\s+[\"']([^\"']+)[\"']/.exec(line);\n    if (m) found.push(m[1]);\n  }\n  return found;\n}\n",
+      "why": "Нет сортировки и удаления повторов, а закомментированный import засчитывается."
+    },
+    {
+      "code": "function importedModules(source) {\n  const found = new Set();\n  for (const line of source.split(\"\\n\")) {\n    const m = /import\\b[^\\n]*?\\bfrom\\s+[\"']([^\"']+)[\"']/.exec(line);\n    if (m) found.add(m[1]);\n  }\n  return [...found].sort();\n}\n",
+      "why": "Закомментированная строка // import … тоже засчитывается: нужен якорь начала строки."
+    },
+    {
+      "code": "function importedModules(source) {\n  const found = new Set();\n  for (const line of source.split(\"\\n\")) {\n    const m = /^\\s*import\\b[^\\n]*?\\bfrom\\s+\"([^\"]+)\"/.exec(line);\n    if (m) found.add(m[1]);\n  }\n  return [...found].sort();\n}\n",
+      "why": "Одинарные кавычки не распознаются."
+    }
+  ]
+}

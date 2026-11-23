@@ -1,0 +1,45 @@
+{
+  "id": "js-07-modules",
+  "title": "JavaScript: модули и инкапсуляция",
+  "goal": "Прятать состояние в модуле, делать фабрики и понимать зависимости между файлами.",
+  "skills": [
+    "js.module",
+    "js.closure",
+    "js.import"
+  ],
+  "prerequisites": [
+    "js-06-json-fetch"
+  ],
+  "runner": "js",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-module.json",
+    "assignments/a2-counter.json",
+    "assignments/a3-imports.json",
+    "assignments/a4-hide.json",
+    "assignments/a5-load-order.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Всё лежит в общем пространстве имён",
+      "fix": "Прячьте переменные внутри функций и модулей, наружу отдавайте только нужное."
+    },
+    {
+      "mistake": "Внутреннее состояние доступно снаружи",
+      "fix": "Держите его в замыкании, а не в свойстве объекта."
+    },
+    {
+      "mistake": "Круговые зависимости между модулями",
+      "fix": "Пересмотрите границы: общая часть выносится в третий модуль."
+    },
+    {
+      "mistake": "Присваивание подключённому имени",
+      "fix": "Подключённые имена менять нельзя: вызывайте функции модуля."
+    }
+  ]
+}

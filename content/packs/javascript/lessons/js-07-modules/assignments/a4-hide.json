@@ -1,0 +1,47 @@
+{
+  "id": "a4-hide",
+  "type": "fix",
+  "title": "Спрятать внутренний массив",
+  "statement": "Стек хранит элементы в публичном массиве `items`: внешний код может испортить его, например дописать лишний элемент командой `s.items.push(99)`, и тогда `size()` покажет неверное число. Исправьте фабрику `createStack` так, чтобы массив стал **закрытым** и свойства `items` у объекта не было. Код под функцией (пользователь модуля) менять не нужно: он пробует испортить массив через `s.items?.push(99)`, но у правильного модуля такого свойства нет. Ожидаемый вывод: `2 undefined`.",
+  "goal": "Скрыть внутреннее состояние модуля.",
+  "input": "—",
+  "expectedResult": "Вывод в консоль.",
+  "constraints": [],
+  "starterCode": "function createStack() {\n  const stack = { items: [] };\n  stack.push = (x) => stack.items.push(x);\n  stack.size = () => stack.items.length;\n  return stack;\n}\n\nconst s = createStack();\ns.push(1);\ns.push(2);\ns.items?.push(99);\nconsole.log(s.size(), s.items);\n",
+  "hints": [
+    "Сейчас массив лежит в свойстве объекта: любой код снаружи может до него добраться.",
+    "Сделайте массив обычной переменной внутри функции: const items = [];",
+    "Методы push и size обращаются к ней напрямую: через замыкание.",
+    "В возвращаемый объект массив не включайте.",
+    "Тогда s.items равно undefined, а size() считает только то, что добавили методом push."
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "expected_stdout": "2 undefined"
+      }
+    ]
+  },
+  "solution": "function createStack() {\n  const items = [];\n  return {\n    push: (x) => items.push(x),\n    size: () => items.length,\n  };\n}\n\nconst s = createStack();\ns.push(1);\ns.push(2);\ns.items?.push(99);\nconsole.log(s.size(), s.items);\n",
+  "explanation": "Закрытое состояние защищает инварианты: список можно менять только через методы модуля. Снаружи такого свойства нет, поэтому испортить массив нельзя.",
+  "criteria": [
+    "Вывод совпадает."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "function createStack() {\n  const stack = { items: [] };\n  stack.push = (x) => stack.items.push(x);\n  stack.size = () => stack.items.length;\n  return stack;\n}\n\nconst s = createStack();\ns.push(1);\ns.push(2);\ns.items?.push(99);\nconsole.log(s.size(), s.items);\n",
+      "why": "Исходная версия: массив публичный, size() возвращает 3."
+    },
+    {
+      "code": "function createStack() {\n  const items = [];\n  return {\n    push: (x) => items.push(x),\n    size: () => items.length + 1,\n  };\n}\n\nconst s = createStack();\ns.push(1);\ns.push(2);\ns.items?.push(99);\nconsole.log(s.size(), s.items);\n",
+      "why": "Метод size считает неверно."
+    },
+    {
+      "code": "function createStack() {\n  const items = [];\n  return {\n    push: (x) => items.push(x),\n    items,\n    size: () => items.length,\n  };\n}\n\nconst s = createStack();\ns.push(1);\ns.push(2);\ns.items?.push(99);\nconsole.log(s.size(), s.items);\n",
+      "why": "Массив снова выставлен наружу через свойство items."
+    }
+  ]
+}

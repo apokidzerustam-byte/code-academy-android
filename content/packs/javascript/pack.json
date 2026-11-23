@@ -12,7 +12,8 @@
     "js-03-objects",
     "js-04-async",
     "js-05-dom",
-    "js-06-json-fetch"
+    "js-06-json-fetch",
+    "js-07-modules"
   ],
   "skills": {
     "js.strings": "Строки и их методы",
@@ -31,6 +32,9 @@
     "js.events2": "События и делегирование",
     "js.safe-html": "textContent и безопасность (XSS)",
     "js.fetch": "Ответ сервера: Response, ok, json",
-    "js.errors": "Сбои запросов, таймаут, Promise.all"
+    "js.errors": "Сбои запросов, таймаут, Promise.all",
+    "js.module": "Модуль: область видимости и открытый интерфейс",
+    "js.closure": "Замыкания и фабрики",
+    "js.import": "Зависимости модулей и порядок загрузки"
   }
 }

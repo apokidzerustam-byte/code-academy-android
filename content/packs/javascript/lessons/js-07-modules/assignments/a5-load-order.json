@@ -1,0 +1,144 @@
+{
+  "id": "a5-load-order",
+  "type": "write",
+  "title": "Порядок загрузки модулей",
+  "statement": "`deps` — объект «модуль → массив модулей, от которых он зависит». Верните массив модулей в порядке загрузки: **сначала зависимости, потом сам модуль**, каждый модуль один раз. Обходите модули по алфавиту, а зависимости каждого модуля — тоже по алфавиту: перед добавлением модуля в результат (рекурсивно) добавьте его зависимости. Модули, которые встречаются только в списках зависимостей, тоже попадают в результат. Если зависимости образуют **цикл**, верните `null`.",
+  "goal": "Определить порядок загрузки и найти циклы.",
+  "input": "Объект зависимостей.",
+  "expectedResult": "Возвращаемое значение.",
+  "constraints": [],
+  "starterCode": "function loadOrder(deps) {\n  // ваш код\n}\n",
+  "hints": [
+    "Это обход графа в глубину: сначала дойти до зависимостей, потом добавить модуль.",
+    "Для каждого модуля заведите состояние: не посещён, в процессе, готов.",
+    "Если встретили модуль «в процессе» — это цикл.",
+    "Сначала посетите зависимости (по алфавиту), затем пометьте модуль готовым и добавьте в результат.",
+    "Если цикл найден, верните null; иначе массив order."
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "loadOrder",
+        "args": [
+          {
+            "app": [
+              "ui",
+              "data"
+            ],
+            "ui": [
+              "utils"
+            ],
+            "data": [
+              "utils"
+            ],
+            "utils": []
+          }
+        ],
+        "expected": [
+          "utils",
+          "data",
+          "ui",
+          "app"
+        ]
+      },
+      {
+        "id": "v2",
+        "function": "loadOrder",
+        "args": [
+          {
+            "a": [
+              "b"
+            ],
+            "b": [
+              "a"
+            ]
+          }
+        ],
+        "expected": null
+      },
+      {
+        "id": "h3",
+        "function": "loadOrder",
+        "args": [
+          {}
+        ],
+        "expected": [],
+        "hidden": true,
+        "hint": "Пустой проект"
+      },
+      {
+        "id": "h4",
+        "function": "loadOrder",
+        "args": [
+          {
+            "main": [
+              "lib"
+            ]
+          }
+        ],
+        "expected": [
+          "lib",
+          "main"
+        ],
+        "hidden": true,
+        "hint": "lib не описан отдельно, но загружается"
+      },
+      {
+        "id": "h5",
+        "function": "loadOrder",
+        "args": [
+          {
+            "b": [],
+            "a": []
+          }
+        ],
+        "expected": [
+          "a",
+          "b"
+        ],
+        "hidden": true,
+        "hint": "Без зависимостей — по алфавиту"
+      },
+      {
+        "id": "h6",
+        "function": "loadOrder",
+        "args": [
+          {
+            "a": [
+              "a"
+            ]
+          }
+        ],
+        "expected": null,
+        "hidden": true,
+        "hint": "Модуль зависит сам от себя"
+      }
+    ]
+  },
+  "solution": "function loadOrder(deps) {\n  const order = [];\n  const state = {};\n  let cyclic = false;\n\n  function visit(name) {\n    if (state[name] === 2) return;\n    if (state[name] === 1) {\n      cyclic = true;\n      return;\n    }\n    state[name] = 1;\n    for (const d of [...(deps[name] || [])].sort()) visit(d);\n    state[name] = 2;\n    order.push(name);\n  }\n\n  for (const name of Object.keys(deps).sort()) visit(name);\n  return cyclic ? null : order;\n}\n",
+  "explanation": "Порядок загрузки — обход зависимостей в глубину: модуль добавляется после всех своих зависимостей. Состояние «в процессе» выдаёт цикл, который сделал бы загрузку невозможной.",
+  "criteria": [
+    "Результат верен на всех наборах, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "function loadOrder(deps) {\n  const order = [];\n  const state = {};\n  let cyclic = false;\n\n  function visit(name) {\n    if (state[name] === 2) return;\n    if (state[name] === 1) {\n      cyclic = true;\n      return;\n    }\n    state[name] = 1;\n    for (const d of [...(deps[name] || [])].sort()) visit(d);\n    state[name] = 2;\n  }\n\n  for (const name of Object.keys(deps).sort()) visit(name);\n  return cyclic ? null : order;\n}\n",
+      "why": "Модули не попадают в результат: нет order.push."
+    },
+    {
+      "code": "function loadOrder(deps) {\n  const order = [];\n  const state = {};\n  let cyclic = false;\n\n  function visit(name) {\n    if (state[name] === 2) return;\n    if (state[name] === 1) {\n      cyclic = true;\n      return;\n    }\n    state[name] = 1;\n    order.push(name);\n    for (const d of [...(deps[name] || [])].sort()) visit(d);\n    state[name] = 2;\n  }\n\n  for (const name of Object.keys(deps).sort()) visit(name);\n  return cyclic ? null : order;\n}\n",
+      "why": "Модуль добавляется раньше своих зависимостей."
+    },
+    {
+      "code": "function loadOrder(deps) {\n  const order = [];\n  const state = {};\n  let cyclic = false;\n\n  function visit(name) {\n    if (state[name] === 2) return;\n    state[name] = 1;\n    for (const d of [...(deps[name] || [])].sort()) visit(d);\n    state[name] = 2;\n    order.push(name);\n  }\n\n  for (const name of Object.keys(deps).sort()) visit(name);\n  return cyclic ? null : order;\n}\n",
+      "why": "Цикл не обнаруживается: рекурсия не заканчивается."
+    },
+    {
+      "code": "function loadOrder(deps) {\n  const order = [];\n  const state = {};\n  let cyclic = false;\n\n  function visit(name) {\n    if (state[name] === 2) return;\n    if (state[name] === 1) {\n      cyclic = true;\n      return;\n    }\n    state[name] = 1;\n    for (const d of (deps[name] || [])) visit(d);\n    state[name] = 2;\n    order.push(name);\n  }\n\n  for (const name of Object.keys(deps)) visit(name);\n  return cyclic ? null : order;\n}\n",
+      "why": "Порядок обхода зависит от порядка записи, а не от алфавита."
+    }
+  ]
+}

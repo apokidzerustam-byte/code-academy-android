@@ -1,0 +1,47 @@
+{
+  "id": "a2-counter",
+  "type": "complete",
+  "title": "Фабрика счётчиков",
+  "statement": "Допишите фабрику `createCounter(start)`: она возвращает объект с методами `inc()` (увеличить на 1), `dec()` (уменьшить на 1) и `value()` (текущее значение). Само значение должно быть **закрытым**: свойства `count` у объекта быть не должно. Код ниже функции (создание двух счётчиков и вывод) менять не нужно.",
+  "goal": "Создать независимые экземпляры с закрытым состоянием.",
+  "input": "—",
+  "expectedResult": "Вывод в консоль.",
+  "constraints": [],
+  "starterCode": "function createCounter(start) {\n  // ваш код: закрытое состояние и методы inc, dec, value\n}\n\nconst a = createCounter(10);\nconst b = createCounter(0);\na.inc();\na.inc();\nb.inc();\na.dec();\nconsole.log(a.value(), b.value(), a.count);\n",
+  "hints": [
+    "Состояние должно быть переменной внутри функции, а не свойством объекта.",
+    "Объявите внутри createCounter переменную count = start.",
+    "Верните объект с методами: inc, dec и value.",
+    "Методы запоминают переменную count (замыкание), поэтому изменяют её напрямую.",
+    "value() возвращает count; у объекта не должно быть свойства count."
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "expected_stdout": "11 1 undefined"
+      }
+    ]
+  },
+  "solution": "function createCounter(start) {\n  let count = start;\n  return {\n    inc() {\n      count += 1;\n    },\n    dec() {\n      count -= 1;\n    },\n    value() {\n      return count;\n    },\n  };\n}\n\nconst a = createCounter(10);\nconst b = createCounter(0);\na.inc();\na.inc();\nb.inc();\na.dec();\nconsole.log(a.value(), b.value(), a.count);\n",
+  "explanation": "Переменная внутри фабрики видна только её методам, а каждый вызов фабрики создаёт отдельную копию. Поэтому счётчики независимы, а свойства count снаружи нет.",
+  "criteria": [
+    "Вывод совпадает."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "function createCounter(start) {\n  return {\n    count: start,\n    inc() {\n      this.count += 1;\n    },\n    dec() {\n      this.count -= 1;\n    },\n    value() {\n      return this.count;\n    },\n  };\n}\n\nconst a = createCounter(10);\nconst b = createCounter(0);\na.inc();\na.inc();\nb.inc();\na.dec();\nconsole.log(a.value(), b.value(), a.count);\n",
+      "why": "Значение хранится в публичном свойстве count: снаружи его видно (a.count не undefined)."
+    },
+    {
+      "code": "let total;\nvar count;\nfunction createCounter(start) {\n  count = start;\n  return {\n    inc() {\n      count += 1;\n    },\n    dec() {\n      count -= 1;\n    },\n    value() {\n      return count;\n    },\n  };\n}\n\nconst a = createCounter(10);\nconst b = createCounter(0);\na.inc();\na.inc();\nb.inc();\na.dec();\nconsole.log(a.value(), b.value(), a.count);\n",
+      "why": "Одна общая переменная на все счётчики: они мешают друг другу."
+    },
+    {
+      "code": "function createCounter(start) {\n  let count = start;\n  return {\n    inc() {\n      count += 1;\n    },\n    dec() {\n      count += 1;\n    },\n    value() {\n      return count;\n    },\n  };\n}\n\nconst a = createCounter(10);\nconst b = createCounter(0);\na.inc();\na.inc();\nb.inc();\na.dec();\nconsole.log(a.value(), b.value(), a.count);\n",
+      "why": "Метод dec увеличивает значение вместо уменьшения."
+    }
+  ]
+}
