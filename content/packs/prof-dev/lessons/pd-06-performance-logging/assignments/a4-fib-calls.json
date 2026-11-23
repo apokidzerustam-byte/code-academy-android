@@ -1,0 +1,109 @@
+{
+  "id": "a4-fib-calls",
+  "type": "write",
+  "title": "Кэш и число вызовов",
+  "statement": "Напишите `fib_calls(n)`: вычислите число Фибоначчи (`fib(0) = 0`, `fib(1) = 1`, `fib(k) = fib(k - 1) + fib(k - 2)`) рекурсивной функцией `fib` **с кэшем** (словарём) и верните список `[fib(n), calls]`, где `calls` — сколько раз была вызвана `fib` (каждый вход в функцию считается, в том числе ответ из кэша). Результат должен совпадать с версией без кэша, но вызовов должно быть намного меньше.",
+  "goal": "Построить кэш и проверить его счётчиком вызовов.",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def fib_calls(n):\n    # Вернуть [fib(n), число вызовов fib] для версии с кэшем\n    pass\n",
+  "hints": [
+    "Заведите словарь memo и счётчик calls (nonlocal во вложенной функции).",
+    "В самом начале fib увеличивайте calls на 1.",
+    "Если k уже есть в memo, сразу верните сохранённое значение.",
+    "Иначе вычислите значение (для k < 2 это k, иначе сумма двух предыдущих) и сохраните в memo.",
+    "Верните список из значения fib(n) и счётчика вызовов."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "fib_calls",
+    "cases": [
+      {
+        "args": [
+          10
+        ],
+        "id": "v1",
+        "expected": [
+          55,
+          19
+        ]
+      },
+      {
+        "args": [
+          1
+        ],
+        "id": "v2",
+        "expected": [
+          1,
+          1
+        ]
+      },
+      {
+        "args": [
+          0
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          0,
+          1
+        ]
+      },
+      {
+        "args": [
+          2
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          1,
+          3
+        ]
+      },
+      {
+        "args": [
+          30
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          832040,
+          59
+        ]
+      },
+      {
+        "args": [
+          25
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": [
+          75025,
+          49
+        ]
+      }
+    ]
+  },
+  "solution": "def fib_calls(n):\n    memo = {}\n    calls = 0\n\n    def fib(k):\n        nonlocal calls\n        calls += 1\n        if k in memo:\n            return memo[k]\n        value = k if k < 2 else fib(k - 1) + fib(k - 2)\n        memo[k] = value\n        return value\n\n    return [fib(n), calls]\n",
+  "explanation": "Кэш превращает лавину вызовов в линейное число: для n = 30 это 59 вызовов вместо почти трёх миллионов. Счётчик вызовов помогает убедиться, что кэш действительно работает.",
+  "criteria": [
+    "Результат верный.",
+    "Повторные значения берутся из кэша.",
+    "Вызовы подсчитаны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def fib_calls(n):\n    memo = {}\n    calls = 0\n\n    def fib(k):\n        nonlocal calls\n        calls += 1\n        value = k if k < 2 else fib(k - 1) + fib(k - 2)\n        memo[k] = value\n        return value\n\n    return [fib(n), calls]\n",
+      "why": "Без проверки кэша число вызовов растёт лавиной."
+    },
+    {
+      "code": "def fib_calls(n):\n    memo = {}\n    calls = 0\n\n    def fib(k):\n        nonlocal calls\n        calls += 1\n        if k in memo:\n            return memo[k]\n        value = k if k < 2 else fib(k - 1) + fib(k - 2)\n        return value\n\n    return [fib(n), calls]\n",
+      "why": "Результаты не запоминаются, кэш остаётся пустым."
+    },
+    {
+      "code": "def fib_calls(n):\n    memo = {}\n    calls = 0\n\n    def fib(k):\n        nonlocal calls\n        calls += 0\n        if k in memo:\n            return memo[k]\n        value = k if k < 2 else fib(k - 1) + fib(k - 2)\n        memo[k] = value\n        return value\n\n    return [fib(n), calls]\n",
+      "why": "Вызовы не считаются."
+    }
+  ]
+}

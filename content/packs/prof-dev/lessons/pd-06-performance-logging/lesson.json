@@ -1,0 +1,45 @@
+{
+  "id": "pd-06-performance-logging",
+  "title": "Производительность и логирование",
+  "goal": "Измерять производительность, ускорять программу и вести журнал без утечки секретов.",
+  "skills": [
+    "pro.measure",
+    "pro.cache",
+    "pro.logging"
+  ],
+  "prerequisites": [
+    "pd-05-release"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-steps.json",
+    "assignments/a2-filter-log.json",
+    "assignments/a3-safe-line.json",
+    "assignments/a4-fib-calls.json",
+    "assignments/a5-hot-spots.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Оптимизируют, ничего не измерив",
+      "fix": "Сначала замер или подсчёт шагов, потом исправление найденного узкого места."
+    },
+    {
+      "mistake": "Кэшируют данные, которые меняются",
+      "fix": "Ограничивайте размер кэша и срок жизни, сбрасывайте его при изменении данных."
+    },
+    {
+      "mistake": "Всё печатают через print",
+      "fix": "Используйте logging с уровнями и именами журналов."
+    },
+    {
+      "mistake": "Записывают пароли и токены в журнал",
+      "fix": "Маскируйте чувствительные поля до записи."
+    }
+  ]
+}

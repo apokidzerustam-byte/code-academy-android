@@ -1,0 +1,105 @@
+{
+  "id": "a3-safe-line",
+  "type": "fix",
+  "title": "Строка журнала без секретов",
+  "statement": "Функция `safe_line(event, data)` собирает строку журнала `событие ключ=значение ...` (в порядке словаря), но пишет в неё всё подряд, в том числе пароли. Исправьте её: значения полей с именами `password`, `token`, `secret` и `card` (**регистр букв в имени не важен**) заменяйте на `***`. Остальные значения оставьте как есть. Исходный словарь менять нельзя.",
+  "goal": "Не писать секреты в журнал.",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def safe_line(event, data):\n    parts = [event]\n    for key, value in data.items():\n        parts.append(f\"{key}={value}\")\n    return \" \".join(parts)\n",
+  "hints": [
+    "Список опасных имён полей: password, token, secret, card.",
+    "Для каждой пары решите, показывать значение или звёздочки.",
+    "Сравнивайте имя поля без учёта регистра: приведите его к нижнему регистру.",
+    "Нужно точное совпадение имени, а не поиск подстроки: поле cards (количество) безвредно.",
+    "В строку добавляйте ключ=показанное_значение через пробел, исходный словарь не изменяйте."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "safe_line",
+    "cases": [
+      {
+        "args": [
+          "login",
+          {
+            "user": "anna",
+            "password": "qwerty"
+          }
+        ],
+        "id": "v1",
+        "expected": "login user=anna password=***"
+      },
+      {
+        "args": [
+          "pay",
+          {
+            "card": "4111",
+            "sum": 10
+          }
+        ],
+        "id": "v2",
+        "expected": "pay card=*** sum=10"
+      },
+      {
+        "args": [
+          "noop",
+          {}
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "noop"
+      },
+      {
+        "args": [
+          "auth",
+          {
+            "Token": "abc",
+            "SECRET": "x",
+            "user": "bob"
+          }
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "auth Token=*** SECRET=*** user=bob"
+      },
+      {
+        "args": [
+          "view",
+          {
+            "page": "home",
+            "cards": 3
+          }
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": "view page=home cards=3"
+      }
+    ]
+  },
+  "solution": "SENSITIVE = {\"password\", \"token\", \"secret\", \"card\"}\n\n\ndef safe_line(event, data):\n    parts = [event]\n    for key, value in data.items():\n        shown = \"***\" if key.lower() in SENSITIVE else value\n        parts.append(f\"{key}={shown}\")\n    return \" \".join(parts)\n",
+  "explanation": "Секреты маскируют перед записью в журнал, а не после: журнал могут читать многие. Имя поля сравнивают точно и без учёта регистра.",
+  "criteria": [
+    "Секретные поля маскируются.",
+    "Регистр не важен.",
+    "Остальные поля остаются."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def safe_line(event, data):\n    parts = [event]\n    for key, value in data.items():\n        parts.append(f\"{key}={value}\")\n    return \" \".join(parts)\n",
+      "why": "Исходная версия: секреты попадают в журнал."
+    },
+    {
+      "code": "SENSITIVE = {\"password\", \"token\", \"secret\", \"card\"}\n\n\ndef safe_line(event, data):\n    parts = [event]\n    for key, value in data.items():\n        shown = \"***\" if key in SENSITIVE else value\n        parts.append(f\"{key}={shown}\")\n    return \" \".join(parts)\n",
+      "why": "Имя поля сравнивается с учётом регистра: Token и SECRET не маскируются."
+    },
+    {
+      "code": "SENSITIVE = {\"password\"}\n\n\ndef safe_line(event, data):\n    parts = [event]\n    for key, value in data.items():\n        shown = \"***\" if key.lower() in SENSITIVE else value\n        parts.append(f\"{key}={shown}\")\n    return \" \".join(parts)\n",
+      "why": "Маскируется только пароль, а токен и номер карты остаются."
+    },
+    {
+      "code": "SENSITIVE = {\"password\", \"token\", \"secret\", \"card\"}\n\n\ndef safe_line(event, data):\n    parts = [event]\n    for key, value in data.items():\n        shown = \"***\" if any(s in key.lower() for s in SENSITIVE) else value\n        parts.append(f\"{key}={shown}\")\n    return \" \".join(parts)\n",
+      "why": "Поиск по подстроке маскирует и безобидное поле cards."
+    }
+  ]
+}

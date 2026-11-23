@@ -1,0 +1,72 @@
+{
+  "id": "a2-filter-log",
+  "type": "complete",
+  "title": "Фильтр журнала по уровню",
+  "statement": "Первая строка ввода — минимальный уровень (`DEBUG`, `INFO`, `WARNING`, `ERROR` или `CRITICAL`), вторая — число записей, затем записи вида `УРОВЕНЬ сообщение`. Порядок уровней: `DEBUG` < `INFO` < `WARNING` < `ERROR` < `CRITICAL`. Выведите в том же порядке только записи, уровень которых **не ниже** минимального, в виде `[УРОВЕНЬ] сообщение`.",
+  "goal": "Отфильтровать журнал по минимальному уровню.",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "ORDER = {\"DEBUG\": 0, \"INFO\": 1, \"WARNING\": 2, \"ERROR\": 3, \"CRITICAL\": 4}\n\nminimum = input().strip()\nn = int(input())\nfor _ in range(n):\n    level, message = input().split(\" \", 1)\n    # Выведите [УРОВЕНЬ] сообщение, если уровень не ниже minimum\n",
+  "hints": [
+    "Сравнивать уровни удобно по числам из словаря ORDER.",
+    "Вход: сначала минимальный уровень, потом число записей.",
+    "Каждую запись делите на уровень и сообщение по первому пробелу.",
+    "Запись нужна, если число её уровня не меньше числа минимального уровня.",
+    "Печатайте в формате [УРОВЕНЬ] сообщение, сообщение может состоять из нескольких слов."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "WARNING\n4\nDEBUG старт\nINFO заказ создан\nWARNING остаток мал\nERROR платёж отклонён\n",
+        "expected_stdout": "[WARNING] остаток мал\n[ERROR] платёж отклонён\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "DEBUG\n2\nINFO a b c\nDEBUG x\n",
+        "expected_stdout": "[INFO] a b c\n[DEBUG] x\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "CRITICAL\n3\nERROR x\nCRITICAL диск полон\nWARNING y\n",
+        "expected_stdout": "[CRITICAL] диск полон\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "INFO\n1\nINFO одна запись\n",
+        "expected_stdout": "[INFO] одна запись\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "ORDER = {\"DEBUG\": 0, \"INFO\": 1, \"WARNING\": 2, \"ERROR\": 3, \"CRITICAL\": 4}\n\nminimum = input().strip()\nn = int(input())\nfor _ in range(n):\n    level, message = input().split(\" \", 1)\n    if ORDER[level] >= ORDER[minimum]:\n        print(f\"[{level}] {message}\")\n",
+  "explanation": "Фильтрация по уровню — основа работы с журналами: на устройстве пользователя включают WARNING, а при отладке DEBUG. Уровни сравнивают по числам, а не как строки.",
+  "criteria": [
+    "Уровни сравниваются по порядку важности.",
+    "Минимальный уровень включается.",
+    "Сообщение остаётся целиком."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "ORDER = {\"DEBUG\": 0, \"INFO\": 1, \"WARNING\": 2, \"ERROR\": 3, \"CRITICAL\": 4}\n\nminimum = input().strip()\nn = int(input())\nfor _ in range(n):\n    level, message = input().split(\" \", 1)\n    # Выведите [УРОВЕНЬ] сообщение, если уровень не ниже minimum\n",
+      "why": "Заготовка ничего не печатает."
+    },
+    {
+      "code": "ORDER = {\"DEBUG\": 0, \"INFO\": 1, \"WARNING\": 2, \"ERROR\": 3, \"CRITICAL\": 4}\n\nminimum = input().strip()\nn = int(input())\nfor _ in range(n):\n    level, message = input().split(\" \", 1)\n    if ORDER[level] > ORDER[minimum]:\n        print(f\"[{level}] {message}\")\n",
+      "why": "Запись с уровнем, равным минимальному, тоже нужно выводить."
+    },
+    {
+      "code": "ORDER = {\"DEBUG\": 0, \"INFO\": 1, \"WARNING\": 2, \"ERROR\": 3, \"CRITICAL\": 4}\n\nminimum = input().strip()\nn = int(input())\nfor _ in range(n):\n    level, message = input().split(\" \", 1)\n    if ORDER[level] <= ORDER[minimum]:\n        print(f\"[{level}] {message}\")\n",
+      "why": "Условие перевёрнуто: выводятся менее важные записи."
+    },
+    {
+      "code": "ORDER = {\"DEBUG\": 0, \"INFO\": 1, \"WARNING\": 2, \"ERROR\": 3, \"CRITICAL\": 4}\n\nminimum = input().strip()\nn = int(input())\nfor _ in range(n):\n    level, message = input().split(\" \")[:2]\n    if ORDER[level] >= ORDER[minimum]:\n        print(f\"[{level}] {message}\")\n",
+      "why": "Сообщение из нескольких слов обрезается до первого слова."
+    }
+  ]
+}

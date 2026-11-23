@@ -1,0 +1,41 @@
+{
+  "id": "a1-steps",
+  "type": "predict",
+  "title": "Сколько шагов",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Сколько шагов",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "def has_dup_slow(items):\n    steps = 0\n    for i in range(len(items)):\n        for j in range(i + 1, len(items)):\n            steps += 1\n            if items[i] == items[j]:\n                return True, steps\n    return False, steps\n\n\ndef has_dup_fast(items):\n    seen = set()\n    steps = 0\n    for x in items:\n        steps += 1\n        if x in seen:\n            return True, steps\n        seen.add(x)\n    return False, steps\n\n\nprint(has_dup_slow([4, 7, 1, 7, 9]))\nprint(has_dup_fast([4, 7, 1, 7, 9]))\nprint(has_dup_slow([5, 6, 7, 8]))\nprint(has_dup_fast([5, 6, 7, 8]))\n",
+  "hints": [
+    "Шаг считается на каждое сравнение пары у медленной версии и на каждый элемент у быстрой.",
+    "В списке [4, 7, 1, 7, 9] совпадают две семёрки.",
+    "Медленная версия сравнивает 4 с каждым из остальных (4 сравнения), потом 7 с 1 и с 7.",
+    "Это 4 + 2 = 6 сравнений: на шестом находится совпадение.",
+    "Быстрая версия берёт элементы по одному: 4, 7, 1, вторая 7 найдена на четвёртом элементе; для [5, 6, 7, 8] медленная делает 3 + 2 + 1 = 6 сравнений, быстрая 4 шага."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "(True, 6)\n(True, 4)\n(False, 6)\n(False, 4)\n"
+  },
+  "solution": "(True, 6)\n(True, 4)\n(False, 6)\n(False, 4)\n",
+  "explanation": "Медленная версия сравнивает пары, быстрая просматривает элементы по одному и запоминает увиденное. Поэтому с ростом данных разрыв в шагах быстро растёт.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "(True, 3)\n(True, 4)\n(False, 6)\n(False, 4)",
+      "answer": "(True, 3)\n(True, 4)\n(False, 6)\n(False, 4)",
+      "why": "Шаг у медленной версии — это сравнение пары, а не строка внешнего цикла: до совпадения сравнений больше."
+    },
+    {
+      "code": "(True, 2)\n(True, 4)\n(False, 6)\n(False, 4)",
+      "answer": "(True, 2)\n(True, 4)\n(False, 6)\n(False, 4)",
+      "why": "Сначала 4 сравнивается со всеми остальными (это 4 шага), а потом ещё 7 с 1 и 7 с 7: итого больше двух шагов."
+    }
+  ]
+}

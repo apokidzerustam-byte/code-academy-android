@@ -1,0 +1,190 @@
+{
+  "id": "a5-hot-spots",
+  "type": "write",
+  "title": "Узкие места",
+  "statement": "Профилировщик записал, сколько миллисекунд занял каждый вызов: `records` — список пар `[имя_функции, миллисекунды]`, одна функция может встречаться много раз. Напишите `hot_spots(records, top)`: просуммируйте время по каждой функции и верните `top` самых «дорогих» в виде списка `[имя, сумма]` — по убыванию суммы; при равных суммах — по имени в алфавитном порядке. Если функций меньше `top`, верните все.",
+  "goal": "Найти функции, которые занимают больше всего времени.",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def hot_spots(records, top):\n    # Найти top функций с наибольшим суммарным временем\n    pass\n",
+  "hints": [
+    "Сначала просуммируйте время по имени функции в словаре.",
+    "Для новой функции начинайте с нуля: totals.get(name, 0).",
+    "Отсортируйте пары по сумме по убыванию.",
+    "Для равных сумм добавьте вторым ключом имя: key=lambda item: (-item[1], item[0]).",
+    "Возьмите первые top пар срезом и превратите в списки [имя, сумма]."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "hot_spots",
+    "cases": [
+      {
+        "args": [
+          [
+            [
+              "load",
+              40
+            ],
+            [
+              "parse",
+              10
+            ],
+            [
+              "load",
+              35
+            ],
+            [
+              "render",
+              50
+            ]
+          ],
+          2
+        ],
+        "id": "v1",
+        "expected": [
+          [
+            "load",
+            75
+          ],
+          [
+            "render",
+            50
+          ]
+        ]
+      },
+      {
+        "args": [
+          [
+            [
+              "a",
+              5
+            ]
+          ],
+          3
+        ],
+        "id": "v2",
+        "expected": [
+          [
+            "a",
+            5
+          ]
+        ]
+      },
+      {
+        "args": [
+          [],
+          2
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            [
+              "b",
+              7
+            ],
+            [
+              "a",
+              7
+            ],
+            [
+              "c",
+              1
+            ]
+          ],
+          2
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          [
+            "a",
+            7
+          ],
+          [
+            "b",
+            7
+          ]
+        ]
+      },
+      {
+        "args": [
+          [
+            [
+              "x",
+              1
+            ],
+            [
+              "y",
+              2
+            ],
+            [
+              "x",
+              1
+            ],
+            [
+              "y",
+              1
+            ]
+          ],
+          1
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          [
+            "y",
+            3
+          ]
+        ]
+      },
+      {
+        "args": [
+          [
+            [
+              "f",
+              3
+            ],
+            [
+              "g",
+              4
+            ]
+          ],
+          0
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": []
+      }
+    ]
+  },
+  "solution": "def hot_spots(records, top):\n    totals = {}\n    for name, ms in records:\n        totals[name] = totals.get(name, 0) + ms\n    ranked = sorted(totals.items(), key=lambda item: (-item[1], item[0]))\n    return [[name, ms] for name, ms in ranked[:top]]\n",
+  "explanation": "Профилирование начинается с суммарного времени по функциям: именно оно показывает, куда уходят ресурсы. Ускорять стоит первые строки такого списка.",
+  "criteria": [
+    "Время суммируется по функции.",
+    "Сортировка по убыванию.",
+    "Ровно top записей."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def hot_spots(records, top):\n    totals = {}\n    for name, ms in records:\n        totals[name] = ms\n    ranked = sorted(totals.items(), key=lambda item: (-item[1], item[0]))\n    return [[name, ms] for name, ms in ranked[:top]]\n",
+      "why": "Учитывается только последний вызов функции, а не сумма."
+    },
+    {
+      "code": "def hot_spots(records, top):\n    totals = {}\n    for name, ms in records:\n        totals[name] = totals.get(name, 0) + ms\n    ranked = sorted(totals.items(), key=lambda item: item[1])\n    return [[name, ms] for name, ms in ranked[:top]]\n",
+      "why": "Сортировка по возрастанию, а нужна по убыванию суммы."
+    },
+    {
+      "code": "def hot_spots(records, top):\n    totals = {}\n    for name, ms in records:\n        totals[name] = totals.get(name, 0) + ms\n    ranked = sorted(totals.items(), key=lambda item: -item[1])\n    return [[name, ms] for name, ms in ranked[:top]]\n",
+      "why": "При равных суммах порядок не определён по имени."
+    },
+    {
+      "code": "def hot_spots(records, top):\n    totals = {}\n    for name, ms in records:\n        totals[name] = totals.get(name, 0) + ms\n    ranked = sorted(totals.items(), key=lambda item: (-item[1], item[0]))\n    return [[name, ms] for name, ms in ranked[:top + 1]]\n",
+      "why": "Возвращается на одну функцию больше, чем нужно."
+    }
+  ]
+}

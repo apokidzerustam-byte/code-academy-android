@@ -14,7 +14,8 @@
     "pd-02-refactoring",
     "pd-03-code-review",
     "pd-04-docs",
-    "pd-05-release"
+    "pd-05-release",
+    "pd-06-performance-logging"
   ],
   "skills": {
     "pro.naming": "Названия и константы",
@@ -31,6 +32,9 @@
     "pro.changelog": "Журнал изменений",
     "pro.semver": "Семантические версии",
     "pro.ci": "CI и проверки выпуска",
-    "pro.signing": "Подпись приложения"
+    "pro.signing": "Подпись приложения",
+    "pro.measure": "Измерение производительности",
+    "pro.cache": "Кэширование и структуры данных",
+    "pro.logging": "Журналирование без секретов"
   }
 }
