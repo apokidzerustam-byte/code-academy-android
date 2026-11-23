@@ -1,0 +1,41 @@
+{
+  "id": "a5-pull",
+  "type": "predict",
+  "title": "Обмен между двумя копиями",
+  "statement": "Что выведут эти команды? Запишите вывод построчно, не запуская их.",
+  "goal": "Обмен между двумя копиями",
+  "input": "Нет.",
+  "expectedResult": "Вывод команд.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "git init -q\necho a > a.txt\ngit add a.txt\ngit commit -q -m \"Первый\"\ngit init -q --bare ../server.git\ngit remote add origin ../server.git\ngit push -q -u origin main\ncd ..\ngit clone -q server.git other\ncd other\necho b > b.txt\ngit add b.txt\ngit commit -q -m \"Второй\"\ngit push -q\ncd ../project\ngit pull -q\ngit log --format=%s\nls\n",
+  "hints": [
+    "Вторая копия (other) делает коммит и отправляет его на сервер.",
+    "Затем в первом проекте выполняется git pull.",
+    "Pull приносит коммит «Второй» и файл b.txt.",
+    "git log --format=%s показывает сообщения от нового к старому.",
+    "Результат: Второй, Первый, a.txt, b.txt."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "Второй\nПервый\na.txt\nb.txt"
+  },
+  "solution": "Второй\nПервый\na.txt\nb.txt",
+  "explanation": "git pull скачивает и сливает чужие коммиты; после него в проекте появляются файлы коллеги.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "Первый\nВторой\na.txt\nb.txt",
+      "answer": "Первый\nВторой\na.txt\nb.txt",
+      "why": "Новейший коммит — первым: история идёт от свежего к старому."
+    },
+    {
+      "code": "Второй\nПервый\na.txt",
+      "answer": "Второй\nПервый\na.txt",
+      "why": "Файл b.txt тоже попал в проект после pull."
+    }
+  ]
+}

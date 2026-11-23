@@ -1,0 +1,47 @@
+{
+  "id": "a4-merge",
+  "type": "write",
+  "title": "Слить ветку",
+  "statement": "Вы в ветке `main`, ветка `feature` содержит готовую работу. Введите команду, которая **сливает `feature` в текущую ветку**.",
+  "goal": "Слить ветку",
+  "input": "Текст команды.",
+  "expectedResult": "Одна команда, как в терминале.",
+  "constraints": [
+    "Ответьте точной командой из условия, без лишних пробелов."
+  ],
+  "hints": [
+    "Слияние выполняет команда git merge.",
+    "Её выполняют в той ветке, которая должна получить изменения.",
+    "Аргумент — имя ветки с изменениями.",
+    "Имя ветки: feature.",
+    "Ответ: git merge feature"
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "git merge feature",
+    "shell": {
+      "setup": "git init -q\necho v1 > app.txt\ngit add app.txt\ngit commit -q -m v1\ngit switch -q -c feature\necho f > feature.txt\ngit add feature.txt\ngit commit -q -m feat\ngit switch -q main\n",
+      "check": "git branch --show-current\nls",
+      "expected": "main\napp.txt\nfeature.txt"
+    }
+  },
+  "solution": "git merge feature",
+  "explanation": "git merge ветка приносит коммиты указанной ветки в текущую.",
+  "criteria": [
+    "Команда записана без ошибок."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "git merge main",
+      "why": "Это слияние main в main: ничего не происходит."
+    },
+    {
+      "code": "git switch feature",
+      "why": "Переключает на feature, не сливая."
+    },
+    {
+      "code": "git branch -d feature",
+      "why": "Удаляет ветку: неслитую работу Git не даст удалить."
+    }
+  ]
+}

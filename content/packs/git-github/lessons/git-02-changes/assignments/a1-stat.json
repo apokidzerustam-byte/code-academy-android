@@ -1,0 +1,41 @@
+{
+  "id": "a1-stat",
+  "type": "predict",
+  "title": "Сводка изменений",
+  "statement": "Что выведут эти команды? Запишите вывод построчно, не запуская их.",
+  "goal": "Сводка изменений",
+  "input": "Нет.",
+  "expectedResult": "Вывод команд.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "git init -q\nprintf 'one\\ntwo\\n' > notes.txt\ngit add notes.txt\ngit commit -q -m \"Заметки\"\nprintf 'one\\nTWO\\nthree\\n' > notes.txt\ngit diff --stat\n",
+  "hints": [
+    "Сравниваются рабочая папка и индекс (он совпадает с коммитом).",
+    "Строка «two» заменена на «TWO»: одна удалённая и одна добавленная.",
+    "Строка «three» добавлена: ещё один плюс.",
+    "Итого: 2 вставки и 1 удаление.",
+    "Вторая строка вывода: «1 file changed, 2 insertions(+), 1 deletion(-)»."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": " notes.txt | 3 ++-\n 1 file changed, 2 insertions(+), 1 deletion(-)"
+  },
+  "solution": " notes.txt | 3 ++-\n 1 file changed, 2 insertions(+), 1 deletion(-)",
+  "explanation": "Замена строки — это удаление и добавление; новая строка — ещё одно добавление.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": " notes.txt | 1 +\n 1 file changed, 1 insertion(+)",
+      "answer": " notes.txt | 1 +\n 1 file changed, 1 insertion(+)",
+      "why": "Строка two заменена (минус и плюс), а ещё добавлена three: изменений больше."
+    },
+    {
+      "code": " notes.txt | 2 +-\n 1 file changed, 1 insertion(+), 1 deletion(-)",
+      "answer": " notes.txt | 2 +-\n 1 file changed, 1 insertion(+), 1 deletion(-)",
+      "why": "Добавлена и третья строка: плюсов два."
+    }
+  ]
+}

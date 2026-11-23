@@ -1,0 +1,200 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Проект, которым приятно пользоваться",
+      "narration": "Хороший репозиторий — это не только код. Первое, что видит человек, открыв проект, — файл README: что это за проект и как им пользоваться. Ещё важно не хранить в репозитории лишнее: временные файлы, логи и особенно секреты вроде паролей и ключей доступа. Для этого есть файл gitignore. И наконец, важные моменты истории, например выпуск версии, отмечают тегами. Сегодня займёмся всеми тремя.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "**README.md** — визитка проекта · **.gitignore** — что Git не трогает · **тег** — метка версии",
+          "cue": 0
+        }
+      ]
+    },
+    {
+      "id": "readme",
+      "title": "README и немного Markdown",
+      "narration": "README пишут на языке Markdown. Решётка в начале строки делает заголовок, дефис — пункт списка, а текст между обратными кавычками выделяется как код. Хороший README отвечает на три вопроса: что это, как запустить и как помочь проекту. Создадим такой файл и сохраним его.",
+      "actions": [
+        {
+          "type": "type",
+          "text": "git init -q\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "printf \"# Тракер задач\\n\\nКонсольный менеджер задач на Python.\\n\\n## Запуск\\n\\n- python main.py\\n\" > README.md\n",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "type",
+          "text": "cat README.md\n",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "# Тракер задач\n\nКонсольный менеджер задач на Python.\n\n## Запуск\n\n- python main.py\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "ignore",
+      "title": "Файл .gitignore",
+      "narration": "Теперь представим, что рядом с кодом появились файл с паролем и журнал работы программы. Без настройки git status предложит добавить и их. Создадим файл gitignore: в нём перечислены шаблоны того, что Git должен игнорировать. Звёздочка заменяет любую часть имени. После этого лишние файлы исчезнут из статуса, а сам gitignore стоит сохранить в репозитории, чтобы правило действовало у всех.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "echo \"print(1)\" > main.py\necho \"ошибка\" > app.log\necho \"PASSWORD=12345\" > .env\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "git status -s\n",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "output",
+          "text": "?? .env\n?? README.md\n?? app.log\n?? main.py\n",
+          "cue": 1
+        },
+        {
+          "type": "type",
+          "text": "printf \"*.log\\n.env\\n\" > .gitignore\n",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "type",
+          "text": "git status -s\n",
+          "file": "terminal.sh",
+          "cue": 4
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "?? .gitignore\n?? README.md\n?? main.py\n",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "commit",
+      "title": "Сохраняем",
+      "narration": "Добавим всё, что осталось, и сохраним. В коммит попадут README, код и gitignore, а пароль и журнал останутся только на этом компьютере. Сообщения коммитов пишите в повелительном наклонении и по делу: «Добавить README», «Исправить ошибку расчёта». Через полгода это спасёт вас при поиске причины бага.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "git add .\ngit commit -q -m \"Добавить README и gitignore\"\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "git status -s\ngit ls-files\n",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "output",
+          "text": ".gitignore\nREADME.md\nmain.py\n",
+          "cue": 1
+        }
+      ]
+    },
+    {
+      "id": "tag",
+      "title": "Теги — метки версий",
+      "narration": "Тег — это постоянное имя для конкретного коммита. Обычно им помечают выпуски: версия один точка ноль. Создаётся тег командой git tag с именем. Список тегов покажет та же команда без параметров. Теги отображаются и в истории, рядом с коммитом.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "git tag v1.0\ngit tag\n",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "output",
+          "text": "v1.0\n",
+          "cue": 2
+        },
+        {
+          "type": "type",
+          "text": "git log --oneline\n",
+          "file": "terminal.sh",
+          "cue": 4
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "720539d (HEAD -> main, tag: v1.0) Добавить README и gitignore\n",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. README объясняет проект, gitignore защищает от случайной публикации лишних файлов и секретов, теги отмечают версии, а понятные сообщения коммитов делают историю читаемой. Если секрет всё же попал в коммит, одного удаления файла недостаточно: ключ нужно считать скомпрометированным и заменить. На этом мы закончили основы Git и можем двигаться к веб-технологиям.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "README → .gitignore → осмысленные коммиты → теги версий. Секреты — **никогда** в репозиторий",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}

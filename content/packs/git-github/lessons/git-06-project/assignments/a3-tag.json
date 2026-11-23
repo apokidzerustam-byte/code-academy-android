@@ -1,0 +1,47 @@
+{
+  "id": "a3-tag",
+  "type": "write",
+  "title": "Создать тег",
+  "statement": "Первый выпуск готов. Введите команду, которая **ставит тег `v1.0` на текущий коммит** (`git tag` и имя).",
+  "goal": "Создать тег",
+  "input": "Текст команды.",
+  "expectedResult": "Одна команда, как в терминале.",
+  "constraints": [
+    "Ответьте точной командой из условия, без лишних пробелов."
+  ],
+  "hints": [
+    "Теги создаёт git tag.",
+    "Если после tag указать имя, тег будет создан.",
+    "Имя выпуска начинается с буквы v.",
+    "Версия: 1.0.",
+    "Ответ: git tag v1.0"
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "git tag v1.0",
+    "shell": {
+      "setup": "git init -q\necho a > a.txt\ngit add a.txt\ngit commit -q -m release\n",
+      "check": "git tag",
+      "expected": "v1.0"
+    }
+  },
+  "solution": "git tag v1.0",
+  "explanation": "git tag имя ставит метку на текущий коммит; git tag без параметров показывает список.",
+  "criteria": [
+    "Команда записана без ошибок."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "git tag",
+      "why": "Только показывает список тегов — тегов пока нет."
+    },
+    {
+      "code": "git branch v1.0",
+      "why": "Создаёт ветку, а не тег."
+    },
+    {
+      "code": "git commit -m v1.0",
+      "why": "Пытается создать коммит, а не тег."
+    }
+  ]
+}

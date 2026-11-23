@@ -1,0 +1,41 @@
+{
+  "id": "a5-auto",
+  "type": "predict",
+  "title": "Слияние без конфликта",
+  "statement": "Что выведут эти команды? Запишите вывод построчно, не запуская их.",
+  "goal": "Слияние без конфликта",
+  "input": "Нет.",
+  "expectedResult": "Вывод команд.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "git init -q\necho a > a.txt\ngit add a.txt\ngit commit -q -m base\ngit switch -q -c feature\necho b > b.txt\ngit add b.txt\ngit commit -q -m \"Файл b\"\ngit switch -q main\necho c > c.txt\ngit add c.txt\ngit commit -q -m \"Файл c\"\ngit merge --no-edit feature > /dev/null\nls\ngit log --format=%s\n",
+  "hints": [
+    "Ветки изменили разные файлы: конфликта нет.",
+    "Git сольёт их сам и создаст коммит слияния.",
+    "Файлы после слияния: a.txt, b.txt, c.txt.",
+    "Сообщение коммита слияния: Merge branch 'feature'.",
+    "История: слияние, затем «Файл c», «Файл b», «base»."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "a.txt\nb.txt\nc.txt\nMerge branch 'feature'\nФайл c\nФайл b\nbase"
+  },
+  "solution": "a.txt\nb.txt\nc.txt\nMerge branch 'feature'\nФайл c\nФайл b\nbase",
+  "explanation": "Если ветки меняют разные места, Git сливает их автоматически и создаёт коммит слияния.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "a.txt\nb.txt\nc.txt\nФайл c\nФайл b\nbase",
+      "answer": "a.txt\nb.txt\nc.txt\nФайл c\nФайл b\nbase",
+      "why": "Слияние создаёт ещё один коммит: «Merge branch 'feature'»."
+    },
+    {
+      "code": "a.txt\nc.txt\nMerge branch 'feature'\nФайл c\nФайл b\nbase",
+      "answer": "a.txt\nc.txt\nMerge branch 'feature'\nФайл c\nФайл b\nbase",
+      "why": "Файл b из ветки feature тоже попадает в main."
+    }
+  ]
+}

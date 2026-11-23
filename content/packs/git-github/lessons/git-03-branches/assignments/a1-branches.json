@@ -1,0 +1,41 @@
+{
+  "id": "a1-branches",
+  "type": "predict",
+  "title": "Список веток",
+  "statement": "Что выведут эти команды? Запишите вывод построчно, не запуская их.",
+  "goal": "Список веток",
+  "input": "Нет.",
+  "expectedResult": "Вывод команд.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "git init -q\necho v1 > app.txt\ngit add app.txt\ngit commit -q -m v1\ngit branch beta\ngit branch alpha\ngit switch -q beta\ngit branch\n",
+  "hints": [
+    "Создаются три ветки: main, beta и alpha.",
+    "Команда git branch показывает их в алфавитном порядке.",
+    "Текущая ветка отмечена звёздочкой.",
+    "Переключились на beta командой git switch.",
+    "Результат: «  alpha», «* beta», «  main»."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "  alpha\n* beta\n  main"
+  },
+  "solution": "  alpha\n* beta\n  main",
+  "explanation": "git branch сортирует ветки по алфавиту; звёздочка отмечает текущую.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "* alpha\n  beta\n  main",
+      "answer": "* alpha\n  beta\n  main",
+      "why": "Звёздочка стоит у текущей ветки beta, а не у alpha."
+    },
+    {
+      "code": "  alpha\n  beta\n* main",
+      "answer": "  alpha\n  beta\n* main",
+      "why": "Мы переключились на beta: звёздочка у неё."
+    }
+  ]
+}

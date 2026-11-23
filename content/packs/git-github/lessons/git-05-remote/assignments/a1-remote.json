@@ -1,0 +1,41 @@
+{
+  "id": "a1-remote",
+  "type": "predict",
+  "title": "Какие remote подключены",
+  "statement": "Что выведут эти команды? Запишите вывод построчно, не запуская их.",
+  "goal": "Какие remote подключены",
+  "input": "Нет.",
+  "expectedResult": "Вывод команд.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "git init -q\necho a > a.txt\ngit add a.txt\ngit commit -q -m \"Первый\"\ngit init -q --bare ../server.git\ngit remote add origin ../server.git\ngit remote add backup ../server.git\ngit remote\ngit remote get-url backup\n",
+  "hints": [
+    "Подключены два удалённых репозитория.",
+    "Команда git remote печатает только имена.",
+    "Имена идут в алфавитном порядке.",
+    "git remote get-url backup печатает адрес этого репозитория.",
+    "Результат: backup, origin, затем адрес ../server.git."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "backup\norigin\n../server.git"
+  },
+  "solution": "backup\norigin\n../server.git",
+  "explanation": "git remote показывает имена, git remote get-url имя — адрес.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "origin\nbackup\n../server.git",
+      "answer": "origin\nbackup\n../server.git",
+      "why": "git remote выводит имена в алфавитном порядке: backup идёт первым."
+    },
+    {
+      "code": "backup\norigin\nbackup",
+      "answer": "backup\norigin\nbackup",
+      "why": "Команда get-url выводит адрес, а не имя."
+    }
+  ]
+}

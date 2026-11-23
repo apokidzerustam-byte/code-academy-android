@@ -1,0 +1,47 @@
+{
+  "id": "a5-revert",
+  "type": "write",
+  "title": "Отменить коммит",
+  "statement": "Последний коммит оказался лишним. Введите команду, которая **отменяет его новым коммитом** без открытия редактора (`git revert`, ключ `--no-edit`, затем `HEAD`).",
+  "goal": "Отменить коммит",
+  "input": "Текст команды.",
+  "expectedResult": "Одна команда, как в терминале.",
+  "constraints": [
+    "Ответьте точной командой из условия, без лишних пробелов."
+  ],
+  "hints": [
+    "Коммит уже сохранён, значит, нужен git revert.",
+    "Он создаёт новый коммит, отменяющий старый.",
+    "Последний коммит обозначается словом HEAD.",
+    "Ключ --no-edit оставляет сообщение по умолчанию.",
+    "Ответ: git revert --no-edit HEAD"
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "git revert --no-edit HEAD",
+    "shell": {
+      "setup": "git init -q\nprintf 'one\\ntwo\\n' > notes.txt\ngit add notes.txt\ngit commit -q -m \"Заметки\"\necho oops >> notes.txt\ngit commit -q -am \"Лишнее\"\n",
+      "check": "cat notes.txt",
+      "expected": "one\ntwo"
+    }
+  },
+  "solution": "git revert --no-edit HEAD",
+  "explanation": "git revert не стирает историю: появляется новый коммит с обратными изменениями.",
+  "criteria": [
+    "Команда записана без ошибок."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "git reset --soft HEAD~1",
+      "why": "Убирает коммит из истории, но правка остаётся в файле."
+    },
+    {
+      "code": "git restore notes.txt",
+      "why": "Не отменяет коммит: правка уже в истории."
+    },
+    {
+      "code": "git revert",
+      "why": "Не указано, какой коммит отменять."
+    }
+  ]
+}

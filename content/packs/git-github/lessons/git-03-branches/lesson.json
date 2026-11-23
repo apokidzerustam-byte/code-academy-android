@@ -1,0 +1,44 @@
+{
+  "id": "git-03-branches",
+  "title": "Ветки и слияние",
+  "goal": "Создавать ветки, переключаться между ними, сливать и удалять.",
+  "skills": [
+    "git.branch",
+    "git.merge"
+  ],
+  "prerequisites": [
+    "git-02-changes"
+  ],
+  "runner": "A",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-branches.json",
+    "assignments/a2-create.json",
+    "assignments/a3-files.json",
+    "assignments/a4-merge.json",
+    "assignments/a5-delete.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Забывают переключиться на main перед слиянием",
+      "fix": "Сливают в текущую ветку: сначала git switch main."
+    },
+    {
+      "mistake": "Работают прямо в main",
+      "fix": "Для каждой задачи заводите отдельную ветку."
+    },
+    {
+      "mistake": "Удаляют ветку, не слив её",
+      "fix": "Сначала git merge; ключ -d защитит от потери."
+    },
+    {
+      "mistake": "Не смотрят, в какой ветке находятся",
+      "fix": "Проверяйте git branch или git status."
+    }
+  ]
+}

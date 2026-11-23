@@ -1,0 +1,47 @@
+{
+  "id": "a2-add",
+  "type": "write",
+  "title": "Подключить сервер",
+  "statement": "Адрес сервера — `../server.git`. Введите команду, которая **подключает его под именем `origin`** (`git remote add`, имя, адрес).",
+  "goal": "Подключить сервер",
+  "input": "Текст команды.",
+  "expectedResult": "Одна команда, как в терминале.",
+  "constraints": [
+    "Ответьте точной командой из условия, без лишних пробелов."
+  ],
+  "hints": [
+    "Подключением серверов занимается git remote.",
+    "Нужно подкоманду add.",
+    "После add — имя, затем адрес.",
+    "Имя: origin; адрес: ../server.git.",
+    "Ответ: git remote add origin ../server.git"
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "git remote add origin ../server.git",
+    "shell": {
+      "setup": "git init -q\necho a > a.txt\ngit add a.txt\ngit commit -q -m \"Первый\"\ngit init -q --bare ../server.git\n",
+      "check": "git remote get-url origin",
+      "expected": "../server.git"
+    }
+  },
+  "solution": "git remote add origin ../server.git",
+  "explanation": "git remote add имя адрес запоминает адрес под коротким именем.",
+  "criteria": [
+    "Команда записана без ошибок."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "git remote origin ../server.git",
+      "why": "Не хватает слова add."
+    },
+    {
+      "code": "git clone ../server.git",
+      "why": "Скачивает копию, а не подключает сервер к проекту."
+    },
+    {
+      "code": "git push origin ../server.git",
+      "why": "Отправка, а не настройка."
+    }
+  ]
+}

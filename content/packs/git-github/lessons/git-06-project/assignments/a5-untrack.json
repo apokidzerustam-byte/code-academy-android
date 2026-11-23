@@ -1,0 +1,47 @@
+{
+  "id": "a5-untrack",
+  "type": "write",
+  "title": "Перестать отслеживать файл",
+  "statement": "Файл `secret.txt` случайно попал в репозиторий. Введите команду, которая **убирает его из Git, но оставляет в папке** (`git rm`, ключ `--cached`, имя файла).",
+  "goal": "Перестать отслеживать файл",
+  "input": "Текст команды.",
+  "expectedResult": "Одна команда, как в терминале.",
+  "constraints": [
+    "Ответьте точной командой из условия, без лишних пробелов."
+  ],
+  "hints": [
+    "Файл нужно убрать из репозитория, но не удалять с диска.",
+    "Для удаления из Git служит git rm.",
+    "Ключ --cached: только из индекса.",
+    "Дальше — имя файла.",
+    "Ответ: git rm --cached secret.txt"
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "git rm --cached secret.txt",
+    "shell": {
+      "setup": "git init -q\necho key > secret.txt\ngit add secret.txt\ngit commit -q -m \"oops\"\n",
+      "check": "git status -s",
+      "expected": "D  secret.txt\n?? secret.txt"
+    }
+  },
+  "solution": "git rm --cached secret.txt",
+  "explanation": "git rm --cached прекращает отслеживание: после коммита файл исчезнет из репозитория, а на диске останется. Не забудьте добавить его в .gitignore и сменить пароль.",
+  "criteria": [
+    "Команда записана без ошибок."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "git rm secret.txt",
+      "why": "Удаляет и из Git, и с диска."
+    },
+    {
+      "code": "git restore --staged secret.txt",
+      "why": "Файл не отслеживается, но он и не был в индексе: без эффекта."
+    },
+    {
+      "code": "git add secret.txt",
+      "why": "Добавляет файл, а не убирает."
+    }
+  ]
+}

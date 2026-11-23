@@ -1,0 +1,47 @@
+{
+  "id": "a2-gitignore",
+  "type": "write",
+  "title": "Игнорировать журналы",
+  "statement": "Рядом с кодом лежит `debug.log`. Введите команду, которая **создаёт файл `.gitignore` с единственной строкой `*.log`** (`echo`, шаблон в двойных кавычках, `>`, имя файла).",
+  "goal": "Игнорировать журналы",
+  "input": "Текст команды.",
+  "expectedResult": "Одна команда, как в терминале.",
+  "constraints": [
+    "Ответьте точной командой из условия, без лишних пробелов."
+  ],
+  "hints": [
+    "Нужно создать текстовый файл .gitignore с одной строкой.",
+    "Строку выводит команда echo.",
+    "Знак > отправляет вывод в файл.",
+    "Шаблон для журналов: *.log.",
+    "Ответ: echo \"*.log\" > .gitignore"
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "echo \"*.log\" > .gitignore",
+    "shell": {
+      "setup": "git init -q\necho 'print(1)' > main.py\necho err > debug.log\n",
+      "check": "git status -s",
+      "expected": "?? .gitignore\n?? main.py"
+    }
+  },
+  "solution": "echo \"*.log\" > .gitignore",
+  "explanation": "Звёздочка в шаблоне заменяет любую часть имени: *.log подходит ко всем журналам.",
+  "criteria": [
+    "Команда записана без ошибок."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "echo \"*.py\" > .gitignore",
+      "why": "Шаблон игнорирует код вместо журналов."
+    },
+    {
+      "code": "echo \"*.log\" >> notes.txt",
+      "why": "Запись идёт в другой файл."
+    },
+    {
+      "code": "touch .gitignore",
+      "why": "Файл создан пустым: правил нет."
+    }
+  ]
+}

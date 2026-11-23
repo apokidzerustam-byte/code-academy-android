@@ -1,0 +1,41 @@
+{
+  "id": "a1-ignore",
+  "type": "predict",
+  "title": "Что покажет статус",
+  "statement": "Что выведут эти команды? Запишите вывод построчно, не запуская их.",
+  "goal": "Что покажет статус",
+  "input": "Нет.",
+  "expectedResult": "Вывод команд.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "git init -q\necho 'print(1)' > a.py\necho err > debug.log\necho SECRET=1 > .env\nprintf '*.log\\n.env\\n' > .gitignore\ngit status -s\n",
+  "hints": [
+    "В .gitignore перечислены шаблоны *.log и .env.",
+    "Под них попадают debug.log и .env.",
+    "Они исчезают из статуса.",
+    "Остаются a.py и сам .gitignore.",
+    "Порядок — алфавитный: сначала .gitignore, потом a.py."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "?? .gitignore\n?? a.py"
+  },
+  "solution": "?? .gitignore\n?? a.py",
+  "explanation": "Игнорируемые файлы не отображаются в git status, а вот сам .gitignore — обычный новый файл.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "?? a.py",
+      "answer": "?? a.py",
+      "why": "Сам файл .gitignore тоже новый и виден в статусе."
+    },
+    {
+      "code": "?? .env\n?? .gitignore\n?? a.py\n?? debug.log",
+      "answer": "?? .env\n?? .gitignore\n?? a.py\n?? debug.log",
+      "why": "Файлы, перечисленные в .gitignore, в статусе не показываются."
+    }
+  ]
+}

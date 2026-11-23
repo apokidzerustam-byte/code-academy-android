@@ -10,11 +10,29 @@
     "python-basics"
   ],
   "lessons": [
-    "git-01-repo"
+    "git-01-repo",
+    "git-02-changes",
+    "git-03-branches",
+    "git-04-conflicts",
+    "git-05-remote",
+    "git-06-project"
   ],
   "skills": {
     "git.init": "git init и git status",
     "git.commit": "git add и git commit",
-    "git.log": "История: git log"
+    "git.log": "История: git log",
+    "git.diff": "git diff",
+    "git.restore": "git restore",
+    "git.revert": "git revert",
+    "git.branch": "Ветки",
+    "git.merge": "git merge",
+    "git.conflict": "Конфликты слияния",
+    "git.abort": "Отмена слияния",
+    "git.remote": "Remote и origin",
+    "git.push": "git push и git pull",
+    "git.clone": "git clone",
+    "git.readme": "README и Markdown",
+    "git.ignore": ".gitignore",
+    "git.tag": "Теги"
   }
 }

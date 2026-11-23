@@ -237,7 +237,7 @@
         },
         {
           "type": "output",
-          "text": "f39ea8d Описание проекта\ne6fed3c Первый коммит\n",
+          "text": "f39ea8d (HEAD -> main) Описание проекта\ne6fed3c Первый коммит\n",
           "cue": 3
         }
       ]

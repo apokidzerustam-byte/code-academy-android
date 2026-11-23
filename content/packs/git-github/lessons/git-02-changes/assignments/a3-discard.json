@@ -1,0 +1,47 @@
+{
+  "id": "a3-discard",
+  "type": "write",
+  "title": "Отбросить правки",
+  "statement": "В файле `notes.txt` неудачные несохранённые правки. Введите команду, которая **возвращает файл к последнему коммиту** (`git restore` и имя файла).",
+  "goal": "Отбросить правки",
+  "input": "Текст команды.",
+  "expectedResult": "Одна команда, как в терминале.",
+  "constraints": [
+    "Ответьте точной командой из условия, без лишних пробелов."
+  ],
+  "hints": [
+    "Правки не сохранены — коммита для отмены нет.",
+    "Файл нужно вернуть к состоянию из последнего коммита.",
+    "Команда — git restore.",
+    "Ключей не нужно.",
+    "Ответ: git restore notes.txt"
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "git restore notes.txt",
+    "shell": {
+      "setup": "git init -q\nprintf 'one\\ntwo\\n' > notes.txt\ngit add notes.txt\ngit commit -q -m \"Заметки\"\necho oops >> notes.txt\n",
+      "check": "cat notes.txt",
+      "expected": "one\ntwo"
+    }
+  },
+  "solution": "git restore notes.txt",
+  "explanation": "git restore файл копирует версию из последнего коммита поверх рабочей: несохранённые правки теряются.",
+  "criteria": [
+    "Команда записана без ошибок."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "git restore --staged notes.txt",
+      "why": "Работает с индексом, а правки в рабочей папке остаются."
+    },
+    {
+      "code": "git add notes.txt",
+      "why": "Добавляет неудачную правку в индекс."
+    },
+    {
+      "code": "git revert HEAD",
+      "why": "Отменяет коммит, а не несохранённые правки."
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "id": "a2-markers",
+  "type": "predict",
+  "title": "Метки в файле",
+  "statement": "Что выведут эти команды? Запишите вывод построчно, не запуская их.",
+  "goal": "Метки в файле",
+  "input": "Нет.",
+  "expectedResult": "Вывод команд.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "git init -q\necho \"Привет\" > greeting.txt\ngit add greeting.txt\ngit commit -q -m \"Приветствие\"\ngit switch -q -c feature\necho \"Здравствуйте\" > greeting.txt\ngit commit -q -am \"Формально\"\ngit switch -q main\necho \"Привет, друзья\" > greeting.txt\ngit commit -q -am \"Дружески\"\ngit merge feature > /dev/null\ncat greeting.txt\n",
+  "hints": [
+    "Мы слили feature в main: текущая ветка — main (HEAD).",
+    "Сначала идёт метка «<<<<<<< HEAD».",
+    "Затем — вариант из текущей ветки.",
+    "Потом разделитель «=======» и вариант из feature.",
+    "В конце — метка «>>>>>>> feature»."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "<<<<<<< HEAD\nПривет, друзья\n=======\nЗдравствуйте\n>>>>>>> feature"
+  },
+  "solution": "<<<<<<< HEAD\nПривет, друзья\n=======\nЗдравствуйте\n>>>>>>> feature",
+  "explanation": "Блок между <<<<<<< и ======= — версия текущей ветки, между ======= и >>>>>>> — версия сливаемой.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<<<<<<< feature\nЗдравствуйте\n=======\nПривет, друзья\n>>>>>>> HEAD",
+      "answer": "<<<<<<< feature\nЗдравствуйте\n=======\nПривет, друзья\n>>>>>>> HEAD",
+      "why": "Сверху — вариант из текущей ветки (HEAD), снизу — из сливаемой."
+    },
+    {
+      "code": "Привет, друзья\nЗдравствуйте",
+      "answer": "Привет, друзья\nЗдравствуйте",
+      "why": "Git вставляет в файл метки конфликта."
+    }
+  ]
+}

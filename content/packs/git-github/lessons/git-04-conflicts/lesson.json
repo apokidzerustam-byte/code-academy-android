@@ -1,0 +1,44 @@
+{
+  "id": "git-04-conflicts",
+  "title": "Конфликты слияния",
+  "goal": "Понимать причину конфликта, читать метки и разрешать конфликт.",
+  "skills": [
+    "git.conflict",
+    "git.abort"
+  ],
+  "prerequisites": [
+    "git-03-branches"
+  ],
+  "runner": "A",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-status.json",
+    "assignments/a2-markers.json",
+    "assignments/a3-abort.json",
+    "assignments/a4-add.json",
+    "assignments/a5-auto.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Оставляют метки <<<<<<< в файле и сохраняют коммит",
+      "fix": "Метки — не код. Перед git add откройте файл и удалите их."
+    },
+    {
+      "mistake": "Паникуют и удаляют репозиторий",
+      "fix": "Ничего не потеряно: git merge --abort вернёт всё назад."
+    },
+    {
+      "mistake": "Делают коммит, не добавив файл",
+      "fix": "Сначала git add для каждого разрешённого файла."
+    },
+    {
+      "mistake": "Принимают одну из сторон, не прочитав обе",
+      "fix": "Прочитайте оба варианта: правильный итог часто объединяет их."
+    }
+  ]
+}

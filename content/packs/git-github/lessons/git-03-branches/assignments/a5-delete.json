@@ -1,0 +1,47 @@
+{
+  "id": "a5-delete",
+  "type": "write",
+  "title": "Удалить слитую ветку",
+  "statement": "Ветка `feature` уже слита. Введите команду, которая **удаляет её** (`git branch`, ключ `-d`, имя).",
+  "goal": "Удалить слитую ветку",
+  "input": "Текст команды.",
+  "expectedResult": "Одна команда, как в терминале.",
+  "constraints": [
+    "Ответьте точной командой из условия, без лишних пробелов."
+  ],
+  "hints": [
+    "Ветки управляются командой git branch.",
+    "Для удаления нужен ключ -d.",
+    "Ключ ставят перед именем ветки.",
+    "Имя ветки: feature.",
+    "Ответ: git branch -d feature"
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "git branch -d feature",
+    "shell": {
+      "setup": "git init -q\necho v1 > app.txt\ngit add app.txt\ngit commit -q -m v1\ngit switch -q -c feature\necho f > feature.txt\ngit add feature.txt\ngit commit -q -m feat\ngit switch -q main\ngit merge -q feature\n",
+      "check": "git branch",
+      "expected": "* main"
+    }
+  },
+  "solution": "git branch -d feature",
+  "explanation": "Ключ -d безопасен: Git не удалит ветку, в которой есть неслитая работа.",
+  "criteria": [
+    "Команда записана без ошибок."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "git branch feature",
+      "why": "Эта команда создаёт ветку, а не удаляет."
+    },
+    {
+      "code": "git switch -d feature",
+      "why": "Переключение на коммит без ветки, ветка остаётся."
+    },
+    {
+      "code": "git merge -d feature",
+      "why": "У слияния нет такого ключа."
+    }
+  ]
+}

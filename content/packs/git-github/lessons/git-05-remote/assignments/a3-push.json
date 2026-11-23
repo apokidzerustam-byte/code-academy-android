@@ -1,0 +1,47 @@
+{
+  "id": "a3-push",
+  "type": "write",
+  "title": "Первая отправка",
+  "statement": "Сервер `origin` уже подключён. Введите команду **первой отправки ветки `main` с запоминанием связи** (`git push`, ключ `-u`, `origin`, `main`).",
+  "goal": "Первая отправка",
+  "input": "Текст команды.",
+  "expectedResult": "Одна команда, как в терминале.",
+  "constraints": [
+    "Ответьте точной командой из условия, без лишних пробелов."
+  ],
+  "hints": [
+    "Отправляет коммиты команда git push.",
+    "Ключ -u запоминает связь веток.",
+    "После ключа: имя сервера и имя ветки.",
+    "Имя сервера origin, ветка main.",
+    "Ответ: git push -u origin main"
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "git push -u origin main",
+    "shell": {
+      "setup": "git init -q\necho a > a.txt\ngit add a.txt\ngit commit -q -m \"Первый\"\ngit init -q --bare ../server.git\ngit remote add origin ../server.git\n",
+      "check": "git rev-parse --abbrev-ref main@{upstream}",
+      "expected": "origin/main"
+    }
+  },
+  "solution": "git push -u origin main",
+  "explanation": "С ключом -u дальше достаточно писать git push и git pull без аргументов.",
+  "criteria": [
+    "Команда записана без ошибок."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "git push",
+      "why": "Нет связи с серверной веткой: Git не знает, куда отправлять."
+    },
+    {
+      "code": "git push origin main",
+      "why": "Отправляет, но без ключа -u связь не запоминается."
+    },
+    {
+      "code": "git pull origin main",
+      "why": "Скачивает, а не отправляет."
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "id": "a4-add",
+  "type": "write",
+  "title": "Сообщить, что конфликт решён",
+  "statement": "Вы отредактировали `greeting.txt`, убрали метки конфликта и оставили нужный текст. Введите команду, которая **помечает файл как разрешённый** (`git add` и имя файла).",
+  "goal": "Сообщить, что конфликт решён",
+  "input": "Текст команды.",
+  "expectedResult": "Одна команда, как в терминале.",
+  "constraints": [
+    "Ответьте точной командой из условия, без лишних пробелов."
+  ],
+  "hints": [
+    "Git ждёт сигнала, что файл исправлен.",
+    "Сигнал — добавление файла в индекс.",
+    "Команда — git add.",
+    "После add указывают имя файла.",
+    "Ответ: git add greeting.txt"
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "git add greeting.txt",
+    "shell": {
+      "setup": "git init -q\necho \"Привет\" > greeting.txt\ngit add greeting.txt\ngit commit -q -m \"Приветствие\"\ngit switch -q -c feature\necho \"Здравствуйте\" > greeting.txt\ngit commit -q -am \"Формально\"\ngit switch -q main\necho \"Привет, друзья\" > greeting.txt\ngit commit -q -am \"Дружески\"\ngit merge feature > /dev/null\necho \"Здравствуйте, друзья\" > greeting.txt\n",
+      "check": "git status -s",
+      "expected": "M  greeting.txt"
+    }
+  },
+  "solution": "git add greeting.txt",
+  "explanation": "Для Git разрешённый конфликт — это файл, добавленный в индекс.",
+  "criteria": [
+    "Команда записана без ошибок."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "git commit",
+      "why": "Пока файл не добавлен в индекс, коммит слияния не создастся."
+    },
+    {
+      "code": "git merge --continue",
+      "why": "Без git add Git скажет, что файл не разрешён."
+    },
+    {
+      "code": "git restore greeting.txt",
+      "why": "Отменяет вашу правку."
+    }
+  ]
+}

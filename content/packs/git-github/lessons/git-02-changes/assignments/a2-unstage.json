@@ -1,0 +1,47 @@
+{
+  "id": "a2-unstage",
+  "type": "write",
+  "title": "Убрать из индекса",
+  "statement": "Файл `notes.txt` по ошибке добавлен в индекс. Введите команду, которая **убирает его из индекса**, не теряя правок (`git restore`, ключ `--staged`, имя файла).",
+  "goal": "Убрать из индекса",
+  "input": "Текст команды.",
+  "expectedResult": "Одна команда, как в терминале.",
+  "constraints": [
+    "Ответьте точной командой из условия, без лишних пробелов."
+  ],
+  "hints": [
+    "Нужно вернуть файл из индекса в рабочую папку.",
+    "Для этого служит команда git restore.",
+    "Ключ --staged говорит: работать с индексом.",
+    "В конце — имя файла.",
+    "Ответ: git restore --staged notes.txt"
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "git restore --staged notes.txt",
+    "shell": {
+      "setup": "git init -q\nprintf 'one\\ntwo\\n' > notes.txt\ngit add notes.txt\ngit commit -q -m \"Заметки\"\necho three >> notes.txt\ngit add notes.txt\n",
+      "check": "git status -s",
+      "expected": " M notes.txt"
+    }
+  },
+  "solution": "git restore --staged notes.txt",
+  "explanation": "git restore --staged перекладывает изменения обратно из индекса, файл остаётся изменённым.",
+  "criteria": [
+    "Команда записана без ошибок."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "git restore notes.txt",
+      "why": "Эта команда отбрасывает правки в рабочей папке, а индекс не трогает."
+    },
+    {
+      "code": "git rm notes.txt",
+      "why": "Удаляет файл из репозитория."
+    },
+    {
+      "code": "git reset --hard",
+      "why": "Уничтожает все несохранённые правки."
+    }
+  ]
+}

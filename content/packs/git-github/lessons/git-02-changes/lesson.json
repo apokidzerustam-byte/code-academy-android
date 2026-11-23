@@ -1,0 +1,45 @@
+{
+  "id": "git-02-changes",
+  "title": "Изменения и отмена",
+  "goal": "Смотреть правки через git diff и безопасно отменять изменения.",
+  "skills": [
+    "git.diff",
+    "git.restore",
+    "git.revert"
+  ],
+  "prerequisites": [
+    "git-01-repo"
+  ],
+  "runner": "A",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-stat.json",
+    "assignments/a2-unstage.json",
+    "assignments/a3-discard.json",
+    "assignments/a4-restore.json",
+    "assignments/a5-revert.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Запускают git restore файл, не проверив, что правки не нужны",
+      "fix": "Сначала посмотрите git diff: восстановить несохранённое нельзя."
+    },
+    {
+      "mistake": "Путают git restore --staged и git restore",
+      "fix": "Со staged — из индекса, без — отбросить правки рабочей папки."
+    },
+    {
+      "mistake": "Забывают, что git diff пуст после git add",
+      "fix": "Для подготовленных правок — git diff --staged."
+    },
+    {
+      "mistake": "Используют git reset --hard там, где хватило бы revert",
+      "fix": "reset переписывает историю; revert безопасен для общих веток."
+    }
+  ]
+}

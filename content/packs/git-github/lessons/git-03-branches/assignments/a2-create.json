@@ -1,0 +1,47 @@
+{
+  "id": "a2-create",
+  "type": "write",
+  "title": "Создать и перейти",
+  "statement": "Вы в основной ветке. Введите команду, которая **создаёт ветку `login` и сразу переключает на неё** (`git switch`, ключ `-c`, имя ветки).",
+  "goal": "Создать и перейти",
+  "input": "Текст команды.",
+  "expectedResult": "Одна команда, как в терминале.",
+  "constraints": [
+    "Ответьте точной командой из условия, без лишних пробелов."
+  ],
+  "hints": [
+    "Нужно и создать ветку, и перейти на неё.",
+    "Команда переключения — git switch.",
+    "Ключ -c означает «создать».",
+    "После ключа указывают имя ветки.",
+    "Ответ: git switch -c login"
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "git switch -c login",
+    "shell": {
+      "setup": "git init -q\necho v1 > app.txt\ngit add app.txt\ngit commit -q -m v1\n",
+      "check": "git branch --show-current",
+      "expected": "login"
+    }
+  },
+  "solution": "git switch -c login",
+  "explanation": "git switch -c = «создать и переключиться» одной командой.",
+  "criteria": [
+    "Команда записана без ошибок."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "git branch login",
+      "why": "Создаёт ветку, но остаётся в main."
+    },
+    {
+      "code": "git switch login",
+      "why": "Такой ветки ещё нет — переключение не удастся."
+    },
+    {
+      "code": "git merge login",
+      "why": "Слияние несуществующей ветки."
+    }
+  ]
+}

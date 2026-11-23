@@ -38,6 +38,8 @@ GITCONFIG = """[user]
 \tautocrlf = false
 [color]
 \tui = false
+[log]
+\tdecorate = short
 [commit]
 \tgpgsign = false
 [tag]

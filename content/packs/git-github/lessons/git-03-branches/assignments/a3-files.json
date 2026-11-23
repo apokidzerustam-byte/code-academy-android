@@ -1,0 +1,41 @@
+{
+  "id": "a3-files",
+  "type": "predict",
+  "title": "Файлы после слияния",
+  "statement": "Что выведут эти команды? Запишите вывод построчно, не запуская их.",
+  "goal": "Файлы после слияния",
+  "input": "Нет.",
+  "expectedResult": "Вывод команд.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "git init -q\necho v1 > app.txt\ngit add app.txt\ngit commit -q -m v1\ngit switch -q -c feature\necho f > feature.txt\ngit add feature.txt\ngit commit -q -m feat\ngit switch -q main\nls\ngit merge -q feature\nls\n",
+  "hints": [
+    "Сначала мы находимся в main, куда feature ещё не слита.",
+    "Первый ls покажет только app.txt.",
+    "Затем merge приносит коммит с feature.txt.",
+    "Второй ls покажет оба файла.",
+    "Всего три строки: app.txt, затем app.txt и feature.txt."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "app.txt\napp.txt\nfeature.txt"
+  },
+  "solution": "app.txt\napp.txt\nfeature.txt",
+  "explanation": "До слияния в main нет файла из ветки feature; после слияния он появляется.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "app.txt\nfeature.txt\napp.txt\nfeature.txt",
+      "answer": "app.txt\nfeature.txt\napp.txt\nfeature.txt",
+      "why": "До слияния в main нет feature.txt: первый ls показывает один файл."
+    },
+    {
+      "code": "app.txt\nfeature.txt",
+      "answer": "app.txt\nfeature.txt",
+      "why": "ls вызывается дважды: до слияния и после."
+    }
+  ]
+}

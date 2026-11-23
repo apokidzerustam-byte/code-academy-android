@@ -1,0 +1,45 @@
+{
+  "id": "git-05-remote",
+  "title": "Удалённые репозитории и GitHub",
+  "goal": "Подключать удалённый репозиторий, отправлять изменения, клонировать и забирать чужие.",
+  "skills": [
+    "git.remote",
+    "git.push",
+    "git.clone"
+  ],
+  "prerequisites": [
+    "git-04-conflicts"
+  ],
+  "runner": "A",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-remote.json",
+    "assignments/a2-add.json",
+    "assignments/a3-push.json",
+    "assignments/a4-clone.json",
+    "assignments/a5-pull.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Пытаются запушить без аккаунта и токена на GitHub",
+      "fix": "GitHub требует токен доступа вместо пароля; создайте его в настройках."
+    },
+    {
+      "mistake": "Делают push, не сделав pull, когда коллега уже отправил изменения",
+      "fix": "Сначала git pull, потом git push."
+    },
+    {
+      "mistake": "Забывают ключ -u при первой отправке",
+      "fix": "Один раз git push -u origin main, дальше — git push."
+    },
+    {
+      "mistake": "Путают Git и GitHub",
+      "fix": "Git работает и без GitHub; GitHub — лишь место хранения."
+    }
+  ]
+}

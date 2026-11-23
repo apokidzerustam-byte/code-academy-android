@@ -1,0 +1,210 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Когда ветки спорят",
+      "narration": "Если две ветки изменили разные файлы или разные места одного файла, Git сольёт их сам. Но если обе ветки поменяли одну и ту же строку по-разному, Git не знает, какой вариант правильный. Возникает конфликт слияния. Это обычная часть командной работы, и бояться её не нужно: Git аккуратно отметит спорные места, а решение примете вы. Сегодня мы намеренно создадим конфликт и разберёмся с ним по шагам.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "**Конфликт** — две ветки по-разному изменили одно и то же место. Решает человек",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "setup",
+      "title": "Две ветки меняют одну строку",
+      "narration": "Создадим файл с приветствием и сохраним его в main. Затем создадим ветку feature и поменяем в ней строку на один вариант. В main вернёмся и поменяем ту же строку на другой вариант. Теперь у каждой ветки своё мнение о первой строке файла.",
+      "actions": [
+        {
+          "type": "type",
+          "text": "git init -q\necho \"Привет\" > greeting.txt\ngit add greeting.txt\ngit commit -q -m \"Приветствие\"\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "git switch -q -c feature\necho \"Здравствуйте\" > greeting.txt\ngit commit -q -am \"Формальное приветствие\"\n",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "type",
+          "text": "git switch -q main\necho \"Привет, друзья\" > greeting.txt\ngit commit -q -am \"Дружеское приветствие\"\n",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "conflict",
+      "title": "Слияние с конфликтом",
+      "narration": "Попробуем слить feature в main. Git сообщит о конфликте в файле и остановит слияние на середине. Не пугайтесь: ничего не потеряно. Короткий статус покажет пару букв U, что означает «обновлён с обеих сторон, не разрешён».",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "git merge feature\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "output",
+          "text": "Auto-merging greeting.txt\nCONFLICT (content): Merge conflict in greeting.txt\nAutomatic merge failed; fix conflicts and then commit the result.\n",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "git status -s\n",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "UU greeting.txt\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "markers",
+      "title": "Метки конфликта",
+      "narration": "Откроем файл. Git вставил в него специальные метки. Между первой меткой и разделителем из знаков равно находится вариант из текущей ветки, а между разделителем и последней меткой — вариант из сливаемой ветки. Наша задача — оставить в файле то, что должно получиться в итоге, и убрать все три метки.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "cat greeting.txt\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "output",
+          "text": "<<<<<<< HEAD\nПривет, друзья\n=======\nЗдравствуйте\n>>>>>>> feature\n",
+          "cue": 0
+        }
+      ]
+    },
+    {
+      "id": "resolve",
+      "title": "Разрешаем конфликт",
+      "narration": "Решим, что итоговое приветствие объединяет оба варианта. Перезапишем файл готовым текстом без меток. Затем сообщаем Git, что конфликт разрешён: добавляем файл в индекс. И, наконец, сохраняем коммит слияния. Если оставить сообщение по умолчанию, ключ no-edit это и делает.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "echo \"Здравствуйте, друзья\" > greeting.txt\n",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "type",
+          "text": "git add greeting.txt\n",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "type",
+          "text": "git commit --no-edit\n",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "[main b724b80] Merge branch 'feature'\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "log",
+      "title": "Результат",
+      "narration": "Посмотрим на историю в виде графа. Видно, как две линии разошлись и снова соединились коммитом слияния. А если в разгар конфликта вы поняли, что не готовы его решать, слияние можно отменить командой merge с ключом abort. Всё вернётся в состояние до слияния.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "git log --oneline --graph\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "output",
+          "text": "*   b724b80 (HEAD -> main) Merge branch 'feature'\n|\\  \n| * e34b310 (feature) Формальное приветствие\n* | 15d00b5 Дружеское приветствие\n|/  \n* a026b77 Приветствие\n",
+          "cue": 0
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. Конфликт возникает, когда ветки по-разному меняют одно и то же место. Порядок действий всегда такой: найти файлы со статусом UU, открыть их, оставить нужный текст и убрать метки, добавить файл командой add, сохранить коммит. Если запутались, git merge с ключом abort отменяет слияние. Часто конфликты — повод просто поговорить с коллегой о том, как должен выглядеть итог.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "Статус `UU` → правим файл, убираем метки → `git add` → `git commit` · отмена: `git merge --abort`",
+          "cue": 2
+        }
+      ]
+    }
+  ]
+}

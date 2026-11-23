@@ -1,0 +1,260 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Три области Git",
+      "narration": "Чтобы уверенно работать с Git, нужно понимать три области. Первая — рабочая папка: файлы, которые вы видите и правите. Вторая — индекс: то, что вы отобрали для следующего коммита. Третья — история: уже сохранённые коммиты. Изменения путешествуют слева направо: из рабочей папки в индекс командой add, из индекса в историю командой commit. А многие команды отмены просто двигают изменения обратно. Сегодня научимся смотреть, что именно изменилось, и безопасно отменять неудачные правки.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "Рабочая папка → (`git add`) → индекс → (`git commit`) → история",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "setup",
+      "title": "Подготовим проект",
+      "narration": "Начнём с небольшого проекта: репозиторий с файлом приветствия и одним коммитом. Дальше будем вносить правки и смотреть на них разными командами.",
+      "actions": [
+        {
+          "type": "type",
+          "text": "git init -q\necho \"Привет, мир\" > hello.txt\ngit add hello.txt\ngit commit -q -m \"Добавлен hello.txt\"\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 0
+        }
+      ]
+    },
+    {
+      "id": "diff",
+      "title": "Что изменилось: git diff",
+      "narration": "Изменим файл и посмотрим разницу командой git diff. Строки, начинающиеся с минуса, удалены, а строки с плюсом добавлены. Если нужна только краткая сводка, добавьте ключ stat: он покажет, сколько строк изменено в каждом файле. Команда git diff без ключей сравнивает рабочую папку с индексом.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "echo \"Привет, Git\" > hello.txt\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "git diff\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "output",
+          "text": "diff --git a/hello.txt b/hello.txt\nindex 5cba490..c43e969 100644\n--- a/hello.txt\n+++ b/hello.txt\n@@ -1 +1 @@\n-Привет, мир\n+Привет, Git\n",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "git diff --stat\n",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "output",
+          "text": " hello.txt | 2 +-\n 1 file changed, 1 insertion(+), 1 deletion(-)\n",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "staged",
+      "title": "Сравнение индекса с историей",
+      "narration": "После git add изменение переезжает в индекс, и обычный git diff становится пустым: рабочая папка и индекс совпадают. Чтобы увидеть то, что войдёт в следующий коммит, используют ключ staged. Это хорошая привычка: перед каждым коммитом проверять, что именно вы собираетесь сохранить.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "git add hello.txt\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "git diff\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "git diff --staged --stat\n",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "output",
+          "text": " hello.txt | 2 +-\n 1 file changed, 1 insertion(+), 1 deletion(-)\n",
+          "cue": 1
+        }
+      ]
+    },
+    {
+      "id": "unstage",
+      "title": "Убрать из индекса",
+      "narration": "Добавили в индекс лишнее? Команда git restore с ключом staged возвращает файл из индекса обратно в рабочую папку. Сами правки при этом сохраняются, просто они перестают быть подготовленными к коммиту.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "git restore --staged hello.txt\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "git status -s\n",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "output",
+          "text": " M hello.txt\n",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "restore",
+      "title": "Отменить правки в файле",
+      "narration": "А если правка не удалась и нужно вернуть файл к последнему сохранённому состоянию? Для этого есть git restore с именем файла. Будьте внимательны: эта команда безвозвратно отбрасывает несохранённые изменения, вернуть их будет нельзя. Проверим содержимое файла командой cat.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "git restore hello.txt\n",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "type",
+          "text": "cat hello.txt\ngit status -s\n",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "Привет, мир\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "revert",
+      "title": "Отмена сохранённого коммита",
+      "narration": "Отменить уже сохранённый коммит можно командой git revert. Она не стирает историю, а создаёт новый коммит, который делает обратное. Это безопасный способ, потому что история остаётся честной, и им можно пользоваться, даже если коммит уже отправлен другим людям. Создадим ненужный коммит и отменим его. Ключ no-edit оставляет сообщение по умолчанию.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "echo \"Ошибка\" >> hello.txt\ngit commit -q -am \"Лишняя строка\"\n",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "type",
+          "text": "git revert --no-edit HEAD\n",
+          "file": "terminal.sh",
+          "cue": 4
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "[main 37fec8f] Revert \"Лишняя строка\"\n Date: Thu Jan 15 12:00:00 2026 +0000\n 1 file changed, 1 deletion(-)\n",
+          "cue": 4
+        },
+        {
+          "type": "type",
+          "text": "git log --format=%s\n",
+          "file": "terminal.sh",
+          "cue": 4
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "Revert \"Лишняя строка\"\nЛишняя строка\nДобавлен hello.txt\n",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. Git diff показывает правки в рабочей папке, а git diff с ключом staged — подготовленные к коммиту. Git restore с ключом staged убирает файл из индекса, а git restore с именем файла отбрасывает несохранённые правки. Git revert отменяет уже сохранённый коммит новым коммитом. Перед командами, которые удаляют изменения, всегда смотрите git status.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`diff` — посмотреть · `restore --staged` — из индекса · `restore` — отбросить правки · `revert` — отменить коммит",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}

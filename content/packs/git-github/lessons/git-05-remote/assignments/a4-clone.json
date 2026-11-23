@@ -1,0 +1,47 @@
+{
+  "id": "a4-clone",
+  "type": "write",
+  "title": "Скачать копию",
+  "statement": "На сервере `../server.git` лежит проект. Введите команду, которая **клонирует его в новую папку `copy`** (`git clone`, адрес, имя папки).",
+  "goal": "Скачать копию",
+  "input": "Текст команды.",
+  "expectedResult": "Одна команда, как в терминале.",
+  "constraints": [
+    "Ответьте точной командой из условия, без лишних пробелов."
+  ],
+  "hints": [
+    "Для копирования проекта есть git clone.",
+    "Сначала указывают адрес, откуда качать.",
+    "Потом — название папки для копии.",
+    "Адрес ../server.git, папка copy.",
+    "Ответ: git clone ../server.git copy"
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "git clone ../server.git copy",
+    "shell": {
+      "setup": "git init -q\necho a > a.txt\ngit add a.txt\ngit commit -q -m \"Первый\"\ngit init -q --bare ../server.git\ngit remote add origin ../server.git\ngit push -q -u origin main\n",
+      "check": "ls copy",
+      "expected": "a.txt"
+    }
+  },
+  "solution": "git clone ../server.git copy",
+  "explanation": "git clone адрес папка скачивает весь проект с историей и настраивает origin.",
+  "criteria": [
+    "Команда записана без ошибок."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "git clone ../server.git",
+      "why": "Копия окажется в папке server, а не copy."
+    },
+    {
+      "code": "git clone copy ../server.git",
+      "why": "Аргументы перепутаны местами."
+    },
+    {
+      "code": "git pull ../server.git copy",
+      "why": "pull не создаёт новую копию проекта."
+    }
+  ]
+}

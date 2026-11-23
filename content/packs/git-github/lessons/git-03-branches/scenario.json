@@ -1,0 +1,214 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Параллельные миры проекта",
+      "narration": "Представьте, что вы хотите попробовать новую идею, но боитесь сломать работающий проект. Ветки Git решают эту проблему. Ветка — это отдельная линия истории: вы работаете в ней, и основная линия остаётся нетронутой. Когда идея готова, ветки сливают вместе. Основная ветка обычно называется main. Каждая новая функция, исправление или эксперимент живёт в своей ветке, и это один из главных приёмов командной разработки.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "**Ветка** — отдельная линия коммитов. `main` — основная, остальные — для новых идей",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "setup",
+      "title": "Исходный проект",
+      "narration": "Подготовим проект с одним коммитом. Команда git branch без параметров показывает список веток, а звёздочка отмечает ту, в которой вы сейчас находитесь.",
+      "actions": [
+        {
+          "type": "type",
+          "text": "git init -q\necho \"Версия 1\" > app.txt\ngit add app.txt\ngit commit -q -m \"Версия 1\"\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "git branch\n",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "output",
+          "text": "* main\n",
+          "cue": 1
+        }
+      ]
+    },
+    {
+      "id": "create",
+      "title": "Создаём ветку и переключаемся",
+      "narration": "Команда git switch с ключом c создаёт новую ветку и сразу переключает на неё. Назовём её feature. Теперь всё, что мы сохраним, попадёт в эту ветку, а main останется как была. Добавим новый файл и сохраним коммит.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "git switch -c feature\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "output",
+          "text": "Switched to a new branch 'feature'\n",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "echo \"Новая функция\" > feature.txt\ngit add feature.txt\ngit commit -q -m \"Добавлена функция\"\n",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "compare",
+      "title": "Ветки живут отдельно",
+      "narration": "Посмотрим на историю со всех веток. Ключ graph рисует линии, а all показывает все ветки. Теперь вернёмся на main командой git switch main и проверим файлы. Файла feature нет: в основной ветке этого коммита ещё не было. Переключаясь между ветками, Git сам подменяет файлы в папке.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "git log --oneline --graph --all\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "output",
+          "text": "* 1533e2e (HEAD -> feature) Добавлена функция\n* 865af2f (main) Версия 1\n",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "git switch main\nls\n",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 2
+        },
+        {
+          "type": "output",
+          "text": "Switched to branch 'main'\napp.txt\n",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "merge",
+      "title": "Слияние веток",
+      "narration": "Идея готова, пора слить её в основную ветку. Находясь в main, выполняем git merge с именем ветки. Поскольку main с момента создания ветки не менялась, Git просто перемещает указатель вперёд. Такое слияние называется перемоткой, по-английски fast-forward. После слияния оба файла на месте.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "git merge feature\n",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "output",
+          "text": "Updating 865af2f..1533e2e\nFast-forward\n feature.txt | 1 +\n 1 file changed, 1 insertion(+)\n create mode 100644 feature.txt\n",
+          "cue": 1
+        },
+        {
+          "type": "type",
+          "text": "ls\n",
+          "file": "terminal.sh",
+          "cue": 4
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "app.txt\nfeature.txt\n",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "delete",
+      "title": "Уборка",
+      "narration": "Когда ветка слита, она больше не нужна. Удалить её можно командой git branch с ключом d. Сами коммиты при этом не пропадают: они уже в истории main. Git откажется удалять ветку, если в ней есть неслитая работа, чтобы вы случайно её не потеряли.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "git branch -d feature\ngit branch\n",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "output",
+          "text": "Deleted branch feature (was 1533e2e).\n* main\n",
+          "cue": 1
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. Ветки позволяют работать над идеями параллельно. Git branch показывает список, git switch с ключом c создаёт ветку и переключается, git merge сливает изменения в текущую ветку, а git branch с ключом d удаляет уже слитую ветку. Хорошая привычка: одна задача — одна ветка. В следующем уроке разберём, что делать, когда две ветки изменили одно и то же место.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`git switch -c имя` · `git merge имя` · `git branch -d имя`",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}

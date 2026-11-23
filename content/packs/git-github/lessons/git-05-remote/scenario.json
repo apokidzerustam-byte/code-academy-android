@@ -1,0 +1,182 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Git и GitHub",
+      "narration": "До сих пор вся история хранилась на одном компьютере. Но разработка почти всегда командная, и код нужно где-то хранить общим. Для этого существуют удалённые репозитории. GitHub — это сервис, который хранит такие репозитории в интернете и добавляет к ним удобства: страницы проектов, обсуждения, проверку кода. Git и GitHub — не одно и то же. Git — программа для истории, а GitHub — один из мест, где эту историю можно хранить. Сегодня мы попробуем все основные операции с удалённым репозиторием, но обойдёмся без интернета: роль GitHub сыграет обычная папка.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "**Git** — программа. **GitHub** — сервис для хранения Git-репозиториев. Удалённый репозиторий = *remote*",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "remote",
+      "title": "Подключаем удалённый репозиторий",
+      "narration": "Подготовим проект с одним коммитом. Затем создадим «сервер»: пустой репозиторий с ключом bare, в нём нет рабочих файлов, только история. Так устроены репозитории на GitHub. Подключаем его к проекту командой git remote add. Имя origin — общепринятое название основного удалённого репозитория. Команда git remote без параметров покажет подключённые.",
+      "actions": [
+        {
+          "type": "type",
+          "text": "git init -q\necho \"Проект\" > README.md\ngit add README.md\ngit commit -q -m \"Первый коммит\"\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "git init --bare ../server.git\n",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "output",
+          "text": "Initialized empty Git repository in /home/user/server.git/\n",
+          "cue": 1
+        },
+        {
+          "type": "type",
+          "text": "git remote add origin ../server.git\ngit remote\n",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "origin\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "push",
+      "title": "Отправляем: git push",
+      "narration": "Команда git push отправляет коммиты на сервер. При первой отправке указываем ключ u, который запоминает связь между локальной веткой и серверной. Дальше достаточно писать просто git push. Теперь история есть и на сервере: любой, у кого есть доступ, может её скачать.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "git push -u origin main\n",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "output",
+          "text": "To ../server.git\n * [new branch]      main -> main\nbranch 'main' set up to track 'origin/main'.\n",
+          "cue": 1
+        }
+      ]
+    },
+    {
+      "id": "clone",
+      "title": "Скачиваем: git clone",
+      "narration": "Чтобы получить копию чужого проекта, служит git clone. Укажем адрес сервера и имя папки для копии. Представим, что это компьютер коллеги: в его папке уже лежит весь проект вместе с историей. Перейдём туда командой cd и посмотрим историю.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "cd ..\ngit clone -q server.git colleague\ncd colleague\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "type",
+          "text": "ls\ngit log --oneline\n",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "README.md\nd9effff (HEAD -> main, origin/main, origin/HEAD) Первый коммит\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "pull",
+      "title": "Обмен изменениями",
+      "narration": "Коллега сделал изменение и отправил его на сервер. Мы возвращаемся в свой проект и забираем новости командой git pull. Git скачивает чужие коммиты и сливает их в нашу ветку. Привычный ритм командной работы: перед началом работы делаем pull, после завершения — commit и push.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "terminal.sh"
+        },
+        {
+          "type": "type",
+          "text": "echo \"Строка от коллеги\" >> README.md\ngit commit -q -am \"Правка коллеги\"\ngit push -q\n",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "cd ../project\ngit pull\ncat README.md\n",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "terminal.sh",
+          "cue": 1
+        },
+        {
+          "type": "output",
+          "text": "From ../server\n   d9effff..041914e  main       -> origin/main\nUpdating d9effff..041914e\nFast-forward\n README.md | 1 +\n 1 file changed, 1 insertion(+)\nПроект\nСтрока от коллеги\n",
+          "cue": 1
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. Remote — это удалённый репозиторий, у него есть имя, чаще всего origin. Git push отправляет коммиты, git pull забирает и сливает чужие, git clone создаёт полную копию. GitHub добавляет к этому веб-интерфейс и инструменты для командной работы. Для работы с настоящим GitHub понадобится интернет и аккаунт, но команды те же самые. Остался последний штрих: оформление проекта.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`git remote add origin адрес` · `git push -u origin main` · `git clone адрес папка` · `git pull`",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}

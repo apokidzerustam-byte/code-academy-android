@@ -1,0 +1,45 @@
+{
+  "id": "git-06-project",
+  "title": "README, .gitignore и теги",
+  "goal": "Оформлять репозиторий: README, .gitignore, осмысленные коммиты и теги версий.",
+  "skills": [
+    "git.readme",
+    "git.ignore",
+    "git.tag"
+  ],
+  "prerequisites": [
+    "git-05-remote"
+  ],
+  "runner": "A",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-ignore.json",
+    "assignments/a2-gitignore.json",
+    "assignments/a3-tag.json",
+    "assignments/a4-tags.json",
+    "assignments/a5-untrack.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Коммитят .env, пароли и токены",
+      "fix": "Внесите в .gitignore до первого коммита; если секрет утёк — замените его."
+    },
+    {
+      "mistake": "Пишут сообщения «правки», «fix», «123»",
+      "fix": "Опишите, что сделано: «Исправить расчёт скидки»."
+    },
+    {
+      "mistake": "Не добавляют .gitignore в репозиторий",
+      "fix": "Файл нужно закоммитить, чтобы правила действовали у всех."
+    },
+    {
+      "mistake": "Ждут, что gitignore уберёт уже отслеживаемый файл",
+      "fix": "Для уже закоммиченных файлов нужен git rm --cached."
+    }
+  ]
+}

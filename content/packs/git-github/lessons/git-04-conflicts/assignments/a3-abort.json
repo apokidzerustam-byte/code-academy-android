@@ -1,0 +1,47 @@
+{
+  "id": "a3-abort",
+  "type": "write",
+  "title": "Отменить слияние",
+  "statement": "Слияние остановилось на конфликте, но вы решили вернуться к состоянию до слияния. Введите команду, которая **отменяет слияние** (`git merge`, ключ `--abort`).",
+  "goal": "Отменить слияние",
+  "input": "Текст команды.",
+  "expectedResult": "Одна команда, как в терминале.",
+  "constraints": [
+    "Ответьте точной командой из условия, без лишних пробелов."
+  ],
+  "hints": [
+    "Нужно прервать слияние и вернуть всё как было.",
+    "Команда та же, что запускала слияние, — git merge.",
+    "Прервать помогает специальный ключ.",
+    "Ключ называется --abort.",
+    "Ответ: git merge --abort"
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "git merge --abort",
+    "shell": {
+      "setup": "git init -q\necho \"Привет\" > greeting.txt\ngit add greeting.txt\ngit commit -q -m \"Приветствие\"\ngit switch -q -c feature\necho \"Здравствуйте\" > greeting.txt\ngit commit -q -am \"Формально\"\ngit switch -q main\necho \"Привет, друзья\" > greeting.txt\ngit commit -q -am \"Дружески\"\ngit merge feature > /dev/null\n",
+      "check": "git status -s\ncat greeting.txt",
+      "expected": "Привет, друзья"
+    }
+  },
+  "solution": "git merge --abort",
+  "explanation": "git merge --abort возвращает рабочую папку и индекс к состоянию до начала слияния.",
+  "criteria": [
+    "Команда записана без ошибок."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "git merge --continue",
+      "why": "Продолжает слияние: конфликт остаётся неразрешённым."
+    },
+    {
+      "code": "git commit",
+      "why": "Нельзя сохранить коммит, пока есть неразрешённые файлы."
+    },
+    {
+      "code": "git restore greeting.txt",
+      "why": "Не завершает слияние и не работает с неразрешённым файлом."
+    }
+  ]
+}

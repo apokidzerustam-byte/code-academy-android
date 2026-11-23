@@ -1,0 +1,41 @@
+{
+  "id": "a1-status",
+  "type": "predict",
+  "title": "Статус при конфликте",
+  "statement": "Что выведут эти команды? Запишите вывод построчно, не запуская их.",
+  "goal": "Статус при конфликте",
+  "input": "Нет.",
+  "expectedResult": "Вывод команд.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "git init -q\necho \"Привет\" > greeting.txt\ngit add greeting.txt\ngit commit -q -m \"Приветствие\"\ngit switch -q -c feature\necho \"Здравствуйте\" > greeting.txt\ngit commit -q -am \"Формально\"\ngit switch -q main\necho \"Привет, друзья\" > greeting.txt\ngit commit -q -am \"Дружески\"\ngit merge feature > /dev/null\ngit status -s\n",
+  "hints": [
+    "Обе ветки изменили одну и ту же строку файла.",
+    "Git не смог слить файл сам.",
+    "Файл с неразрешённым конфликтом отмечается двумя одинаковыми буквами.",
+    "Эти буквы — U (unmerged) в обоих столбцах.",
+    "Вывод: «UU greeting.txt»."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "UU greeting.txt"
+  },
+  "solution": "UU greeting.txt",
+  "explanation": "UU — «unmerged с обеих сторон»: Git ждёт, пока вы разрешите конфликт.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "M  greeting.txt",
+      "answer": "M  greeting.txt",
+      "why": "При конфликте файл помечается буквами UU, а не M."
+    },
+    {
+      "code": "AA greeting.txt",
+      "answer": "AA greeting.txt",
+      "why": "Буквы AA означают, что файл добавлен с двух сторон; здесь он изменён."
+    }
+  ]
+}

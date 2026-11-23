@@ -1,0 +1,41 @@
+{
+  "id": "a4-restore",
+  "type": "predict",
+  "title": "Что останется в файле",
+  "statement": "Что выведут эти команды? Запишите вывод построчно, не запуская их.",
+  "goal": "Что останется в файле",
+  "input": "Нет.",
+  "expectedResult": "Вывод команд.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "git init -q\nprintf 'one\\ntwo\\n' > notes.txt\ngit add notes.txt\ngit commit -q -m \"Заметки\"\necho oops >> notes.txt\ngit add notes.txt\ngit restore --staged notes.txt\ngit restore notes.txt\ncat notes.txt\ngit status -s\n",
+  "hints": [
+    "Сначала правка добавлена в индекс, затем убрана оттуда.",
+    "После restore --staged правка осталась только в рабочей папке.",
+    "Команда restore без ключа отбросила и её.",
+    "Файл снова такой же, как в коммите: две строки.",
+    "Статус не выводит ничего: изменений нет."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "one\ntwo"
+  },
+  "solution": "one\ntwo",
+  "explanation": "Две команды restore по очереди убрали правку из индекса и из рабочей папки.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "one\ntwo\noops",
+      "answer": "one\ntwo\noops",
+      "why": "Вторая команда restore без staged вернула файл к версии из коммита."
+    },
+    {
+      "code": "one\ntwo\n M notes.txt",
+      "answer": "one\ntwo\n M notes.txt",
+      "why": "Статус пуст: файл вернулся к коммиту."
+    }
+  ]
+}
