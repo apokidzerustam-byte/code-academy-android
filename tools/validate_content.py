@@ -111,6 +111,7 @@ def run_code(code, stdin=""):
 
 WEB_LANGS = {"html", "js", "sql", "kotlin"}
 EXT_LANG = {"sh": "bash", "bash": "bash", "py": "python", "html": "html", "htm": "html", "js": "js", "sql": "sql", "kt": "kotlin", "kts": "kotlin"}
+MAX_TESTS_BYTES = 200 * 1024
 KINDS = {
     "python": {"stdout", "function", "answer", "fastapi"},
     "html": {"web", "answer"}, "js": {"web", "answer"}, "sql": {"sql", "answer"}, "kotlin": {"kotlin", "answer"},
@@ -470,6 +471,10 @@ def _validate_shell_answer(rep, where, a, tests):
 def validate_assignment(path, a, rep, lang="python"):
     where = str(path)
     tests = a["tests"]
+    # Тесты передаются между процессами (Binder, лимит около 1 МБ): большие входы роняют приложение на устройстве.
+    size = len(json.dumps(tests, ensure_ascii=False).encode("utf-8"))
+    if size > MAX_TESTS_BYTES:
+        rep.err(where, f"тесты занимают {size // 1024} КБ (допустимо не больше {MAX_TESTS_BYTES // 1024} КБ): уменьшите входные данные")
     if tests["kind"] not in KINDS.get(lang, KINDS["python"]):
         rep.err(where, f"вид тестов {tests['kind']!r} не подходит для языка урока {lang!r}")
         return
