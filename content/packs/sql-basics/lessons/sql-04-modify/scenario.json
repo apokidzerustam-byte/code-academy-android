@@ -1,0 +1,169 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Три команды изменения",
+      "narration": "Запросы SELECT только читают данные. Но таблица должна жить: появляются новые записи, старые меняются, ненужные исчезают. Для этого есть три команды. INSERT добавляет строки, UPDATE изменяет существующие, DELETE удаляет. Сегодня учимся ими пользоваться и узнаем, как база защищает таблицу от неверных данных.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "INSERT — добавить · UPDATE — изменить · DELETE — удалить",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "schema",
+      "title": "Таблица с правилами",
+      "narration": "Возьмём список дел. У каждой задачи есть номер, название, статус и срочность. Посмотрите на правила, которые записаны в самой таблице. NOT NULL значит, что название обязательно. DEFAULT задаёт значение по умолчанию: если статус не указать, будет todo. А CHECK ограничивает допустимые значения: статус только из трёх слов, а срочность от одного до пяти.",
+      "actions": [
+        {
+          "type": "type",
+          "text": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  status TEXT NOT NULL DEFAULT 'todo' CHECK (status IN ('todo', 'doing', 'done')),\n  priority INTEGER NOT NULL DEFAULT 3 CHECK (priority BETWEEN 1 AND 5)\n);\n\nINSERT INTO tasks (title, status, priority) VALUES\n  ('Купить молоко', 'todo', 2),\n  ('Написать отчёт', 'doing', 1),\n  ('Позвонить врачу', 'todo', 3),\n  ('Оплатить интернет', 'done', 2);\n",
+          "file": "schema.sql",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            3,
+            4,
+            5
+          ],
+          "file": "schema.sql",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "insert",
+      "title": "INSERT: добавляем строки",
+      "narration": "Добавим две задачи одной командой. После INSERT INTO пишем таблицу и в скобках столбцы, которые заполняем, а после VALUES — сами значения, по одной скобке на строку. Статус мы не указали, поэтому подставится значение по умолчанию. Номер выдаст сама база. Запускаем и смотрим таблицу: обе новые задачи со статусом todo.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.sql"
+        },
+        {
+          "type": "type",
+          "text": "INSERT INTO tasks (title, priority)\nVALUES ('Сдать книги', 1),\n       ('Починить кран', 4);\n\nSELECT id, title, status, priority FROM tasks ORDER BY id;\n",
+          "file": "main.sql",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "main.sql",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "(строка 1: изменено 2 строки)\n\nid | title             | status | priority\n---+-------------------+--------+---------\n1  | Купить молоко     | todo   | 2\n2  | Написать отчёт    | doing  | 1\n3  | Позвонить врачу   | todo   | 3\n4  | Оплатить интернет | done   | 2\n5  | Сдать книги       | todo   | 1\n6  | Починить кран     | todo   | 4\n(6 строк)\n",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "update",
+      "title": "UPDATE: меняем строки",
+      "narration": "Теперь отметим покупку молока как выполненную. Команда UPDATE, имя таблицы, после SET — какие столбцы меняем, а после WHERE — какие строки. Значение можно вычислять из текущего: priority равно priority минус один делает задачу срочнее. Запускаем: молоко стало done.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.sql"
+        },
+        {
+          "type": "type",
+          "text": "UPDATE tasks\nSET status = 'done'\nWHERE title = 'Купить молоко';\n\nSELECT id, title, status, priority FROM tasks ORDER BY id;\n",
+          "file": "main.sql",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            3
+          ],
+          "file": "main.sql",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "main.sql",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "(строка 1: изменено 1 строка)\n\nid | title             | status | priority\n---+-------------------+--------+---------\n1  | Купить молоко     | done   | 2\n2  | Написать отчёт    | doing  | 1\n3  | Позвонить врачу   | todo   | 3\n4  | Оплатить интернет | done   | 2\n(4 строки)\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "delete",
+      "title": "DELETE: удаляем строки",
+      "narration": "Выполненные задачи можно удалить. Команда DELETE FROM, таблица и условие WHERE. Запускаем: задача про интернет исчезла. Важно: без WHERE удалятся все строки таблицы, а не только нужные. То же касается UPDATE: без условия он изменит всё. Поэтому перед такой командой полезно написать SELECT с тем же WHERE и убедиться, что выбрались именно нужные строки.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.sql"
+        },
+        {
+          "type": "type",
+          "text": "DELETE FROM tasks\nWHERE status = 'done';\n\nSELECT id, title, status, priority FROM tasks ORDER BY id;\n",
+          "file": "main.sql",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "main.sql",
+          "cue": 2
+        },
+        {
+          "type": "output",
+          "text": "(строка 1: изменено 1 строка)\n\nid | title           | status | priority\n---+-----------------+--------+---------\n1  | Купить молоко   | todo   | 2\n2  | Написать отчёт  | doing  | 1\n3  | Позвонить врачу | todo   | 3\n(3 строки)\n",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "check",
+      "title": "Защита от неверных данных",
+      "narration": "Попробуем добавить задачу со статусом finished, которого нет в списке. База откажет: проверка CHECK не пройдена. Таблица осталась целой. Это удобно: даже если в программе ошибка, неверные данные в таблицу не попадут.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.sql"
+        },
+        {
+          "type": "type",
+          "text": "INSERT INTO tasks (title, status)\nVALUES ('Тест', 'finished');\n",
+          "file": "main.sql",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "main.sql",
+          "cue": 1
+        },
+        {
+          "type": "output",
+          "text": "SQLError: не выполнено условие CHECK: status IN ('todo', 'doing', 'done') (CHECK constraint failed: status IN ('todo', 'doing', 'done'))\n  строка 1",
+          "stream": "stderr",
+          "cue": 1
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. INSERT INTO добавляет строки, и пропущенные столбцы получают значения по умолчанию. UPDATE с SET и WHERE меняет нужные строки. DELETE с WHERE удаляет их. Ограничения NOT NULL, DEFAULT и CHECK защищают таблицу от неверных данных. И запомните правило: перед UPDATE и DELETE проверяйте WHERE запросом SELECT.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "Перед `UPDATE`/`DELETE` напишите `SELECT … WHERE …` — и убедитесь, что выбрались те строки.",
+          "cue": 5
+        }
+      ]
+    }
+  ]
+}

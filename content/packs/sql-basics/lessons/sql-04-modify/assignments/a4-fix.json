@@ -1,0 +1,159 @@
+{
+  "id": "a4-fix",
+  "type": "fix",
+  "title": "Ловушка с OR",
+  "statement": "Нужно пометить как `done` все задачи со срочностью 1 или 2. Команда написана, но помечает **все** задачи подряд. Найдите ошибку в условии.",
+  "goal": "Читать условие WHERE.",
+  "input": "Таблицы создаются автоматически перед запуском.",
+  "expectedResult": "Таблица результата.",
+  "constraints": [],
+  "starterCode": "UPDATE tasks\nSET status = 'done'\nWHERE priority = 1 OR 2;\n",
+  "hints": [
+    "Выполните SELECT с тем же условием: что выберется?",
+    "Каждая часть условия через OR — самостоятельное условие.",
+    "Просто «2» — не сравнение: для базы это всегда истина.",
+    "Нужно сравнить priority со значением 2 или записать список значений.",
+    "Для списка значений есть оператор IN (…)."
+  ],
+  "tests": {
+    "kind": "sql",
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  status TEXT NOT NULL DEFAULT 'todo' CHECK (status IN ('todo', 'doing', 'done')),\n  priority INTEGER NOT NULL DEFAULT 3 CHECK (priority BETWEEN 1 AND 5)\n);\n\nINSERT INTO tasks (title, status, priority) VALUES\n  ('Купить молоко', 'todo', 2),\n  ('Написать отчёт', 'doing', 1),\n  ('Позвонить врачу', 'todo', 3),\n  ('Оплатить интернет', 'done', 2);\n",
+        "query": "SELECT id, title, status, priority FROM tasks ORDER BY id;",
+        "expected": {
+          "rows": [
+            [
+              1,
+              "Купить молоко",
+              "done",
+              2
+            ],
+            [
+              2,
+              "Написать отчёт",
+              "done",
+              1
+            ],
+            [
+              3,
+              "Позвонить врачу",
+              "todo",
+              3
+            ],
+            [
+              4,
+              "Оплатить интернет",
+              "done",
+              2
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h2",
+        "setup": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  status TEXT NOT NULL DEFAULT 'todo' CHECK (status IN ('todo', 'doing', 'done')),\n  priority INTEGER NOT NULL DEFAULT 3 CHECK (priority BETWEEN 1 AND 5)\n);\n\nINSERT INTO tasks (title, status, priority) VALUES\n  ('Уборка', 'todo', 1), ('Почта', 'todo', 1), ('Спорт', 'doing', 4), ('Налоги', 'done', 5),\n  ('Чтение', 'done', 1), ('Звонок', 'todo', 5), ('План', 'doing', 2);\n",
+        "query": "SELECT id, title, status, priority FROM tasks ORDER BY id;",
+        "expected": {
+          "rows": [
+            [
+              1,
+              "Уборка",
+              "done",
+              1
+            ],
+            [
+              2,
+              "Почта",
+              "done",
+              1
+            ],
+            [
+              3,
+              "Спорт",
+              "doing",
+              4
+            ],
+            [
+              4,
+              "Налоги",
+              "done",
+              5
+            ],
+            [
+              5,
+              "Чтение",
+              "done",
+              1
+            ],
+            [
+              6,
+              "Звонок",
+              "todo",
+              5
+            ],
+            [
+              7,
+              "План",
+              "done",
+              2
+            ]
+          ]
+        },
+        "hidden": true,
+        "hint": "Данных может быть больше, и в них есть подходящие и неподходящие строки"
+      },
+      {
+        "id": "h3",
+        "setup": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  status TEXT NOT NULL DEFAULT 'todo' CHECK (status IN ('todo', 'doing', 'done')),\n  priority INTEGER NOT NULL DEFAULT 3 CHECK (priority BETWEEN 1 AND 5)\n);\n\nINSERT INTO tasks (title, status, priority) VALUES ('Единственная', 'todo', 1), ('Готово', 'done', 3);\n",
+        "query": "SELECT id, title, status, priority FROM tasks ORDER BY id;",
+        "expected": {
+          "rows": [
+            [
+              1,
+              "Единственная",
+              "done",
+              1
+            ],
+            [
+              2,
+              "Готово",
+              "done",
+              3
+            ]
+          ]
+        },
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "setup": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  status TEXT NOT NULL DEFAULT 'todo' CHECK (status IN ('todo', 'doing', 'done')),\n  priority INTEGER NOT NULL DEFAULT 3 CHECK (priority BETWEEN 1 AND 5)\n);\n\n",
+        "query": "SELECT id, title, status, priority FROM tasks ORDER BY id;",
+        "expected": {
+          "rows": []
+        },
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "UPDATE tasks\nSET status = 'done'\nWHERE priority IN (1, 2);",
+  "explanation": "Выражение priority = 1 OR 2 разбирается как (priority = 1) OR 2, а число 2 считается истиной. IN (1, 2) записывает то, что имелось в виду.",
+  "criteria": [
+    "Результат совпадает на всех наборах данных, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "UPDATE tasks SET status = 'done' WHERE priority = 1 OR 2;",
+      "why": "Ошибка осталась: «OR 2» всегда истинно."
+    },
+    {
+      "code": "UPDATE tasks SET status = 'done' WHERE priority = 1;",
+      "why": "Пропущены задачи со срочностью 2."
+    },
+    {
+      "code": "UPDATE tasks SET status = 'done' WHERE priority <= 3;",
+      "why": "Захвачены и задачи со срочностью 3."
+    }
+  ]
+}

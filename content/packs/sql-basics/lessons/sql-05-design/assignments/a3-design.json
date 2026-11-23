@@ -1,0 +1,113 @@
+{
+  "id": "a3-design",
+  "type": "write",
+  "title": "Теги задач",
+  "statement": "У каждой задачи может быть много тегов. Создайте таблицу `tags`: `id` (целое, первичный ключ), `task_id` (целое, обязательное, внешний ключ на `tasks(id)`) и `name` (текст, обязательный).",
+  "goal": "Спроектировать таблицу для связи «один ко многим».",
+  "input": "Таблицы создаются автоматически перед запуском.",
+  "expectedResult": "Таблица результата.",
+  "constraints": [],
+  "starterCode": "-- Создайте таблицу tags\n",
+  "hints": [
+    "Связь «один ко многим»: у тега одна задача, а у задачи много тегов.",
+    "Ссылка на задачу хранится в таблице тегов: столбец task_id.",
+    "Первичный ключ — id INTEGER PRIMARY KEY.",
+    "Для task_id: тип, NOT NULL и REFERENCES tasks(id).",
+    "Запятая нужна между столбцами, но не после последнего."
+  ],
+  "tests": {
+    "kind": "sql",
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL\n);\n",
+        "query": "SELECT name, type, \"notnull\", pk FROM pragma_table_info('tags') ORDER BY name;",
+        "expected": {
+          "rows": [
+            [
+              "id",
+              "INTEGER",
+              0,
+              1
+            ],
+            [
+              "name",
+              "TEXT",
+              1,
+              0
+            ],
+            [
+              "task_id",
+              "INTEGER",
+              1,
+              0
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h2",
+        "setup": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL\n);\n",
+        "query": "SELECT \"table\", \"from\", \"to\" FROM pragma_foreign_key_list('tags');",
+        "expected": {
+          "rows": [
+            [
+              "tasks",
+              "task_id",
+              "id"
+            ]
+          ]
+        },
+        "hidden": true,
+        "hint": "Проверяется связь с таблицей задач"
+      },
+      {
+        "id": "h3",
+        "setup": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL\n);\nINSERT INTO tasks (title) VALUES ('Другая');",
+        "query": "SELECT name, type, \"notnull\", pk FROM pragma_table_info('tags') ORDER BY name;",
+        "expected": {
+          "rows": [
+            [
+              "id",
+              "INTEGER",
+              0,
+              1
+            ],
+            [
+              "name",
+              "TEXT",
+              1,
+              0
+            ],
+            [
+              "task_id",
+              "INTEGER",
+              1,
+              0
+            ]
+          ]
+        },
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "CREATE TABLE tags (\n  id INTEGER PRIMARY KEY,\n  task_id INTEGER NOT NULL REFERENCES tasks(id),\n  name TEXT NOT NULL\n);",
+  "explanation": "Ссылка всегда лежит на стороне «многих»: таблица tags хранит task_id и ссылается на tasks.",
+  "criteria": [
+    "Результат совпадает на всех наборах данных, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "CREATE TABLE tags (id INTEGER PRIMARY KEY, task_id INTEGER NOT NULL, name TEXT NOT NULL);",
+      "why": "Нет внешнего ключа."
+    },
+    {
+      "code": "CREATE TABLE tags (id INTEGER PRIMARY KEY, task_id INTEGER NOT NULL REFERENCES tasks(id), name TEXT);",
+      "why": "Название тега не обязательно: нет NOT NULL."
+    },
+    {
+      "code": "CREATE TABLE tags (id INTEGER, task_id INTEGER NOT NULL REFERENCES tasks(id), name TEXT NOT NULL);",
+      "why": "Нет первичного ключа."
+    }
+  ]
+}

@@ -1,0 +1,189 @@
+{
+  "id": "a1-insert",
+  "type": "write",
+  "title": "Новая задача",
+  "statement": "Добавьте в таблицу `tasks` одну задачу с названием `Сдать книги` и срочностью `1`. Статус указывать **не нужно** — пусть возьмётся значение по умолчанию.",
+  "goal": "Добавлять строки командой INSERT.",
+  "input": "Таблицы создаются автоматически перед запуском.",
+  "expectedResult": "Таблица результата.",
+  "constraints": [],
+  "starterCode": "-- Добавьте задачу\n",
+  "hints": [
+    "Новую строку добавляет команда INSERT.",
+    "INSERT INTO таблица (столбцы) VALUES (значения).",
+    "Укажите два столбца: title и priority.",
+    "Текст в одинарных кавычках, число без кавычек.",
+    "Статус не указывайте — подставится DEFAULT."
+  ],
+  "tests": {
+    "kind": "sql",
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  status TEXT NOT NULL DEFAULT 'todo' CHECK (status IN ('todo', 'doing', 'done')),\n  priority INTEGER NOT NULL DEFAULT 3 CHECK (priority BETWEEN 1 AND 5)\n);\n\nINSERT INTO tasks (title, status, priority) VALUES\n  ('Купить молоко', 'todo', 2),\n  ('Написать отчёт', 'doing', 1),\n  ('Позвонить врачу', 'todo', 3),\n  ('Оплатить интернет', 'done', 2);\n",
+        "query": "SELECT id, title, status, priority FROM tasks ORDER BY id;",
+        "expected": {
+          "rows": [
+            [
+              1,
+              "Купить молоко",
+              "todo",
+              2
+            ],
+            [
+              2,
+              "Написать отчёт",
+              "doing",
+              1
+            ],
+            [
+              3,
+              "Позвонить врачу",
+              "todo",
+              3
+            ],
+            [
+              4,
+              "Оплатить интернет",
+              "done",
+              2
+            ],
+            [
+              5,
+              "Сдать книги",
+              "todo",
+              1
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h2",
+        "setup": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  status TEXT NOT NULL DEFAULT 'todo' CHECK (status IN ('todo', 'doing', 'done')),\n  priority INTEGER NOT NULL DEFAULT 3 CHECK (priority BETWEEN 1 AND 5)\n);\n\nINSERT INTO tasks (title, status, priority) VALUES\n  ('Уборка', 'todo', 1), ('Почта', 'todo', 1), ('Спорт', 'doing', 4), ('Налоги', 'done', 5),\n  ('Чтение', 'done', 1), ('Звонок', 'todo', 5), ('План', 'doing', 2);\n",
+        "query": "SELECT id, title, status, priority FROM tasks ORDER BY id;",
+        "expected": {
+          "rows": [
+            [
+              1,
+              "Уборка",
+              "todo",
+              1
+            ],
+            [
+              2,
+              "Почта",
+              "todo",
+              1
+            ],
+            [
+              3,
+              "Спорт",
+              "doing",
+              4
+            ],
+            [
+              4,
+              "Налоги",
+              "done",
+              5
+            ],
+            [
+              5,
+              "Чтение",
+              "done",
+              1
+            ],
+            [
+              6,
+              "Звонок",
+              "todo",
+              5
+            ],
+            [
+              7,
+              "План",
+              "doing",
+              2
+            ],
+            [
+              8,
+              "Сдать книги",
+              "todo",
+              1
+            ]
+          ]
+        },
+        "hidden": true,
+        "hint": "Данных может быть больше, и в них есть подходящие и неподходящие строки"
+      },
+      {
+        "id": "h3",
+        "setup": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  status TEXT NOT NULL DEFAULT 'todo' CHECK (status IN ('todo', 'doing', 'done')),\n  priority INTEGER NOT NULL DEFAULT 3 CHECK (priority BETWEEN 1 AND 5)\n);\n\nINSERT INTO tasks (title, status, priority) VALUES ('Единственная', 'todo', 1), ('Готово', 'done', 3);\n",
+        "query": "SELECT id, title, status, priority FROM tasks ORDER BY id;",
+        "expected": {
+          "rows": [
+            [
+              1,
+              "Единственная",
+              "todo",
+              1
+            ],
+            [
+              2,
+              "Готово",
+              "done",
+              3
+            ],
+            [
+              3,
+              "Сдать книги",
+              "todo",
+              1
+            ]
+          ]
+        },
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "setup": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  status TEXT NOT NULL DEFAULT 'todo' CHECK (status IN ('todo', 'doing', 'done')),\n  priority INTEGER NOT NULL DEFAULT 3 CHECK (priority BETWEEN 1 AND 5)\n);\n\n",
+        "query": "SELECT id, title, status, priority FROM tasks ORDER BY id;",
+        "expected": {
+          "rows": [
+            [
+              1,
+              "Сдать книги",
+              "todo",
+              1
+            ]
+          ]
+        },
+        "hidden": true,
+        "hint": "Работает и на пустой таблице"
+      }
+    ]
+  },
+  "solution": "INSERT INTO tasks (title, priority)\nVALUES ('Сдать книги', 1);",
+  "explanation": "Столбцы, которых нет в списке, получают значения по умолчанию, а номер выдаёт база.",
+  "criteria": [
+    "Результат совпадает на всех наборах данных, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "INSERT INTO tasks (title, status, priority) VALUES ('Сдать книги', 'doing', 1);",
+      "why": "Статус указан вручную, а нужен по умолчанию."
+    },
+    {
+      "code": "INSERT INTO tasks (title) VALUES ('Сдать книги');",
+      "why": "Не указана срочность 1: подставилась тройка."
+    },
+    {
+      "code": "INSERT INTO tasks (title, priority) VALUES ('Сдать книги', 1), ('Сдать книги', 1);",
+      "why": "Добавлено две строки вместо одной."
+    },
+    {
+      "code": "UPDATE tasks SET title = 'Сдать книги', priority = 1;",
+      "why": "UPDATE меняет существующие строки, а новая не добавляется."
+    }
+  ]
+}

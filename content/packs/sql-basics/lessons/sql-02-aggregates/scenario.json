@@ -1,0 +1,214 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Один ответ на много строк",
+      "narration": "До сих пор запрос возвращал строки таблицы. Но часто нужен один итог: сколько всего товаров, какова сумма выручки, какая самая высокая цена. Для этого в SQL есть агрегатные функции: они берут много строк и сворачивают их в одно значение. Сегодня работаем с таблицей продаж: товар, категория, цена и количество.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "**Агрегат** — функция, которая сворачивает много строк в одно значение: COUNT, SUM, AVG, MIN, MAX.",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "data",
+      "title": "Таблица продаж",
+      "narration": "Вот таблица sales. В ней пять строк: хлеб и молоко в категории еда, ручка и тетрадь в канцелярии и наушники в технике. У каждой строки есть цена за штуку и количество проданных штук.",
+      "actions": [
+        {
+          "type": "type",
+          "text": "CREATE TABLE sales (\n  id INTEGER PRIMARY KEY,\n  product TEXT NOT NULL,\n  category TEXT NOT NULL,\n  price REAL NOT NULL,\n  qty INTEGER NOT NULL\n);\n\nINSERT INTO sales (product, category, price, qty) VALUES\n  ('Хлеб', 'еда', 3.5, 10),\n  ('Молоко', 'еда', 4.0, 5),\n  ('Ручка', 'канцелярия', 2.0, 20),\n  ('Тетрадь', 'канцелярия', 1.5, 30),\n  ('Наушники', 'техника', 120.0, 2);\n",
+          "file": "schema.sql",
+          "cue": 0
+        }
+      ]
+    },
+    {
+      "id": "count",
+      "title": "COUNT, SUM, MIN, MAX",
+      "narration": "Функция COUNT со звёздочкой считает строки. Запускаем: пять. Функция SUM складывает значения столбца, а внутри можно написать выражение: цена умножить на количество — это выручка по каждой строке, и SUM их сложит. MIN и MAX находят наименьшее и наибольшее. Каждому результату можно дать имя словом AS: оно появится в заголовке столбца.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.sql"
+        },
+        {
+          "type": "type",
+          "text": "SELECT COUNT(*) FROM sales;\n",
+          "file": "main.sql",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "main.sql",
+          "cue": 1
+        },
+        {
+          "type": "output",
+          "text": "COUNT(*)\n--------\n5\n(1 строка)\n",
+          "cue": 1
+        },
+        {
+          "type": "clear",
+          "file": "main.sql"
+        },
+        {
+          "type": "type",
+          "text": "SELECT SUM(price * qty) AS revenue,\n       MIN(price) AS cheapest,\n       MAX(price) AS dearest\nFROM sales;\n",
+          "file": "main.sql",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "main.sql",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "revenue | cheapest | dearest\n--------+----------+--------\n380     | 1.5      | 120\n(1 строка)\n",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "group",
+      "title": "GROUP BY: итоги по группам",
+      "narration": "Чаще нужен итог не по всей таблице, а по группам: сколько товаров в каждой категории. Для этого после FROM добавляем GROUP BY и имя столбца. База делит строки на группы с одинаковым значением и считает функцию для каждой группы отдельно. Запускаем: еда — два товара, канцелярия — два, техника — один. В списке выбираемых столбцов можно оставлять только то, по чему группируем, и агрегаты.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.sql"
+        },
+        {
+          "type": "type",
+          "text": "SELECT category, COUNT(*) AS n\nFROM sales\nGROUP BY category;\n",
+          "file": "main.sql",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            3
+          ],
+          "file": "main.sql",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "main.sql",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "category   | n\n-----------+--\nеда        | 2\nканцелярия | 2\nтехника    | 1\n(3 строки)\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "having",
+      "title": "HAVING: условие на группы",
+      "narration": "А как оставить только группы, где продано не меньше двадцати штук? WHERE тут не подойдёт: он работает до группировки, и агрегатов в нём писать нельзя. Для условий на результат группировки есть слово HAVING. Оно пишется после GROUP BY. Запускаем: остались только канцелярия, где пятьдесят штук, и больше ничего: в еде пятнадцать, в технике две.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.sql"
+        },
+        {
+          "type": "type",
+          "text": "SELECT category, SUM(qty) AS total\nFROM sales\nGROUP BY category\nHAVING SUM(qty) >= 20;\n",
+          "file": "main.sql",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            4
+          ],
+          "file": "main.sql",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "main.sql",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "category   | total\n-----------+------\nканцелярия | 50\n(1 строка)\n",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "avg",
+      "title": "Среднее и округление",
+      "narration": "Среднее значение даёт функция AVG, а ROUND округляет число до нужного количества знаков. Посчитаем среднюю цену по каждой категории и отсортируем по убыванию. Сортировать можно по имени, которое мы дали результату. Запускаем: самые дорогие товары в технике, самые дешёвые — в канцелярии.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.sql"
+        },
+        {
+          "type": "type",
+          "text": "SELECT category, ROUND(AVG(price), 2) AS avg_price\nFROM sales\nGROUP BY category\nORDER BY avg_price DESC;\n",
+          "file": "main.sql",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "main.sql",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "category   | avg_price\n-----------+----------\nтехника    | 120\nеда        | 3.75\nканцелярия | 1.75\n(3 строки)\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "error",
+      "title": "Частая ошибка: агрегат в WHERE",
+      "narration": "Если попытаться использовать агрегат в условии WHERE, база откажет: функции для групп нельзя применять к отдельным строкам. Запустим такой запрос и прочитаем сообщение. Решение простое: условие на агрегат переносим в HAVING.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.sql"
+        },
+        {
+          "type": "type",
+          "text": "SELECT category, price FROM sales\nWHERE COUNT(*) > 1;\n",
+          "file": "main.sql",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "main.sql",
+          "cue": 1
+        },
+        {
+          "type": "output",
+          "text": "SQLError: агрегатную функцию COUNT() нельзя использовать здесь — условие на группы пишется в HAVING (misuse of aggregate function COUNT())\n  строка 1",
+          "stream": "stderr",
+          "cue": 1
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. COUNT, SUM, AVG, MIN и MAX сворачивают строки в одно значение. GROUP BY делит строки на группы, и функции считаются для каждой группы. WHERE фильтрует строки до группировки, HAVING — группы после неё. Результатам можно давать имена через AS и округлять их функцией ROUND.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`SELECT … FROM … WHERE … GROUP BY … HAVING … ORDER BY … LIMIT …`",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}

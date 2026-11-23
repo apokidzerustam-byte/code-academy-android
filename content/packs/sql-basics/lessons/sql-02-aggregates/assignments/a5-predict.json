@@ -1,0 +1,39 @@
+{
+  "id": "a5-predict",
+  "type": "predict",
+  "title": "Что вернёт запрос?",
+  "statement": "Что вернёт запрос? Запишите строки результата по одной в строке, значения через « | » (без заголовка таблицы).",
+  "goal": "Что вернёт запрос?",
+  "input": "—",
+  "expectedResult": "Строки результата.",
+  "constraints": [],
+  "code": "CREATE TABLE sales (\n  id INTEGER PRIMARY KEY,\n  product TEXT NOT NULL,\n  category TEXT NOT NULL,\n  price REAL NOT NULL,\n  qty INTEGER NOT NULL\n);\n\nINSERT INTO sales (product, category, price, qty) VALUES\n  ('Хлеб', 'еда', 3.5, 10),\n  ('Молоко', 'еда', 4.0, 5),\n  ('Ручка', 'канцелярия', 2.0, 20),\n  ('Тетрадь', 'канцелярия', 1.5, 30),\n  ('Наушники', 'техника', 120.0, 2);\nSELECT category, SUM(qty) AS total\nFROM sales\nWHERE price < 100\nGROUP BY category\nHAVING SUM(qty) > 20\nORDER BY category;\n",
+  "hints": [
+    "Порядок выполнения: WHERE, затем GROUP BY, затем HAVING.",
+    "WHERE price < 100 убирает наушники.",
+    "Остаются еда (15 штук) и канцелярия (50 штук).",
+    "HAVING оставляет группы со штуками больше 20.",
+    "Остаётся одна категория."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "канцелярия | 50"
+  },
+  "solution": "канцелярия | 50",
+  "explanation": "Сначала WHERE убирает строки, потом группы считаются, потом HAVING убирает группы.",
+  "criteria": [
+    "Правильные строки в правильном порядке."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "канцелярия | 50\nеда | 15",
+      "answer": "канцелярия | 50\nеда | 15",
+      "why": "В еде продано 15 штук, условие HAVING требует больше 20."
+    },
+    {
+      "code": "канцелярия | 50\nтехника | 2",
+      "answer": "канцелярия | 50\nтехника | 2",
+      "why": "Техника отброшена условием WHERE: цена 120 не меньше 100."
+    }
+  ]
+}

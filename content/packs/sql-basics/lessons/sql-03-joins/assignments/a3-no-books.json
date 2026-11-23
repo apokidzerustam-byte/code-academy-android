@@ -1,0 +1,85 @@
+{
+  "id": "a3-no-books",
+  "type": "write",
+  "title": "Авторы без книг",
+  "statement": "Выведите имена авторов, у которых **нет ни одной книги** (столбец `name`), по алфавиту.",
+  "goal": "Находить строки без пары: LEFT JOIN … IS NULL.",
+  "input": "Таблицы создаются автоматически перед запуском.",
+  "expectedResult": "Таблица результата.",
+  "constraints": [],
+  "starterCode": "SELECT name FROM authors\n",
+  "hints": [
+    "Нужны авторы, у которых в правой таблице нет пары.",
+    "Сохраните всех авторов: LEFT JOIN.",
+    "У авторов без книг столбцы книги пусты.",
+    "Проверка на пустое значение — IS NULL, не = NULL.",
+    "Проверяйте именно столбец правой таблицы, например b.id."
+  ],
+  "tests": {
+    "kind": "sql",
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE authors (\n  id INTEGER PRIMARY KEY,\n  name TEXT NOT NULL\n);\n\nCREATE TABLE books (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  author_id INTEGER REFERENCES authors(id),\n  year INTEGER\n);\n\nINSERT INTO authors (name) VALUES ('Толстой'), ('Булгаков'), ('Гоголь'), ('Чехов');\n\nINSERT INTO books (title, author_id, year) VALUES\n  ('Война и мир', 1, 1869),\n  ('Анна Каренина', 1, 1878),\n  ('Мастер и Маргарита', 2, 1967),\n  ('Ревизор', 3, 1836);\n",
+        "expected": {
+          "columns": [
+            "name"
+          ],
+          "rows": [
+            [
+              "Чехов"
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h2",
+        "setup": "CREATE TABLE authors (\n  id INTEGER PRIMARY KEY,\n  name TEXT NOT NULL\n);\n\nCREATE TABLE books (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  author_id INTEGER REFERENCES authors(id),\n  year INTEGER\n);\n\nINSERT INTO authors (name) VALUES ('Достоевский'), ('Пушкин'), ('Лермонтов');\nINSERT INTO books (title, author_id, year) VALUES\n  ('Идиот', 1, 1869), ('Бесы', 1, 1872), ('Евгений Онегин', 2, 1833),\n  ('Сборник без автора', NULL, 1950), ('Современник', 2, 1936);\n",
+        "expected": {
+          "columns": [
+            "name"
+          ],
+          "rows": [
+            [
+              "Лермонтов"
+            ]
+          ]
+        },
+        "hidden": true,
+        "hint": "Авторов без книг может быть несколько"
+      },
+      {
+        "id": "h3",
+        "setup": "CREATE TABLE authors (\n  id INTEGER PRIMARY KEY,\n  name TEXT NOT NULL\n);\n\nCREATE TABLE books (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  author_id INTEGER REFERENCES authors(id),\n  year INTEGER\n);\n\nINSERT INTO authors (name) VALUES ('Грибоедов'), ('Гончаров');\nINSERT INTO books (title, author_id, year) VALUES ('Горе от ума', 1, 1825), ('Обломов', 2, 1859), ('Обрыв', 2, 1869);\n",
+        "expected": {
+          "columns": [
+            "name"
+          ],
+          "rows": []
+        },
+        "hidden": true,
+        "hint": "Если у всех авторов есть книги, результат пуст"
+      }
+    ],
+    "ordered": true
+  },
+  "solution": "SELECT a.name\nFROM authors a\nLEFT JOIN books b ON b.author_id = a.id\nWHERE b.id IS NULL\nORDER BY a.name;",
+  "explanation": "После LEFT JOIN строки без пары имеют NULL в столбцах правой таблицы; IS NULL их отбирает.",
+  "criteria": [
+    "Результат совпадает на всех наборах данных, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "SELECT a.name FROM authors a LEFT JOIN books b ON b.author_id = a.id WHERE b.id = NULL ORDER BY a.name;",
+      "why": "Сравнение с NULL через = ничего не находит: нужен IS NULL."
+    },
+    {
+      "code": "SELECT a.name FROM authors a JOIN books b ON b.author_id = a.id WHERE b.id IS NULL ORDER BY a.name;",
+      "why": "Обычный JOIN не создаёт строк без пары."
+    },
+    {
+      "code": "SELECT a.name FROM authors a LEFT JOIN books b ON b.author_id = a.id ORDER BY a.name;",
+      "why": "Нет условия на отсутствие книги."
+    }
+  ]
+}

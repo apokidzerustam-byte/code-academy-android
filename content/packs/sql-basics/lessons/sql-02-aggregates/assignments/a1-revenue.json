@@ -1,0 +1,91 @@
+{
+  "id": "a1-revenue",
+  "type": "write",
+  "title": "Общая выручка",
+  "statement": "В таблице `sales` есть столбцы `id`, `product`, `category`, `price`, `qty`.\n\nНапишите запрос, который возвращает **одно число**: общую выручку — сумму `price * qty` по всем строкам.",
+  "goal": "Применять SUM к выражению.",
+  "input": "Таблицы создаются автоматически перед запуском.",
+  "expectedResult": "Таблица результата.",
+  "constraints": [],
+  "starterCode": "-- Ваш запрос\n",
+  "hints": [
+    "Нужен один итог по всей таблице — это агрегат.",
+    "Суммирует значения функция SUM.",
+    "Выручка строки — цена, умноженная на количество.",
+    "Выражение можно писать прямо в скобках функции.",
+    "SELECT SUM(price * qty) FROM sales;"
+  ],
+  "tests": {
+    "kind": "sql",
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE sales (\n  id INTEGER PRIMARY KEY,\n  product TEXT NOT NULL,\n  category TEXT NOT NULL,\n  price REAL NOT NULL,\n  qty INTEGER NOT NULL\n);\n\nINSERT INTO sales (product, category, price, qty) VALUES\n  ('Хлеб', 'еда', 3.5, 10),\n  ('Молоко', 'еда', 4.0, 5),\n  ('Ручка', 'канцелярия', 2.0, 20),\n  ('Тетрадь', 'канцелярия', 1.5, 30),\n  ('Наушники', 'техника', 120.0, 2);\n",
+        "expected": {
+          "columns": [
+            "revenue"
+          ],
+          "rows": [
+            [
+              380
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h2",
+        "setup": "CREATE TABLE sales (\n  id INTEGER PRIMARY KEY,\n  product TEXT NOT NULL,\n  category TEXT NOT NULL,\n  price REAL NOT NULL,\n  qty INTEGER NOT NULL\n);\nINSERT INTO sales (product, category, price, qty) VALUES\n  ('Чай', 'еда', 1.0, 12), ('Кофе', 'еда', 2.0, 4), ('Сахар', 'еда', 2.0, 6),\n  ('Диск', 'техника', 10.0, 1), ('Кабель', 'техника', 5.0, 6),\n  ('Скрепки', 'канцелярия', 0.5, 20);\n",
+        "expected": {
+          "columns": [
+            "revenue"
+          ],
+          "rows": [
+            [
+              82
+            ]
+          ]
+        },
+        "hidden": true,
+        "hint": "Выручка считается по всем строкам"
+      },
+      {
+        "id": "h3",
+        "setup": "CREATE TABLE sales (\n  id INTEGER PRIMARY KEY,\n  product TEXT NOT NULL,\n  category TEXT NOT NULL,\n  price REAL NOT NULL,\n  qty INTEGER NOT NULL\n);\nINSERT INTO sales (product, category, price, qty) VALUES\n  ('Мышь', 'техника', 15.0, 2), ('Клавиатура', 'техника', 25.0, 1);\n",
+        "expected": {
+          "columns": [
+            "revenue"
+          ],
+          "rows": [
+            [
+              55
+            ]
+          ]
+        },
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "SELECT SUM(price * qty) AS revenue FROM sales;",
+  "explanation": "SUM(price * qty) сначала считает выручку каждой строки, а затем складывает результаты.",
+  "criteria": [
+    "Результат совпадает на всех наборах данных, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "SELECT SUM(price) FROM sales;",
+      "why": "Не учтено количество."
+    },
+    {
+      "code": "SELECT SUM(qty) FROM sales;",
+      "why": "Суммируется количество, а не выручка."
+    },
+    {
+      "code": "SELECT price * qty FROM sales;",
+      "why": "Возвращает выручку по каждой строке, а не итог."
+    },
+    {
+      "code": "SELECT COUNT(*) FROM sales;",
+      "why": "Считается число строк."
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "id": "a4-avg",
+  "type": "write",
+  "title": "Средняя цена",
+  "statement": "Выведите для каждой категории её название и **среднюю цену** товара, округлённую до 2 знаков: столбцы `category` и `avg_price`. Порядок — от большей средней цены к меньшей (при равенстве — по названию категории).",
+  "goal": "Применять AVG и ROUND.",
+  "input": "Таблицы создаются автоматически перед запуском.",
+  "expectedResult": "Таблица результата.",
+  "constraints": [],
+  "starterCode": "SELECT category FROM sales\n",
+  "hints": [
+    "Среднее значение — функция AVG.",
+    "Группируем по категории.",
+    "Округляет ROUND(значение, число_знаков).",
+    "Сортируем по имени результата: ORDER BY avg_price DESC.",
+    "При равенстве — добавьте второй столбец сортировки через запятую."
+  ],
+  "tests": {
+    "kind": "sql",
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE sales (\n  id INTEGER PRIMARY KEY,\n  product TEXT NOT NULL,\n  category TEXT NOT NULL,\n  price REAL NOT NULL,\n  qty INTEGER NOT NULL\n);\n\nINSERT INTO sales (product, category, price, qty) VALUES\n  ('Хлеб', 'еда', 3.5, 10),\n  ('Молоко', 'еда', 4.0, 5),\n  ('Ручка', 'канцелярия', 2.0, 20),\n  ('Тетрадь', 'канцелярия', 1.5, 30),\n  ('Наушники', 'техника', 120.0, 2);\n",
+        "expected": {
+          "columns": [
+            "category",
+            "avg_price"
+          ],
+          "rows": [
+            [
+              "техника",
+              120
+            ],
+            [
+              "еда",
+              3.75
+            ],
+            [
+              "канцелярия",
+              1.75
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h2",
+        "setup": "CREATE TABLE sales (\n  id INTEGER PRIMARY KEY,\n  product TEXT NOT NULL,\n  category TEXT NOT NULL,\n  price REAL NOT NULL,\n  qty INTEGER NOT NULL\n);\nINSERT INTO sales (product, category, price, qty) VALUES\n  ('Чай', 'еда', 1.0, 12), ('Кофе', 'еда', 2.0, 4), ('Сахар', 'еда', 2.0, 6),\n  ('Диск', 'техника', 10.0, 1), ('Кабель', 'техника', 5.0, 6),\n  ('Скрепки', 'канцелярия', 0.5, 20);\n",
+        "expected": {
+          "columns": [
+            "category",
+            "avg_price"
+          ],
+          "rows": [
+            [
+              "техника",
+              7.5
+            ],
+            [
+              "еда",
+              1.67
+            ],
+            [
+              "канцелярия",
+              0.5
+            ]
+          ]
+        },
+        "hidden": true,
+        "hint": "Среднее не всегда круглое число: нужно округление до 2 знаков"
+      },
+      {
+        "id": "h3",
+        "setup": "CREATE TABLE sales (\n  id INTEGER PRIMARY KEY,\n  product TEXT NOT NULL,\n  category TEXT NOT NULL,\n  price REAL NOT NULL,\n  qty INTEGER NOT NULL\n);\nINSERT INTO sales (product, category, price, qty) VALUES\n  ('Мышь', 'техника', 15.0, 2), ('Клавиатура', 'техника', 25.0, 1);\n",
+        "expected": {
+          "columns": [
+            "category",
+            "avg_price"
+          ],
+          "rows": [
+            [
+              "техника",
+              20
+            ]
+          ]
+        },
+        "hidden": true
+      }
+    ],
+    "ordered": true
+  },
+  "solution": "SELECT category, ROUND(AVG(price), 2) AS avg_price\nFROM sales\nGROUP BY category\nORDER BY avg_price DESC, category;",
+  "explanation": "ROUND(AVG(price), 2) — среднее с двумя знаками; ORDER BY можно писать по псевдониму результата.",
+  "criteria": [
+    "Результат совпадает на всех наборах данных, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "SELECT category, AVG(price) AS avg_price FROM sales GROUP BY category ORDER BY avg_price DESC, category;",
+      "why": "Нет округления."
+    },
+    {
+      "code": "SELECT category, ROUND(AVG(price), 2) AS avg_price FROM sales GROUP BY category ORDER BY avg_price, category;",
+      "why": "Порядок по возрастанию."
+    },
+    {
+      "code": "SELECT category, ROUND(MAX(price), 2) AS avg_price FROM sales GROUP BY category ORDER BY avg_price DESC, category;",
+      "why": "Считается максимум, а не среднее."
+    },
+    {
+      "code": "SELECT category, ROUND(AVG(price * qty), 2) AS avg_price FROM sales GROUP BY category ORDER BY avg_price DESC, category;",
+      "why": "Усредняется выручка, а не цена."
+    }
+  ]
+}

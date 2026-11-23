@@ -1,0 +1,46 @@
+{
+  "id": "sql-03-joins",
+  "title": "SQL: связи и JOIN",
+  "goal": "Хранить связанные данные в разных таблицах и соединять их запросами JOIN и LEFT JOIN.",
+  "skills": [
+    "sql.join",
+    "sql.left-join",
+    "sql.alias"
+  ],
+  "prerequisites": [
+    "sql-02-aggregates"
+  ],
+  "runner": "sql",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-join.json",
+    "assignments/a2-count-books.json",
+    "assignments/a3-no-books.json",
+    "assignments/a4-fix-join.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "JOIN без условия ON",
+      "fix": "Каждая строка встанет с каждой: добавьте условие связи.",
+      "errorType": "SQLError"
+    },
+    {
+      "mistake": "Сравнение с NULL через =",
+      "fix": "Используйте IS NULL и IS NOT NULL."
+    },
+    {
+      "mistake": "COUNT(*) после LEFT JOIN",
+      "fix": "Считайте COUNT от столбца правой таблицы."
+    },
+    {
+      "mistake": "Одинаковое имя столбца в двух таблицах",
+      "fix": "Пишите псевдоним таблицы: a.id, b.id."
+    }
+  ]
+}

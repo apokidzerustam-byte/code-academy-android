@@ -1,0 +1,197 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Как спроектировать таблицы",
+      "narration": "До сих пор таблицы нам давали готовыми. Теперь научимся придумывать их самим. Главное правило проектирования: каждый факт хранится в одном месте. Если название категории выписано в каждой задаче, при переименовании придётся править сотни строк, и где-нибудь обязательно забудут. Лучше завести отдельную таблицу и ссылаться на неё по номеру.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "**Один факт — одно место.** Повторяющееся выносим в отдельную таблицу и ссылаемся на номер строки.",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "keys",
+      "title": "Первичный ключ и ограничения",
+      "narration": "Каждой таблице нужен первичный ключ, номер, по которому строку можно однозначно найти. Объявляем столбец id как INTEGER PRIMARY KEY, и база выдаёт номера сама. Дальше уточняем остальные столбцы. NOT NULL запрещает пустое значение. UNIQUE не даёт повторять значения: например, две категории с одним названием. Тип столбца тоже важен: INTEGER для целых чисел, REAL для дробных и TEXT для строк.",
+      "actions": [
+        {
+          "type": "type",
+          "text": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL\n);\n",
+          "file": "schema.sql",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            2
+          ],
+          "file": "schema.sql",
+          "cue": 1
+        }
+      ]
+    },
+    {
+      "id": "fk",
+      "title": "Внешний ключ",
+      "narration": "Теперь свяжем заметки с задачами. В таблице notes добавляем столбец task_id и пишем слово REFERENCES: оно говорит, что значение должно совпадать с номером существующей строки в таблице tasks. Это и есть внешний ключ. В таблице две задачи и три заметки: у второй задачи две заметки. Такая связь называется «один ко многим».",
+      "actions": [
+        {
+          "type": "type",
+          "text": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL\n);\n\nCREATE TABLE notes (\n  id INTEGER PRIMARY KEY,\n  task_id INTEGER NOT NULL REFERENCES tasks(id),\n  text TEXT NOT NULL\n);\n\nINSERT INTO tasks (title) VALUES ('Купить молоко'), ('Написать отчёт');\nINSERT INTO notes (task_id, text) VALUES (1, 'Два литра'), (2, 'К пятнице'), (2, 'Согласовать с Ольгой');\n",
+          "file": "schema.sql",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            8
+          ],
+          "file": "schema.sql",
+          "cue": 1
+        }
+      ]
+    },
+    {
+      "id": "join",
+      "title": "Читаем связанные данные",
+      "narration": "Чтобы увидеть заметки вместе с названиями задач, соединяем таблицы через JOIN, как в прошлом уроке. Запускаем: каждая заметка подписана названием своей задачи. Название хранится только в таблице задач, а в заметках лишь номер.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.sql"
+        },
+        {
+          "type": "type",
+          "text": "SELECT t.title, n.text\nFROM notes n\nJOIN tasks t ON t.id = n.task_id\nORDER BY n.id;\n",
+          "file": "main.sql",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "main.sql",
+          "cue": 1
+        },
+        {
+          "type": "output",
+          "text": "title          | text\n---------------+---------------------\nКупить молоко  | Два литра\nНаписать отчёт | К пятнице\nНаписать отчёт | Согласовать с Ольгой\n(3 строки)\n",
+          "cue": 1
+        }
+      ]
+    },
+    {
+      "id": "violation",
+      "title": "База охраняет связи",
+      "narration": "Попробуем добавить заметку к задаче номер девяносто девять, которой нет. Внешний ключ не позволит: база откажет и объяснит причину. Так в таблицах не появляются «осиротевшие» строки, ссылающиеся в пустоту.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.sql"
+        },
+        {
+          "type": "type",
+          "text": "INSERT INTO notes (task_id, text)\nVALUES (99, 'Заметка к несуществующей задаче');\n",
+          "file": "main.sql",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "main.sql",
+          "cue": 1
+        },
+        {
+          "type": "output",
+          "text": "SQLError: нарушена связь: внешний ключ указывает на несуществующую строку (FOREIGN KEY constraint failed)\n  строка 1",
+          "stream": "stderr",
+          "cue": 1
+        }
+      ]
+    },
+    {
+      "id": "normalize",
+      "title": "Выносим повторы в справочник",
+      "narration": "А что делать, если данные уже лежат в одной плоской таблице, где категория повторяется в каждой строке? Создаём таблицу categories с уникальным названием. Затем заполняем её командой INSERT с вложенным SELECT: берём различающиеся значения словом DISTINCT и сортируем по алфавиту. Запускаем: две категории вместо пяти повторов. Дальше задачи будут ссылаться на номера категорий.",
+      "actions": [
+        {
+          "type": "type",
+          "text": "CREATE TABLE flat (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  category TEXT NOT NULL\n);\n\nINSERT INTO flat (title, category) VALUES\n  ('Купить молоко', 'дом'), ('Написать отчёт', 'работа'),\n  ('Позвонить врачу', 'дом'), ('Сдать отчёт', 'работа'), ('Купить хлеб', 'дом');\n",
+          "file": "schema.sql",
+          "cue": 0
+        },
+        {
+          "type": "clear",
+          "file": "main.sql"
+        },
+        {
+          "type": "type",
+          "text": "CREATE TABLE categories (\n  id INTEGER PRIMARY KEY,\n  name TEXT NOT NULL UNIQUE\n);\n\nINSERT INTO categories (name)\nSELECT DISTINCT category\nFROM flat\nORDER BY category;\n\nSELECT * FROM categories;\n",
+          "file": "main.sql",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            6,
+            7,
+            8,
+            9
+          ],
+          "file": "main.sql",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "main.sql",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "(строка 6: изменено 2 строки)\n\nid | name\n---+-------\n1  | дом\n2  | работа\n(2 строки)\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "inspect",
+      "title": "Заглянуть в схему",
+      "narration": "Как узнать, из чего состоит таблица? Функция pragma table info возвращает по строке на каждый столбец: имя, тип, запрет пустых значений и признак первичного ключа. Запустим её для таблицы notes: видно, что task_id обязателен, а id — первичный ключ.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.sql"
+        },
+        {
+          "type": "type",
+          "text": "SELECT name, type, \"notnull\", pk\nFROM pragma_table_info('notes');\n",
+          "file": "main.sql",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "main.sql",
+          "cue": 2
+        },
+        {
+          "type": "output",
+          "text": "name    | type    | notnull | pk\n--------+---------+---------+---\nid      | INTEGER | 0       | 1\ntask_id | INTEGER | 1       | 0\ntext    | TEXT    | 1       | 0\n(3 строки)\n",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. Каждый факт хранится в одном месте. У таблицы есть первичный ключ. NOT NULL, UNIQUE и CHECK охраняют значения, а внешний ключ REFERENCES связывает таблицы и не даёт ссылаться на несуществующие строки. Повторы выносим в справочник командой INSERT с SELECT. Эти правила пригодятся и в итоговом проекте.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`id INTEGER PRIMARY KEY` · `NOT NULL` · `UNIQUE` · `task_id INTEGER REFERENCES tasks(id)`",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}

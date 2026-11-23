@@ -1,0 +1,39 @@
+{
+  "id": "a5-predict",
+  "type": "predict",
+  "title": "Что останется в таблице?",
+  "statement": "Что вернёт запрос? Запишите строки результата по одной в строке, значения через « | » (без заголовка таблицы).",
+  "goal": "Что останется в таблице?",
+  "input": "—",
+  "expectedResult": "Строки результата.",
+  "constraints": [],
+  "code": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  status TEXT NOT NULL DEFAULT 'todo' CHECK (status IN ('todo', 'doing', 'done')),\n  priority INTEGER NOT NULL DEFAULT 3 CHECK (priority BETWEEN 1 AND 5)\n);\n\nINSERT INTO tasks (title, status, priority) VALUES\n  ('А', 'todo', 2), ('Б', 'doing', 4), ('В', 'done', 1), ('Г', 'todo', 5);\nUPDATE tasks SET priority = priority - 1 WHERE status <> 'done';\nDELETE FROM tasks WHERE priority > 3;\nINSERT INTO tasks (title) VALUES ('Д');\nSELECT title, status, priority FROM tasks ORDER BY priority, title;\n",
+  "hints": [
+    "Идём по командам сверху вниз, как их выполняет база.",
+    "UPDATE уменьшает срочность у задач, которые не done: А — 1, Б — 3, Г — 4, а В не меняется.",
+    "DELETE удаляет строки со срочностью больше трёх.",
+    "INSERT добавляет задачу Д с значениями по умолчанию.",
+    "Сортировка: сначала по срочности, внутри равной — по названию."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "А | todo | 1\nВ | done | 1\nБ | doing | 3\nД | todo | 3"
+  },
+  "solution": "А | todo | 1\nВ | done | 1\nБ | doing | 3\nД | todo | 3",
+  "explanation": "Команды выполняются по порядку: каждая видит результат предыдущей.",
+  "criteria": [
+    "Правильные строки в правильном порядке."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "В | done | 1\nА | todo | 1\nД | todo | 3\nБ | doing | 3",
+      "answer": "В | done | 1\nА | todo | 1\nД | todo | 3\nБ | doing | 3",
+      "why": "Порядок строк неверный: сначала по срочности, затем по названию."
+    },
+    {
+      "code": "А | todo | 1\nВ | done | 1\nБ | doing | 3\nД | todo | 3\nГ | todo | 4",
+      "answer": "А | todo | 1\nВ | done | 1\nБ | doing | 3\nД | todo | 3\nГ | todo | 4",
+      "why": "Задача Г удалена: у неё срочность 4 после UPDATE."
+    }
+  ]
+}

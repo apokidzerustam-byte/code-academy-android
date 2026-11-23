@@ -1,0 +1,97 @@
+{
+  "id": "a3-having",
+  "type": "write",
+  "title": "Категории с большим спросом",
+  "statement": "Выведите категории, в которых продано **не меньше 20 штук** (сумма `qty`): столбцы `category` и `total`. Порядок строк не важен.",
+  "goal": "Фильтровать группы условием HAVING.",
+  "input": "Таблицы создаются автоматически перед запуском.",
+  "expectedResult": "Таблица результата.",
+  "constraints": [],
+  "starterCode": "-- Ваш запрос\n",
+  "hints": [
+    "Условие касается итога по группе, а не отдельной строки.",
+    "Для условий на группы — HAVING.",
+    "HAVING пишется после GROUP BY.",
+    "В условии повторите агрегат: SUM(qty).",
+    "Граница «не меньше» — знак >=."
+  ],
+  "tests": {
+    "kind": "sql",
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE sales (\n  id INTEGER PRIMARY KEY,\n  product TEXT NOT NULL,\n  category TEXT NOT NULL,\n  price REAL NOT NULL,\n  qty INTEGER NOT NULL\n);\n\nINSERT INTO sales (product, category, price, qty) VALUES\n  ('Хлеб', 'еда', 3.5, 10),\n  ('Молоко', 'еда', 4.0, 5),\n  ('Ручка', 'канцелярия', 2.0, 20),\n  ('Тетрадь', 'канцелярия', 1.5, 30),\n  ('Наушники', 'техника', 120.0, 2);\n",
+        "expected": {
+          "columns": [
+            "category",
+            "total"
+          ],
+          "rows": [
+            [
+              "канцелярия",
+              50
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h2",
+        "setup": "CREATE TABLE sales (\n  id INTEGER PRIMARY KEY,\n  product TEXT NOT NULL,\n  category TEXT NOT NULL,\n  price REAL NOT NULL,\n  qty INTEGER NOT NULL\n);\nINSERT INTO sales (product, category, price, qty) VALUES\n  ('Чай', 'еда', 1.0, 12), ('Кофе', 'еда', 2.0, 4), ('Сахар', 'еда', 2.0, 6),\n  ('Диск', 'техника', 10.0, 1), ('Кабель', 'техника', 5.0, 6),\n  ('Скрепки', 'канцелярия', 0.5, 20);\n",
+        "expected": {
+          "columns": [
+            "category",
+            "total"
+          ],
+          "rows": [
+            [
+              "еда",
+              22
+            ],
+            [
+              "канцелярия",
+              20
+            ]
+          ]
+        },
+        "hidden": true,
+        "hint": "Граница включена: ровно 20 тоже подходит"
+      },
+      {
+        "id": "h3",
+        "setup": "CREATE TABLE sales (\n  id INTEGER PRIMARY KEY,\n  product TEXT NOT NULL,\n  category TEXT NOT NULL,\n  price REAL NOT NULL,\n  qty INTEGER NOT NULL\n);\nINSERT INTO sales (product, category, price, qty) VALUES\n  ('Мышь', 'техника', 15.0, 2), ('Клавиатура', 'техника', 25.0, 1);\n",
+        "expected": {
+          "columns": [
+            "category",
+            "total"
+          ],
+          "rows": []
+        },
+        "hidden": true,
+        "hint": "Бывает, что ни одна категория не подходит"
+      }
+    ]
+  },
+  "solution": "SELECT category, SUM(qty) AS total\nFROM sales\nGROUP BY category\nHAVING SUM(qty) >= 20;",
+  "explanation": "HAVING применяется после группировки и может использовать агрегаты, а WHERE — до неё и только к строкам.",
+  "criteria": [
+    "Результат совпадает на всех наборах данных, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "SELECT category, SUM(qty) AS total FROM sales GROUP BY category;",
+      "why": "Нет условия на группы."
+    },
+    {
+      "code": "SELECT category, SUM(qty) AS total FROM sales GROUP BY category HAVING SUM(qty) > 20;",
+      "why": "Строго больше: пропущены группы ровно с 20."
+    },
+    {
+      "code": "SELECT category, SUM(qty) AS total FROM sales WHERE qty >= 20 GROUP BY category;",
+      "why": "Условие применено к отдельным строкам, а не к группам."
+    },
+    {
+      "code": "SELECT category, COUNT(*) AS total FROM sales GROUP BY category HAVING COUNT(*) >= 20;",
+      "why": "Считается число строк, а нужна сумма количества."
+    }
+  ]
+}

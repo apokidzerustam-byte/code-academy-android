@@ -1,0 +1,96 @@
+{
+  "id": "a4-normalize",
+  "type": "write",
+  "title": "Справочник из плоской таблицы",
+  "statement": "В таблице `flat` категория записана в каждой строке. Таблица `categories` уже создана и пуста. Заполните её **различающимися** значениями столбца `category` из `flat` по алфавиту (номера выдаст база).",
+  "goal": "Переносить уникальные значения: INSERT … SELECT DISTINCT.",
+  "input": "Таблицы создаются автоматически перед запуском.",
+  "expectedResult": "Таблица результата.",
+  "constraints": [],
+  "starterCode": "-- Заполните таблицу categories\n",
+  "hints": [
+    "Данные нужно скопировать из одной таблицы в другую.",
+    "После INSERT INTO таблица (столбец) вместо VALUES можно написать SELECT.",
+    "Повторы убирает слово DISTINCT сразу после SELECT.",
+    "Берите столбец category из таблицы flat.",
+    "Порядок номеров задаёт ORDER BY category в конце."
+  ],
+  "tests": {
+    "kind": "sql",
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE flat (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  category TEXT NOT NULL\n);\n\nCREATE TABLE categories (\n  id INTEGER PRIMARY KEY,\n  name TEXT NOT NULL UNIQUE\n);\n\nINSERT INTO flat (title, category) VALUES\n  ('Б', 'учёба'), ('А', 'дом'), ('В', 'учёба'), ('Г', 'работа'), ('Д', 'дом'), ('Е', 'учёба');\n",
+        "query": "SELECT id, name FROM categories ORDER BY id;",
+        "expected": {
+          "rows": [
+            [
+              1,
+              "дом"
+            ],
+            [
+              2,
+              "работа"
+            ],
+            [
+              3,
+              "учёба"
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h2",
+        "setup": "CREATE TABLE flat (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  category TEXT NOT NULL\n);\n\nCREATE TABLE categories (\n  id INTEGER PRIMARY KEY,\n  name TEXT NOT NULL UNIQUE\n);\n\nINSERT INTO flat (title, category) VALUES ('X', 'яблоки'), ('Y', 'груши'), ('Z', 'яблоки');\n",
+        "query": "SELECT id, name FROM categories ORDER BY id;",
+        "expected": {
+          "rows": [
+            [
+              1,
+              "груши"
+            ],
+            [
+              2,
+              "яблоки"
+            ]
+          ]
+        },
+        "hidden": true,
+        "hint": "Повторы нужно схлопнуть, порядок — по алфавиту"
+      },
+      {
+        "id": "h3",
+        "setup": "CREATE TABLE flat (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  category TEXT NOT NULL\n);\n\nCREATE TABLE categories (\n  id INTEGER PRIMARY KEY,\n  name TEXT NOT NULL UNIQUE\n);\n\nINSERT INTO flat (title, category) VALUES ('Одна', 'одна');\n",
+        "query": "SELECT id, name FROM categories ORDER BY id;",
+        "expected": {
+          "rows": [
+            [
+              1,
+              "одна"
+            ]
+          ]
+        },
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "INSERT INTO categories (name)\nSELECT DISTINCT category\nFROM flat\nORDER BY category;",
+  "explanation": "INSERT … SELECT копирует результат запроса в таблицу; DISTINCT убирает повторы, ORDER BY определяет порядок добавления и номера.",
+  "criteria": [
+    "Результат совпадает на всех наборах данных, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "INSERT INTO categories (name) SELECT category FROM flat ORDER BY category;",
+      "why": "Нет DISTINCT: ошибка уникальности из-за повторов."
+    },
+    {
+      "code": "INSERT INTO categories (name) SELECT DISTINCT category FROM flat;",
+      "why": "Нет сортировки: номера выдаются не по алфавиту."
+    },
+    {
+      "code": "INSERT INTO categories (name) SELECT DISTINCT title FROM flat ORDER BY title;",
+      "why": "Переносятся названия задач вместо категорий."
+    }
+  ]
+}

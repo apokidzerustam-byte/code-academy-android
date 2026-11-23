@@ -1,0 +1,140 @@
+{
+  "id": "a3-delete",
+  "type": "write",
+  "title": "Уборка в списке",
+  "statement": "Удалите из таблицы все задачи со статусом `done`. Остальные должны остаться.",
+  "goal": "Удалять строки командой DELETE.",
+  "input": "Таблицы создаются автоматически перед запуском.",
+  "expectedResult": "Таблица результата.",
+  "constraints": [],
+  "starterCode": "-- Удалите выполненные\n",
+  "hints": [
+    "Удаляет строки команда DELETE.",
+    "Синтаксис: DELETE FROM таблица WHERE условие.",
+    "Какие строки удалять, определяет WHERE.",
+    "Нужны только задачи со статусом done.",
+    "Без WHERE удалятся все строки."
+  ],
+  "tests": {
+    "kind": "sql",
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  status TEXT NOT NULL DEFAULT 'todo' CHECK (status IN ('todo', 'doing', 'done')),\n  priority INTEGER NOT NULL DEFAULT 3 CHECK (priority BETWEEN 1 AND 5)\n);\n\nINSERT INTO tasks (title, status, priority) VALUES\n  ('Купить молоко', 'todo', 2),\n  ('Написать отчёт', 'doing', 1),\n  ('Позвонить врачу', 'todo', 3),\n  ('Оплатить интернет', 'done', 2);\n",
+        "query": "SELECT id, title, status, priority FROM tasks ORDER BY id;",
+        "expected": {
+          "rows": [
+            [
+              1,
+              "Купить молоко",
+              "todo",
+              2
+            ],
+            [
+              2,
+              "Написать отчёт",
+              "doing",
+              1
+            ],
+            [
+              3,
+              "Позвонить врачу",
+              "todo",
+              3
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h2",
+        "setup": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  status TEXT NOT NULL DEFAULT 'todo' CHECK (status IN ('todo', 'doing', 'done')),\n  priority INTEGER NOT NULL DEFAULT 3 CHECK (priority BETWEEN 1 AND 5)\n);\n\nINSERT INTO tasks (title, status, priority) VALUES\n  ('Уборка', 'todo', 1), ('Почта', 'todo', 1), ('Спорт', 'doing', 4), ('Налоги', 'done', 5),\n  ('Чтение', 'done', 1), ('Звонок', 'todo', 5), ('План', 'doing', 2);\n",
+        "query": "SELECT id, title, status, priority FROM tasks ORDER BY id;",
+        "expected": {
+          "rows": [
+            [
+              1,
+              "Уборка",
+              "todo",
+              1
+            ],
+            [
+              2,
+              "Почта",
+              "todo",
+              1
+            ],
+            [
+              3,
+              "Спорт",
+              "doing",
+              4
+            ],
+            [
+              6,
+              "Звонок",
+              "todo",
+              5
+            ],
+            [
+              7,
+              "План",
+              "doing",
+              2
+            ]
+          ]
+        },
+        "hidden": true,
+        "hint": "Данных может быть больше, и в них есть подходящие и неподходящие строки"
+      },
+      {
+        "id": "h3",
+        "setup": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  status TEXT NOT NULL DEFAULT 'todo' CHECK (status IN ('todo', 'doing', 'done')),\n  priority INTEGER NOT NULL DEFAULT 3 CHECK (priority BETWEEN 1 AND 5)\n);\n\nINSERT INTO tasks (title, status, priority) VALUES ('Единственная', 'todo', 1), ('Готово', 'done', 3);\n",
+        "query": "SELECT id, title, status, priority FROM tasks ORDER BY id;",
+        "expected": {
+          "rows": [
+            [
+              1,
+              "Единственная",
+              "todo",
+              1
+            ]
+          ]
+        },
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "setup": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  status TEXT NOT NULL DEFAULT 'todo' CHECK (status IN ('todo', 'doing', 'done')),\n  priority INTEGER NOT NULL DEFAULT 3 CHECK (priority BETWEEN 1 AND 5)\n);\n\n",
+        "query": "SELECT id, title, status, priority FROM tasks ORDER BY id;",
+        "expected": {
+          "rows": []
+        },
+        "hidden": true,
+        "hint": "Пустая таблица остаётся пустой"
+      }
+    ]
+  },
+  "solution": "DELETE FROM tasks\nWHERE status = 'done';",
+  "explanation": "DELETE FROM с WHERE удаляет только подходящие строки; без WHERE очистится вся таблица.",
+  "criteria": [
+    "Результат совпадает на всех наборах данных, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "DELETE FROM tasks;",
+      "why": "Нет WHERE: удалены все строки."
+    },
+    {
+      "code": "DELETE FROM tasks WHERE status = 'todo';",
+      "why": "Удалены не те задачи."
+    },
+    {
+      "code": "DELETE FROM tasks WHERE status = 'done' AND priority > 3;",
+      "why": "Удалены не все выполненные: лишнее условие."
+    },
+    {
+      "code": "UPDATE tasks SET status = 'todo' WHERE status = 'done';",
+      "why": "Задачи не удалены, а переведены в другой статус."
+    }
+  ]
+}

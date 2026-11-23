@@ -1,0 +1,46 @@
+{
+  "id": "sql-05-design",
+  "title": "SQL: проектирование таблиц",
+  "goal": "Проектировать таблицы: первичные и внешние ключи, ограничения, связь «один ко многим» и вынос повторов в справочник.",
+  "skills": [
+    "sql.design",
+    "sql.keys",
+    "sql.normalize"
+  ],
+  "prerequisites": [
+    "sql-04-modify"
+  ],
+  "runner": "sql",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-create.json",
+    "assignments/a2-fk.json",
+    "assignments/a3-design.json",
+    "assignments/a4-normalize.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Одно и то же значение повторяется в сотне строк",
+      "fix": "Выносите его в справочник и ссылайтесь на номер."
+    },
+    {
+      "mistake": "Ссылка на несуществующую строку",
+      "fix": "Внешний ключ запретит: сначала создайте строку, на которую ссылаетесь.",
+      "errorType": "SQLError"
+    },
+    {
+      "mistake": "Ссылка не на первичный ключ",
+      "fix": "REFERENCES указывает на столбец id другой таблицы."
+    },
+    {
+      "mistake": "Забыли UNIQUE у справочника",
+      "fix": "Без него в справочнике появятся повторы."
+    }
+  ]
+}

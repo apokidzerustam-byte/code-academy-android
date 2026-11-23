@@ -1,0 +1,39 @@
+{
+  "id": "a5-predict",
+  "type": "predict",
+  "title": "Заметки по задачам",
+  "statement": "Что вернёт запрос? Запишите строки результата по одной в строке, значения через « | » (без заголовка таблицы).",
+  "goal": "Заметки по задачам",
+  "input": "—",
+  "expectedResult": "Строки результата.",
+  "constraints": [],
+  "code": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL\n);\n\nCREATE TABLE notes (\n  id INTEGER PRIMARY KEY,\n  task_id INTEGER NOT NULL REFERENCES tasks(id),\n  text TEXT NOT NULL\n);\n\nINSERT INTO tasks (title) VALUES ('А'), ('Б'), ('В');\nINSERT INTO notes (task_id, text) VALUES (1, 'x'), (1, 'y'), (3, 'z'), (3, 'w'), (3, 'v');\nSELECT t.title, COUNT(n.id) AS n\nFROM tasks t\nLEFT JOIN notes n ON n.task_id = t.id\nGROUP BY t.id\nHAVING COUNT(n.id) <> 2\nORDER BY n DESC, t.title;\n",
+  "hints": [
+    "Сначала LEFT JOIN сохраняет все задачи, даже без заметок.",
+    "Заметок: у А две, у Б ни одной, у В три.",
+    "HAVING убирает группы, где заметок ровно две.",
+    "Остаётся две задачи.",
+    "Сортировка по числу заметок по убыванию."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "В | 3\nБ | 0"
+  },
+  "solution": "В | 3\nБ | 0",
+  "explanation": "LEFT JOIN сохраняет задачу без заметок (счёт 0), HAVING отбрасывает группы с двумя, ORDER BY n DESC ставит большие числа первыми.",
+  "criteria": [
+    "Правильные строки в правильном порядке."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "А | 2\nБ | 0\nВ | 3",
+      "answer": "А | 2\nБ | 0\nВ | 3",
+      "why": "Задача А осталась: условие HAVING исключает группы ровно с двумя заметками."
+    },
+    {
+      "code": "Б | 0\nВ | 3",
+      "answer": "Б | 0\nВ | 3",
+      "why": "Порядок неверный: сначала должны идти задачи с большим числом заметок."
+    }
+  ]
+}

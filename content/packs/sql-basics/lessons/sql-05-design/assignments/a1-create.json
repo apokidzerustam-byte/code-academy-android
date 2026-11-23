@@ -1,0 +1,103 @@
+{
+  "id": "a1-create",
+  "type": "write",
+  "title": "Таблица категорий",
+  "statement": "Создайте таблицу `categories` с двумя столбцами: `id` — целое число, первичный ключ; `name` — текст, **обязательный** и **уникальный**.",
+  "goal": "Создавать таблицу с ключами и ограничениями.",
+  "input": "Таблицы создаются автоматически перед запуском.",
+  "expectedResult": "Таблица результата.",
+  "constraints": [],
+  "starterCode": "-- Создайте таблицу\n",
+  "hints": [
+    "Таблицу создаёт CREATE TABLE.",
+    "В скобках перечисляют столбцы через запятую: имя и тип.",
+    "Первичный ключ записывают после типа: INTEGER PRIMARY KEY.",
+    "У name два ограничения: NOT NULL и UNIQUE.",
+    "Запятая нужна между столбцами, но не после последнего."
+  ],
+  "tests": {
+    "kind": "sql",
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL\n);\n",
+        "query": "SELECT name, type, \"notnull\", pk FROM pragma_table_info('categories') ORDER BY name;",
+        "expected": {
+          "rows": [
+            [
+              "id",
+              "INTEGER",
+              0,
+              1
+            ],
+            [
+              "name",
+              "TEXT",
+              1,
+              0
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h2",
+        "setup": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL\n);\n",
+        "query": "SELECT COUNT(*) FROM pragma_index_list('categories') WHERE \"unique\" = 1;",
+        "expected": {
+          "rows": [
+            [
+              1
+            ]
+          ]
+        },
+        "hidden": true,
+        "hint": "Проверяется и уникальность названия"
+      },
+      {
+        "id": "h3",
+        "setup": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL\n);\nINSERT INTO tasks (title) VALUES ('Любая');",
+        "query": "SELECT name, type, \"notnull\", pk FROM pragma_table_info('categories') ORDER BY name;",
+        "expected": {
+          "rows": [
+            [
+              "id",
+              "INTEGER",
+              0,
+              1
+            ],
+            [
+              "name",
+              "TEXT",
+              1,
+              0
+            ]
+          ]
+        },
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "CREATE TABLE categories (\n  id INTEGER PRIMARY KEY,\n  name TEXT NOT NULL UNIQUE\n);",
+  "explanation": "PRIMARY KEY делает номер уникальным идентификатором строки, NOT NULL запрещает пустое значение, UNIQUE — повторы.",
+  "criteria": [
+    "Результат совпадает на всех наборах данных, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "CREATE TABLE categories (id INTEGER PRIMARY KEY, name TEXT NOT NULL);",
+      "why": "Нет UNIQUE: названия могут повторяться."
+    },
+    {
+      "code": "CREATE TABLE categories (id INTEGER PRIMARY KEY, name TEXT UNIQUE);",
+      "why": "Нет NOT NULL: название можно не указывать."
+    },
+    {
+      "code": "CREATE TABLE categories (id INTEGER, name TEXT NOT NULL UNIQUE);",
+      "why": "Нет PRIMARY KEY у id."
+    },
+    {
+      "code": "CREATE TABLE categories (id INTEGER PRIMARY KEY, name INTEGER NOT NULL UNIQUE);",
+      "why": "Неверный тип у name: нужен TEXT."
+    }
+  ]
+}

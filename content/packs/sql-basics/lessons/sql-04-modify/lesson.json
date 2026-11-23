@@ -1,0 +1,46 @@
+{
+  "id": "sql-04-modify",
+  "title": "SQL: изменение данных",
+  "goal": "Добавлять, изменять и удалять строки командами INSERT, UPDATE и DELETE и понимать ограничения таблицы.",
+  "skills": [
+    "sql.insert",
+    "sql.delete",
+    "sql.constraints"
+  ],
+  "prerequisites": [
+    "sql-03-joins"
+  ],
+  "runner": "sql",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-insert.json",
+    "assignments/a2-update.json",
+    "assignments/a3-delete.json",
+    "assignments/a4-fix.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "UPDATE или DELETE без WHERE",
+      "fix": "Без условия затрагиваются все строки: сначала проверьте SELECT-ом.",
+      "errorType": "SQLError"
+    },
+    {
+      "mistake": "Условие «x = 1 OR 2»",
+      "fix": "Пишите «x = 1 OR x = 2» или «x IN (1, 2)»."
+    },
+    {
+      "mistake": "Забыли указать обязательный столбец (NOT NULL)",
+      "fix": "INSERT вернёт ошибку: укажите значение или задайте DEFAULT."
+    },
+    {
+      "mistake": "Значение нарушает CHECK",
+      "fix": "Прочитайте сообщение об ошибке и сверьтесь с описанием таблицы."
+    }
+  ]
+}

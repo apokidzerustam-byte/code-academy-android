@@ -1,0 +1,85 @@
+{
+  "id": "a4-fix-join",
+  "type": "fix",
+  "title": "Исправьте соединение",
+  "statement": "Запрос должен вывести название книги и имя автора для книг, **написанных после 1900 года**, по алфавиту названий. Сейчас таблицы соединены неверно. Найдите ошибку.",
+  "goal": "Читать условие ON.",
+  "input": "Таблицы создаются автоматически перед запуском.",
+  "expectedResult": "Таблица результата.",
+  "constraints": [],
+  "starterCode": "SELECT b.title, a.name\nFROM books b\nJOIN authors a ON a.id = b.id\nWHERE b.year > 1900\nORDER BY b.title;\n",
+  "hints": [
+    "Сравните результат с таблицей данных.",
+    "Условие связи пишется после ON.",
+    "Номер автора в книге — столбец author_id.",
+    "Сравнивать нужно с id таблицы авторов.",
+    "Остальные части запроса менять не нужно."
+  ],
+  "tests": {
+    "kind": "sql",
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE authors (\n  id INTEGER PRIMARY KEY,\n  name TEXT NOT NULL\n);\n\nCREATE TABLE books (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  author_id INTEGER REFERENCES authors(id),\n  year INTEGER\n);\n\nINSERT INTO authors (name) VALUES ('Толстой'), ('Булгаков'), ('Гоголь'), ('Чехов');\n\nINSERT INTO books (title, author_id, year) VALUES\n  ('Война и мир', 1, 1869),\n  ('Анна Каренина', 1, 1878),\n  ('Мастер и Маргарита', 2, 1967),\n  ('Ревизор', 3, 1836);\n",
+        "expected": {
+          "columns": [
+            "title",
+            "name"
+          ],
+          "rows": [
+            [
+              "Мастер и Маргарита",
+              "Булгаков"
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h2",
+        "setup": "CREATE TABLE authors (\n  id INTEGER PRIMARY KEY,\n  name TEXT NOT NULL\n);\n\nCREATE TABLE books (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  author_id INTEGER REFERENCES authors(id),\n  year INTEGER\n);\n\nINSERT INTO authors (name) VALUES ('Достоевский'), ('Пушкин'), ('Лермонтов');\nINSERT INTO books (title, author_id, year) VALUES\n  ('Идиот', 1, 1869), ('Бесы', 1, 1872), ('Евгений Онегин', 2, 1833),\n  ('Сборник без автора', NULL, 1950), ('Современник', 2, 1936);\n",
+        "expected": {
+          "columns": [
+            "title",
+            "name"
+          ],
+          "rows": [
+            [
+              "Современник",
+              "Пушкин"
+            ]
+          ]
+        },
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "setup": "CREATE TABLE authors (\n  id INTEGER PRIMARY KEY,\n  name TEXT NOT NULL\n);\n\nCREATE TABLE books (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  author_id INTEGER REFERENCES authors(id),\n  year INTEGER\n);\n\nINSERT INTO authors (name) VALUES ('Грибоедов'), ('Гончаров');\nINSERT INTO books (title, author_id, year) VALUES ('Горе от ума', 1, 1825), ('Обломов', 2, 1859), ('Обрыв', 2, 1869);\n",
+        "expected": {
+          "columns": [
+            "title",
+            "name"
+          ],
+          "rows": []
+        },
+        "hidden": true,
+        "hint": "Если подходящих книг нет, результат пуст"
+      }
+    ],
+    "ordered": true
+  },
+  "solution": "SELECT b.title, a.name\nFROM books b\nJOIN authors a ON a.id = b.author_id\nWHERE b.year > 1900\nORDER BY b.title;",
+  "explanation": "ON сравнивает внешний ключ книги с первичным ключом автора; сравнение b.id = a.id связывает несвязанные строки.",
+  "criteria": [
+    "Результат совпадает на всех наборах данных, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "SELECT b.title, a.name FROM books b JOIN authors a ON a.id = b.id WHERE b.year > 1900 ORDER BY b.title;",
+      "why": "Связь по неверным столбцам осталась."
+    },
+    {
+      "code": "SELECT b.title, a.name FROM books b JOIN authors a ON a.id = b.author_id ORDER BY b.title;",
+      "why": "Потеряно условие на год."
+    }
+  ]
+}

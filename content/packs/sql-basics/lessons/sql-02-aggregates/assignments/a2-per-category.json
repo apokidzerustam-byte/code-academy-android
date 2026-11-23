@@ -1,0 +1,115 @@
+{
+  "id": "a2-per-category",
+  "type": "write",
+  "title": "Товаров в категориях",
+  "statement": "Выведите для каждой категории её название и **число строк** (товаров) в ней: столбцы `category` и `n`. Порядок — по названию категории по алфавиту.",
+  "goal": "Группировать строки: GROUP BY.",
+  "input": "Таблицы создаются автоматически перед запуском.",
+  "expectedResult": "Таблица результата.",
+  "constraints": [],
+  "starterCode": "SELECT category FROM sales\n",
+  "hints": [
+    "Нужен итог по каждой категории — это группировка.",
+    "После FROM пишут GROUP BY category.",
+    "Число строк в группе считает COUNT(*).",
+    "Порядок — ORDER BY category в самом конце.",
+    "SELECT category, COUNT(*) AS n FROM sales GROUP BY category ORDER BY category;"
+  ],
+  "tests": {
+    "kind": "sql",
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE sales (\n  id INTEGER PRIMARY KEY,\n  product TEXT NOT NULL,\n  category TEXT NOT NULL,\n  price REAL NOT NULL,\n  qty INTEGER NOT NULL\n);\n\nINSERT INTO sales (product, category, price, qty) VALUES\n  ('Хлеб', 'еда', 3.5, 10),\n  ('Молоко', 'еда', 4.0, 5),\n  ('Ручка', 'канцелярия', 2.0, 20),\n  ('Тетрадь', 'канцелярия', 1.5, 30),\n  ('Наушники', 'техника', 120.0, 2);\n",
+        "expected": {
+          "columns": [
+            "category",
+            "n"
+          ],
+          "rows": [
+            [
+              "еда",
+              2
+            ],
+            [
+              "канцелярия",
+              2
+            ],
+            [
+              "техника",
+              1
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h2",
+        "setup": "CREATE TABLE sales (\n  id INTEGER PRIMARY KEY,\n  product TEXT NOT NULL,\n  category TEXT NOT NULL,\n  price REAL NOT NULL,\n  qty INTEGER NOT NULL\n);\nINSERT INTO sales (product, category, price, qty) VALUES\n  ('Чай', 'еда', 1.0, 12), ('Кофе', 'еда', 2.0, 4), ('Сахар', 'еда', 2.0, 6),\n  ('Диск', 'техника', 10.0, 1), ('Кабель', 'техника', 5.0, 6),\n  ('Скрепки', 'канцелярия', 0.5, 20);\n",
+        "expected": {
+          "columns": [
+            "category",
+            "n"
+          ],
+          "rows": [
+            [
+              "еда",
+              3
+            ],
+            [
+              "канцелярия",
+              1
+            ],
+            [
+              "техника",
+              2
+            ]
+          ]
+        },
+        "hidden": true,
+        "hint": "Категорий может быть больше или меньше"
+      },
+      {
+        "id": "h3",
+        "setup": "CREATE TABLE sales (\n  id INTEGER PRIMARY KEY,\n  product TEXT NOT NULL,\n  category TEXT NOT NULL,\n  price REAL NOT NULL,\n  qty INTEGER NOT NULL\n);\nINSERT INTO sales (product, category, price, qty) VALUES\n  ('Мышь', 'техника', 15.0, 2), ('Клавиатура', 'техника', 25.0, 1);\n",
+        "expected": {
+          "columns": [
+            "category",
+            "n"
+          ],
+          "rows": [
+            [
+              "техника",
+              2
+            ]
+          ]
+        },
+        "hidden": true,
+        "hint": "Если в категории одна строка, всё равно нужна строка с единицей"
+      }
+    ],
+    "ordered": true
+  },
+  "solution": "SELECT category, COUNT(*) AS n\nFROM sales\nGROUP BY category\nORDER BY category;",
+  "explanation": "GROUP BY category делит таблицу на группы, COUNT(*) считает строки в каждой, ORDER BY упорядочивает итог.",
+  "criteria": [
+    "Результат совпадает на всех наборах данных, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "SELECT category, COUNT(*) AS n FROM sales ORDER BY category;",
+      "why": "Нет группировки: одна строка на всю таблицу."
+    },
+    {
+      "code": "SELECT category, COUNT(*) AS n FROM sales GROUP BY product ORDER BY category;",
+      "why": "Группировка по товару вместо категории."
+    },
+    {
+      "code": "SELECT category, SUM(qty) AS n FROM sales GROUP BY category ORDER BY category;",
+      "why": "Суммируется количество, а нужно число строк."
+    },
+    {
+      "code": "SELECT category, COUNT(*) AS n FROM sales GROUP BY category ORDER BY n DESC;",
+      "why": "Порядок по числу, а не по названию."
+    }
+  ]
+}

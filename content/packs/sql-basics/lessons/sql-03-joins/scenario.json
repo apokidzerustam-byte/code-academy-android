@@ -1,0 +1,194 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Зачем несколько таблиц",
+      "narration": "Представьте, что в таблице книг рядом с каждой книгой записано имя автора. У Толстого две книги, значит, имя повторяется дважды, а если автор поменяет написание имени, исправлять придётся каждую строку. Правильнее хранить авторов в отдельной таблице, а в книге указывать только номер автора. Такой номер называется внешним ключом: он ссылается на строку другой таблицы.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "**Внешний ключ** — столбец, в котором лежит номер строки из другой таблицы: `books.author_id → authors.id`.",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "data",
+      "title": "Две связанные таблицы",
+      "narration": "У нас две таблицы. В авторах четыре строки, у каждой свой номер id. В книгах столбец author_id хранит номер автора. Например, у книги Война и мир стоит единица, значит, её написал автор с номером один. У Чехова пока нет книг.",
+      "actions": [
+        {
+          "type": "type",
+          "text": "CREATE TABLE authors (\n  id INTEGER PRIMARY KEY,\n  name TEXT NOT NULL\n);\n\nCREATE TABLE books (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  author_id INTEGER REFERENCES authors(id),\n  year INTEGER\n);\n\nINSERT INTO authors (name) VALUES ('Толстой'), ('Булгаков'), ('Гоголь'), ('Чехов');\n\nINSERT INTO books (title, author_id, year) VALUES\n  ('Война и мир', 1, 1869),\n  ('Анна Каренина', 1, 1878),\n  ('Мастер и Маргарита', 2, 1967),\n  ('Ревизор', 3, 1836);\n",
+          "file": "schema.sql",
+          "cue": 0
+        }
+      ]
+    },
+    {
+      "id": "join",
+      "title": "JOIN: соединяем таблицы",
+      "narration": "Чтобы вывести книгу рядом с именем автора, таблицы нужно соединить. Слово JOIN добавляет вторую таблицу, а после ON пишем условие связи: номер автора в книге равен номеру в авторах. Столбцы называем вместе с именем таблицы через точку, чтобы не путаться. Запускаем. Каждая книга получила имя своего автора, а Чехова в результате нет: у него нет книг.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.sql"
+        },
+        {
+          "type": "type",
+          "text": "SELECT books.title, authors.name\nFROM books\nJOIN authors ON authors.id = books.author_id;\n",
+          "file": "main.sql",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            3
+          ],
+          "file": "main.sql",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "main.sql",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "title              | name\n-------------------+---------\nВойна и мир        | Толстой\nАнна Каренина      | Толстой\nМастер и Маргарита | Булгаков\nРевизор            | Гоголь\n(4 строки)\n",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "alias",
+      "title": "Короткие имена таблиц",
+      "narration": "Писать полные имена таблиц долго. Поэтому таблицам дают короткие псевдонимы прямо после названия: books станет b, authors — a. Дальше используем их везде. Заодно оставим только книги до тысяча девятисотого года и отсортируем по названию. Запускаем.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.sql"
+        },
+        {
+          "type": "type",
+          "text": "SELECT b.title, a.name\nFROM books b\nJOIN authors a ON a.id = b.author_id\nWHERE b.year < 1900\nORDER BY b.title;\n",
+          "file": "main.sql",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "main.sql",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "title         | name\n--------------+--------\nАнна Каренина | Толстой\nВойна и мир   | Толстой\nРевизор       | Гоголь\n(3 строки)\n",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "left",
+      "title": "LEFT JOIN: сохраняем все строки",
+      "narration": "Обычный JOIN оставляет только те строки, у которых есть пара. А если нужны все авторы, даже без книг? Тогда используют LEFT JOIN: левая таблица, то есть та, что стоит после FROM, сохраняется целиком. Если пары нет, значения из правой таблицы будут пустыми, NULL. Запускаем. Чехов теперь в списке, а название книги у него пусто.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.sql"
+        },
+        {
+          "type": "type",
+          "text": "SELECT a.name, b.title\nFROM authors a\nLEFT JOIN books b ON b.author_id = a.id\nORDER BY a.name;\n",
+          "file": "main.sql",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "main.sql",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "name     | title\n---------+-------------------\nБулгаков | Мастер и Маргарита\nГоголь   | Ревизор\nТолстой  | Анна Каренина\nТолстой  | Война и мир\nЧехов    | NULL\n(5 строк)\n",
+          "cue": 5
+        }
+      ]
+    },
+    {
+      "id": "count",
+      "title": "JOIN и группировка",
+      "narration": "Соединение можно сочетать с группировкой. Посчитаем книги у каждого автора: LEFT JOIN, затем GROUP BY по номеру автора. Здесь важная деталь: считаем COUNT от столбца правой таблицы, b точка id. Тогда пустые значения не считаются, и у Чехова получится ноль, а не один. Запускаем.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.sql"
+        },
+        {
+          "type": "type",
+          "text": "SELECT a.name, COUNT(b.id) AS n\nFROM authors a\nLEFT JOIN books b ON b.author_id = a.id\nGROUP BY a.id\nORDER BY a.name;\n",
+          "file": "main.sql",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            1
+          ],
+          "file": "main.sql",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "main.sql",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "name     | n\n---------+--\nБулгаков | 1\nГоголь   | 1\nТолстой  | 2\nЧехов    | 0\n(4 строки)\n",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "error",
+      "title": "Неоднозначный столбец",
+      "narration": "Если столбец с таким именем есть в обеих таблицах, база не поймёт, какой имеется в виду. Запросим просто id и посмотрим на ошибку. Исправляется это просто: пишем имя таблицы или её псевдоним перед точкой.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.sql"
+        },
+        {
+          "type": "type",
+          "text": "SELECT id, title, name\nFROM books\nJOIN authors ON authors.id = books.author_id;\n",
+          "file": "main.sql",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "main.sql",
+          "cue": 1
+        },
+        {
+          "type": "output",
+          "text": "SQLError: неоднозначный столбец «id» — укажите таблицу: таблица.id (ambiguous column name: id)\n  строка 1",
+          "stream": "stderr",
+          "cue": 1
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. Связанные данные хранят в разных таблицах, а связь задаёт внешний ключ. JOIN с условием ON соединяет таблицы и оставляет только пары. LEFT JOIN сохраняет все строки левой таблицы. Для подсчёта связанных строк считайте COUNT от столбца правой таблицы. А чтобы не путаться в одинаковых именах, используйте псевдонимы.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`FROM a JOIN b ON b.a_id = a.id` — только пары · `LEFT JOIN` — все строки `a`",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}

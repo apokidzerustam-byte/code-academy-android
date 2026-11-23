@@ -1,0 +1,118 @@
+{
+  "id": "a2-count-books",
+  "type": "write",
+  "title": "Сколько книг у автора",
+  "statement": "Выведите имена **всех** авторов и число их книг: столбцы `name` и `n`. Авторы без книг тоже нужны (с нулём). Порядок — по имени автора.",
+  "goal": "Считать связанные строки через LEFT JOIN и COUNT.",
+  "input": "Таблицы создаются автоматически перед запуском.",
+  "expectedResult": "Таблица результата.",
+  "constraints": [],
+  "starterCode": "SELECT name FROM authors\n",
+  "hints": [
+    "Нужны все авторы, даже без книг: какой JOIN сохраняет левую таблицу?",
+    "LEFT JOIN: слева authors, справа books.",
+    "Сгруппируйте по автору.",
+    "Считайте COUNT от столбца правой таблицы: пустые значения не считаются.",
+    "ORDER BY a.name — в самом конце."
+  ],
+  "tests": {
+    "kind": "sql",
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE authors (\n  id INTEGER PRIMARY KEY,\n  name TEXT NOT NULL\n);\n\nCREATE TABLE books (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  author_id INTEGER REFERENCES authors(id),\n  year INTEGER\n);\n\nINSERT INTO authors (name) VALUES ('Толстой'), ('Булгаков'), ('Гоголь'), ('Чехов');\n\nINSERT INTO books (title, author_id, year) VALUES\n  ('Война и мир', 1, 1869),\n  ('Анна Каренина', 1, 1878),\n  ('Мастер и Маргарита', 2, 1967),\n  ('Ревизор', 3, 1836);\n",
+        "expected": {
+          "columns": [
+            "name",
+            "n"
+          ],
+          "rows": [
+            [
+              "Булгаков",
+              1
+            ],
+            [
+              "Гоголь",
+              1
+            ],
+            [
+              "Толстой",
+              2
+            ],
+            [
+              "Чехов",
+              0
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h2",
+        "setup": "CREATE TABLE authors (\n  id INTEGER PRIMARY KEY,\n  name TEXT NOT NULL\n);\n\nCREATE TABLE books (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  author_id INTEGER REFERENCES authors(id),\n  year INTEGER\n);\n\nINSERT INTO authors (name) VALUES ('Достоевский'), ('Пушкин'), ('Лермонтов');\nINSERT INTO books (title, author_id, year) VALUES\n  ('Идиот', 1, 1869), ('Бесы', 1, 1872), ('Евгений Онегин', 2, 1833),\n  ('Сборник без автора', NULL, 1950), ('Современник', 2, 1936);\n",
+        "expected": {
+          "columns": [
+            "name",
+            "n"
+          ],
+          "rows": [
+            [
+              "Достоевский",
+              2
+            ],
+            [
+              "Лермонтов",
+              0
+            ],
+            [
+              "Пушкин",
+              2
+            ]
+          ]
+        },
+        "hidden": true,
+        "hint": "Бывает, что у автора нет ни одной книги"
+      },
+      {
+        "id": "h3",
+        "setup": "CREATE TABLE authors (\n  id INTEGER PRIMARY KEY,\n  name TEXT NOT NULL\n);\n\nCREATE TABLE books (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  author_id INTEGER REFERENCES authors(id),\n  year INTEGER\n);\n\nINSERT INTO authors (name) VALUES ('Грибоедов'), ('Гончаров');\nINSERT INTO books (title, author_id, year) VALUES ('Горе от ума', 1, 1825), ('Обломов', 2, 1859), ('Обрыв', 2, 1869);\n",
+        "expected": {
+          "columns": [
+            "name",
+            "n"
+          ],
+          "rows": [
+            [
+              "Гончаров",
+              2
+            ],
+            [
+              "Грибоедов",
+              1
+            ]
+          ]
+        },
+        "hidden": true
+      }
+    ],
+    "ordered": true
+  },
+  "solution": "SELECT a.name, COUNT(b.id) AS n\nFROM authors a\nLEFT JOIN books b ON b.author_id = a.id\nGROUP BY a.id\nORDER BY a.name;",
+  "explanation": "COUNT(b.id) пропускает NULL, поэтому у автора без книг получается 0.",
+  "criteria": [
+    "Результат совпадает на всех наборах данных, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "SELECT a.name, COUNT(b.id) AS n FROM authors a JOIN books b ON b.author_id = a.id GROUP BY a.id ORDER BY a.name;",
+      "why": "Обычный JOIN теряет авторов без книг."
+    },
+    {
+      "code": "SELECT a.name, COUNT(*) AS n FROM authors a LEFT JOIN books b ON b.author_id = a.id GROUP BY a.id ORDER BY a.name;",
+      "why": "COUNT(*) считает и пустую строку: у автора без книг получается 1."
+    },
+    {
+      "code": "SELECT a.name, COUNT(b.id) AS n FROM authors a LEFT JOIN books b ON b.author_id = a.id ORDER BY a.name;",
+      "why": "Нет группировки."
+    }
+  ]
+}

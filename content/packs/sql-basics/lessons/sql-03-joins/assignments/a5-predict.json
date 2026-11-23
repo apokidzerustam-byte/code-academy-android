@@ -1,0 +1,39 @@
+{
+  "id": "a5-predict",
+  "type": "predict",
+  "title": "Что вернёт запрос?",
+  "statement": "Что вернёт запрос? Запишите строки результата по одной в строке, значения через « | » (без заголовка таблицы).",
+  "goal": "Что вернёт запрос?",
+  "input": "—",
+  "expectedResult": "Строки результата.",
+  "constraints": [],
+  "code": "CREATE TABLE authors (\n  id INTEGER PRIMARY KEY,\n  name TEXT NOT NULL\n);\n\nCREATE TABLE books (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  author_id INTEGER REFERENCES authors(id),\n  year INTEGER\n);\n\nINSERT INTO authors (name) VALUES ('Толстой'), ('Булгаков'), ('Гоголь'), ('Чехов');\n\nINSERT INTO books (title, author_id, year) VALUES\n  ('Война и мир', 1, 1869),\n  ('Анна Каренина', 1, 1878),\n  ('Мастер и Маргарита', 2, 1967),\n  ('Ревизор', 3, 1836);\nSELECT a.name, COUNT(b.id) AS n\nFROM authors a\nLEFT JOIN books b ON b.author_id = a.id\nWHERE a.id <> 3\nGROUP BY a.id\nHAVING COUNT(b.id) <> 1\nORDER BY a.name;\n",
+  "hints": [
+    "Сначала LEFT JOIN сохраняет всех авторов.",
+    "WHERE убирает автора с номером 3 — Гоголя.",
+    "Книг: Толстой — 2, Булгаков — 1, Чехов — 0.",
+    "HAVING оставляет группы, где число книг не равно единице.",
+    "В конце строки упорядочены по имени автора, по алфавиту."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "Толстой | 2\nЧехов | 0"
+  },
+  "solution": "Толстой | 2\nЧехов | 0",
+  "explanation": "WHERE выполняется до группировки, HAVING — после; сортировка идёт по именам по алфавиту.",
+  "criteria": [
+    "Правильные строки в правильном порядке."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "Булгаков | 1\nТолстой | 2\nЧехов | 0",
+      "answer": "Булгаков | 1\nТолстой | 2\nЧехов | 0",
+      "why": "У Булгакова одна книга: условие HAVING её убирает."
+    },
+    {
+      "code": "Толстой | 2",
+      "answer": "Толстой | 2",
+      "why": "Чехов тоже подходит: у него 0 книг, а условие — «не равно 1»."
+    }
+  ]
+}

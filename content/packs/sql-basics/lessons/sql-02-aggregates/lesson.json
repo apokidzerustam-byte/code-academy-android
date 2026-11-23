@@ -1,0 +1,46 @@
+{
+  "id": "sql-02-aggregates",
+  "title": "SQL: агрегаты и группировка",
+  "goal": "Считать итоги функциями COUNT, SUM, AVG, MIN, MAX, группировать строки и фильтровать группы.",
+  "skills": [
+    "sql.aggregates",
+    "sql.group",
+    "sql.round"
+  ],
+  "prerequisites": [
+    "sql-01-select"
+  ],
+  "runner": "sql",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-revenue.json",
+    "assignments/a2-per-category.json",
+    "assignments/a3-having.json",
+    "assignments/a4-avg.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Агрегат в WHERE",
+      "fix": "Условие на итог группы пишите в HAVING.",
+      "errorType": "SQLError"
+    },
+    {
+      "mistake": "Столбец в SELECT не из GROUP BY и не агрегат",
+      "fix": "Группируйте по нему или оберните агрегатом."
+    },
+    {
+      "mistake": "HAVING вместо WHERE для обычных строк",
+      "fix": "Фильтр на строки — WHERE, он работает быстрее."
+    },
+    {
+      "mistake": "Забывают ROUND для среднего",
+      "fix": "AVG даёт много знаков после запятой."
+    }
+  ]
+}

@@ -3,11 +3,15 @@
   "version": "0.1.0",
   "stage": 9,
   "title": "Базы данных: SQL",
-  "description": "SQLite прямо в приложении: таблицы, запросы, изменение данных. Пилот этапа 9.",
+  "description": "SQLite прямо в приложении: таблицы, запросы, агрегаты, соединения, изменение данных и проектирование.",
   "language": "sql",
   "minAppVersion": 1,
   "lessons": [
-    "sql-01-select"
+    "sql-01-select",
+    "sql-02-aggregates",
+    "sql-03-joins",
+    "sql-04-modify",
+    "sql-05-design"
   ],
   "skills": {
     "sql.tables": "Таблицы, CREATE и INSERT",
@@ -15,6 +19,18 @@
     "sql.where": "Условия WHERE",
     "sql.order": "Сортировка и LIMIT",
     "sql.update": "Изменение данных UPDATE",
-    "sql.errors": "Ошибки в SQL"
+    "sql.errors": "Ошибки в SQL",
+    "sql.aggregates": "Агрегатные функции",
+    "sql.group": "GROUP BY и HAVING",
+    "sql.round": "Среднее и округление",
+    "sql.join": "JOIN и внешние ключи",
+    "sql.left-join": "LEFT JOIN и отсутствие пары",
+    "sql.alias": "Псевдонимы таблиц",
+    "sql.insert": "INSERT: добавление строк",
+    "sql.delete": "DELETE и осторожность с WHERE",
+    "sql.constraints": "Ограничения таблицы",
+    "sql.design": "Проектирование таблиц",
+    "sql.keys": "Первичные и внешние ключи",
+    "sql.normalize": "Нормализация данных"
   }
 }

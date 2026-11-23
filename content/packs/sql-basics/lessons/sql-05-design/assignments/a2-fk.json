@@ -1,0 +1,97 @@
+{
+  "id": "a2-fk",
+  "type": "complete",
+  "title": "Связь заметок с задачами",
+  "statement": "Таблица `notes` создана без связи: `task_id` просто число. Допишите так, чтобы `task_id` был **внешним ключом** на `tasks(id)` и был обязательным.",
+  "goal": "Объявлять внешний ключ.",
+  "input": "Таблицы создаются автоматически перед запуском.",
+  "expectedResult": "Таблица результата.",
+  "constraints": [],
+  "starterCode": "CREATE TABLE notes (\n  id INTEGER PRIMARY KEY,\n  task_id INTEGER,\n  text TEXT NOT NULL\n);\n",
+  "hints": [
+    "Сравните описание столбца task_id с условием.",
+    "Связь с другой таблицей задаёт слово REFERENCES.",
+    "После REFERENCES пишут таблицу и в скобках её столбец.",
+    "Ссылаться нужно на первичный ключ таблицы tasks.",
+    "Обязательность — слова NOT NULL перед REFERENCES."
+  ],
+  "tests": {
+    "kind": "sql",
+    "cases": [
+      {
+        "id": "v1",
+        "setup": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL\n);\n",
+        "query": "SELECT \"table\", \"from\", \"to\" FROM pragma_foreign_key_list('notes');",
+        "expected": {
+          "rows": [
+            [
+              "tasks",
+              "task_id",
+              "id"
+            ]
+          ]
+        }
+      },
+      {
+        "id": "h2",
+        "setup": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL\n);\n",
+        "query": "SELECT name, type, \"notnull\" FROM pragma_table_info('notes') ORDER BY name;",
+        "expected": {
+          "rows": [
+            [
+              "id",
+              "INTEGER",
+              0
+            ],
+            [
+              "task_id",
+              "INTEGER",
+              1
+            ],
+            [
+              "text",
+              "TEXT",
+              1
+            ]
+          ]
+        },
+        "hidden": true,
+        "hint": "Проверяется и обязательность столбца"
+      },
+      {
+        "id": "h3",
+        "setup": "CREATE TABLE tasks (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL\n);\nINSERT INTO tasks (title) VALUES ('Любая');",
+        "query": "SELECT \"table\", \"from\", \"to\" FROM pragma_foreign_key_list('notes');",
+        "expected": {
+          "rows": [
+            [
+              "tasks",
+              "task_id",
+              "id"
+            ]
+          ]
+        },
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "CREATE TABLE notes (\n  id INTEGER PRIMARY KEY,\n  task_id INTEGER NOT NULL REFERENCES tasks(id),\n  text TEXT NOT NULL\n);",
+  "explanation": "REFERENCES tasks(id) связывает столбец с первичным ключом другой таблицы; NOT NULL запрещает заметки без задачи.",
+  "criteria": [
+    "Результат совпадает на всех наборах данных, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "CREATE TABLE notes (id INTEGER PRIMARY KEY, task_id INTEGER NOT NULL, text TEXT NOT NULL);",
+      "why": "Нет внешнего ключа."
+    },
+    {
+      "code": "CREATE TABLE notes (id INTEGER PRIMARY KEY, task_id INTEGER REFERENCES tasks(id), text TEXT NOT NULL);",
+      "why": "task_id не обязателен: нет NOT NULL."
+    },
+    {
+      "code": "CREATE TABLE notes (id INTEGER PRIMARY KEY, task_id INTEGER NOT NULL REFERENCES tasks(title), text TEXT NOT NULL);",
+      "why": "Ссылка не на первичный ключ: нужен tasks(id)."
+    }
+  ]
+}
