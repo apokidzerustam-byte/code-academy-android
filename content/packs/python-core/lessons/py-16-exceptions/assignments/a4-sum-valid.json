@@ -1,0 +1,68 @@
+{
+  "id": "a4-sum-valid",
+  "type": "write",
+  "title": "Сумма корректных",
+  "statement": "В одной строке через пробел записаны слова. Часть из них — целые числа. Выведите сумму всех чисел и количество «не чисел» в формате `сумма=… ошибок=…`.\n\nВвод:\n```\n5 abc 10 x 7\n```\nВывод:\n```\nсумма=22 ошибок=2\n```",
+  "goal": "Сумма корректных",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "",
+  "hints": [
+    "Каждое слово нужно попытаться превратить в число.",
+    "Попытка преобразования — в блоке try.",
+    "Если получилось — прибавьте к сумме, если ValueError — увеличьте счётчик ошибок.",
+    "Слова вроде 3.5 для int тоже ошибка.",
+    "except ValueError: bad += 1."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "5 abc 10 x 7\n",
+        "expected_stdout": "сумма=22 ошибок=2\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "1 2 3\n",
+        "expected_stdout": "сумма=6 ошибок=0\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "а б в\n",
+        "expected_stdout": "сумма=0 ошибок=3\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "-5 5 0\n",
+        "expected_stdout": "сумма=0 ошибок=0\n",
+        "hidden": true
+      },
+      {
+        "id": "h5",
+        "stdin": "3.5 4\n",
+        "expected_stdout": "сумма=4 ошибок=1\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "total = 0\nbad = 0\nfor word in input().split():\n    try:\n        total += int(word)\n    except ValueError:\n        bad += 1\nprint(f\"сумма={total} ошибок={bad}\")\n",
+  "explanation": "Каждое слово обрабатывается независимо: корректные суммируются, некорректные считаются, и ошибка не прерывает цикл.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "total = 0\nbad = 0\nfor word in input().split():\n    total += int(word)\nprint(f\"сумма={total} ошибок={bad}\")\n",
+      "why": "Ошибка преобразования не перехвачена — программа падает."
+    },
+    {
+      "code": "total = 0\nbad = 0\nfor word in input().split():\n    try:\n        total += int(word)\n    except ValueError:\n        pass\nprint(f\"сумма={total} ошибок={bad}\")\n",
+      "why": "Некорректные слова не посчитаны."
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "id": "a2-total",
+  "type": "function",
+  "title": "Стоимость заказа из JSON",
+  "statement": "Функция `order_total(text)` получает строку JSON — список объектов с полями `price` и `qty` — и возвращает общую стоимость (сумму `price * qty`).\n\nПример: `order_total('[{\"price\": 40, \"qty\": 2}, {\"price\": 350, \"qty\": 1}]')` → `430`.",
+  "goal": "Стоимость заказа из JSON",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Текст нужно превратить в список, а затем посчитать сумму.",
+    "Функция loads разбирает строку JSON.",
+    "Получится список словарей: читайте поля по ключам.",
+    "Стоимость позиции — price * qty.",
+    "return sum(i['price'] * i['qty'] for i in json.loads(text))."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "order_total",
+    "cases": [
+      {
+        "args": [
+          "[{\"price\": 40, \"qty\": 2}, {\"price\": 350, \"qty\": 1}]"
+        ],
+        "id": "v1",
+        "expected": 430
+      },
+      {
+        "args": [
+          "[]"
+        ],
+        "id": "v2",
+        "expected": 0
+      },
+      {
+        "args": [
+          "[{\"price\": 10, \"qty\": 0}]"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          "[{\"price\": 2.5, \"qty\": 4}, {\"price\": 1, \"qty\": 1}]"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 11.0
+      },
+      {
+        "args": [
+          "[{\"price\": 7, \"qty\": 3, \"name\": \"х\"}]"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 21
+      }
+    ]
+  },
+  "solution": "import json\n\ndef order_total(text):\n    items = json.loads(text)\n    return sum(i[\"price\"] * i[\"qty\"] for i in items)\n",
+  "explanation": "loads возвращает список словарей, к которым применимы обычные приёмы: обращение по ключу и sum с генератором.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import json\n\ndef order_total(text):\n    items = json.loads(text)\n    return sum(i[\"price\"] for i in items)\n",
+      "why": "Количество не учтено."
+    },
+    {
+      "code": "import json\n\ndef order_total(text):\n    return sum(i[\"price\"] * i[\"qty\"] for i in text)\n",
+      "why": "Строка не разобрана: перебираются символы текста."
+    },
+    {
+      "code": "import json\n\ndef order_total(text):\n    items = json.loads(text)\n    return len(items)\n",
+      "why": "Возвращено число позиций, а не стоимость."
+    }
+  ]
+}

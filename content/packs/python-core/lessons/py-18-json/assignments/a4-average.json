@@ -1,0 +1,56 @@
+{
+  "id": "a4-average",
+  "type": "write",
+  "title": "Среднее по JSON",
+  "statement": "Во вводе одна строка с JSON-объектом вида `{\"name\": \"Аня\", \"marks\": [5, 4, 5]}`. Выведите `имя: среднее`, среднее округлите до двух знаков.\n\nВвод:\n```\n{\"name\": \"Аня\", \"marks\": [5, 4, 5]}\n```\nВывод:\n```\nАня: 4.67\n```",
+  "goal": "Среднее по JSON",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "",
+  "hints": [
+    "Ввод — это строка JSON, её нужно разобрать.",
+    "Для разбора строки используйте json.loads.",
+    "Имя лежит по ключу name, оценки — по ключу marks.",
+    "Среднее — сумма на количество.",
+    "f-строка с :.2f округляет до двух знаков."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "{\"name\": \"Аня\", \"marks\": [5, 4, 5]}\n",
+        "expected_stdout": "Аня: 4.67\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "{\"name\": \"Борис\", \"marks\": [3]}\n",
+        "expected_stdout": "Борис: 3.00\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "{\"marks\": [4, 4, 5, 5], \"name\": \"Вера\"}\n",
+        "expected_stdout": "Вера: 4.50\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "import json\n\ndata = json.loads(input())\nprint(f\"{data['name']}: {sum(data['marks']) / len(data['marks']):.2f}\")\n",
+  "explanation": "Порядок ключей в JSON не важен: данные берутся по именам полей.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import json\n\ndata = json.loads(input())\nprint(f\"{data['name']}: {sum(data['marks']) / len(data['marks'])}\")\n",
+      "why": "Среднее не округлено до двух знаков."
+    },
+    {
+      "code": "import json\n\ndata = json.loads(input())\nprint(f\"{data['name']}: {sum(data['marks']):.2f}\")\n",
+      "why": "Выведена сумма вместо среднего."
+    }
+  ]
+}

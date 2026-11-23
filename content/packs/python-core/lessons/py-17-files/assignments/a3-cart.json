@@ -1,0 +1,62 @@
+{
+  "id": "a3-cart",
+  "type": "write",
+  "title": "Стоимость корзины из файла",
+  "statement": "Первая строка — число позиций `n`. Далее `n` строк `название;количество;цена`. Запишите их в файл `cart.txt`, прочитайте файл и выведите общую стоимость (сумма количество × цена).\n\nВвод:\n```\n2\nхлеб;2;40\nмолоко;1;90\n```\nВывод:\n```\n170\n```",
+  "goal": "Стоимость корзины из файла",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "",
+  "hints": [
+    "Разберите задачу на этапы: прочитать, записать в файл, прочитать файл, посчитать.",
+    "Позиции читаем в цикле input().",
+    "Каждую позицию записываем в файл с переводом строки.",
+    "Файл читаем построчно, строку разбиваем по точке с запятой.",
+    "total += int(qty) * int(price)."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "2\nхлеб;2;40\nмолоко;1;90\n",
+        "expected_stdout": "170\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "1\nчай;3;100\n",
+        "expected_stdout": "300\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "3\nа;1;1\nб;2;2\nв;3;3\n",
+        "expected_stdout": "14\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "0\n",
+        "expected_stdout": "0\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "n = int(input())\nlines = [input() for _ in range(n)]\nwith open(\"cart.txt\", \"w\", encoding=\"utf-8\") as f:\n    for line in lines:\n        f.write(line + \"\\n\")\ntotal = 0\nwith open(\"cart.txt\", encoding=\"utf-8\") as f:\n    for line in f:\n        name, qty, price = line.strip().split(\";\")\n        total += int(qty) * int(price)\nprint(total)\n",
+  "explanation": "Данные проходят полный цикл: ввод → файл → разбор → сумма. Накопитель total увеличивается на каждой строке.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "n = int(input())\nlines = [input() for _ in range(n)]\ntotal = 0\nfor line in lines:\n    name, qty, price = line.split(\";\")\n    total += int(qty) + int(price)\nprint(total)\n",
+      "why": "Количество и цена складываются вместо умножения."
+    },
+    {
+      "code": "n = int(input())\nlines = [input() for _ in range(n)]\ntotal = 0\nfor line in lines:\n    name, qty, price = line.split(\";\")\n    total = int(qty) * int(price)\nprint(total)\n",
+      "why": "Сумма не накапливается: остаётся стоимость последней позиции."
+    }
+  ]
+}

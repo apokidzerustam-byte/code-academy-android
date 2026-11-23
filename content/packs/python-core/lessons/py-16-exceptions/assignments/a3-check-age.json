@@ -1,0 +1,88 @@
+{
+  "id": "a3-check-age",
+  "type": "function",
+  "title": "Проверка возраста",
+  "statement": "Напишите функцию `check_age(age)`: если `age` меньше 0 или больше 150, она вызывает `ValueError`; иначе возвращает `age`.",
+  "goal": "Проверка возраста",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Недопустимые данные нужно сообщить исключением.",
+    "Условие нарушения: age < 0 или age > 150.",
+    "Исключение вызывается ключевым словом raise.",
+    "Тип исключения — ValueError, в скобках — текст.",
+    "if age < 0 or age > 150: raise ValueError('...'); return age."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "check_age",
+    "cases": [
+      {
+        "args": [
+          25
+        ],
+        "id": "v1",
+        "expected": 25
+      },
+      {
+        "args": [
+          -1
+        ],
+        "expected_error": "ValueError",
+        "id": "v2"
+      },
+      {
+        "args": [
+          151
+        ],
+        "expected_error": "ValueError",
+        "id": "h3",
+        "hidden": true
+      },
+      {
+        "args": [
+          0
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          150
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 150
+      },
+      {
+        "args": [
+          -100
+        ],
+        "expected_error": "ValueError",
+        "id": "h6",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "def check_age(age):\n    if age < 0 or age > 150:\n        raise ValueError(\"недопустимый возраст\")\n    return age\n",
+  "explanation": "raise прерывает функцию и передаёт ошибку вызывающему коду; границы 0 и 150 включаются в допустимый диапазон.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def check_age(age):\n    if age < 0 or age > 150:\n        return None\n    return age\n",
+      "why": "Вместо исключения возвращается None."
+    },
+    {
+      "code": "def check_age(age):\n    if age <= 0 or age >= 150:\n        raise ValueError(\"недопустимый возраст\")\n    return age\n",
+      "why": "Границы 0 и 150 тоже допустимы."
+    },
+    {
+      "code": "def check_age(age):\n    if age < 0:\n        raise ValueError(\"недопустимый возраст\")\n    return age\n",
+      "why": "Верхняя граница не проверяется."
+    }
+  ]
+}

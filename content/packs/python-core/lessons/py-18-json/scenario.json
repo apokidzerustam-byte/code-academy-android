@@ -1,0 +1,160 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "JSON — язык обмена данными",
+      "narration": "Программам постоянно нужно передавать данные друг другу: приложению — серверу, серверу — браузеру, программе — файлу на диске. Для этого придумали формат JSON. Это обычный текст, который выглядит почти как словари и списки Python: фигурные скобки, ключи в кавычках, значения через двоеточие. Его понимают все языки программирования, поэтому JSON стал стандартом для веб-программирования и настроек приложений. В Python для работы с ним есть встроенный модуль json.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "**JSON** — текстовый формат данных: объекты `{}`, массивы `[]`, строки, числа, `true`, `false`, `null`",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "dumps",
+      "title": "Из Python в JSON",
+      "narration": "Функция dumps превращает объект Python в строку JSON. Названия функций легко запомнить: s в конце означает строку. Возьмём словарь с именем, возрастом и списком оценок. Обратите внимание на преобразования: True превращается в маленькое true, None — в null, а кортеж — в массив. По умолчанию русские буквы записываются кодами, как слэш u и четыре цифры. Чтобы текст остался читаемым, добавляем ensure_ascii равно False, а для красивых отступов — indent.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "import json\n\n",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "person = {\"name\": \"Аня\", \"age\": 25, \"marks\": [5, 4], \"active\": True, \"phone\": None}\n",
+          "cue": 2
+        },
+        {
+          "type": "type",
+          "text": "print(json.dumps(person))\n",
+          "cue": 3
+        },
+        {
+          "type": "type",
+          "text": "print(json.dumps(person, ensure_ascii=False))\nprint(json.dumps(person, ensure_ascii=False, indent=2))\n",
+          "cue": 5
+        },
+        {
+          "type": "run",
+          "cue": 5
+        },
+        {
+          "type": "output",
+          "text": "{\"name\": \"\\u0410\\u043d\\u044f\", \"age\": 25, \"marks\": [5, 4], \"active\": true, \"phone\": null}\n{\"name\": \"Аня\", \"age\": 25, \"marks\": [5, 4], \"active\": true, \"phone\": null}\n{\n  \"name\": \"Аня\",\n  \"age\": 25,\n  \"marks\": [\n    5,\n    4\n  ],\n  \"active\": true,\n  \"phone\": null\n}\n",
+          "cue": 5
+        }
+      ]
+    },
+    {
+      "id": "loads",
+      "title": "Из JSON в Python",
+      "narration": "Обратное действие выполняет функция loads: она принимает строку JSON и возвращает словарь или список. Дальше с ними работают как с обычными объектами: читают по ключам, перебирают, считают. Посмотрите на пример: приходит строка с товарами, а мы получаем список словарей и считаем общую стоимость. Именно так программы разбирают ответы серверов.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "import json\n\n",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "text = '[{\"name\": \"хлеб\", \"price\": 40, \"qty\": 2}, {\"name\": \"сыр\", \"price\": 350, \"qty\": 1}]'\n",
+          "cue": 2
+        },
+        {
+          "type": "type",
+          "text": "items = json.loads(text)\nprint(type(items), items[0][\"name\"])\nprint(sum(i[\"price\"] * i[\"qty\"] for i in items))\n",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "<class 'list'> хлеб\n430\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "files",
+      "title": "JSON и файлы",
+      "narration": "Для работы с файлами есть пара функций без буквы s: dump записывает объект в открытый файл, а load читает его. Сохраним настройки приложения в файл, а потом загрузим обратно и убедимся, что получили то же самое. Это самый простой способ дать программе память между запусками: тему оформления, последний открытый урок, список задач.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "import json\n\nsettings = {\"theme\": \"тёмная\", \"font\": 18, \"sound\": True}\n",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "with open(\"settings.json\", \"w\", encoding=\"utf-8\") as f:\n    json.dump(settings, f, ensure_ascii=False, indent=2)\n",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "with open(\"settings.json\", encoding=\"utf-8\") as f:\n    loaded = json.load(f)\nprint(loaded == settings, loaded[\"theme\"])\n",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "cue": 2
+        },
+        {
+          "type": "output",
+          "text": "True тёмная\n",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "errors",
+      "title": "Некорректный JSON",
+      "narration": "Строка, пришедшая снаружи, может оказаться неверной: потеряна кавычка, лишняя запятая, обрезан конец. Тогда loads вызывает исключение JSONDecodeError. Это подвид ValueError, поэтому его можно перехватить через except ValueError. Всегда обрабатывайте такие ошибки, когда читаете данные из внешнего источника: файла, ответа сервера или текста, который вставил пользователь. Также помните, что JSON не умеет хранить множества и даты напрямую: их придётся преобразовать.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "import json\n\nfor text in ['{\"a\": 1}', '{\"a\": 1,}']:\n    try:\n        print(json.loads(text))\n    except ValueError:\n        print(\"некорректный JSON\")\n",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "{'a': 1}\nнекорректный JSON\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. JSON — универсальный текстовый формат для обмена данными. Функция dumps превращает объект в строку, loads — строку в объект. Функции dump и load делают то же самое с файлами. Параметр ensure_ascii равно False сохраняет русский текст читаемым, а indent добавляет отступы. Некорректный JSON даёт ошибку, которую нужно перехватывать. В веб-разработке вы будете работать с JSON постоянно.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`dumps` ↔ `loads` (строка) · `dump` ↔ `load` (файл) · `ensure_ascii=False`",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}

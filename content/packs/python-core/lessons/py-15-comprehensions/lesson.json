@@ -1,0 +1,44 @@
+{
+  "id": "py-15-comprehensions",
+  "title": "Включения, lambda и сортировка",
+  "goal": "Строить списки включениями, писать lambda и сортировать данные по ключу.",
+  "skills": [
+    "python.comprehensions",
+    "python.lambda",
+    "python.sorted.key"
+  ],
+  "prerequisites": [
+    "py-14-dicts"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-even-squares.json",
+    "assignments/a2-by-length.json",
+    "assignments/a3-students.json",
+    "assignments/a4-comp.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Пишут включение с несколькими вложенными циклами и условиями в одну строку",
+      "fix": "Если выражение трудно читать — разверните его в обычный цикл."
+    },
+    {
+      "mistake": "lst = lst.sort() вместо sorted",
+      "fix": "sort() сортирует на месте и возвращает None; для нового списка используйте sorted()."
+    },
+    {
+      "mistake": "Условие if ставят перед for: [x if x > 0 for x in lst]",
+      "fix": "Фильтр if идёт после источника данных: [x for x in lst if x > 0]."
+    },
+    {
+      "mistake": "Забывают, что lambda — одно выражение",
+      "fix": "Для нескольких действий объявите функцию через def."
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "id": "a5-order",
+  "type": "predict",
+  "title": "Порядок выполнения",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Порядок выполнения",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "def test(x):\n    try:\n        print(\"a\")\n        result = 10 / x\n        print(\"b\")\n    except ZeroDivisionError:\n        print(\"c\")\n    else:\n        print(\"d\", result)\n    finally:\n        print(\"e\")\n\ntest(2)\ntest(0)\n",
+  "hints": [
+    "Прослеживайте каждый вызов отдельно.",
+    "test(2): ошибки нет — выполнятся a, b, затем else и finally.",
+    "10 / 2 в Python даёт 5.0.",
+    "test(0): после a деление падает, строка b пропускается.",
+    "Для test(0): a, c, e."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "a\nb\nd 5.0\ne\na\nc\ne\n"
+  },
+  "solution": "a\nb\nd 5.0\ne\na\nc\ne\n",
+  "explanation": "else выполняется только без ошибки, except — только при ошибке, finally — всегда. Деление в Python даёт дробное число 5.0.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "a\nb\nd 5\ne\na\nc\ne\n",
+      "answer": "a\nb\nd 5\ne\na\nc\ne\n",
+      "why": "Деление / в Python всегда даёт дробное число: 10 / 2 — это 5.0, а не 5."
+    },
+    {
+      "code": "a\nb\nc\nd 5.0\ne\na\nc\ne\n",
+      "answer": "a\nb\nc\nd 5.0\ne\na\nc\ne\n",
+      "why": "Ветка except и ветка else никогда не выполняются в одном вызове."
+    }
+  ]
+}

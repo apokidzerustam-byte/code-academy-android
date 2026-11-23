@@ -1,0 +1,68 @@
+{
+  "id": "a5-read-or-default",
+  "type": "function",
+  "title": "Чтение с запасным вариантом",
+  "statement": "Напишите функцию `read_text(name)`: возвращает содержимое файла `name`, а если файла не существует — пустую строку `\"\"`.",
+  "goal": "Чтение с запасным вариантом",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Открытие отсутствующего файла вызывает исключение.",
+    "Нужен блок try с чтением файла внутри.",
+    "Перехватывайте именно FileNotFoundError.",
+    "В except верните пустую строку.",
+    "try: with open(...) as f: return f.read(); except FileNotFoundError: return ''."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "read_text",
+    "cases": [
+      {
+        "args": [
+          "такого-файла-нет.txt"
+        ],
+        "id": "v1",
+        "expected": ""
+      },
+      {
+        "args": [
+          "data/missing.txt"
+        ],
+        "id": "v2",
+        "expected": ""
+      },
+      {
+        "args": [
+          "x.txt"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": ""
+      },
+      {
+        "args": [
+          "config.ini"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": ""
+      }
+    ]
+  },
+  "solution": "def read_text(name):\n    try:\n        with open(name, encoding=\"utf-8\") as f:\n            return f.read()\n    except FileNotFoundError:\n        return \"\"\n",
+  "explanation": "Тип исключения указан конкретно, поэтому остальные ошибки (например, неверная кодировка) не скрываются.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def read_text(name):\n    with open(name, encoding=\"utf-8\") as f:\n        return f.read()\n",
+      "why": "Для отсутствующего файла возникает FileNotFoundError."
+    },
+    {
+      "code": "def read_text(name):\n    try:\n        with open(name, encoding=\"utf-8\") as f:\n            return f.read()\n    except FileNotFoundError:\n        return None\n",
+      "why": "Вместо пустой строки возвращается None."
+    }
+  ]
+}

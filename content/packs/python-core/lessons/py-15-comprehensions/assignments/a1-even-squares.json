@@ -1,0 +1,105 @@
+{
+  "id": "a1-even-squares",
+  "type": "function",
+  "title": "Квадраты чётных",
+  "statement": "Напишите функцию `even_squares(nums)`, которая возвращает список квадратов только **чётных** чисел из `nums` в исходном порядке. Используйте списковое включение.\n\nПример: `even_squares([1, 2, 3, 4])` → `[4, 16]`.",
+  "goal": "Квадраты чётных",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Нужно и отфильтровать числа, и преобразовать их.",
+    "Структура включения: [выражение for x in данные if условие].",
+    "Условие чётности: n % 2 == 0.",
+    "Выражение слева — n * n.",
+    "return [n * n for n in nums if n % 2 == 0]."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "even_squares",
+    "cases": [
+      {
+        "args": [
+          [
+            1,
+            2,
+            3,
+            4
+          ]
+        ],
+        "id": "v1",
+        "expected": [
+          4,
+          16
+        ]
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            1,
+            3,
+            5
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            -2,
+            0,
+            7,
+            6
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          4,
+          0,
+          36
+        ]
+      },
+      {
+        "args": [
+          [
+            10
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": [
+          100
+        ]
+      }
+    ]
+  },
+  "solution": "def even_squares(nums):\n    return [n * n for n in nums if n % 2 == 0]\n",
+  "explanation": "Условие справа отбирает чётные числа, выражение слева возводит каждое из них в квадрат.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def even_squares(nums):\n    return [n * n for n in nums]\n",
+      "why": "Условие не учтено: возведены все числа."
+    },
+    {
+      "code": "def even_squares(nums):\n    return [n for n in nums if n % 2 == 0]\n",
+      "why": "Выбраны чётные, но не возведены в квадрат."
+    },
+    {
+      "code": "def even_squares(nums):\n    return [n * n for n in nums if n % 2 == 1]\n",
+      "why": "Условие перепутано: выбираются нечётные (и для отрицательных остаток другой)."
+    }
+  ]
+}

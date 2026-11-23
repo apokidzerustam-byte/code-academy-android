@@ -1,0 +1,90 @@
+{
+  "id": "a3-safe-parse",
+  "type": "function",
+  "title": "Безопасный разбор",
+  "statement": "Напишите функцию `safe_parse(text)`: возвращает объект, разобранный из JSON, а для некорректного JSON — `None`.",
+  "goal": "Безопасный разбор",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Некорректный JSON приводит к исключению.",
+    "Разбор нужно поместить в try.",
+    "JSONDecodeError — подвид ValueError.",
+    "В except верните None.",
+    "try: return json.loads(text); except ValueError: return None."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "safe_parse",
+    "cases": [
+      {
+        "args": [
+          "{\"a\": 1}"
+        ],
+        "id": "v1",
+        "expected": {
+          "a": 1
+        }
+      },
+      {
+        "args": [
+          "{\"a\": 1,}"
+        ],
+        "id": "v2",
+        "expected": null
+      },
+      {
+        "args": [
+          "[1, 2, 3]"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "args": [
+          "не json"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": null
+      },
+      {
+        "args": [
+          "null"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": null
+      },
+      {
+        "args": [
+          "{"
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": null
+      }
+    ]
+  },
+  "solution": "import json\n\ndef safe_parse(text):\n    try:\n        return json.loads(text)\n    except ValueError:\n        return None\n",
+  "explanation": "Перехватывая ValueError, мы обрабатываем и JSONDecodeError. Заметьте: корректная строка «null» разбирается в None — это не ошибка.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import json\n\ndef safe_parse(text):\n    return json.loads(text)\n",
+      "why": "Ошибка разбора не перехватывается."
+    },
+    {
+      "code": "import json\n\ndef safe_parse(text):\n    try:\n        return json.loads(text)\n    except ValueError:\n        return {}\n",
+      "why": "Для ошибки возвращается пустой словарь вместо None."
+    }
+  ]
+}

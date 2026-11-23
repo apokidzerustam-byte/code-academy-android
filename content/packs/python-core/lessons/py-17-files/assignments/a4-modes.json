@@ -1,0 +1,41 @@
+{
+  "id": "a4-modes",
+  "type": "predict",
+  "title": "Режимы открытия",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Режимы открытия",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "with open(\"a.txt\", \"w\", encoding=\"utf-8\") as f:\n    f.write(\"1\\n2\\n\")\nwith open(\"a.txt\", \"a\", encoding=\"utf-8\") as f:\n    f.write(\"3\\n\")\nwith open(\"a.txt\", encoding=\"utf-8\") as f:\n    lines = f.read().split()\nprint(len(lines), lines[-1])\nwith open(\"a.txt\", \"w\", encoding=\"utf-8\") as f:\n    f.write(\"x\")\nwith open(\"a.txt\", encoding=\"utf-8\") as f:\n    print(f.read())\n",
+  "hints": [
+    "Следите за содержимым файла после каждого блока with.",
+    "После первого блока в файле «1» и «2».",
+    "Режим a добавляет «3» в конец.",
+    "split() вернёт три элемента, последний — «3».",
+    "Последний блок стирает всё и записывает «x»."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "3 3\nx\n"
+  },
+  "solution": "3 3\nx\n",
+  "explanation": "w перезаписывает, a дополняет. После трёх записей в файле три строки, а последняя запись в режиме w оставляет единственную «x».",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "3 3\n1\n2\n3\nx\n",
+      "answer": "3 3\n1\n2\n3\nx\n",
+      "why": "Режим w стирает файл: после него в файле только «x»."
+    },
+    {
+      "code": "2 2\nx\n",
+      "answer": "2 2\nx\n",
+      "why": "Режим a дописывает в конец: строк в файле три, последняя — «3»."
+    }
+  ]
+}

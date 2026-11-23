@@ -1,0 +1,45 @@
+{
+  "id": "py-18-json",
+  "title": "JSON",
+  "goal": "Преобразовывать данные Python в JSON и обратно, сохранять их в файл и обрабатывать некорректный JSON.",
+  "skills": [
+    "python.json",
+    "python.json.files",
+    "python.json.errors"
+  ],
+  "prerequisites": [
+    "py-17-files"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-to-json.json",
+    "assignments/a2-total.json",
+    "assignments/a3-safe-parse.json",
+    "assignments/a4-average.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Путают dumps/loads и dump/load",
+      "fix": "С буквой s — строки (string), без неё — файлы."
+    },
+    {
+      "mistake": "JSON с одинарными кавычками или хвостовой запятой",
+      "fix": "В JSON только двойные кавычки и нет запятой после последнего элемента.",
+      "errorType": "JSONDecodeError"
+    },
+    {
+      "mistake": "Русские буквы превращаются в \\u0420…",
+      "fix": "Передайте ensure_ascii=False."
+    },
+    {
+      "mistake": "Ждут, что кортеж вернётся кортежем",
+      "fix": "JSON не различает кортежи и списки: после load получится список."
+    }
+  ]
+}

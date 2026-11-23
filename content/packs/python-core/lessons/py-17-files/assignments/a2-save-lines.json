@@ -1,0 +1,90 @@
+{
+  "id": "a2-save-lines",
+  "type": "function",
+  "title": "Сохранить список строк",
+  "statement": "Напишите функцию `save_lines(lines)`: она записывает каждую строку списка `lines` в файл `lines.txt` **на отдельной строке**, затем читает файл и возвращает список прочитанных строк (без символов перевода строки).\n\nПример: `save_lines([\"а\", \"б\"])` → `[\"а\", \"б\"]`.",
+  "goal": "Сохранить список строк",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Сначала запись, затем чтение — два блока with.",
+    "Запишите в цикле: каждую строку плюс символ перевода строки.",
+    "Перевод строки в тексте программы пишется как \\n.",
+    "При чтении каждая строка заканчивается переводом строки — уберите его методом strip.",
+    "return [row.strip() for row in f]."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "save_lines",
+    "cases": [
+      {
+        "args": [
+          [
+            "а",
+            "б"
+          ]
+        ],
+        "id": "v1",
+        "expected": [
+          "а",
+          "б"
+        ]
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": []
+      },
+      {
+        "args": [
+          [
+            "один"
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": [
+          "один"
+        ]
+      },
+      {
+        "args": [
+          [
+            "привет мир",
+            "ещё строка",
+            "и ещё"
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": [
+          "привет мир",
+          "ещё строка",
+          "и ещё"
+        ]
+      }
+    ]
+  },
+  "solution": "def save_lines(lines):\n    with open(\"lines.txt\", \"w\", encoding=\"utf-8\") as f:\n        for line in lines:\n            f.write(line + \"\\n\")\n    with open(\"lines.txt\", encoding=\"utf-8\") as f:\n        return [row.strip() for row in f]\n",
+  "explanation": "Запись и чтение — два отдельных блока with. strip() убирает символ перевода строки, который остаётся при чтении.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def save_lines(lines):\n    with open(\"lines.txt\", \"w\", encoding=\"utf-8\") as f:\n        for line in lines:\n            f.write(line)\n    with open(\"lines.txt\", encoding=\"utf-8\") as f:\n        return [row.strip() for row in f]\n",
+      "why": "Не добавлен перевод строки: всё записано в одну строку."
+    },
+    {
+      "code": "def save_lines(lines):\n    with open(\"lines.txt\", \"w\", encoding=\"utf-8\") as f:\n        for line in lines:\n            f.write(line + \"\\n\")\n    with open(\"lines.txt\", encoding=\"utf-8\") as f:\n        return list(f)\n",
+      "why": "Строки возвращены вместе с символом перевода строки."
+    },
+    {
+      "code": "def save_lines(lines):\n    with open(\"lines.txt\", \"a\", encoding=\"utf-8\") as f:\n        for line in lines:\n            f.write(line + \"\\n\")\n    with open(\"lines.txt\", encoding=\"utf-8\") as f:\n        return [row.strip() for row in f]\n",
+      "why": "Режим a дописывает: строки из прошлых вызовов остаются в файле."
+    }
+  ]
+}

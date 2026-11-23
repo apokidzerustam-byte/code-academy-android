@@ -1,0 +1,45 @@
+{
+  "id": "py-17-files",
+  "title": "Файлы",
+  "goal": "Записывать, читать и дописывать текстовые файлы, обрабатывать отсутствующий файл и разбирать строки таблицы.",
+  "skills": [
+    "python.files",
+    "python.files.modes",
+    "python.files.parse"
+  ],
+  "prerequisites": [
+    "py-16-exceptions"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-roundtrip.json",
+    "assignments/a2-save-lines.json",
+    "assignments/a3-cart.json",
+    "assignments/a4-modes.json",
+    "assignments/a5-read-or-default.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Открывают для записи в режиме w файл, который хотели дополнить",
+      "fix": "Для дозаписи используйте режим a: w стирает прежнее содержимое."
+    },
+    {
+      "mistake": "Не указывают encoding='utf-8' для русского текста",
+      "fix": "Всегда указывайте encoding='utf-8'."
+    },
+    {
+      "mistake": "Забывают убрать перевод строки при чтении",
+      "fix": "Используйте line.strip() или line.rstrip('\\n')."
+    },
+    {
+      "mistake": "Открывают файл без with и забывают закрыть",
+      "fix": "Конструкция with закрывает файл автоматически."
+    }
+  ]
+}

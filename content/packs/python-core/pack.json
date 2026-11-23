@@ -13,7 +13,11 @@
     "py-11-functions",
     "py-12-functions-advanced",
     "py-13-collections",
-    "py-14-dicts"
+    "py-14-dicts",
+    "py-15-comprehensions",
+    "py-16-exceptions",
+    "py-17-files",
+    "py-18-json"
   ],
   "skills": {
     "python.functions": "Функции: def и вызов",
@@ -30,6 +34,18 @@
     "python.dicts": "Словари",
     "python.dicts.get": "Метод get и KeyError",
     "python.dicts.iterate": "Перебор словаря: items",
-    "python.dicts.counting": "Подсчёт частот"
+    "python.dicts.counting": "Подсчёт частот",
+    "python.comprehensions": "Списковые включения",
+    "python.lambda": "lambda-функции",
+    "python.sorted.key": "Сортировка sorted с key",
+    "python.exceptions": "Исключения: try и except",
+    "python.exceptions.raise": "Вызов исключения: raise",
+    "python.exceptions.finally": "else и finally",
+    "python.files": "Файлы: open и with",
+    "python.files.modes": "Режимы w, r, a",
+    "python.files.parse": "Разбор строк файла",
+    "python.json": "Модуль json: dumps и loads",
+    "python.json.files": "JSON и файлы: dump и load",
+    "python.json.errors": "Ошибки разбора JSON"
   }
 }

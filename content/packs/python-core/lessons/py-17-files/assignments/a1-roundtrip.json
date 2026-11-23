@@ -1,0 +1,62 @@
+{
+  "id": "a1-roundtrip",
+  "type": "write",
+  "title": "Записать и прочитать",
+  "statement": "Прочитайте строку, запишите её в файл `note.txt`, затем прочитайте файл и выведите его содержимое **в верхнем регистре**.\n\nВвод:\n```\nпривет, мир\n```\nВывод:\n```\nПРИВЕТ, МИР\n```",
+  "goal": "Записать и прочитать",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "",
+  "hints": [
+    "Нужны два шага: записать, потом прочитать.",
+    "Откройте файл в режиме w и вызовите write.",
+    "Затем откройте его снова для чтения (режим по умолчанию).",
+    "Содержимое получают методом read.",
+    "print(f.read().upper())."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "привет, мир\n",
+        "expected_stdout": "ПРИВЕТ, МИР\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "Python\n",
+        "expected_stdout": "PYTHON\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "а\n",
+        "expected_stdout": "А\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "Ёжик в тумане\n",
+        "expected_stdout": "ЁЖИК В ТУМАНЕ\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "text = input()\nwith open(\"note.txt\", \"w\", encoding=\"utf-8\") as f:\n    f.write(text)\nwith open(\"note.txt\", encoding=\"utf-8\") as f:\n    print(f.read().upper())\n",
+  "explanation": "Сначала файл открывается на запись, закрывается блоком with, затем открывается заново для чтения.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "text = input()\nwith open(\"note.txt\", \"w\", encoding=\"utf-8\") as f:\n    f.write(text)\nwith open(\"note.txt\", \"w\", encoding=\"utf-8\") as f:\n    print(f.read().upper())\n",
+      "why": "Файл для чтения открыт в режиме w: чтение невозможно (и старое содержимое стёрто)."
+    },
+    {
+      "code": "text = input()\nwith open(\"note.txt\", \"w\", encoding=\"utf-8\") as f:\n    f.write(text)\nwith open(\"note.txt\", encoding=\"utf-8\") as f:\n    print(f.read())\n",
+      "why": "Регистр не изменён."
+    }
+  ]
+}

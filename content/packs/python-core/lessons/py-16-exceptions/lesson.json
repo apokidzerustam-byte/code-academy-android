@@ -1,0 +1,45 @@
+{
+  "id": "py-16-exceptions",
+  "title": "Исключения",
+  "goal": "Перехватывать ошибки через try/except, вызывать свои исключения и безопасно читать ввод.",
+  "skills": [
+    "python.exceptions",
+    "python.exceptions.raise",
+    "python.exceptions.finally"
+  ],
+  "prerequisites": [
+    "py-15-comprehensions"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-safe-int.json",
+    "assignments/a2-safe-divide.json",
+    "assignments/a3-check-age.json",
+    "assignments/a4-sum-valid.json",
+    "assignments/a5-order.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Голый except: перехватывает всё, даже опечатки",
+      "fix": "Указывайте тип: except ValueError."
+    },
+    {
+      "mistake": "except: pass — ошибка проглочена",
+      "fix": "Сообщите пользователю или запишите в лог, иначе проблему не найти."
+    },
+    {
+      "mistake": "В try помещают всю программу",
+      "fix": "Оставьте в try только строки, которые могут упасть."
+    },
+    {
+      "mistake": "Путают else и finally",
+      "fix": "else — когда ошибки не было; finally — в любом случае."
+    }
+  ]
+}

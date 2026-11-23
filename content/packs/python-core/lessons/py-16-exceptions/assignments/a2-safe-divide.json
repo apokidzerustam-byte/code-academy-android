@@ -1,0 +1,85 @@
+{
+  "id": "a2-safe-divide",
+  "type": "function",
+  "title": "Безопасное деление",
+  "statement": "Напишите функцию `safe_divide(a, b)`: возвращает `a / b`, а если `b` равно нулю — `None`.\n\nПримеры: `safe_divide(10, 4)` → `2.5`, `safe_divide(1, 0)` → `None`.",
+  "goal": "Безопасное деление",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Деление на ноль вызывает исключение ZeroDivisionError.",
+    "Поместите деление в try.",
+    "В except верните None.",
+    "Можно проверить b == 0 через if, но здесь потренируйтесь с try/except.",
+    "try: return a / b; except ZeroDivisionError: return None."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "safe_divide",
+    "cases": [
+      {
+        "args": [
+          10,
+          4
+        ],
+        "id": "v1",
+        "expected": 2.5
+      },
+      {
+        "args": [
+          1,
+          0
+        ],
+        "id": "v2",
+        "expected": null
+      },
+      {
+        "args": [
+          0,
+          5
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 0.0
+      },
+      {
+        "args": [
+          -9,
+          3
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": -3.0
+      },
+      {
+        "args": [
+          0,
+          0
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": null
+      }
+    ]
+  },
+  "solution": "def safe_divide(a, b):\n    try:\n        return a / b\n    except ZeroDivisionError:\n        return None\n",
+  "explanation": "Исключение ZeroDivisionError перехватывается там, где оно возможно, и функция возвращает None вместо падения.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def safe_divide(a, b):\n    return a / b\n",
+      "why": "Деление на ноль не обработано."
+    },
+    {
+      "code": "def safe_divide(a, b):\n    try:\n        return a / b\n    except ZeroDivisionError:\n        return 0\n",
+      "why": "Возвращается 0 вместо None."
+    },
+    {
+      "code": "def safe_divide(a, b):\n    if a == 0:\n        return None\n    return a / b\n",
+      "why": "Проверяется делимое, а не делитель."
+    }
+  ]
+}

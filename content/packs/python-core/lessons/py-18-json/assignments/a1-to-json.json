@@ -1,0 +1,96 @@
+{
+  "id": "a1-to-json",
+  "type": "function",
+  "title": "В читаемый JSON",
+  "statement": "Напишите функцию `to_json(data)`, которая возвращает строку JSON: русские буквы **не** экранируются, ключи отсортированы (`sort_keys=True`), отступов нет.\n\nПример: `to_json({\"имя\": \"Аня\", \"b\": 1, \"a\": [1, 2]})` → `'{\"a\": [1, 2], \"b\": 1, \"имя\": \"Аня\"}'`.",
+  "goal": "В читаемый JSON",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Для преобразования в JSON есть модуль json.",
+    "Нужна функция dumps — она возвращает строку.",
+    "Параметр ensure_ascii=False сохраняет русские буквы.",
+    "Параметр sort_keys=True упорядочивает ключи.",
+    "return json.dumps(data, ensure_ascii=False, sort_keys=True)."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "to_json",
+    "cases": [
+      {
+        "args": [
+          {
+            "имя": "Аня",
+            "b": 1,
+            "a": [
+              1,
+              2
+            ]
+          }
+        ],
+        "id": "v1",
+        "expected": "{\"a\": [1, 2], \"b\": 1, \"имя\": \"Аня\"}"
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": "[]"
+      },
+      {
+        "args": [
+          {
+            "z": null,
+            "y": true
+          }
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "{\"y\": true, \"z\": null}"
+      },
+      {
+        "args": [
+          {
+            "город": "Москва"
+          }
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "{\"город\": \"Москва\"}"
+      },
+      {
+        "args": [
+          [
+            1,
+            "два",
+            3.5
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": "[1, \"два\", 3.5]"
+      }
+    ]
+  },
+  "solution": "import json\n\ndef to_json(data):\n    return json.dumps(data, ensure_ascii=False, sort_keys=True)\n",
+  "explanation": "dumps превращает объект в строку JSON; два параметра делают результат читаемым и предсказуемым.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import json\n\ndef to_json(data):\n    return json.dumps(data, sort_keys=True)\n",
+      "why": "Русские буквы экранированы кодами \\uXXXX."
+    },
+    {
+      "code": "import json\n\ndef to_json(data):\n    return json.dumps(data, ensure_ascii=False)\n",
+      "why": "Ключи не отсортированы."
+    },
+    {
+      "code": "def to_json(data):\n    return str(data)\n",
+      "why": "str() даёт запись Python (одинарные кавычки, True/None), а не JSON."
+    }
+  ]
+}

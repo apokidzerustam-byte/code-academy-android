@@ -1,0 +1,98 @@
+{
+  "id": "a1-safe-int",
+  "type": "function",
+  "title": "Безопасное число",
+  "statement": "Напишите функцию `safe_int(text, default=0)`: она превращает строку в целое число, а если это невозможно (`ValueError`, а для `None` — `TypeError`), возвращает `default`.\n\nПримеры: `safe_int(\"42\")` → `42`, `safe_int(\"abc\")` → `0`, `safe_int(\"x\", -1)` → `-1`.",
+  "goal": "Безопасное число",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Преобразование может упасть — нужен блок try.",
+    "В try пишем return int(text).",
+    "В except перехватываем ValueError — и TypeError на случай None.",
+    "Несколько типов указывают кортежем: except (ValueError, TypeError).",
+    "except (ValueError, TypeError): return default."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "safe_int",
+    "cases": [
+      {
+        "args": [
+          "42"
+        ],
+        "id": "v1",
+        "expected": 42
+      },
+      {
+        "args": [
+          "abc"
+        ],
+        "id": "v2",
+        "expected": 0
+      },
+      {
+        "args": [
+          "x",
+          -1
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": -1
+      },
+      {
+        "args": [
+          ""
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          " 7 "
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 7
+      },
+      {
+        "args": [
+          null,
+          5
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": 5
+      },
+      {
+        "args": [
+          "3.5"
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": 0
+      }
+    ]
+  },
+  "solution": "def safe_int(text, default=0):\n    try:\n        return int(text)\n    except (ValueError, TypeError):\n        return default\n",
+  "explanation": "Два типа ошибок перехвачены в одной ветке; при ошибке возвращается переданное значение по умолчанию.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def safe_int(text, default=0):\n    return int(text)\n",
+      "why": "Ошибки не перехватываются."
+    },
+    {
+      "code": "def safe_int(text, default=0):\n    try:\n        return int(text)\n    except ValueError:\n        return default\n",
+      "why": "None вызывает TypeError, который не перехвачен."
+    },
+    {
+      "code": "def safe_int(text, default=0):\n    try:\n        return int(text)\n    except:\n        return 0\n",
+      "why": "Значение default игнорируется (всегда 0)."
+    }
+  ]
+}
