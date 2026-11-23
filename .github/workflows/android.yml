@@ -195,6 +195,7 @@ jobs:
         if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_run')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
         run: |
           mkdir -p /tmp/apk && cp app/build/outputs/apk/release/app-release.apk /tmp/apk/code-academy-proto.apk
           cd /tmp/apk
@@ -217,7 +218,7 @@ jobs:
             for id in $(gh api "repos/${GITHUB_REPOSITORY}/releases?per_page=100" --jq ".[] | select(.draft and .name==\"${TITLE}\") | .id"); do
               gh api -X DELETE "repos/${GITHUB_REPOSITORY}/releases/${id}"
             done
-            gh release create "proto-${GITHUB_SHA::7}" --draft --target "${GITHUB_SHA}" --title "${TITLE}" \
+            gh release create "proto-${GITHUB_SHA::7}" -R "${GITHUB_REPOSITORY}" --draft --target "${GITHUB_SHA}" --title "${TITLE}" \
               --notes "Сборка коммита ${GITHUB_SHA::7}. Установка: скачайте code-academy-proto.apk на телефон и откройте; подробности — docs/USER_GUIDE.md. Контрольная сумма — в SHA256SUMS.txt." \
               code-academy-proto.apk SHA256SUMS.txt
             NOTE_DIR=$(mktemp -d) && cd "$NOTE_DIR"
