@@ -1,0 +1,145 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Клиенту нельзя доверять",
+      "narration": "Клиенту нельзя доверять. Он может прислать пустое название, отрицательную цену или ноль штук. Если принять это молча, в списке окажется мусор. Хороший сервер проверяет данные на входе и честно отвечает: ошибка на стороне клиента. Для таких ошибок есть коды четырёхсотой серии. Четыреста двадцать два значит «данные неверные», а четыреста девять — «конфликт с тем, что уже есть».",
+      "actions": [
+        {
+          "type": "note",
+          "md": "422 — данные не прошли проверку · 409 — конфликт с уже существующим · 404 — не найдено",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "validate",
+      "title": "Ограничения в модели",
+      "narration": "Ограничения задают прямо в модели с помощью Field. Многоточие значит, что поле обязательное. Параметр min_length задаёт минимальную длину названия. Параметр gt — строго больше нуля для цены. Параметр ge — не меньше единицы для количества, а по умолчанию одна штука. Отправим нормальный товар и три плохих: короткое название, нулевую цену и нулевое количество. FastAPI вернёт четыреста двадцать два сам, наш обработчик даже не запустится.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\nITEMS = []\n\n\nclass ItemIn(BaseModel):\n    name: str = Field(..., min_length=2)\n    price: float = Field(..., gt=0)\n    qty: int = Field(1, ge=1)\n\n\n@app.post(\"/items\", status_code=201)\ndef add_item(item: ItemIn):\n    ITEMS.append({\"name\": item.name, \"price\": item.price, \"qty\": item.qty})\n    return ITEMS[-1]\n\n\nclient = TestClient(app)\nr = client.post(\"/items\", json={\"name\": \"Чай\", \"price\": 3.5})\nprint(r.status_code, r.json())\nprint(client.post(\"/items\", json={\"name\": \"Я\", \"price\": 3.5}).status_code)\nprint(client.post(\"/items\", json={\"name\": \"Сыр\", \"price\": 0}).status_code)\nprint(client.post(\"/items\", json={\"name\": \"Сыр\", \"price\": 5, \"qty\": 0}).status_code)\n",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            10
+          ],
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            11
+          ],
+          "cue": 3
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            12
+          ],
+          "cue": 4
+        },
+        {
+          "type": "run",
+          "cue": 5
+        },
+        {
+          "type": "output",
+          "text": "201 {'name': 'Чай', 'price': 3.5, 'qty': 1}\n422\n422\n422\n",
+          "cue": 5
+        }
+      ]
+    },
+    {
+      "id": "conflict",
+      "title": "Свои ошибки: 409",
+      "narration": "А некоторые ошибки знает только наш код. Например, товар с таким названием уже есть. Для этого подходит код четыреста девять, конфликт. Перед добавлением проходим по списку, и если название совпало, поднимаем исключение. Отправим «Чай» дважды: второй раз получим конфликт и понятное сообщение.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\nITEMS = []\n\n\nclass ItemIn(BaseModel):\n    name: str = Field(..., min_length=2)\n    price: float = Field(..., gt=0)\n    qty: int = Field(1, ge=1)\n\n\n@app.post(\"/items\", status_code=201)\ndef add_item(item: ItemIn):\n    for it in ITEMS:\n        if it[\"name\"] == item.name:\n            raise HTTPException(status_code=409, detail=\"Такой товар уже есть\")\n    ITEMS.append({\"name\": item.name, \"price\": item.price, \"qty\": item.qty})\n    return ITEMS[-1]\n\n\nclient = TestClient(app)\nclient.post(\"/items\", json={\"name\": \"Чай\", \"price\": 3.5})\nr = client.post(\"/items\", json={\"name\": \"Чай\", \"price\": 4})\nprint(r.status_code, r.json())\n",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            17,
+            18,
+            19
+          ],
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "409 {'detail': 'Такой товар уже есть'}\n",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "paging",
+      "title": "Постраничный вывод",
+      "narration": "Когда записей много, отдавать их все сразу нельзя. Клиент присылает параметры запроса: limit — сколько взять, offset — сколько пропустить. Если их нет, берутся значения по умолчанию. Достаём срез от offset до offset плюс limit. Добавим пять товаров и запросим по два с разных позиций. За пределами списка срез просто пуст, а вместо числа в limit получим четыреста двадцать два.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\nITEMS = []\n\n\nclass ItemIn(BaseModel):\n    name: str = Field(..., min_length=2)\n    price: float = Field(..., gt=0)\n    qty: int = Field(1, ge=1)\n\n\n@app.post(\"/items\", status_code=201)\ndef add_item(item: ItemIn):\n    for it in ITEMS:\n        if it[\"name\"] == item.name:\n            raise HTTPException(status_code=409, detail=\"Такой товар уже есть\")\n    ITEMS.append({\"name\": item.name, \"price\": item.price, \"qty\": item.qty})\n    return ITEMS[-1]\n\n\n@app.get(\"/items\")\ndef list_items(limit: int = 10, offset: int = 0):\n    return ITEMS[offset:offset + limit]\n\n\nclient = TestClient(app)\nfor n in range(1, 6):\n    client.post(\"/items\", json={\"name\": f\"Т{n}\", \"price\": 1.5})\nfor offset in (0, 2, 4, 10):\n    r = client.get(\"/items\", params={\"limit\": 2, \"offset\": offset})\n    print([i[\"name\"] for i in r.json()])\nprint(client.get(\"/items\", params={\"limit\": \"много\"}).status_code)\n",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            25
+          ],
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            21
+          ],
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "['Т1', 'Т2']\n['Т3', 'Т4']\n['Т5']\n[]\n422\n",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Итак. Ограничения в модели через Field дают код четыреста двадцать два без единой строчки проверки. Свои ошибки поднимаем через HTTPException: четыреста девять для конфликта. Параметры limit и offset превращают длинный список в страницы. И запомните: значение по умолчанию в модели не проверяется, поэтому оно само должно подходить под ограничение.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "Field(…, gt=0) → 422 · HTTPException(409) → конфликт · limit/offset → страницы · значение по умолчанию не проверяется",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}

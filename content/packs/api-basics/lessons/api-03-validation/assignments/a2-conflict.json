@@ -1,0 +1,103 @@
+{
+  "id": "a2-conflict",
+  "type": "write",
+  "title": "Конфликт: товар уже есть",
+  "statement": "Напишите **POST** `/items` (код **201**). Если товар с таким названием уже в списке — код **409** и `{\"detail\": \"Такой товар уже есть\"}`, а в список ничего не добавляется. Иначе добавьте `{\"name\", \"price\", \"qty\"}` и верните его.",
+  "goal": "Проверять конфликт перед записью.",
+  "input": "Модель с ограничениями; список ITEMS.",
+  "expectedResult": "201 или 409.",
+  "constraints": [
+    "Модель и GET не меняйте."
+  ],
+  "starterCode": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\nITEMS = []\n\n\nclass ItemIn(BaseModel):\n    name: str = Field(..., min_length=2)\n    price: float = Field(..., gt=0)\n    qty: int = Field(1, ge=1)\n\n\n@app.get(\"/items\")\ndef list_items():\n    return ITEMS\n\n# POST /items с проверкой конфликта\n",
+  "hints": [
+    "Сначала проверка, потом запись.",
+    "Пройдите по ITEMS циклом: for it in ITEMS.",
+    "Название совпало — raise HTTPException(status_code=409, detail=\"Такой товар уже есть\").",
+    "Если цикл закончился без исключения — ITEMS.append({...}).",
+    "return ITEMS[-1] — вернуть добавленный товар."
+  ],
+  "tests": {
+    "kind": "fastapi",
+    "cases": [
+      {
+        "id": "v1",
+        "method": "POST",
+        "path": "/items",
+        "json": {
+          "name": "Чай",
+          "price": 3.5
+        },
+        "expected_status": 201,
+        "expected_json": {
+          "name": "Чай",
+          "price": 3.5,
+          "qty": 1
+        }
+      },
+      {
+        "id": "v2",
+        "method": "POST",
+        "path": "/items",
+        "json": {
+          "name": "Чай",
+          "price": 4
+        },
+        "expected_status": 409,
+        "expected_json": {
+          "detail": "Такой товар уже есть"
+        }
+      },
+      {
+        "id": "h1",
+        "hidden": true,
+        "method": "POST",
+        "path": "/items",
+        "json": {
+          "name": "Сыр",
+          "price": 7
+        },
+        "expected_status": 201,
+        "hint": "Другое название — это другой товар"
+      },
+      {
+        "id": "h2",
+        "hidden": true,
+        "path": "/items",
+        "expected_json": [
+          {
+            "name": "Чай",
+            "price": 3.5,
+            "qty": 1
+          },
+          {
+            "name": "Сыр",
+            "price": 7.0,
+            "qty": 1
+          }
+        ],
+        "hint": "Повторный товар в список попадать не должен"
+      }
+    ]
+  },
+  "solution": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\nITEMS = []\n\n\nclass ItemIn(BaseModel):\n    name: str = Field(..., min_length=2)\n    price: float = Field(..., gt=0)\n    qty: int = Field(1, ge=1)\n\n\n@app.post(\"/items\", status_code=201)\ndef add_item(item: ItemIn):\n    for it in ITEMS:\n        if it[\"name\"] == item.name:\n            raise HTTPException(status_code=409, detail=\"Такой товар уже есть\")\n    ITEMS.append({\"name\": item.name, \"price\": item.price, \"qty\": item.qty})\n    return ITEMS[-1]\n\n\n@app.get(\"/items\")\ndef list_items():\n    return ITEMS\n",
+  "explanation": "Проверка идёт до записи: исключение прерывает функцию раньше, чем товар попадёт в список.",
+  "criteria": [
+    "Новый товар добавляется (201).",
+    "Повтор даёт 409 и список не меняет."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\nITEMS = []\n\n\nclass ItemIn(BaseModel):\n    name: str = Field(..., min_length=2)\n    price: float = Field(..., gt=0)\n    qty: int = Field(1, ge=1)\n\n\n@app.post(\"/items\", status_code=201)\ndef add_item(item: ItemIn):\n    for it in ITEMS:\n        if it[\"name\"] == item.name:\n            raise HTTPException(status_code=400, detail=\"Такой товар уже есть\")\n    ITEMS.append({\"name\": item.name, \"price\": item.price, \"qty\": item.qty})\n    return ITEMS[-1]\n\n\n@app.get(\"/items\")\ndef list_items():\n    return ITEMS\n",
+      "why": "Для конфликта нужен код 409, а не 400."
+    },
+    {
+      "code": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\nITEMS = []\n\n\nclass ItemIn(BaseModel):\n    name: str = Field(..., min_length=2)\n    price: float = Field(..., gt=0)\n    qty: int = Field(1, ge=1)\n\n\n@app.post(\"/items\", status_code=201)\ndef add_item(item: ItemIn):\n    ITEMS.append({\"name\": item.name, \"price\": item.price, \"qty\": item.qty})\n    return ITEMS[-1]\n\n\n@app.get(\"/items\")\ndef list_items():\n    return ITEMS\n",
+      "why": "Проверки нет: повторный товар добавляется со статусом 201."
+    },
+    {
+      "code": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\nITEMS = []\n\n\nclass ItemIn(BaseModel):\n    name: str = Field(..., min_length=2)\n    price: float = Field(..., gt=0)\n    qty: int = Field(1, ge=1)\n\n\n@app.post(\"/items\", status_code=201)\ndef add_item(item: ItemIn):\n    ITEMS.append({\"name\": item.name, \"price\": item.price, \"qty\": item.qty})\n    if sum(1 for it in ITEMS if it[\"name\"] == item.name) > 1:\n        raise HTTPException(status_code=409, detail=\"Такой товар уже есть\")\n    return ITEMS[-1]\n\n\n@app.get(\"/items\")\ndef list_items():\n    return ITEMS\n",
+      "why": "Проверка после записи: дубликат уже попал в список."
+    }
+  ]
+}

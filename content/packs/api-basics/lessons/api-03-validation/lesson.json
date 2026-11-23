@@ -1,0 +1,45 @@
+{
+  "id": "api-03-validation",
+  "title": "FastAPI: проверка данных и страницы",
+  "goal": "Ограничивать данные в модели, возвращать понятные ошибки и отдавать длинные списки постранично.",
+  "skills": [
+    "api.validation",
+    "api.errors",
+    "api.paging"
+  ],
+  "prerequisites": [
+    "api-02-crud"
+  ],
+  "runner": "A",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-constraints.json",
+    "assignments/a2-conflict.json",
+    "assignments/a3-paging.json",
+    "assignments/a4-default.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Значение по умолчанию не подходит под ограничение",
+      "fix": "По умолчанию не проверяется: Field(0, ge=1) — ошибка автора."
+    },
+    {
+      "mistake": "Срез items[offset:limit]",
+      "fix": "Конец среза — offset + limit."
+    },
+    {
+      "mistake": "Проверка конфликта после записи",
+      "fix": "Сначала проверьте, потом записывайте — иначе дубликат уже в списке."
+    },
+    {
+      "mistake": "400 вместо 409 или 422",
+      "fix": "422 — данные не прошли модель; 409 — конфликт с существующим."
+    }
+  ]
+}

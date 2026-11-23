@@ -1,0 +1,104 @@
+{
+  "id": "a4-filter",
+  "type": "fix",
+  "title": "Фильтр по статусу",
+  "statement": "Адрес `/tasks?done=true` должен возвращать только выполненные задачи, `/tasks?done=false` — только невыполненные, без параметра — все. Сейчас `done=false` почему-то возвращает **все** задачи. Найдите ошибку.",
+  "goal": "Отличать False от «параметр не передан».",
+  "input": "Параметр запроса done.",
+  "expectedResult": "Три режима фильтра.",
+  "constraints": [
+    "Параметр done необязательный."
+  ],
+  "starterCode": "from typing import Optional\nfrom fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel\n\napp = FastAPI()\nTASKS = {\n    1: {\"id\": 1, \"title\": \"Хлеб\", \"done\": True},\n    2: {\"id\": 2, \"title\": \"Чай\", \"done\": False},\n    3: {\"id\": 3, \"title\": \"Сыр\", \"done\": True},\n}\nNEXT_ID = 4\n\n\nclass TaskIn(BaseModel):\n    title: str\n    done: bool = False\n\n\n@app.get(\"/tasks\")\ndef list_tasks(done: Optional[bool] = None):\n    if done:\n        return [t for t in TASKS.values() if t[\"done\"]]\n    return list(TASKS.values())\n",
+  "hints": [
+    "Запросите /tasks?done=false и посмотрите, что вернулось.",
+    "Условие if done: для значения False не срабатывает.",
+    "Но False — это значение, а не отсутствие параметра.",
+    "Отсутствие параметра — None. Сравнивайте с None.",
+    "if done is not None: и сравнение t[\"done\"] == done"
+  ],
+  "tests": {
+    "kind": "fastapi",
+    "cases": [
+      {
+        "id": "all",
+        "path": "/tasks",
+        "expected_json": [
+          {
+            "id": 1,
+            "title": "Хлеб",
+            "done": true
+          },
+          {
+            "id": 2,
+            "title": "Чай",
+            "done": false
+          },
+          {
+            "id": 3,
+            "title": "Сыр",
+            "done": true
+          }
+        ]
+      },
+      {
+        "id": "done",
+        "path": "/tasks",
+        "params": {
+          "done": true
+        },
+        "expected_json": [
+          {
+            "id": 1,
+            "title": "Хлеб",
+            "done": true
+          },
+          {
+            "id": 3,
+            "title": "Сыр",
+            "done": true
+          }
+        ]
+      },
+      {
+        "id": "todo",
+        "path": "/tasks",
+        "params": {
+          "done": false
+        },
+        "expected_json": [
+          {
+            "id": 2,
+            "title": "Чай",
+            "done": false
+          }
+        ],
+        "hint": "done=false — только невыполненные"
+      },
+      {
+        "id": "bad",
+        "hidden": true,
+        "path": "/tasks",
+        "params": {
+          "done": "maybe"
+        },
+        "expected_status": 422
+      }
+    ]
+  },
+  "solution": "from typing import Optional\nfrom fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel\n\napp = FastAPI()\nTASKS = {\n    1: {\"id\": 1, \"title\": \"Хлеб\", \"done\": True},\n    2: {\"id\": 2, \"title\": \"Чай\", \"done\": False},\n    3: {\"id\": 3, \"title\": \"Сыр\", \"done\": True},\n}\nNEXT_ID = 4\n\n\nclass TaskIn(BaseModel):\n    title: str\n    done: bool = False\n\n\n@app.get(\"/tasks\")\ndef list_tasks(done: Optional[bool] = None):\n    if done is not None:\n        return [t for t in TASKS.values() if t[\"done\"] == done]\n    return list(TASKS.values())\n",
+  "explanation": "if done: считает False «пустым», поэтому ветка фильтрации пропускается. Проверка is not None различает False и «не передано».",
+  "criteria": [
+    "done=true, done=false и без параметра работают."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from typing import Optional\nfrom fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel\n\napp = FastAPI()\nTASKS = {\n    1: {\"id\": 1, \"title\": \"Хлеб\", \"done\": True},\n    2: {\"id\": 2, \"title\": \"Чай\", \"done\": False},\n    3: {\"id\": 3, \"title\": \"Сыр\", \"done\": True},\n}\nNEXT_ID = 4\n\n\nclass TaskIn(BaseModel):\n    title: str\n    done: bool = False\n\n\n@app.get(\"/tasks\")\ndef list_tasks(done: Optional[bool] = None):\n    if done:\n        return [t for t in TASKS.values() if t[\"done\"]]\n    return list(TASKS.values())\n",
+      "why": "Ошибка осталась: для False возвращаются все задачи."
+    },
+    {
+      "code": "from typing import Optional\nfrom fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel\n\napp = FastAPI()\nTASKS = {\n    1: {\"id\": 1, \"title\": \"Хлеб\", \"done\": True},\n    2: {\"id\": 2, \"title\": \"Чай\", \"done\": False},\n    3: {\"id\": 3, \"title\": \"Сыр\", \"done\": True},\n}\nNEXT_ID = 4\n\n\nclass TaskIn(BaseModel):\n    title: str\n    done: bool = False\n\n\n@app.get(\"/tasks\")\ndef list_tasks(done: Optional[bool] = None):\n    if done is not None:\n        return [t for t in TASKS.values() if t[\"done\"]]\n    return list(TASKS.values())\n",
+      "why": "Всегда возвращаются выполненные, даже при done=false."
+    }
+  ]
+}

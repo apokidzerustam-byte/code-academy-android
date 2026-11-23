@@ -1,0 +1,39 @@
+{
+  "id": "a5-predict",
+  "type": "predict",
+  "title": "Что напечатает клиент?",
+  "statement": "Что напечатает программа? Каждая строка вывода — с новой строки.",
+  "goal": "Предсказывать коды и ответы API.",
+  "input": "—",
+  "expectedResult": "Шесть строк.",
+  "constraints": [],
+  "code": "from fastapi import FastAPI\nfrom fastapi.testclient import TestClient\n\napp = FastAPI()\nitems = []\n\n\n@app.post(\"/add/{x}\")\ndef add(x: int):\n    items.append(x)\n    return len(items)\n\n\n@app.get(\"/sum\")\ndef total():\n    return sum(items)\n\n\nclient = TestClient(app)\nprint(client.post(\"/add/5\").json())\nprint(client.post(\"/add/7\").json())\nprint(client.get(\"/sum\").json())\nprint(client.get(\"/add/1\").status_code)\nprint(client.post(\"/add/x\").status_code)\nprint(client.get(\"/sum\").json())\n",
+  "hints": [
+    "Идём сверху вниз: сервер хранит items между запросами.",
+    "Первый POST добавляет 5 и возвращает длину списка — 1.",
+    "Второй добавляет 7: длина 2. Сумма 5 + 7 = 12.",
+    "GET по адресу, где разрешён только POST, — код 405.",
+    "Текст вместо числа в пути — код 422, и items не меняется."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "1\n2\n12\n405\n422\n12"
+  },
+  "solution": "1\n2\n12\n405\n422\n12",
+  "explanation": "POST возвращает длину списка (1, затем 2), GET /sum — 12. Метод GET для /add не разрешён — 405, «x» — не число — 422, а сумма осталась 12.",
+  "criteria": [
+    "Все шесть строк верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "1\n2\n12\n404\n422\n12",
+      "answer": "1\n2\n12\n404\n422\n12",
+      "why": "Адрес /add существует, но только для POST: это 405, а не 404."
+    },
+    {
+      "code": "5\n7\n12\n405\n422\n12",
+      "answer": "5\n7\n12\n405\n422\n12",
+      "why": "POST возвращает длину списка, а не добавленное число."
+    }
+  ]
+}

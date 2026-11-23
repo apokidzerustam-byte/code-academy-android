@@ -1,0 +1,46 @@
+{
+  "id": "api-02-crud",
+  "title": "FastAPI: список дел (CRUD)",
+  "goal": "Писать обработчики POST, GET, PUT и DELETE, хранить данные в памяти сервера и возвращать верные коды ответа.",
+  "skills": [
+    "api.crud",
+    "api.state",
+    "api.filter"
+  ],
+  "prerequisites": [
+    "api-01-fastapi"
+  ],
+  "runner": "A",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-create.json",
+    "assignments/a2-get-delete.json",
+    "assignments/a3-put.json",
+    "assignments/a4-filter.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Счётчик меняют без global",
+      "fix": "Переменную модуля внутри функции меняют после слова global.",
+      "errorType": "UnboundLocalError"
+    },
+    {
+      "mistake": "if done: вместо if done is not None:",
+      "fix": "False — тоже значение; «не передано» — это None."
+    },
+    {
+      "mistake": "Забыли проверить существование номера",
+      "fix": "Без проверки обращение к словарю даёт KeyError и код 500."
+    },
+    {
+      "mistake": "Код 200 при создании",
+      "fix": "Создание отвечает 201: status_code=201."
+    }
+  ]
+}

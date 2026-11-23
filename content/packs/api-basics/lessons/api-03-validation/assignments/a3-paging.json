@@ -1,0 +1,130 @@
+{
+  "id": "a3-paging",
+  "type": "write",
+  "title": "Страницы чисел",
+  "statement": "В списке `NUMS` числа от 1 до 20. Напишите **GET** `/numbers` с параметрами запроса `limit` (по умолчанию **5**) и `offset` (по умолчанию **0**). Ответ: `{\"total\": <размер всего NUMS>, \"items\": <срез>}`.",
+  "goal": "Использовать параметры запроса для страниц.",
+  "input": "limit и offset в запросе.",
+  "expectedResult": "total и срез items.",
+  "constraints": [
+    "NUMS не меняйте."
+  ],
+  "starterCode": "from fastapi import FastAPI\nfrom fastapi.testclient import TestClient\n\napp = FastAPI()\nNUMS = list(range(1, 21))\n\n\n# GET /numbers с limit и offset\n",
+  "hints": [
+    "Параметры запроса — обычные аргументы функции: def numbers(limit: int = 5, offset: int = 0).",
+    "Срез начинается с offset.",
+    "Заканчивается на offset + limit (не на limit!).",
+    "total — это len(NUMS), а не длина среза.",
+    "return {\"total\": len(NUMS), \"items\": NUMS[offset:offset + limit]}"
+  ],
+  "tests": {
+    "kind": "fastapi",
+    "cases": [
+      {
+        "id": "v1",
+        "path": "/numbers",
+        "expected_json": {
+          "total": 20,
+          "items": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        }
+      },
+      {
+        "id": "v2",
+        "path": "/numbers",
+        "params": {
+          "limit": 3,
+          "offset": 3
+        },
+        "expected_json": {
+          "total": 20,
+          "items": [
+            4,
+            5,
+            6
+          ]
+        },
+        "hint": "offset — сколько пропустить, limit — сколько взять"
+      },
+      {
+        "id": "h1",
+        "hidden": true,
+        "path": "/numbers",
+        "params": {
+          "limit": 5,
+          "offset": 18
+        },
+        "expected_json": {
+          "total": 20,
+          "items": [
+            19,
+            20
+          ]
+        },
+        "hint": "У конца списка страница короче"
+      },
+      {
+        "id": "h2",
+        "hidden": true,
+        "path": "/numbers",
+        "params": {
+          "offset": 50
+        },
+        "expected_json": {
+          "total": 20,
+          "items": []
+        },
+        "hint": "total — всегда размер всего списка"
+      },
+      {
+        "id": "h3",
+        "hidden": true,
+        "path": "/numbers",
+        "params": {
+          "limit": "abc"
+        },
+        "expected_status": 422
+      },
+      {
+        "id": "h4",
+        "hidden": true,
+        "path": "/numbers",
+        "params": {
+          "limit": 2
+        },
+        "expected_json": {
+          "total": 20,
+          "items": [
+            1,
+            2
+          ]
+        }
+      }
+    ]
+  },
+  "solution": "from fastapi import FastAPI\nfrom fastapi.testclient import TestClient\n\napp = FastAPI()\nNUMS = list(range(1, 21))\n\n\n@app.get(\"/numbers\")\ndef numbers(limit: int = 5, offset: int = 0):\n    return {\"total\": len(NUMS), \"items\": NUMS[offset:offset + limit]}\n",
+  "explanation": "Срез от offset до offset + limit; total считают по всему списку, а не по странице.",
+  "criteria": [
+    "Значения по умолчанию работают.",
+    "Страница считается от offset."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from fastapi import FastAPI\nfrom fastapi.testclient import TestClient\n\napp = FastAPI()\nNUMS = list(range(1, 21))\n\n\n@app.get(\"/numbers\")\ndef numbers(limit: int = 5, offset: int = 0):\n    return {\"total\": len(NUMS), \"items\": NUMS[offset:limit]}\n",
+      "why": "Конец среза — limit, а не offset + limit."
+    },
+    {
+      "code": "from fastapi import FastAPI\nfrom fastapi.testclient import TestClient\n\napp = FastAPI()\nNUMS = list(range(1, 21))\n\n\n@app.get(\"/numbers\")\ndef numbers(limit: int = 10, offset: int = 0):\n    return {\"total\": len(NUMS), \"items\": NUMS[offset:offset + limit]}\n",
+      "why": "По умолчанию должно быть 5 элементов."
+    },
+    {
+      "code": "from fastapi import FastAPI\nfrom fastapi.testclient import TestClient\n\napp = FastAPI()\nNUMS = list(range(1, 21))\n\n\n@app.get(\"/numbers\")\ndef numbers(limit: int = 5, offset: int = 0):\n    return {\"total\": len(NUMS[offset:offset + limit]), \"items\": NUMS[offset:offset + limit]}\n",
+      "why": "total — размер всего списка, а не страницы."
+    }
+  ]
+}

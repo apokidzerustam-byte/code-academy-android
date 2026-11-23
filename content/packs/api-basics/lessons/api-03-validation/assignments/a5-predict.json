@@ -1,0 +1,39 @@
+{
+  "id": "a5-predict",
+  "type": "predict",
+  "title": "Что напечатает клиент?",
+  "statement": "Что напечатает программа? Каждая строка вывода — с новой строки.",
+  "goal": "Предсказывать коды ответа и тела.",
+  "input": "—",
+  "expectedResult": "Шесть строк.",
+  "constraints": [],
+  "code": "from fastapi import FastAPI\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\n\n\nclass Q(BaseModel):\n    n: int = Field(..., ge=1, le=3)\n\n\n@app.post(\"/q\")\ndef q(item: Q):\n    return {\"n\": item.n * 2}\n\n\n@app.get(\"/page\")\ndef page(size: int = 2):\n    return list(range(size))\n\n\nclient = TestClient(app)\nprint(client.post(\"/q\", json={\"n\": 3}).json())\nprint(client.post(\"/q\", json={\"n\": 4}).status_code)\nprint(client.post(\"/q\", json={}).status_code)\nprint(client.get(\"/page\").json())\nprint(client.get(\"/page\", params={\"size\": 3}).json())\nprint(client.get(\"/page\", params={\"size\": \"x\"}).status_code)\n",
+  "hints": [
+    "Идём сверху вниз, каждый print — одна строка.",
+    "n=3 укладывается в от 1 до 3 — обработчик выполняется и удваивает.",
+    "n=4 больше le=3, а пустое тело не содержит обязательного n — в обоих случаях 422.",
+    "GET /page без параметра берёт size=2: range(2) даёт [0, 1].",
+    "size=3 — [0, 1, 2]; текст вместо числа — снова 422."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "{'n': 6}\n422\n422\n[0, 1]\n[0, 1, 2]\n422"
+  },
+  "solution": "{'n': 6}\n422\n422\n[0, 1]\n[0, 1, 2]\n422",
+  "explanation": "n=3 проходит проверку (6), n=4 нарушает le, пустое тело нарушает обязательность — оба 422. size по умолчанию 2, с параметром 3; нечисловой size — 422.",
+  "criteria": [
+    "Все шесть строк верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "{'n': 6}\n400\n422\n[0, 1]\n[0, 1, 2]\n422",
+      "answer": "{'n': 6}\n400\n422\n[0, 1]\n[0, 1, 2]\n422",
+      "why": "Нарушение проверки модели — это 422, а не 400."
+    },
+    {
+      "code": "{'n': 6}\n422\n422\n[0, 1, 2]\n[0, 1, 2]\n422",
+      "answer": "{'n': 6}\n422\n422\n[0, 1, 2]\n[0, 1, 2]\n422",
+      "why": "Без параметра берётся значение по умолчанию size=2, а не 3."
+    }
+  ]
+}

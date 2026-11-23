@@ -3,17 +3,24 @@
   "version": "0.1.0",
   "stage": 8,
   "title": "Веб-API на FastAPI",
-  "description": "Свой сервер на Python: обработчики, параметры, модели данных и коды ответа. Запросы — тестовым клиентом без сети. Пилот этапа 10.",
+  "description": "Свой сервер на Python: обработчики, параметры, модели данных, CRUD и коды ответа. Запросы — тестовым клиентом без сети.",
   "language": "python",
   "minAppVersion": 1,
   "lessons": [
-    "api-01-fastapi"
+    "api-01-fastapi",
+    "api-02-crud",
+    "api-03-validation"
   ],
   "skills": {
     "api.http": "HTTP: методы, пути, коды ответа",
     "api.routes": "Обработчики FastAPI",
     "api.params": "Параметры пути и запроса",
     "api.models": "Тело запроса: модели pydantic",
-    "api.errors": "Ошибки API: 404 и 422"
+    "api.errors": "Свои ошибки: 400, 404, 409",
+    "api.crud": "CRUD: создать, прочитать, изменить, удалить",
+    "api.state": "Данные в памяти сервера",
+    "api.filter": "Необязательные параметры запроса",
+    "api.validation": "Проверка данных: Field и код 422",
+    "api.paging": "Постраничный вывод: limit и offset"
   }
 }

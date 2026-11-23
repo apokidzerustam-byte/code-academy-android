@@ -1,0 +1,128 @@
+{
+  "id": "a1-constraints",
+  "type": "complete",
+  "title": "Ограничения модели",
+  "statement": "В модели `ItemIn` пока нет ограничений. Добавьте через `Field`: название — **не короче 2 символов**, цена — **строго больше 0**, количество — **не меньше 1** (по умолчанию 1). Обработчик менять не нужно.",
+  "goal": "Ставить ограничения Field в модели.",
+  "input": "Модель без ограничений.",
+  "expectedResult": "Плохие данные → 422.",
+  "constraints": [
+    "Обработчик POST не меняйте."
+  ],
+  "starterCode": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\nITEMS = []\n\n\nclass ItemIn(BaseModel):\n    name: str\n    price: float\n    qty: int = 1\n\n\n@app.post(\"/items\", status_code=201)\ndef add_item(item: ItemIn):\n    ITEMS.append({\"name\": item.name, \"price\": item.price, \"qty\": item.qty})\n    return ITEMS[-1]\n",
+  "hints": [
+    "Импортировано: Field. Ограничение пишут как значение поля: name: str = Field(...).",
+    "Многоточие первым аргументом делает поле обязательным.",
+    "Название: Field(..., min_length=2). Цена: gt=0 — строго больше.",
+    "Количество: по умолчанию 1, поэтому Field(1, ge=1).",
+    "price: float = Field(..., gt=0), qty: int = Field(1, ge=1)"
+  ],
+  "tests": {
+    "kind": "fastapi",
+    "cases": [
+      {
+        "id": "v1",
+        "method": "POST",
+        "path": "/items",
+        "json": {
+          "name": "Чай",
+          "price": 3.5
+        },
+        "expected_status": 201,
+        "expected_json": {
+          "name": "Чай",
+          "price": 3.5,
+          "qty": 1
+        }
+      },
+      {
+        "id": "v2",
+        "method": "POST",
+        "path": "/items",
+        "json": {
+          "name": "Я",
+          "price": 3.5
+        },
+        "expected_status": 422,
+        "hint": "Название короче двух символов не принимается"
+      },
+      {
+        "id": "h1",
+        "hidden": true,
+        "method": "POST",
+        "path": "/items",
+        "json": {
+          "name": "Сыр",
+          "price": 0
+        },
+        "expected_status": 422,
+        "hint": "Цена ноль — это не «больше нуля»"
+      },
+      {
+        "id": "h2",
+        "hidden": true,
+        "method": "POST",
+        "path": "/items",
+        "json": {
+          "name": "Сыр",
+          "price": -1
+        },
+        "expected_status": 422
+      },
+      {
+        "id": "h3",
+        "hidden": true,
+        "method": "POST",
+        "path": "/items",
+        "json": {
+          "name": "Сыр",
+          "price": 5,
+          "qty": 0
+        },
+        "expected_status": 422,
+        "hint": "Количество не меньше единицы"
+      },
+      {
+        "id": "h4",
+        "hidden": true,
+        "method": "POST",
+        "path": "/items",
+        "json": {
+          "name": "Сыр",
+          "price": 5,
+          "qty": 3
+        },
+        "expected_status": 201,
+        "expected_json": {
+          "name": "Сыр",
+          "price": 5.0,
+          "qty": 3
+        }
+      }
+    ]
+  },
+  "solution": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\nITEMS = []\n\n\nclass ItemIn(BaseModel):\n    name: str = Field(..., min_length=2)\n    price: float = Field(..., gt=0)\n    qty: int = Field(1, ge=1)\n\n\n@app.post(\"/items\", status_code=201)\ndef add_item(item: ItemIn):\n    ITEMS.append({\"name\": item.name, \"price\": item.price, \"qty\": item.qty})\n    return ITEMS[-1]\n",
+  "explanation": "Field(...) обязательное поле с ограничениями; при нарушении FastAPI сам отвечает 422.",
+  "criteria": [
+    "Корректный товар принимается.",
+    "Нарушения каждого из трёх ограничений дают 422."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\nITEMS = []\n\n\nclass ItemIn(BaseModel):\n    name: str = Field(..., min_length=2)\n    price: float\n    qty: int = 1\n\n\n@app.post(\"/items\", status_code=201)\ndef add_item(item: ItemIn):\n    ITEMS.append({\"name\": item.name, \"price\": item.price, \"qty\": item.qty})\n    return ITEMS[-1]\n",
+      "why": "Ограничена только длина названия: цена 0 и количество 0 проходят."
+    },
+    {
+      "code": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\nITEMS = []\n\n\nclass ItemIn(BaseModel):\n    name: str = Field(..., min_length=2)\n    price: float = Field(..., ge=0)\n    qty: int = Field(1, ge=1)\n\n\n@app.post(\"/items\", status_code=201)\ndef add_item(item: ItemIn):\n    ITEMS.append({\"name\": item.name, \"price\": item.price, \"qty\": item.qty})\n    return ITEMS[-1]\n",
+      "why": "Цена ноль допустима: нужно строго больше нуля (gt)."
+    },
+    {
+      "code": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\nITEMS = []\n\n\nclass ItemIn(BaseModel):\n    name: str = Field(..., min_length=1)\n    price: float = Field(..., gt=0)\n    qty: int = Field(1, ge=1)\n\n\n@app.post(\"/items\", status_code=201)\ndef add_item(item: ItemIn):\n    ITEMS.append({\"name\": item.name, \"price\": item.price, \"qty\": item.qty})\n    return ITEMS[-1]\n",
+      "why": "Название из одного символа проходит: нужно не короче двух."
+    },
+    {
+      "code": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\nITEMS = []\n\n\nclass ItemIn(BaseModel):\n    name: str = Field(..., min_length=2)\n    price: float = Field(..., gt=0)\n    qty: int = Field(1, ge=0)\n\n\n@app.post(\"/items\", status_code=201)\ndef add_item(item: ItemIn):\n    ITEMS.append({\"name\": item.name, \"price\": item.price, \"qty\": item.qty})\n    return ITEMS[-1]\n",
+      "why": "Количество ноль допустимо: нужно не меньше единицы."
+    }
+  ]
+}

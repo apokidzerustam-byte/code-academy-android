@@ -1,0 +1,96 @@
+{
+  "id": "a4-default",
+  "type": "fix",
+  "title": "Количество по умолчанию",
+  "statement": "Товар без поля `qty` должен получать **1 штуку**, а `qty: 0` — отклоняться (422). Сейчас товар без `qty` создаётся с нулём штук. Найдите ошибку.",
+  "goal": "Помнить: значение по умолчанию не проверяется.",
+  "input": "Модель с Field.",
+  "expectedResult": "Товар без qty получает 1.",
+  "constraints": [
+    "Ограничение ge=1 должно остаться."
+  ],
+  "starterCode": "from fastapi import FastAPI\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\nITEMS = []\n\n\nclass ItemIn(BaseModel):\n    name: str = Field(..., min_length=2)\n    price: float = Field(..., gt=0)\n    qty: int = Field(0, ge=1)\n\n\n@app.post(\"/items\", status_code=201)\ndef add_item(item: ItemIn):\n    ITEMS.append({\"name\": item.name, \"price\": item.price, \"qty\": item.qty})\n    return ITEMS[-1]\n",
+  "hints": [
+    "Отправьте товар без qty и посмотрите, что в ответе.",
+    "В ответе qty равно 0 — откуда оно?",
+    "Из значения по умолчанию в Field(0, …).",
+    "Ограничение ge=1 значение по умолчанию не проверяет.",
+    "Поставьте по умолчанию 1: qty: int = Field(1, ge=1)"
+  ],
+  "tests": {
+    "kind": "fastapi",
+    "cases": [
+      {
+        "id": "v1",
+        "method": "POST",
+        "path": "/items",
+        "json": {
+          "name": "Чай",
+          "price": 3.5
+        },
+        "expected_status": 201,
+        "expected_json": {
+          "name": "Чай",
+          "price": 3.5,
+          "qty": 1
+        },
+        "hint": "Если количество не прислали, должна быть одна штука"
+      },
+      {
+        "id": "v2",
+        "method": "POST",
+        "path": "/items",
+        "json": {
+          "name": "Сыр",
+          "price": 5,
+          "qty": 0
+        },
+        "expected_status": 422
+      },
+      {
+        "id": "h1",
+        "hidden": true,
+        "method": "POST",
+        "path": "/items",
+        "json": {
+          "name": "Сыр",
+          "price": 5,
+          "qty": 4
+        },
+        "expected_status": 201,
+        "expected_json": {
+          "name": "Сыр",
+          "price": 5.0,
+          "qty": 4
+        }
+      },
+      {
+        "id": "h2",
+        "hidden": true,
+        "method": "POST",
+        "path": "/items",
+        "json": {
+          "name": "Х",
+          "price": 5
+        },
+        "expected_status": 422
+      }
+    ]
+  },
+  "solution": "from fastapi import FastAPI\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\nITEMS = []\n\n\nclass ItemIn(BaseModel):\n    name: str = Field(..., min_length=2)\n    price: float = Field(..., gt=0)\n    qty: int = Field(1, ge=1)\n\n\n@app.post(\"/items\", status_code=201)\ndef add_item(item: ItemIn):\n    ITEMS.append({\"name\": item.name, \"price\": item.price, \"qty\": item.qty})\n    return ITEMS[-1]\n",
+  "explanation": "Значение по умолчанию подставляется без проверки. Ограничение ge=1 отклоняет присланный ноль, но не замечает ноль по умолчанию — его нужно выбрать верным.",
+  "criteria": [
+    "Без qty — одна штука.",
+    "qty=0 отклоняется."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from fastapi import FastAPI\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\nITEMS = []\n\n\nclass ItemIn(BaseModel):\n    name: str = Field(..., min_length=2)\n    price: float = Field(..., gt=0)\n    qty: int = Field(0, ge=1)\n\n\n@app.post(\"/items\", status_code=201)\ndef add_item(item: ItemIn):\n    ITEMS.append({\"name\": item.name, \"price\": item.price, \"qty\": item.qty})\n    return ITEMS[-1]\n",
+      "why": "Ошибка осталась: по умолчанию ноль штук."
+    },
+    {
+      "code": "from fastapi import FastAPI\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\nITEMS = []\n\n\nclass ItemIn(BaseModel):\n    name: str = Field(..., min_length=2)\n    price: float = Field(..., gt=0)\n    qty: int = Field(1, ge=0)\n\n\n@app.post(\"/items\", status_code=201)\ndef add_item(item: ItemIn):\n    ITEMS.append({\"name\": item.name, \"price\": item.price, \"qty\": item.qty})\n    return ITEMS[-1]\n",
+      "why": "Ограничение ослаблено: qty=0 теперь принимается."
+    }
+  ]
+}

@@ -1,0 +1,124 @@
+{
+  "id": "a1-create",
+  "type": "write",
+  "title": "Создать и показать",
+  "statement": "Допишите приложение. Сделайте:\n\n- **POST** `/tasks` с кодом **201**: записывает задачу в `TASKS` под номером `NEXT_ID`, увеличивает `NEXT_ID` и возвращает `{\"id\": …, \"title\": …, \"done\": …}`;\n- **GET** `/tasks`: возвращает список всех задач в порядке создания.",
+  "goal": "Писать POST-обработчик с моделью и счётчиком.",
+  "input": "Модель TaskIn, словарь TASKS и счётчик NEXT_ID уже заданы.",
+  "expectedResult": "Задачи создаются и читаются списком.",
+  "constraints": [
+    "Не меняйте TaskIn, TASKS и NEXT_ID.",
+    "Счётчик меняют после слова global."
+  ],
+  "starterCode": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel\n\napp = FastAPI()\nTASKS = {}\nNEXT_ID = 1\n\n\nclass TaskIn(BaseModel):\n    title: str\n    done: bool = False\n\n# POST /tasks (код 201) и GET /tasks\n",
+  "hints": [
+    "POST-обработчик получает параметр с типом модели: task: TaskIn.",
+    "Код 201 задаёт параметр декоратора: status_code=201.",
+    "Чтобы изменить NEXT_ID, объявите global NEXT_ID.",
+    "Положите в TASKS[NEXT_ID] словарь с id, title и done; затем увеличьте NEXT_ID.",
+    "GET /tasks — return list(TASKS.values())."
+  ],
+  "tests": {
+    "kind": "fastapi",
+    "cases": [
+      {
+        "id": "v1",
+        "method": "POST",
+        "path": "/tasks",
+        "json": {
+          "title": "А"
+        },
+        "expected_status": 201,
+        "expected_json": {
+          "id": 1,
+          "title": "А",
+          "done": false
+        }
+      },
+      {
+        "id": "v2",
+        "method": "POST",
+        "path": "/tasks",
+        "json": {
+          "title": "Б",
+          "done": true
+        },
+        "expected_status": 201,
+        "expected_json": {
+          "id": 2,
+          "title": "Б",
+          "done": true
+        }
+      },
+      {
+        "id": "h1",
+        "hidden": true,
+        "path": "/tasks",
+        "expected_json": [
+          {
+            "id": 1,
+            "title": "А",
+            "done": false
+          },
+          {
+            "id": 2,
+            "title": "Б",
+            "done": true
+          }
+        ],
+        "hint": "GET /tasks возвращает все задачи списком, в порядке создания"
+      },
+      {
+        "id": "h2",
+        "hidden": true,
+        "method": "POST",
+        "path": "/tasks",
+        "json": {
+          "done": true
+        },
+        "expected_status": 422,
+        "hint": "Без названия задача не создаётся — 422"
+      },
+      {
+        "id": "h3",
+        "hidden": true,
+        "method": "POST",
+        "path": "/tasks",
+        "json": {
+          "title": "В"
+        },
+        "expected_status": 201,
+        "expected_json": {
+          "id": 3,
+          "title": "В",
+          "done": false
+        },
+        "hint": "Номера растут на единицу, а неудачный запрос номер не занимает"
+      }
+    ]
+  },
+  "solution": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel\n\napp = FastAPI()\nTASKS = {}\nNEXT_ID = 1\n\n\nclass TaskIn(BaseModel):\n    title: str\n    done: bool = False\n\n\n@app.post(\"/tasks\", status_code=201)\ndef create_task(task: TaskIn):\n    global NEXT_ID\n    TASKS[NEXT_ID] = {\"id\": NEXT_ID, \"title\": task.title, \"done\": task.done}\n    NEXT_ID += 1\n    return TASKS[NEXT_ID - 1]\n\n\n@app.get(\"/tasks\")\ndef list_tasks():\n    return list(TASKS.values())\n",
+  "explanation": "Обработчик POST записывает задачу под номером NEXT_ID и сдвигает счётчик; GET отдаёт все значения словаря списком.",
+  "criteria": [
+    "POST создаёт задачу с кодом 201.",
+    "GET показывает все задачи."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel\n\napp = FastAPI()\nTASKS = {}\nNEXT_ID = 1\n\n\nclass TaskIn(BaseModel):\n    title: str\n    done: bool = False\n\n\n@app.post(\"/tasks\", status_code=200)\ndef create_task(task: TaskIn):\n    global NEXT_ID\n    TASKS[NEXT_ID] = {\"id\": NEXT_ID, \"title\": task.title, \"done\": task.done}\n    NEXT_ID += 1\n    return TASKS[NEXT_ID - 1]\n\n\n@app.get(\"/tasks\")\ndef list_tasks():\n    return list(TASKS.values())\n",
+      "why": "Создание должно возвращать код 201."
+    },
+    {
+      "code": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel\n\napp = FastAPI()\nTASKS = {}\nNEXT_ID = 1\n\n\nclass TaskIn(BaseModel):\n    title: str\n    done: bool = False\n\n\n@app.post(\"/tasks\", status_code=201)\ndef create_task(task: TaskIn):\n    global NEXT_ID\n    TASKS[NEXT_ID] = {\"id\": NEXT_ID, \"title\": task.title, \"done\": task.done}\n    return TASKS[NEXT_ID - 1]\n\n\n@app.get(\"/tasks\")\ndef list_tasks():\n    return list(TASKS.values())\n",
+      "why": "Счётчик не растёт: все задачи получают номер 1."
+    },
+    {
+      "code": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel\n\napp = FastAPI()\nTASKS = {}\nNEXT_ID = 1\n\n\nclass TaskIn(BaseModel):\n    title: str\n    done: bool = False\n\n\n@app.post(\"/tasks\", status_code=201)\ndef create_task(task: TaskIn):\n    global NEXT_ID\n    TASKS[NEXT_ID] = {\"id\": NEXT_ID, \"title\": task.title, \"done\": task.done}\n    NEXT_ID += 1\n    return TASKS[NEXT_ID - 1]\n\n\n@app.get(\"/tasks\")\ndef list_tasks():\n    return TASKS\n",
+      "why": "Возвращён словарь вместо списка."
+    },
+    {
+      "code": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel\n\napp = FastAPI()\nTASKS = {}\nNEXT_ID = 1\n\n\nclass TaskIn(BaseModel):\n    title: str\n    done: bool = False\n\n\n@app.post(\"/tasks\", status_code=201)\ndef create_task(task: TaskIn):\n    global NEXT_ID\n    TASKS[NEXT_ID] = {\"id\": NEXT_ID, \"title\": task.title, \"done\": False}\n    NEXT_ID += 1\n    return TASKS[NEXT_ID - 1]\n\n\n@app.get(\"/tasks\")\ndef list_tasks():\n    return list(TASKS.values())\n",
+      "why": "Признак выполнения из запроса игнорируется."
+    }
+  ]
+}

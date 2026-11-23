@@ -1,0 +1,205 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Четыре действия с данными",
+      "narration": "Почти любое приложение умеет четыре вещи с данными: создать, прочитать, изменить и удалить. По-английски это CRUD. В веб-API каждому действию соответствует метод запроса. POST создаёт, GET читает, PUT заменяет, DELETE удаляет. Сегодня на этой основе напишем сервер списка дел, который хранит задачи в памяти.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "CRUD: **C**reate — POST · **R**ead — GET · **U**pdate — PUT · **D**elete — DELETE",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "create",
+      "title": "Создаём задачу: POST",
+      "narration": "Задачи хранятся в словаре, ключ — номер. Счётчик следующего номера лежит в переменной NEXT_ID. Модель TaskIn описывает то, что присылает клиент: название и признак выполнения, по умолчанию ложь. Обработчик POST записывает задачу под новым номером и увеличивает счётчик. Параметр status_code равно двести один говорит: создано. Отправим две задачи.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel\n\napp = FastAPI()\nTASKS = {}\nNEXT_ID = 1\n\n\nclass TaskIn(BaseModel):\n    title: str\n    done: bool = False\n\n\n@app.post(\"/tasks\", status_code=201)\ndef create_task(task: TaskIn):\n    global NEXT_ID\n    TASKS[NEXT_ID] = {\"id\": NEXT_ID, \"title\": task.title, \"done\": task.done}\n    NEXT_ID += 1\n    return TASKS[NEXT_ID - 1]\n\n\nclient = TestClient(app)\nr = client.post(\"/tasks\", json={\"title\": \"Купить молоко\"})\nprint(r.status_code, r.json())\nr = client.post(\"/tasks\", json={\"title\": \"Написать отчёт\", \"done\": True})\nprint(r.status_code, r.json())\n",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            6,
+            7
+          ],
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            10,
+            11,
+            12
+          ],
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            15,
+            16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "cue": 3
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            15
+          ],
+          "cue": 4
+        },
+        {
+          "type": "run",
+          "cue": 5
+        },
+        {
+          "type": "output",
+          "text": "201 {'id': 1, 'title': 'Купить молоко', 'done': False}\n201 {'id': 2, 'title': 'Написать отчёт', 'done': True}\n",
+          "cue": 5
+        }
+      ]
+    },
+    {
+      "id": "read",
+      "title": "Читаем: GET",
+      "narration": "Теперь чтение. Адрес tasks без номера возвращает все задачи списком. Адрес с номером возвращает одну задачу, а если такого номера нет, поднимаем исключение с кодом четыреста четыре. Запрашиваем весь список, вторую задачу и несуществующую девятую.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel\n\napp = FastAPI()\nTASKS = {}\nNEXT_ID = 1\n\n\nclass TaskIn(BaseModel):\n    title: str\n    done: bool = False\n\n\n@app.post(\"/tasks\", status_code=201)\ndef create_task(task: TaskIn):\n    global NEXT_ID\n    TASKS[NEXT_ID] = {\"id\": NEXT_ID, \"title\": task.title, \"done\": task.done}\n    NEXT_ID += 1\n    return TASKS[NEXT_ID - 1]\n\n\n@app.get(\"/tasks\")\ndef list_tasks():\n    return list(TASKS.values())\n\n\n@app.get(\"/tasks/{task_id}\")\ndef get_task(task_id: int):\n    if task_id not in TASKS:\n        raise HTTPException(status_code=404, detail=\"Задача не найдена\")\n    return TASKS[task_id]\n\n\nclient = TestClient(app)\nclient.post(\"/tasks\", json={\"title\": \"Купить молоко\"})\nclient.post(\"/tasks\", json={\"title\": \"Написать отчёт\", \"done\": True})\nprint(client.get(\"/tasks\").json())\nprint(client.get(\"/tasks/2\").json())\nprint(client.get(\"/tasks/9\").status_code)\n",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            23,
+            24,
+            25
+          ],
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            28,
+            29,
+            30,
+            31,
+            32
+          ],
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "[{'id': 1, 'title': 'Купить молоко', 'done': False}, {'id': 2, 'title': 'Написать отчёт', 'done': True}]\n{'id': 2, 'title': 'Написать отчёт', 'done': True}\n404\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "update",
+      "title": "Заменяем: PUT",
+      "narration": "Метод PUT заменяет задачу целиком. Обработчик получает и номер из адреса, и новое тело. Если номера нет, снова четыреста четыре. Отметим молоко выполненным. Заметьте: запрос к девятой задаче вернул ошибку, а после обновления чтение первой показывает новое значение.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel\n\napp = FastAPI()\nTASKS = {}\nNEXT_ID = 1\n\n\nclass TaskIn(BaseModel):\n    title: str\n    done: bool = False\n\n\n@app.post(\"/tasks\", status_code=201)\ndef create_task(task: TaskIn):\n    global NEXT_ID\n    TASKS[NEXT_ID] = {\"id\": NEXT_ID, \"title\": task.title, \"done\": task.done}\n    NEXT_ID += 1\n    return TASKS[NEXT_ID - 1]\n\n\n@app.get(\"/tasks\")\ndef list_tasks():\n    return list(TASKS.values())\n\n\n@app.get(\"/tasks/{task_id}\")\ndef get_task(task_id: int):\n    if task_id not in TASKS:\n        raise HTTPException(status_code=404, detail=\"Задача не найдена\")\n    return TASKS[task_id]\n\n\n@app.put(\"/tasks/{task_id}\")\ndef update_task(task_id: int, task: TaskIn):\n    if task_id not in TASKS:\n        raise HTTPException(status_code=404, detail=\"Задача не найдена\")\n    TASKS[task_id] = {\"id\": task_id, \"title\": task.title, \"done\": task.done}\n    return TASKS[task_id]\n\n\nclient = TestClient(app)\nclient.post(\"/tasks\", json={\"title\": \"Купить молоко\"})\nclient.post(\"/tasks\", json={\"title\": \"Написать отчёт\", \"done\": True})\nprint(client.put(\"/tasks/1\", json={\"title\": \"Купить молоко\", \"done\": True}).json())\nprint(client.put(\"/tasks/9\", json={\"title\": \"X\"}).status_code)\nprint(client.get(\"/tasks/1\").json())\n",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            35,
+            36,
+            37,
+            38,
+            39,
+            40
+          ],
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "{'id': 1, 'title': 'Купить молоко', 'done': True}\n404\n{'id': 1, 'title': 'Купить молоко', 'done': True}\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "delete",
+      "title": "Удаляем: DELETE",
+      "narration": "Удаление — метод DELETE. Если задача есть, убираем её из словаря и сообщаем, какой номер удалён. Удалим вторую задачу. Теперь чтение второй даёт четыреста четыре, повторное удаление — тоже, а в списке осталась одна задача.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "from fastapi import FastAPI, HTTPException\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel\n\napp = FastAPI()\nTASKS = {}\nNEXT_ID = 1\n\n\nclass TaskIn(BaseModel):\n    title: str\n    done: bool = False\n\n\n@app.post(\"/tasks\", status_code=201)\ndef create_task(task: TaskIn):\n    global NEXT_ID\n    TASKS[NEXT_ID] = {\"id\": NEXT_ID, \"title\": task.title, \"done\": task.done}\n    NEXT_ID += 1\n    return TASKS[NEXT_ID - 1]\n\n\n@app.get(\"/tasks\")\ndef list_tasks():\n    return list(TASKS.values())\n\n\n@app.get(\"/tasks/{task_id}\")\ndef get_task(task_id: int):\n    if task_id not in TASKS:\n        raise HTTPException(status_code=404, detail=\"Задача не найдена\")\n    return TASKS[task_id]\n\n\n@app.put(\"/tasks/{task_id}\")\ndef update_task(task_id: int, task: TaskIn):\n    if task_id not in TASKS:\n        raise HTTPException(status_code=404, detail=\"Задача не найдена\")\n    TASKS[task_id] = {\"id\": task_id, \"title\": task.title, \"done\": task.done}\n    return TASKS[task_id]\n\n\n@app.delete(\"/tasks/{task_id}\")\ndef delete_task(task_id: int):\n    if task_id not in TASKS:\n        raise HTTPException(status_code=404, detail=\"Задача не найдена\")\n    del TASKS[task_id]\n    return {\"deleted\": task_id}\n\n\nclient = TestClient(app)\nclient.post(\"/tasks\", json={\"title\": \"Купить молоко\"})\nclient.post(\"/tasks\", json={\"title\": \"Написать отчёт\", \"done\": True})\nprint(client.delete(\"/tasks/2\").json())\nprint(client.get(\"/tasks/2\").status_code)\nprint(client.delete(\"/tasks/2\").status_code)\nprint(len(client.get(\"/tasks\").json()))\n",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            43,
+            44,
+            45,
+            46,
+            47,
+            48
+          ],
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "cue": 2
+        },
+        {
+          "type": "output",
+          "text": "{'deleted': 2}\n404\n404\n1\n",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. CRUD — это создание, чтение, изменение и удаление, а в API им соответствуют POST, GET, PUT и DELETE. Код двести один сообщает о создании, четыреста четыре — о том, что не найдено. Данные в словаре живут, пока работает сервер; чтобы они сохранялись, нужна база данных, а о ней — в следующих этапах.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "POST → 201 · GET → 200 · PUT → 200 · DELETE → 200 · нет такой записи → 404",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}
