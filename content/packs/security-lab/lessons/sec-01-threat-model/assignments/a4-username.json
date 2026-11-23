@@ -1,0 +1,108 @@
+{
+  "id": "a4-username",
+  "type": "function",
+  "title": "Проверка имени по белому списку",
+  "statement": "Напишите `valid_username(name)`: имя допустимо, если оно состоит только из строчных латинских букв, цифр и `_`, а длина — от 3 до 20 символов. Верните `True` или `False`.",
+  "goal": "Проверка имени по белому списку",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Допустимые символы описываются регулярным выражением.",
+    "Класс символов: [a-z0-9_].",
+    "Длина задаётся квантификатором {3,20}.",
+    "Нужно совпадение со всей строкой, а не с началом.",
+    "Для этого служит re.fullmatch."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "valid_username",
+    "cases": [
+      {
+        "args": [
+          "anna_92"
+        ],
+        "id": "v1",
+        "expected": true
+      },
+      {
+        "args": [
+          "ab"
+        ],
+        "id": "v2",
+        "expected": false
+      },
+      {
+        "args": [
+          "ROOT"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          "aaaaaaaaaaaaaaaaaaaa"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": true
+      },
+      {
+        "args": [
+          "aaaaaaaaaaaaaaaaaaaaa"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          "bad name"
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          "x'; --"
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          "юзер123"
+        ],
+        "id": "h8",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          "abc"
+        ],
+        "id": "h9",
+        "hidden": true,
+        "expected": true
+      }
+    ]
+  },
+  "solution": "import re\n\n\ndef valid_username(name):\n    return re.fullmatch(r\"[a-z0-9_]{3,20}\", name) is not None\n",
+  "explanation": "Белый список (разрешить только известное) надёжнее чёрного списка: нельзя перечислить все опасные строки, но можно описать допустимые.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import re\n\n\ndef valid_username(name):\n    return re.match(r\"[a-z0-9_]{3,20}\", name) is not None\n",
+      "why": "re.match не проверяет конец строки: лишние символы проходят."
+    },
+    {
+      "code": "def valid_username(name):\n    return 3 <= len(name) <= 20 and name.isalnum()\n",
+      "why": "Разрешает заглавные и нелатинские буквы, запрещает подчёркивание."
+    }
+  ]
+}

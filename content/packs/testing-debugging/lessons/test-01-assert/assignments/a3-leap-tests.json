@@ -1,0 +1,69 @@
+{
+  "id": "a3-leap-tests",
+  "type": "write",
+  "title": "Тесты, которые ловят баги",
+  "statement": "В программе спрятаны четыре версии функции `is_leap(year)` (високосный год): `good` — верная, `bug1`, `bug2`, `bug3` — каждая с ошибкой. Напишите в функции `tests(is_leap)` проверки `assert`, чтобы программа печатала **`PASS` для `good`** и **`FAIL` для каждой неверной версии**. Версия выбирается входной строкой.\n\nПодсказка по правилу: год високосный, если делится на 4, но не на 100, кроме годов, делящихся на 400.",
+  "goal": "Тесты, которые ловят баги",
+  "input": "Название версии: good, bug1, bug2 или bug3.",
+  "expectedResult": "PASS для верной версии и FAIL для каждой неверной.",
+  "constraints": [],
+  "starterCode": "def good(y):\n    return y % 4 == 0 and (y % 100 != 0 or y % 400 == 0)\n\n\ndef bug1(y):\n    return y % 4 == 0\n\n\ndef bug2(y):\n    return y % 4 == 0 and y % 100 != 0\n\n\ndef bug3(y):\n    return (y % 4 == 0 and y % 100 != 0) or y % 200 == 0\n\n\ndef tests(is_leap):\n    pass\n\n\nimpls = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3}\nimpl = impls[input().strip()]\ntry:\n    tests(impl)\n    print(\"PASS\")\nexcept AssertionError:\n    print(\"FAIL\")\n",
+  "hints": [
+    "Сначала запустите программу со входом good: она должна напечатать PASS.",
+    "Каждая неверная версия ошибается на своём виде года.",
+    "Проверьте обычный високосный год и обычный невисокосный.",
+    "Нужны годы-века: делящиеся на 100 и на 400, и делящиеся на 100, но не на 400 — в том числе чётные века вроде 1800.",
+    "Пять утверждений достаточно: два обычных года и три века."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "good\n",
+        "expected_stdout": "PASS\n"
+      },
+      {
+        "id": "v2",
+        "stdin": "bug1\n",
+        "expected_stdout": "FAIL\n"
+      },
+      {
+        "id": "h3",
+        "stdin": "bug2\n",
+        "expected_stdout": "FAIL\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "bug3\n",
+        "expected_stdout": "FAIL\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "def good(y):\n    return y % 4 == 0 and (y % 100 != 0 or y % 400 == 0)\n\n\ndef bug1(y):\n    return y % 4 == 0\n\n\ndef bug2(y):\n    return y % 4 == 0 and y % 100 != 0\n\n\ndef bug3(y):\n    return (y % 4 == 0 and y % 100 != 0) or y % 200 == 0\n\n\ndef tests(is_leap):\n    assert is_leap(2024)\n    assert not is_leap(2023)\n    assert not is_leap(1900)\n    assert is_leap(2000)\n    assert not is_leap(1800)\n\n\nimpls = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3}\nimpl = impls[input().strip()]\ntry:\n    tests(impl)\n    print(\"PASS\")\nexcept AssertionError:\n    print(\"FAIL\")\n",
+  "explanation": "Тест полезен, если способен упасть. Каждая ошибка требует «своей» проверки: bug1 ловят века вроде 1900, bug2 — год 2000, bug3 — век 1800.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def good(y):\n    return y % 4 == 0 and (y % 100 != 0 or y % 400 == 0)\n\n\ndef bug1(y):\n    return y % 4 == 0\n\n\ndef bug2(y):\n    return y % 4 == 0 and y % 100 != 0\n\n\ndef bug3(y):\n    return (y % 4 == 0 and y % 100 != 0) or y % 200 == 0\n\n\ndef tests(is_leap):\n    assert is_leap(2024)\n    assert not is_leap(2023)\n\n\nimpls = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3}\nimpl = impls[input().strip()]\ntry:\n    tests(impl)\n    print(\"PASS\")\nexcept AssertionError:\n    print(\"FAIL\")\n",
+      "why": "Не проверены века: bug1 не пойман."
+    },
+    {
+      "code": "def good(y):\n    return y % 4 == 0 and (y % 100 != 0 or y % 400 == 0)\n\n\ndef bug1(y):\n    return y % 4 == 0\n\n\ndef bug2(y):\n    return y % 4 == 0 and y % 100 != 0\n\n\ndef bug3(y):\n    return (y % 4 == 0 and y % 100 != 0) or y % 200 == 0\n\n\ndef tests(is_leap):\n    assert is_leap(2024)\n    assert not is_leap(2023)\n    assert not is_leap(1900)\n\n\nimpls = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3}\nimpl = impls[input().strip()]\ntry:\n    tests(impl)\n    print(\"PASS\")\nexcept AssertionError:\n    print(\"FAIL\")\n",
+      "why": "Нет проверки 2000: bug2 не пойман."
+    },
+    {
+      "code": "def good(y):\n    return y % 4 == 0 and (y % 100 != 0 or y % 400 == 0)\n\n\ndef bug1(y):\n    return y % 4 == 0\n\n\ndef bug2(y):\n    return y % 4 == 0 and y % 100 != 0\n\n\ndef bug3(y):\n    return (y % 4 == 0 and y % 100 != 0) or y % 200 == 0\n\n\ndef tests(is_leap):\n    assert is_leap(2024)\n    assert not is_leap(1900)\n    assert is_leap(2000)\n\n\nimpls = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3}\nimpl = impls[input().strip()]\ntry:\n    tests(impl)\n    print(\"PASS\")\nexcept AssertionError:\n    print(\"FAIL\")\n",
+      "why": "Нет проверки 1800: bug3 не пойман."
+    },
+    {
+      "code": "def good(y):\n    return y % 4 == 0 and (y % 100 != 0 or y % 400 == 0)\n\n\ndef bug1(y):\n    return y % 4 == 0\n\n\ndef bug2(y):\n    return y % 4 == 0 and y % 100 != 0\n\n\ndef bug3(y):\n    return (y % 4 == 0 and y % 100 != 0) or y % 200 == 0\n\n\ndef tests(is_leap):\n    assert is_leap(1900)\n\n\nimpls = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3}\nimpl = impls[input().strip()]\ntry:\n    tests(impl)\n    print(\"PASS\")\nexcept AssertionError:\n    print(\"FAIL\")\n",
+      "why": "Тест неверен: на правильной версии падает."
+    }
+  ]
+}

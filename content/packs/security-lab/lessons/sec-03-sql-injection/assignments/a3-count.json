@@ -1,0 +1,72 @@
+{
+  "id": "a3-count",
+  "type": "function",
+  "title": "Сколько пользователей с ролью",
+  "statement": "Напишите `count_users(role)`: верните число пользователей с указанной ролью. Запрос должен быть параметризованным. База `users` уже создана.",
+  "goal": "Сколько пользователей с ролью",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Используйте SELECT COUNT(*) с условием по роли.",
+    "Значение роли передайте параметром.",
+    "Выполните запрос через conn.execute.",
+    "fetchone() вернёт кортеж с одним числом.",
+    "Число — первый элемент кортежа."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "count_users",
+    "cases": [
+      {
+        "args": [
+          "user"
+        ],
+        "id": "v1",
+        "expected": 2
+      },
+      {
+        "args": [
+          "admin"
+        ],
+        "id": "v2",
+        "expected": 1
+      },
+      {
+        "args": [
+          "guest"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          "user' OR '1'='1"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          "admin' --"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 0
+      }
+    ]
+  },
+  "solution": "import sqlite3\n\nconn = sqlite3.connect(\":memory:\")\nconn.execute(\"CREATE TABLE users (name TEXT, role TEXT)\")\nconn.executemany(\"INSERT INTO users VALUES (?, ?)\", [(\"anna\", \"admin\"), (\"boris\", \"user\"), (\"clara\", \"user\")])\n\n\n\ndef count_users(role):\n    return conn.execute(\"SELECT COUNT(*) FROM users WHERE role = ?\", (role,)).fetchone()[0]\n",
+  "explanation": "COUNT(*) возвращает одну строку с одним столбцом. Параметр защищает от подмены условия.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import sqlite3\n\nconn = sqlite3.connect(\":memory:\")\nconn.execute(\"CREATE TABLE users (name TEXT, role TEXT)\")\nconn.executemany(\"INSERT INTO users VALUES (?, ?)\", [(\"anna\", \"admin\"), (\"boris\", \"user\"), (\"clara\", \"user\")])\n\n\n\ndef count_users(role):\n    return conn.execute(f\"SELECT COUNT(*) FROM users WHERE role = '{role}'\").fetchone()[0]\n",
+      "why": "Склейка: инъекция считает всех пользователей."
+    }
+  ]
+}

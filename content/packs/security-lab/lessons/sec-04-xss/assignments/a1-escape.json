@@ -1,0 +1,41 @@
+{
+  "id": "a1-escape",
+  "type": "predict",
+  "title": "Что вернёт escape",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Что вернёт escape",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "import html\n\nprint(html.escape(\"<b>Tom & Jerry</b>\"))\nprint(html.escape(\"5 > 3\"))\nprint(html.escape(\"it's\"))\nprint(html.escape(\"it's\", quote=False))\n",
+  "hints": [
+    "escape заменяет <, >, & и (по умолчанию) кавычки.",
+    "Первая строка: теги и амперсанд.",
+    "Вторая: знак > превращается в &gt;.",
+    "Одинарная кавычка по умолчанию — &#x27;.",
+    "С quote=False кавычка остаётся."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "&lt;b&gt;Tom &amp; Jerry&lt;/b&gt;\n5 &gt; 3\nit&#x27;s\nit's\n"
+  },
+  "solution": "&lt;b&gt;Tom &amp; Jerry&lt;/b&gt;\n5 &gt; 3\nit&#x27;s\nit's\n",
+  "explanation": "html.escape заменяет &, <, > и по умолчанию кавычки; параметр quote=False отключает замену кавычек.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "&lt;b&gt;Tom &amp; Jerry&lt;/b&gt;\n5 &gt; 3\nit's\nit's",
+      "answer": "&lt;b&gt;Tom &amp; Jerry&lt;/b&gt;\n5 &gt; 3\nit's\nit's",
+      "why": "По умолчанию кавычки тоже экранируются."
+    },
+    {
+      "code": "&lt;b&gt;Tom & Jerry&lt;/b&gt;\n5 &gt; 3\nit&#x27;s\nit's",
+      "answer": "&lt;b&gt;Tom & Jerry&lt;/b&gt;\n5 &gt; 3\nit&#x27;s\nit's",
+      "why": "Амперсанд экранируется тоже: &amp;."
+    }
+  ]
+}

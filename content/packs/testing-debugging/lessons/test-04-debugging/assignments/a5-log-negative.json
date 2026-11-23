@@ -1,0 +1,58 @@
+{
+  "id": "a5-log-negative",
+  "type": "complete",
+  "title": "Журнал предупреждений",
+  "statement": "Первая строка ввода — `n`, далее `n` целых чисел (каждое в своей строке). Настройка `logging` уже сделана. Для каждого отрицательного числа запишите предупреждение `WARNING: пропущено X` (через `logging.warning`), остальные числа сложите. В конце выведите через `logging.info` строку `INFO: сумма S`.",
+  "goal": "Журнал предупреждений",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "import logging\nimport sys\n\nlogging.basicConfig(level=logging.INFO, stream=sys.stdout, format=\"%(levelname)s: %(message)s\", force=True)\n\nn = int(input())\n# ваш код\n",
+  "hints": [
+    "Прочитайте n, затем в цикле по n чисел.",
+    "Для отрицательного числа вызовите logging.warning.",
+    "Остальные числа добавляйте в сумму.",
+    "Текст предупреждения: пропущено и число.",
+    "После цикла — logging.info с суммой."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "3\n4\n-2\n5\n",
+        "expected_stdout": "WARNING: пропущено -2\nINFO: сумма 9\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "2\n-1\n-7\n",
+        "expected_stdout": "WARNING: пропущено -1\nWARNING: пропущено -7\nINFO: сумма 0\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "1\n0\n",
+        "expected_stdout": "INFO: сумма 0\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "0\n",
+        "expected_stdout": "INFO: сумма 0\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "import logging\nimport sys\n\nlogging.basicConfig(level=logging.INFO, stream=sys.stdout, format=\"%(levelname)s: %(message)s\", force=True)\n\nn = int(input())\ntotal = 0\nfor _ in range(n):\n    value = int(input())\n    if value < 0:\n        logging.warning(\"пропущено %d\", value)\n    else:\n        total += value\nlogging.info(\"сумма %d\", total)\n",
+  "explanation": "logging.warning и logging.info печатают строки с уровнем. Формат задан в basicConfig, поэтому достаточно написать только текст.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import logging\nimport sys\n\nlogging.basicConfig(level=logging.INFO, stream=sys.stdout, format=\"%(levelname)s: %(message)s\", force=True)\n\nn = int(input())\ntotal = 0\nfor _ in range(n):\n    value = int(input())\n    total += value\nlogging.info(\"сумма %d\", total)\n",
+      "why": "Отрицательные числа не пропускаются и не журналируются."
+    }
+  ]
+}

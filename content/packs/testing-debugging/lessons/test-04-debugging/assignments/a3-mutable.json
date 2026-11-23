@@ -1,0 +1,40 @@
+{
+  "id": "a3-mutable",
+  "type": "fix",
+  "title": "Общий список",
+  "statement": "Функция `add_item(item, items=[])` добавляет элемент в список и возвращает его. Программа должна напечатать `['a']` и `['b']`, но печатает `['a']` и `['a', 'b']`. Найдите причину и исправьте функцию.",
+  "goal": "Общий список",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "def add_item(item, items=[]):\n    items.append(item)\n    return items\n\n\nprint(add_item(\"a\"))\nprint(add_item(\"b\"))\n",
+  "hints": [
+    "Значение по умолчанию создаётся один раз — при определении функции.",
+    "Список-значение по умолчанию общий для всех вызовов.",
+    "Нужно создавать новый список при каждом вызове без аргумента.",
+    "Типичный приём: значение по умолчанию None.",
+    "Внутри: если items равно None — создать пустой список."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "",
+        "expected_stdout": "['a']\n['b']\n"
+      }
+    ]
+  },
+  "solution": "def add_item(item, items=None):\n    if items is None:\n        items = []\n    items.append(item)\n    return items\n\n\nprint(add_item(\"a\"))\nprint(add_item(\"b\"))\n",
+  "explanation": "Значение по умолчанию вычисляется один раз. Изменяемое значение разделяется между вызовами; безопасно использовать None и создавать объект внутри.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def add_item(item, items=[]):\n    items.append(item)\n    return items\n\n\nprint(add_item(\"a\"))\nprint(add_item(\"b\"))\n",
+      "why": "Исходная версия: список общий для всех вызовов."
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "id": "a5-runner",
+  "type": "complete",
+  "title": "Свой мини-прогон тестов",
+  "statement": "Первая строка ввода — число `n`. Далее `n` строк `x ожидаемое`. Функция `square(x)` уже написана. Для каждой строки напечатайте `ок x`, если `square(x)` равно ожидаемому, иначе `ошибка x: получено A, ожидалось B`. В конце напечатайте `пройдено K из N`.",
+  "goal": "Свой мини-прогон тестов",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "def square(x):\n    return x * x\n\n\n# прочитайте n и проверьте n случаев\n",
+  "hints": [
+    "Прочитайте n, затем в цикле n строк.",
+    "В каждой строке два числа: x и ожидаемое.",
+    "Сравните square(x) с ожидаемым значением.",
+    "Считайте количество пройденных проверок в счётчике.",
+    "После цикла напечатайте итог."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "3\n2 4\n3 9\n4 15\n",
+        "expected_stdout": "ок 2\nок 3\nошибка 4: получено 16, ожидалось 15\nпройдено 2 из 3\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "1\n5 25\n",
+        "expected_stdout": "ок 5\nпройдено 1 из 1\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "2\n0 0\n-3 -9\n",
+        "expected_stdout": "ок 0\nошибка -3: получено 9, ожидалось -9\nпройдено 1 из 2\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "0\n",
+        "expected_stdout": "пройдено 0 из 0\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "def square(x):\n    return x * x\n\n\nn = int(input())\npassed = 0\nfor _ in range(n):\n    x, expected = (int(v) for v in input().split())\n    got = square(x)\n    if got == expected:\n        print(\"ок\", x)\n        passed += 1\n    else:\n        print(f\"ошибка {x}: получено {got}, ожидалось {expected}\")\nprint(f\"пройдено {passed} из {n}\")\n",
+  "explanation": "Это тестовый «раннер» в миниатюре: данные в таблице, функция под проверкой, отчёт о каждом расхождении и итог.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def square(x):\n    return x * x\n\n\nn = int(input())\nfor _ in range(n):\n    x, expected = (int(v) for v in input().split())\n    print(\"ок\", x)\nprint(f\"пройдено {n} из {n}\")\n",
+      "why": "Расхождения не проверяются."
+    }
+  ]
+}

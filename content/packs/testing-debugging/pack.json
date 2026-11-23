@@ -1,0 +1,32 @@
+{
+  "id": "testing-debugging",
+  "version": "0.1.0",
+  "stage": 12,
+  "title": "Тестирование и отладка",
+  "description": "assert и unittest, граничные случаи, чтение traceback, отладка print и logging — тесты, которые ловят настоящие ошибки.",
+  "language": "python",
+  "minAppVersion": 1,
+  "requiresPacks": [
+    "python-core"
+  ],
+  "lessons": [
+    "test-01-assert",
+    "test-02-unittest",
+    "test-03-edge-cases",
+    "test-04-debugging"
+  ],
+  "skills": {
+    "test.assert": "assert и AssertionError",
+    "test.table": "Таблица тестов",
+    "test.mutation": "Тест ловит ошибку",
+    "test.unittest": "unittest",
+    "test.raises": "assertRaises",
+    "test.setup": "setUp и независимость тестов",
+    "test.boundary": "Граничные значения",
+    "test.classes": "Классы эквивалентности",
+    "test.special": "Особые случаи",
+    "debug.traceback": "Чтение ошибок",
+    "debug.logging": "logging",
+    "debug.traps": "Классические ловушки"
+  }
+}

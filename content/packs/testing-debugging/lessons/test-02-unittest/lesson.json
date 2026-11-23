@@ -1,0 +1,45 @@
+{
+  "id": "test-02-unittest",
+  "title": "unittest",
+  "goal": "Писать тесты на unittest: TestCase, assert-методы, assertRaises, setUp.",
+  "skills": [
+    "test.unittest",
+    "test.raises",
+    "test.setup"
+  ],
+  "prerequisites": [
+    "test-01-assert"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-result.json",
+    "assignments/a2-palindrome-tests.json",
+    "assignments/a3-raises.json",
+    "assignments/a4-setup.json",
+    "assignments/a5-almost.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Забывают начать имя метода с test",
+      "fix": "unittest запускает только методы с префиксом test — иначе проверок не будет вовсе."
+    },
+    {
+      "mistake": "Пишут тесты, зависящие друг от друга",
+      "fix": "Каждому тесту — своё состояние через setUp."
+    },
+    {
+      "mistake": "Сравнивают дроби через assertEqual",
+      "fix": "Для дробей используйте assertAlmostEqual."
+    },
+    {
+      "mistake": "Путают провал и ошибку",
+      "fix": "Провал — неверный результат, ошибка — исключение в коде."
+    }
+  ]
+}

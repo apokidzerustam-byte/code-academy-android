@@ -1,0 +1,79 @@
+{
+  "id": "a2-discount-tests",
+  "type": "write",
+  "title": "Тесты на границах скидки",
+  "statement": "Скидка: до 1000 — 0%, от 1000 до 5000 (не включая) — 5%, от 5000 — 10%. В программе спрятаны версии `good`, `bug1`…`bug4` функции `discount`. Допишите в `tests(discount)` проверки `assert`, чтобы для `good` печаталось `PASS`, а для каждой неверной версии — `FAIL`.",
+  "goal": "Тесты на границах скидки",
+  "input": "Название версии: good, bug1, bug2, bug3 или bug4.",
+  "expectedResult": "PASS для верной версии и FAIL для каждой неверной.",
+  "constraints": [],
+  "starterCode": "def good(total):\n    if total >= 5000:\n        return 10\n    if total >= 1000:\n        return 5\n    return 0\n\n\ndef bug1(total):\n    if total >= 5000:\n        return 10\n    if total > 1000:\n        return 5\n    return 0\n\n\ndef bug2(total):\n    if total > 5000:\n        return 10\n    if total >= 1000:\n        return 5\n    return 0\n\n\ndef bug3(total):\n    if total >= 4900:\n        return 10\n    if total >= 1000:\n        return 5\n    return 0\n\n\ndef bug4(total):\n    if total >= 5000:\n        return 10\n    if total >= 999:\n        return 5\n    return 0\n\n\ndef tests(discount):\n    pass\n\n\nimpls = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3, \"bug4\": bug4}\nimpl = impls[input().strip()]\ntry:\n    tests(impl)\n    print(\"PASS\")\nexcept AssertionError:\n    print(\"FAIL\")\n",
+  "hints": [
+    "Для каждой границы проверьте значение чуть меньше и ровно на границе.",
+    "Границ две: 1000 и 5000.",
+    "Берите числа 999, 1000 и 4999, 5000.",
+    "Каждая ошибка меняет поведение на одной границе.",
+    "Четыре утверждения достаточно."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "good\n",
+        "expected_stdout": "PASS\n"
+      },
+      {
+        "id": "v2",
+        "stdin": "bug1\n",
+        "expected_stdout": "FAIL\n"
+      },
+      {
+        "id": "h3",
+        "stdin": "bug2\n",
+        "expected_stdout": "FAIL\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "bug3\n",
+        "expected_stdout": "FAIL\n",
+        "hidden": true
+      },
+      {
+        "id": "h5",
+        "stdin": "bug4\n",
+        "expected_stdout": "FAIL\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "def good(total):\n    if total >= 5000:\n        return 10\n    if total >= 1000:\n        return 5\n    return 0\n\n\ndef bug1(total):\n    if total >= 5000:\n        return 10\n    if total > 1000:\n        return 5\n    return 0\n\n\ndef bug2(total):\n    if total > 5000:\n        return 10\n    if total >= 1000:\n        return 5\n    return 0\n\n\ndef bug3(total):\n    if total >= 4900:\n        return 10\n    if total >= 1000:\n        return 5\n    return 0\n\n\ndef bug4(total):\n    if total >= 5000:\n        return 10\n    if total >= 999:\n        return 5\n    return 0\n\n\ndef tests(discount):\n    assert discount(999) == 0\n    assert discount(1000) == 5\n    assert discount(4999) == 5\n    assert discount(5000) == 10\n\n\nimpls = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3, \"bug4\": bug4}\nimpl = impls[input().strip()]\ntry:\n    tests(impl)\n    print(\"PASS\")\nexcept AssertionError:\n    print(\"FAIL\")\n",
+  "explanation": "Граничные значения ловят замены > и >= и сдвиги порогов. Значения в «середине» классов этих ошибок не видят.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def good(total):\n    if total >= 5000:\n        return 10\n    if total >= 1000:\n        return 5\n    return 0\n\n\ndef bug1(total):\n    if total >= 5000:\n        return 10\n    if total > 1000:\n        return 5\n    return 0\n\n\ndef bug2(total):\n    if total > 5000:\n        return 10\n    if total >= 1000:\n        return 5\n    return 0\n\n\ndef bug3(total):\n    if total >= 4900:\n        return 10\n    if total >= 1000:\n        return 5\n    return 0\n\n\ndef bug4(total):\n    if total >= 5000:\n        return 10\n    if total >= 999:\n        return 5\n    return 0\n\n\ndef tests(discount):\n    assert discount(500) == 0\n    assert discount(3000) == 5\n    assert discount(9000) == 10\n\n\nimpls = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3, \"bug4\": bug4}\nimpl = impls[input().strip()]\ntry:\n    tests(impl)\n    print(\"PASS\")\nexcept AssertionError:\n    print(\"FAIL\")\n",
+      "why": "Только «середины» классов: границы не проверены."
+    },
+    {
+      "code": "def good(total):\n    if total >= 5000:\n        return 10\n    if total >= 1000:\n        return 5\n    return 0\n\n\ndef bug1(total):\n    if total >= 5000:\n        return 10\n    if total > 1000:\n        return 5\n    return 0\n\n\ndef bug2(total):\n    if total > 5000:\n        return 10\n    if total >= 1000:\n        return 5\n    return 0\n\n\ndef bug3(total):\n    if total >= 4900:\n        return 10\n    if total >= 1000:\n        return 5\n    return 0\n\n\ndef bug4(total):\n    if total >= 5000:\n        return 10\n    if total >= 999:\n        return 5\n    return 0\n\n\ndef tests(discount):\n    assert discount(1000) == 5\n    assert discount(4999) == 5\n    assert discount(5000) == 10\n\n\nimpls = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3, \"bug4\": bug4}\nimpl = impls[input().strip()]\ntry:\n    tests(impl)\n    print(\"PASS\")\nexcept AssertionError:\n    print(\"FAIL\")\n",
+      "why": "Нет проверки 999: bug4 не пойман."
+    },
+    {
+      "code": "def good(total):\n    if total >= 5000:\n        return 10\n    if total >= 1000:\n        return 5\n    return 0\n\n\ndef bug1(total):\n    if total >= 5000:\n        return 10\n    if total > 1000:\n        return 5\n    return 0\n\n\ndef bug2(total):\n    if total > 5000:\n        return 10\n    if total >= 1000:\n        return 5\n    return 0\n\n\ndef bug3(total):\n    if total >= 4900:\n        return 10\n    if total >= 1000:\n        return 5\n    return 0\n\n\ndef bug4(total):\n    if total >= 5000:\n        return 10\n    if total >= 999:\n        return 5\n    return 0\n\n\ndef tests(discount):\n    assert discount(999) == 0\n    assert discount(1000) == 5\n    assert discount(5000) == 10\n\n\nimpls = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3, \"bug4\": bug4}\nimpl = impls[input().strip()]\ntry:\n    tests(impl)\n    print(\"PASS\")\nexcept AssertionError:\n    print(\"FAIL\")\n",
+      "why": "Нет проверки 4999: bug3 не пойман."
+    },
+    {
+      "code": "def good(total):\n    if total >= 5000:\n        return 10\n    if total >= 1000:\n        return 5\n    return 0\n\n\ndef bug1(total):\n    if total >= 5000:\n        return 10\n    if total > 1000:\n        return 5\n    return 0\n\n\ndef bug2(total):\n    if total > 5000:\n        return 10\n    if total >= 1000:\n        return 5\n    return 0\n\n\ndef bug3(total):\n    if total >= 4900:\n        return 10\n    if total >= 1000:\n        return 5\n    return 0\n\n\ndef bug4(total):\n    if total >= 5000:\n        return 10\n    if total >= 999:\n        return 5\n    return 0\n\n\ndef tests(discount):\n    assert discount(999) == 0\n    assert discount(1000) == 5\n    assert discount(4999) == 5\n\n\nimpls = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3, \"bug4\": bug4}\nimpl = impls[input().strip()]\ntry:\n    tests(impl)\n    print(\"PASS\")\nexcept AssertionError:\n    print(\"FAIL\")\n",
+      "why": "Нет границы 5000: bug2 не пойман."
+    },
+    {
+      "code": "def good(total):\n    if total >= 5000:\n        return 10\n    if total >= 1000:\n        return 5\n    return 0\n\n\ndef bug1(total):\n    if total >= 5000:\n        return 10\n    if total > 1000:\n        return 5\n    return 0\n\n\ndef bug2(total):\n    if total > 5000:\n        return 10\n    if total >= 1000:\n        return 5\n    return 0\n\n\ndef bug3(total):\n    if total >= 4900:\n        return 10\n    if total >= 1000:\n        return 5\n    return 0\n\n\ndef bug4(total):\n    if total >= 5000:\n        return 10\n    if total >= 999:\n        return 5\n    return 0\n\n\ndef tests(discount):\n    assert discount(1000) == 0\n\n\nimpls = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3, \"bug4\": bug4}\nimpl = impls[input().strip()]\ntry:\n    tests(impl)\n    print(\"PASS\")\nexcept AssertionError:\n    print(\"FAIL\")\n",
+      "why": "Тест неверен: падает на правильной версии."
+    }
+  ]
+}

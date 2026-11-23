@@ -1,0 +1,79 @@
+{
+  "id": "a2-require",
+  "type": "function",
+  "title": "Обязательная настройка",
+  "statement": "Напишите `require(env, name)`: `env` — словарь переменных. Если `name` есть и значение не пустое — верните его. Иначе возбудите `KeyError` с текстом `нужна переменная NAME`.",
+  "goal": "Обязательная настройка",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Получите значение по имени без исключения.",
+    "Метод get вернёт None, если ключа нет.",
+    "Пустое значение тоже считается отсутствием.",
+    "Проверка: if not value.",
+    "Исключение: raise KeyError с понятным текстом."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "require",
+    "cases": [
+      {
+        "args": [
+          {
+            "API_KEY": "abc"
+          },
+          "API_KEY"
+        ],
+        "id": "v1",
+        "expected": "abc"
+      },
+      {
+        "args": [
+          {},
+          "API_KEY"
+        ],
+        "expected_error": "KeyError",
+        "id": "v2"
+      },
+      {
+        "args": [
+          {
+            "A": "1",
+            "B": "2"
+          },
+          "B"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "2"
+      },
+      {
+        "args": [
+          {
+            "A": ""
+          },
+          "A"
+        ],
+        "expected_error": "KeyError",
+        "id": "h4",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "def require(env, name):\n    value = env.get(name)\n    if not value:\n        raise KeyError(f\"нужна переменная {name}\")\n    return value\n",
+  "explanation": "Обязательный секрет лучше потребовать при старте: ошибка сразу покажет, чего не хватает.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def require(env, name):\n    return env[name]\n",
+      "why": "Пустое значение принимается."
+    },
+    {
+      "code": "def require(env, name):\n    return env.get(name, \"\")\n",
+      "why": "Отсутствие переменной не вызывает ошибку."
+    }
+  ]
+}

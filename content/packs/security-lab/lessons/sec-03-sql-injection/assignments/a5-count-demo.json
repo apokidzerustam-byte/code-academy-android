@@ -1,0 +1,41 @@
+{
+  "id": "a5-count-demo",
+  "type": "predict",
+  "title": "Склейка против параметра",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Склейка против параметра",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "import sqlite3\n\nconn = sqlite3.connect(\":memory:\")\nconn.execute(\"CREATE TABLE users (name TEXT, role TEXT)\")\nconn.executemany(\"INSERT INTO users VALUES (?, ?)\", [(\"anna\", \"admin\"), (\"boris\", \"user\"), (\"clara\", \"user\")])\n\n\n\ndef bad(role):\n    return len(conn.execute(f\"SELECT name FROM users WHERE role = '{role}'\").fetchall())\n\n\ndef good(role):\n    return len(conn.execute(\"SELECT name FROM users WHERE role = ?\", (role,)).fetchall())\n\n\nprint(bad(\"user\"), good(\"user\"))\nprint(bad(\"x' OR '1'='1\"), good(\"x' OR '1'='1\"))\n",
+  "hints": [
+    "В таблице три пользователя: роль admin у одного, user у двоих.",
+    "Для «user» обе функции вернут 2.",
+    "Склеенный запрос с подозрительным значением содержит условие, истинное всегда.",
+    "Он вернёт все 3 записи.",
+    "Параметризованный запрос ищет роль с таким названием буквально: 0."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "2 2\n3 0\n"
+  },
+  "solution": "2 2\n3 0\n",
+  "explanation": "Склеенный запрос меняет смысл условия; параметризованный всегда ищет значение буквально.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "2 2\n0 0",
+      "answer": "2 2\n0 0",
+      "why": "При склейке условие «1=1» истинно для всех трёх строк."
+    },
+    {
+      "code": "2 2\n3 3",
+      "answer": "2 2\n3 3",
+      "why": "Параметризованный запрос ищет роль буквально и ничего не находит."
+    }
+  ]
+}

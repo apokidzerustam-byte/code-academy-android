@@ -1,0 +1,69 @@
+{
+  "id": "a2-palindrome-tests",
+  "type": "write",
+  "title": "Тесты на палиндром",
+  "statement": "Функция `is_palindrome(s)` определяет, читается ли строка одинаково слева направо и справа налево **без учёта регистра, пробелов и знаков препинания**. В программе спрятаны версии `good`, `bug1`, `bug2`, `bug3`. Допишите методы в класс `Tests` (используйте `impl`) так, чтобы для `good` выводилось `PASS`, а для каждой неверной версии — `FAIL`.",
+  "goal": "Тесты на палиндром",
+  "input": "Название версии: good, bug1, bug2 или bug3.",
+  "expectedResult": "PASS для верной версии и FAIL для каждой неверной.",
+  "constraints": [],
+  "starterCode": "import unittest\n\n\ndef good(s):\n    t = \"\".join(c.lower() for c in s if c.isalnum())\n    return t == t[::-1]\n\n\ndef bug1(s):\n    t = \"\".join(c for c in s if c.isalnum())\n    return t == t[::-1]\n\n\ndef bug2(s):\n    t = s.lower()\n    return t == t[::-1]\n\n\ndef bug3(s):\n    t = \"\".join(c.lower() for c in s if c.isalnum())\n    return bool(t) and t == t[::-1]\n\n\nimpl = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3}[input().strip()]\n\n\nclass Tests(unittest.TestCase):\n    def test_todo(self):\n        pass\n\n\nresult = unittest.TestResult()\nunittest.defaultTestLoader.loadTestsFromTestCase(Tests).run(result)\nprint(\"PASS\" if result.wasSuccessful() else \"FAIL\")\n",
+  "hints": [
+    "Сначала запустите программу со входом good: должно быть PASS.",
+    "Каждая неверная версия ломается на своём виде входа.",
+    "Проверьте строку с заглавными буквами, строку с пробелами и знаками, и пустую строку.",
+    "Нужен и один отрицательный пример: строка, которая не палиндром.",
+    "Один метод test_… может содержать несколько проверок, но удобнее разделять."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "good\n",
+        "expected_stdout": "PASS\n"
+      },
+      {
+        "id": "v2",
+        "stdin": "bug1\n",
+        "expected_stdout": "FAIL\n"
+      },
+      {
+        "id": "h3",
+        "stdin": "bug2\n",
+        "expected_stdout": "FAIL\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "bug3\n",
+        "expected_stdout": "FAIL\n",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "import unittest\n\n\ndef good(s):\n    t = \"\".join(c.lower() for c in s if c.isalnum())\n    return t == t[::-1]\n\n\ndef bug1(s):\n    t = \"\".join(c for c in s if c.isalnum())\n    return t == t[::-1]\n\n\ndef bug2(s):\n    t = s.lower()\n    return t == t[::-1]\n\n\ndef bug3(s):\n    t = \"\".join(c.lower() for c in s if c.isalnum())\n    return bool(t) and t == t[::-1]\n\n\nimpl = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3}[input().strip()]\n\n\nclass Tests(unittest.TestCase):\n    def test_simple(self):\n        self.assertTrue(impl(\"level\"))\n        self.assertFalse(impl(\"hello\"))\n\n    def test_case(self):\n        self.assertTrue(impl(\"Level\"))\n\n    def test_punctuation(self):\n        self.assertTrue(impl(\"А роза упала на лапу Азора\"))\n        self.assertTrue(impl(\"Madam, I'm Adam\"))\n\n    def test_empty(self):\n        self.assertTrue(impl(\"\"))\n\n\nresult = unittest.TestResult()\nunittest.defaultTestLoader.loadTestsFromTestCase(Tests).run(result)\nprint(\"PASS\" if result.wasSuccessful() else \"FAIL\")\n",
+  "explanation": "Хорошие тесты покрывают разные классы входов: обычный, с другим регистром, с пробелами и знаками, пустой. Каждый класс «убивает» свой баг.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import unittest\n\n\ndef good(s):\n    t = \"\".join(c.lower() for c in s if c.isalnum())\n    return t == t[::-1]\n\n\ndef bug1(s):\n    t = \"\".join(c for c in s if c.isalnum())\n    return t == t[::-1]\n\n\ndef bug2(s):\n    t = s.lower()\n    return t == t[::-1]\n\n\ndef bug3(s):\n    t = \"\".join(c.lower() for c in s if c.isalnum())\n    return bool(t) and t == t[::-1]\n\n\nimpl = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3}[input().strip()]\n\n\nclass Tests(unittest.TestCase):\n    def test_simple(self):\n        self.assertTrue(impl(\"level\"))\n        self.assertFalse(impl(\"hello\"))\n\n\nresult = unittest.TestResult()\nunittest.defaultTestLoader.loadTestsFromTestCase(Tests).run(result)\nprint(\"PASS\" if result.wasSuccessful() else \"FAIL\")\n",
+      "why": "Не проверены регистр, знаки и пустая строка."
+    },
+    {
+      "code": "import unittest\n\n\ndef good(s):\n    t = \"\".join(c.lower() for c in s if c.isalnum())\n    return t == t[::-1]\n\n\ndef bug1(s):\n    t = \"\".join(c for c in s if c.isalnum())\n    return t == t[::-1]\n\n\ndef bug2(s):\n    t = s.lower()\n    return t == t[::-1]\n\n\ndef bug3(s):\n    t = \"\".join(c.lower() for c in s if c.isalnum())\n    return bool(t) and t == t[::-1]\n\n\nimpl = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3}[input().strip()]\n\n\nclass Tests(unittest.TestCase):\n    def test_a(self):\n        self.assertTrue(impl(\"level\"))\n        self.assertFalse(impl(\"hello\"))\n        self.assertTrue(impl(\"Level\"))\n        self.assertTrue(impl(\"Madam, I'm Adam\"))\n\n\nresult = unittest.TestResult()\nunittest.defaultTestLoader.loadTestsFromTestCase(Tests).run(result)\nprint(\"PASS\" if result.wasSuccessful() else \"FAIL\")\n",
+      "why": "Нет проверки пустой строки: bug3 не пойман."
+    },
+    {
+      "code": "import unittest\n\n\ndef good(s):\n    t = \"\".join(c.lower() for c in s if c.isalnum())\n    return t == t[::-1]\n\n\ndef bug1(s):\n    t = \"\".join(c for c in s if c.isalnum())\n    return t == t[::-1]\n\n\ndef bug2(s):\n    t = s.lower()\n    return t == t[::-1]\n\n\ndef bug3(s):\n    t = \"\".join(c.lower() for c in s if c.isalnum())\n    return bool(t) and t == t[::-1]\n\n\nimpl = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3}[input().strip()]\n\n\nclass Tests(unittest.TestCase):\n    def test_a(self):\n        self.assertTrue(impl(\"level\"))\n        self.assertTrue(impl(\"Level\"))\n        self.assertTrue(impl(\"\"))\n        self.assertFalse(impl(\"hello\"))\n\n\nresult = unittest.TestResult()\nunittest.defaultTestLoader.loadTestsFromTestCase(Tests).run(result)\nprint(\"PASS\" if result.wasSuccessful() else \"FAIL\")\n",
+      "why": "Нет строк с пробелами и знаками: bug2 не пойман."
+    },
+    {
+      "code": "import unittest\n\n\ndef good(s):\n    t = \"\".join(c.lower() for c in s if c.isalnum())\n    return t == t[::-1]\n\n\ndef bug1(s):\n    t = \"\".join(c for c in s if c.isalnum())\n    return t == t[::-1]\n\n\ndef bug2(s):\n    t = s.lower()\n    return t == t[::-1]\n\n\ndef bug3(s):\n    t = \"\".join(c.lower() for c in s if c.isalnum())\n    return bool(t) and t == t[::-1]\n\n\nimpl = {\"good\": good, \"bug1\": bug1, \"bug2\": bug2, \"bug3\": bug3}[input().strip()]\n\n\nclass Tests(unittest.TestCase):\n    def test_a(self):\n        self.assertFalse(impl(\"level\"))\n\n\nresult = unittest.TestResult()\nunittest.defaultTestLoader.loadTestsFromTestCase(Tests).run(result)\nprint(\"PASS\" if result.wasSuccessful() else \"FAIL\")\n",
+      "why": "Тест неверен: на правильной версии падает."
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "id": "a4-clamp",
+  "type": "function",
+  "title": "Сначала тесты: clamp",
+  "statement": "Тесты уже написаны — осталось написать функцию. `clamp(x, low, high)` возвращает `x`, если он между `low` и `high`; иначе — ближайшую границу.\n\n```python\nassert clamp(5, 0, 10) == 5\nassert clamp(-3, 0, 10) == 0\nassert clamp(99, 0, 10) == 10\n```",
+  "goal": "Сначала тесты: clamp",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Есть три случая: слишком мало, слишком много, в норме.",
+    "Если x меньше нижней границы — вернуть нижнюю границу.",
+    "Если больше верхней — вернуть верхнюю.",
+    "Иначе вернуть сам x.",
+    "Можно через if или через min и max."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "clamp",
+    "cases": [
+      {
+        "args": [
+          5,
+          0,
+          10
+        ],
+        "id": "v1",
+        "expected": 5
+      },
+      {
+        "args": [
+          -3,
+          0,
+          10
+        ],
+        "id": "v2",
+        "expected": 0
+      },
+      {
+        "args": [
+          99,
+          0,
+          10
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 10
+      },
+      {
+        "args": [
+          0,
+          0,
+          10
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          10,
+          0,
+          10
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 10
+      },
+      {
+        "args": [
+          -5,
+          -10,
+          -1
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": -5
+      },
+      {
+        "args": [
+          7,
+          7,
+          7
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": 7
+      }
+    ]
+  },
+  "solution": "def clamp(x, low, high):\n    if x < low:\n        return low\n    if x > high:\n        return high\n    return x\n",
+  "explanation": "Тесты описали поведение до кода. Три ветки if — самая прямая реализация; граничные значения (равны low или high) возвращаются как есть.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def clamp(x, low, high):\n    return max(low, x)\n",
+      "why": "Верхняя граница не учитывается."
+    },
+    {
+      "code": "def clamp(x, low, high):\n    if x < low:\n        return low\n    if x >= high:\n        return high - 1\n    return x\n",
+      "why": "На границе возвращается high - 1."
+    },
+    {
+      "code": "def clamp(x, low, high):\n    return min(high, x)\n",
+      "why": "Нижняя граница не учитывается."
+    }
+  ]
+}

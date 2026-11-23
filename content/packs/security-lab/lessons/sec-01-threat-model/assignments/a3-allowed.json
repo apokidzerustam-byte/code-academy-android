@@ -1,0 +1,99 @@
+{
+  "id": "a3-allowed",
+  "type": "function",
+  "title": "Матрица доступа",
+  "statement": "Права ролей: `admin` — читать, писать, удалять; `editor` — читать, писать; `viewer` — только читать. Напишите `allowed(role, action)`: верните `True`, только если роль известна и действие ей разрешено. Неизвестные роли и действия — `False`.",
+  "goal": "Матрица доступа",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Сохраните права ролей в словаре: роль → множество действий.",
+    "Для роли берите множество прав.",
+    "Неизвестная роль — пустое множество.",
+    "Проверьте, входит ли действие в множество.",
+    "Метод словаря .get(роль, set()) решает вопрос неизвестных ролей."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "allowed",
+    "cases": [
+      {
+        "args": [
+          "admin",
+          "delete"
+        ],
+        "id": "v1",
+        "expected": true
+      },
+      {
+        "args": [
+          "viewer",
+          "write"
+        ],
+        "id": "v2",
+        "expected": false
+      },
+      {
+        "args": [
+          "editor",
+          "write"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": true
+      },
+      {
+        "args": [
+          "viewer",
+          "read"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": true
+      },
+      {
+        "args": [
+          "guest",
+          "read"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          "admin",
+          "fly"
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          "editor",
+          "delete"
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": false
+      }
+    ]
+  },
+  "solution": "RIGHTS = {\n    \"admin\": {\"read\", \"write\", \"delete\"},\n    \"editor\": {\"read\", \"write\"},\n    \"viewer\": {\"read\"},\n}\n\n\ndef allowed(role, action):\n    return action in RIGHTS.get(role, set())\n",
+  "explanation": "Белый список: разрешено только то, что записано явно. Неизвестные роли получают пустой набор прав.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def allowed(role, action):\n    return role == \"admin\" or action == \"read\"\n",
+      "why": "Editor не может писать, а неизвестная роль читает."
+    },
+    {
+      "code": "RIGHTS = {\"admin\": {\"read\", \"write\", \"delete\"}, \"editor\": {\"read\", \"write\", \"delete\"}, \"viewer\": {\"read\"}}\n\n\ndef allowed(role, action):\n    return action in RIGHTS.get(role, set())\n",
+      "why": "Редактору выдано право удаления."
+    }
+  ]
+}

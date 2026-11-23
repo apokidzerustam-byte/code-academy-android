@@ -1,0 +1,81 @@
+{
+  "id": "a2-find-role",
+  "type": "fix",
+  "title": "Исправьте поиск роли",
+  "statement": "Функция ищет роль пользователя, склеивая запрос. Перепишите её через **параметр** (`?`), чтобы вводы вроде `x' OR '1'='1` ничего не находили, а имена с апострофом работали.",
+  "goal": "Исправьте поиск роли",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "import sqlite3\n\nconn = sqlite3.connect(\":memory:\")\nconn.execute(\"CREATE TABLE users (name TEXT, role TEXT)\")\nconn.executemany(\"INSERT INTO users VALUES (?, ?)\", [(\"anna\", \"admin\"), (\"boris\", \"user\"), (\"clara\", \"user\")])\n\n\n\ndef find_role(name):\n    row = conn.execute(f\"SELECT role FROM users WHERE name = '{name}'\").fetchone()\n    return row[0] if row else None\n",
+  "hints": [
+    "Проблема — f-строка внутри запроса.",
+    "В запросе на месте значения должен стоять знак вопроса.",
+    "Значение передаётся вторым аргументом execute.",
+    "Второй аргумент — кортеж, даже из одного элемента.",
+    "Запятая после имени делает кортеж: (name,)."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "find_role",
+    "cases": [
+      {
+        "args": [
+          "boris"
+        ],
+        "id": "v1",
+        "expected": "user"
+      },
+      {
+        "args": [
+          "x' OR '1'='1"
+        ],
+        "id": "v2",
+        "expected": null
+      },
+      {
+        "args": [
+          "nobody"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": null
+      },
+      {
+        "args": [
+          "anna"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "admin"
+      },
+      {
+        "args": [
+          "o'neil"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": null
+      },
+      {
+        "args": [
+          "clara' --"
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": null
+      }
+    ]
+  },
+  "solution": "import sqlite3\n\nconn = sqlite3.connect(\":memory:\")\nconn.execute(\"CREATE TABLE users (name TEXT, role TEXT)\")\nconn.executemany(\"INSERT INTO users VALUES (?, ?)\", [(\"anna\", \"admin\"), (\"boris\", \"user\"), (\"clara\", \"user\")])\n\n\n\ndef find_role(name):\n    row = conn.execute(\"SELECT role FROM users WHERE name = ?\", (name,)).fetchone()\n    return row[0] if row else None\n",
+  "explanation": "Параметр передаётся отдельно от текста запроса, поэтому кавычки и ключевые слова во вводе остаются обычными символами.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import sqlite3\n\nconn = sqlite3.connect(\":memory:\")\nconn.execute(\"CREATE TABLE users (name TEXT, role TEXT)\")\nconn.executemany(\"INSERT INTO users VALUES (?, ?)\", [(\"anna\", \"admin\"), (\"boris\", \"user\"), (\"clara\", \"user\")])\n\n\n\ndef find_role(name):\n    row = conn.execute(f\"SELECT role FROM users WHERE name = '{name}'\").fetchone()\n    return row[0] if row else None\n",
+      "why": "Склейка строк: инъекция возвращает первую запись."
+    }
+  ]
+}

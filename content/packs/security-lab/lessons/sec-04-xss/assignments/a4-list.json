@@ -1,0 +1,82 @@
+{
+  "id": "a4-list",
+  "type": "function",
+  "title": "Список элементов",
+  "statement": "Напишите `html_list(items)`: верните `<ul>` с элементом `<li>…</li>` на каждое значение списка (текст экранируйте), без пробелов и переносов: `<ul><li>a</li><li>b</li></ul>`. Для пустого списка — `<ul></ul>`.",
+  "goal": "Список элементов",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Каждый элемент оборачивается в <li>.",
+    "Содержимое элемента экранируйте.",
+    "Соберите все <li> в одну строку через join.",
+    "Оберните результат в <ul>…</ul>.",
+    "Для пустого списка получится <ul></ul> автоматически."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "html_list",
+    "cases": [
+      {
+        "args": [
+          [
+            "a",
+            "b"
+          ]
+        ],
+        "id": "v1",
+        "expected": "<ul><li>a</li><li>b</li></ul>"
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": "<ul></ul>"
+      },
+      {
+        "args": [
+          [
+            "<b>x</b>",
+            "1 < 2"
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "<ul><li>&lt;b&gt;x&lt;/b&gt;</li><li>1 &lt; 2</li></ul>"
+      },
+      {
+        "args": [
+          [
+            "Tom & Jerry"
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "<ul><li>Tom &amp; Jerry</li></ul>"
+      },
+      {
+        "args": [
+          [
+            "\"q\""
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": "<ul><li>&quot;q&quot;</li></ul>"
+      }
+    ]
+  },
+  "solution": "import html\n\n\ndef html_list(items):\n    inner = \"\".join(f\"<li>{html.escape(item)}</li>\" for item in items)\n    return f\"<ul>{inner}</ul>\"\n",
+  "explanation": "join склеивает строки без разделителей; экранирование применяется к каждому элементу отдельно.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def html_list(items):\n    return \"<ul>\" + \"\".join(f\"<li>{item}</li>\" for item in items) + \"</ul>\"\n",
+      "why": "Элементы не экранируются."
+    }
+  ]
+}

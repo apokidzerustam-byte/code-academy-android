@@ -1,0 +1,41 @@
+{
+  "id": "a2-errors",
+  "type": "predict",
+  "title": "Тип ошибки",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Тип ошибки",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "tests = [\n    lambda: [10, 20][2],\n    lambda: {\"x\": 1}[\"y\"],\n    lambda: int(\"12.5\"),\n    lambda: None.strip(),\n]\nfor t in tests:\n    try:\n        t()\n    except Exception as e:\n        print(type(e).__name__)\n",
+  "hints": [
+    "Четыре проверки — четыре строки вывода.",
+    "Индекс 2 в списке из двух элементов: IndexError.",
+    "Ключа «y» нет: KeyError.",
+    "int из строки с точкой: ValueError.",
+    "Метод у None: AttributeError."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "IndexError\nKeyError\nValueError\nAttributeError\n"
+  },
+  "solution": "IndexError\nKeyError\nValueError\nAttributeError\n",
+  "explanation": "Тип ошибки подсказывает причину: индекс, ключ, значение или отсутствующий атрибут.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "IndexError\nKeyError\nTypeError\nAttributeError",
+      "answer": "IndexError\nKeyError\nTypeError\nAttributeError",
+      "why": "int(\"12.5\") даёт ValueError, а не TypeError."
+    },
+    {
+      "code": "IndexError\nValueError\nKeyError\nAttributeError",
+      "answer": "IndexError\nValueError\nKeyError\nAttributeError",
+      "why": "Порядок строк соответствует порядку проверок."
+    }
+  ]
+}

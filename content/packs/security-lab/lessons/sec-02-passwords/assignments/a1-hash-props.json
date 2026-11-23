@@ -1,0 +1,46 @@
+{
+  "id": "a1-hash-props",
+  "type": "predict",
+  "title": "Свойства хеша",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Свойства хеша",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "import hashlib\n\n\ndef sha(text):\n    return hashlib.sha256(text.encode()).hexdigest()\n\nprint(sha(\"a\") == sha(\"a\"))\nprint(sha(\"a\") == sha(\"A\"))\nprint(len(sha(\"очень длинная строка \" * 100)))\nprint(sha(\"ab\") == sha(\"a\") + sha(\"b\"))\n",
+  "hints": [
+    "Одинаковый вход — одинаковый хеш.",
+    "Большая и малая буква — разные входы.",
+    "SHA-256 всегда даёт 64 шестнадцатеричных символа.",
+    "Хеш склейки строк — не склейка хешей.",
+    "Результат: True, False, 64, False."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "True\nFalse\n64\nFalse\n"
+  },
+  "solution": "True\nFalse\n64\nFalse\n",
+  "explanation": "У хеша фиксированная длина, он детерминирован и сильно меняется от малейшего изменения входа.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "True\nTrue\n64\nFalse",
+      "answer": "True\nTrue\n64\nFalse",
+      "why": "Регистр меняет хеш полностью."
+    },
+    {
+      "code": "True\nFalse\n64\nTrue",
+      "answer": "True\nFalse\n64\nTrue",
+      "why": "Хеш склейки не равен склейке хешей."
+    },
+    {
+      "code": "True\nFalse\n2100\nFalse",
+      "answer": "True\nFalse\n2100\nFalse",
+      "why": "Длина хеша не зависит от длины входа."
+    }
+  ]
+}

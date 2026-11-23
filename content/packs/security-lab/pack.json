@@ -1,0 +1,36 @@
+{
+  "id": "security-lab",
+  "version": "0.1.0",
+  "stage": 11,
+  "title": "Кибербезопасность: учебная лаборатория",
+  "description": "Модель угроз, хеширование паролей, SQL-инъекции и XSS на учебных примерах в безопасной песочнице, секреты и проверка ввода.",
+  "language": "python",
+  "minAppVersion": 1,
+  "requiresPacks": [
+    "python-core"
+  ],
+  "lessons": [
+    "sec-01-threat-model",
+    "sec-02-passwords",
+    "sec-03-sql-injection",
+    "sec-04-xss",
+    "sec-05-secrets-csrf"
+  ],
+  "skills": {
+    "sec.model": "Модель угроз",
+    "sec.access": "Контроль доступа",
+    "sec.validation": "Проверка входных данных",
+    "sec.hash": "Хеш-функции",
+    "sec.salt": "Соль",
+    "sec.pbkdf2": "pbkdf2_hmac",
+    "sec.injection": "SQL-инъекции",
+    "sec.params": "Параметризованные запросы",
+    "sec.whitelist": "Белый список имён",
+    "sec.xss": "XSS",
+    "sec.escape": "Экранирование вывода",
+    "sec.urls": "Проверка адресов",
+    "sec.secrets": "Секреты и окружение",
+    "sec.csrf": "CSRF",
+    "sec.hmac": "HMAC-токены"
+  }
+}

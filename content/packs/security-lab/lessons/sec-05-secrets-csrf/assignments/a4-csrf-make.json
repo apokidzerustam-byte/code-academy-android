@@ -1,0 +1,81 @@
+{
+  "id": "a4-csrf-make",
+  "type": "function",
+  "title": "Выдать CSRF-токен",
+  "statement": "Напишите `make_token(session_id, secret)`: верните `hmac.new(secret.encode(), session_id.encode(), hashlib.sha256).hexdigest()`.",
+  "goal": "Выдать CSRF-токен",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Токен получается из идентификатора сессии и секрета.",
+    "Для этого служит модуль hmac.",
+    "hmac.new принимает ключ, сообщение и алгоритм.",
+    "Ключ — секрет, сообщение — идентификатор сессии, оба в байтах.",
+    "Результат — hexdigest()."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "make_token",
+    "cases": [
+      {
+        "args": [
+          "session-1",
+          "s3cret"
+        ],
+        "id": "v1",
+        "expected": "14f6de24299b91835f7f59e29913c38ed876f46b58c67d997ae3d3646507c215"
+      },
+      {
+        "args": [
+          "session-2",
+          "s3cret"
+        ],
+        "id": "v2",
+        "expected": "1478d22f171b42830bd1f92f0f3adbb57ccfdb45c9f5ba7d9d7b985b4541419a"
+      },
+      {
+        "args": [
+          "session-1",
+          "other"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "3acb7afabcd584d4cade36ec9a4b74f70609e286bdb2c8e112453e4399cccfcf"
+      },
+      {
+        "args": [
+          "",
+          "k"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "8bb990c40a7d61cb97597a942125025be50ac8beb74436e3735b98893a7f6620"
+      },
+      {
+        "args": [
+          "сессия",
+          "секрет"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": "08b0a8d70fb1e545cbcadf83f4b01ed0517e88c320c639bf4b8818d2c50dd0ee"
+      }
+    ]
+  },
+  "solution": "import hashlib\nimport hmac\n\n\ndef make_token(session_id, secret):\n    return hmac.new(secret.encode(), session_id.encode(), hashlib.sha256).hexdigest()\n",
+  "explanation": "HMAC связывает токен с секретом сервера: без секрета подделать токен нельзя.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import hashlib\n\n\ndef make_token(session_id, secret):\n    return hashlib.sha256((session_id + secret).encode()).hexdigest()\n",
+      "why": "Не HMAC: другая конструкция."
+    },
+    {
+      "code": "import hashlib\nimport hmac\n\n\ndef make_token(session_id, secret):\n    return hmac.new(secret.encode(), session_id.encode(), hashlib.md5).hexdigest()\n",
+      "why": "Другой алгоритм хеширования."
+    }
+  ]
+}

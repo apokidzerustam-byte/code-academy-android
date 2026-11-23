@@ -1,0 +1,41 @@
+{
+  "id": "a1-assert",
+  "type": "predict",
+  "title": "Что напечатает проверка",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Что напечатает проверка",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "def double(x):\n    return x + x\n\nfor value, expected in [(2, 4), (5, 11), (0, 0)]:\n    try:\n        assert double(value) == expected\n        print(value, \"ок\")\n    except AssertionError:\n        print(value, \"упал\")\n",
+  "hints": [
+    "Для каждой пары вычислите double(value) и сравните с expected.",
+    "double(2) даёт 4, ожидалось 4.",
+    "double(5) даёт 10 — а ожидалось 11.",
+    "Упавший assert ловит except, цикл идёт дальше.",
+    "Для 0 функция возвращает 0: проверка проходит."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "2 ок\n5 упал\n0 ок\n"
+  },
+  "solution": "2 ок\n5 упал\n0 ок\n",
+  "explanation": "AssertionError перехвачен, поэтому цикл не останавливается: мы видим результат по каждому случаю.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "2 ок\n5 ок\n0 ок",
+      "answer": "2 ок\n5 ок\n0 ок",
+      "why": "Для 5 функция вернёт 10, а ожидается 11 — тест упадёт."
+    },
+    {
+      "code": "2 ок\n5 упал",
+      "answer": "2 ок\n5 упал",
+      "why": "Цикл продолжается и проверяет значение 0."
+    }
+  ]
+}

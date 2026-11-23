@@ -1,0 +1,160 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Когда данные становятся кодом",
+      "narration": "Инъекция возникает, когда данные пользователя попадают в команду и интерпретируются как её часть. Самый известный пример — SQL-инъекция. Программист склеивает текст запроса из строки и введённого значения, а пользователь вводит не имя, а кусочек SQL. Эта уязвимость много лет входит в списки самых опасных. Сегодня мы разберём её на игрушечной базе в памяти: с вымышленными данными и без доступа к чему-либо реальному. Цель — научиться писать запросы, которые не ломаются от чужого ввода.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "Данные пользователя **не должны** становиться частью текста команды",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "setup",
+      "title": "Учебная база",
+      "narration": "Создадим базу данных SQLite прямо в памяти. В ней таблица пользователей с именем и ролью, три вымышленные записи. База исчезнет при завершении программы, поэтому ничего вреда мы не нанесём. Для начала выполним обычный запрос и убедимся, что всё работает.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "import sqlite3\n\nconn = sqlite3.connect(\":memory:\")\nconn.execute(\"CREATE TABLE users (name TEXT, role TEXT)\")\nconn.executemany(\"INSERT INTO users VALUES (?, ?)\", [(\"anna\", \"admin\"), (\"boris\", \"user\"), (\"clara\", \"user\")])\n\n",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "print(conn.execute(\"SELECT role FROM users WHERE name = 'anna'\").fetchall())\n",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "[('admin',)]\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "bad",
+      "title": "Опасная склейка строк",
+      "narration": "Теперь напишем функцию поиска так, как писать нельзя: подставим имя в запрос через f-строку. Для обычного имени всё работает. Но если вместо имени передать значение с кавычкой и условием, которое всегда истинно, то запрос изменит смысл: условие в WHERE перестанет что-либо фильтровать, и вернутся все записи. Посмотрим, во что превратился текст запроса.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "import sqlite3\n\nconn = sqlite3.connect(\":memory:\")\nconn.execute(\"CREATE TABLE users (name TEXT, role TEXT)\")\nconn.executemany(\"INSERT INTO users VALUES (?, ?)\", [(\"anna\", \"admin\"), (\"boris\", \"user\"), (\"clara\", \"user\")])\n\n",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "def find_bad(name):\n    sql = f\"SELECT name, role FROM users WHERE name = '{name}'\"\n    print(sql)\n    return conn.execute(sql).fetchall()\n\n\n",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "print(find_bad(\"boris\"))\nprint(find_bad(\"x' OR '1'='1\"))\n",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "SELECT name, role FROM users WHERE name = 'boris'\n[('boris', 'user')]\nSELECT name, role FROM users WHERE name = 'x' OR '1'='1'\n[('anna', 'admin'), ('boris', 'user'), ('clara', 'user')]\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "good",
+      "title": "Параметризованный запрос",
+      "narration": "Правильное решение — параметризованные запросы. В тексте запроса на месте значения ставится знак вопроса, а сами значения передаются отдельно. Драйвер базы данных гарантирует, что значение останется значением, и ничто в нём не будет выполнено как команда. Та же самая подозрительная строка теперь просто ищется как имя, которого нет, и ничего не находится.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "import sqlite3\n\nconn = sqlite3.connect(\":memory:\")\nconn.execute(\"CREATE TABLE users (name TEXT, role TEXT)\")\nconn.executemany(\"INSERT INTO users VALUES (?, ?)\", [(\"anna\", \"admin\"), (\"boris\", \"user\"), (\"clara\", \"user\")])\n\n",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "def find_good(name):\n    return conn.execute(\"SELECT name, role FROM users WHERE name = ?\", (name,)).fetchall()\n\n\n",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "print(find_good(\"boris\"))\nprint(find_good(\"x' OR '1'='1\"))\n",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "[('boris', 'user')]\n[]\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "names",
+      "title": "Имена столбцов не параметризуются",
+      "narration": "Знак вопроса заменяет только значения. Название столбца или таблицы параметром передать нельзя. Если порядок сортировки выбирает пользователь, нельзя подставлять его слово в запрос напрямую. Правильный подход — белый список: разрешённые названия перечислены в программе, а всё остальное отвергается. Так сортировка работает по допустимым столбцам, а странный ввод вызывает ошибку.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "import sqlite3\n\nconn = sqlite3.connect(\":memory:\")\nconn.execute(\"CREATE TABLE users (name TEXT, role TEXT)\")\nconn.executemany(\"INSERT INTO users VALUES (?, ?)\", [(\"anna\", \"admin\"), (\"boris\", \"user\"), (\"clara\", \"user\")])\n\n",
+          "cue": 3
+        },
+        {
+          "type": "type",
+          "text": "ALLOWED = {\"name\", \"role\"}\n\n\ndef names_sorted(column):\n    if column not in ALLOWED:\n        raise ValueError(\"недопустимый столбец\")\n    rows = conn.execute(f\"SELECT name FROM users ORDER BY {column}\").fetchall()\n    return [r[0] for r in rows]\n\n\n",
+          "cue": 3
+        },
+        {
+          "type": "type",
+          "text": "print(names_sorted(\"name\"))\ntry:\n    names_sorted(\"name; DROP TABLE users\")\nexcept ValueError as e:\n    print(\"отказ:\", e)\n",
+          "cue": 4
+        },
+        {
+          "type": "run",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "['anna', 'boris', 'clara']\nотказ: недопустимый столбец\n",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. Никогда не склеивайте SQL из пользовательских данных. Передавайте значения через параметры: знак вопроса и кортеж значений. Для имён столбцов и таблиц используйте белый список. Давайте программе доступ к базе с минимально необходимыми правами, чтобы даже при ошибке ущерб был ограничен. Те же правила действуют и для других видов инъекций: команд оболочки, запросов к другим базам.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`execute(\"... WHERE name = ?\", (name,))` · имена столбцов — по белому списку",
+          "cue": 2
+        }
+      ]
+    }
+  ]
+}

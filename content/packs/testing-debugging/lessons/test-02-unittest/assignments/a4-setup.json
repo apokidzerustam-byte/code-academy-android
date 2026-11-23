@@ -1,0 +1,40 @@
+{
+  "id": "a4-setup",
+  "type": "fix",
+  "title": "Независимые тесты",
+  "statement": "Класс `Counter` и его тесты уже написаны, но один тест падает, потому что **тесты влияют друг на друга**: общий объект создан один раз на весь файл. Исправьте программу так, чтобы каждый тест получал свежий `Counter` (через `setUp`), и она напечатала `0 провалов`.",
+  "goal": "Независимые тесты",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "import unittest\n\n\nclass Counter:\n    def __init__(self):\n        self.value = 0\n\n    def hit(self):\n        self.value += 1\n\n\nshared = Counter()\n\n\nclass T(unittest.TestCase):\n    def test_hit(self):\n        shared.hit()\n        self.assertEqual(shared.value, 1)\n\n    def test_start(self):\n        self.assertEqual(shared.value, 0)\n\n\nresult = unittest.TestResult()\nunittest.defaultTestLoader.loadTestsFromTestCase(T).run(result)\nprint(len(result.failures), \"провалов\")\n",
+  "hints": [
+    "Тесты запускаются в алфавитном порядке: test_hit раньше test_start.",
+    "Общий объект после test_hit уже имеет значение 1.",
+    "Нужно новое состояние перед каждым тестом.",
+    "Для этого служит метод setUp в классе.",
+    "Создайте Counter в setUp и сохраните в self."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "",
+        "expected_stdout": "0 провалов\n"
+      }
+    ]
+  },
+  "solution": "import unittest\n\n\nclass Counter:\n    def __init__(self):\n        self.value = 0\n\n    def hit(self):\n        self.value += 1\n\n\nclass T(unittest.TestCase):\n    def setUp(self):\n        self.counter = Counter()\n\n    def test_start(self):\n        self.assertEqual(self.counter.value, 0)\n\n    def test_hit(self):\n        self.counter.hit()\n        self.assertEqual(self.counter.value, 1)\n\n\nresult = unittest.TestResult()\nunittest.defaultTestLoader.loadTestsFromTestCase(T).run(result)\nprint(len(result.failures), \"провалов\")\n",
+  "explanation": "Порядок тестов не гарантирован, поэтому каждый тест должен получать собственное состояние. Метод setUp вызывается перед каждым тестом.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import unittest\n\n\nclass Counter:\n    def __init__(self):\n        self.value = 0\n\n    def hit(self):\n        self.value += 1\n\n\nshared = Counter()\n\n\nclass T(unittest.TestCase):\n    def test_hit(self):\n        shared.hit()\n        self.assertEqual(shared.value, 1)\n\n    def test_start(self):\n        self.assertEqual(shared.value, 0)\n\n\nresult = unittest.TestResult()\nunittest.defaultTestLoader.loadTestsFromTestCase(T).run(result)\nprint(len(result.failures), \"провалов\")\n",
+      "why": "Общий объект сохраняет состояние между тестами."
+    }
+  ]
+}

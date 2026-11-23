@@ -1,0 +1,86 @@
+{
+  "id": "a5-csrf-check",
+  "type": "function",
+  "title": "Проверить токен",
+  "statement": "Напишите `check_token(session_id, secret, token)`: пересчитайте токен как в предыдущем задании (`hmac`, `sha256`, hex) и сравните с `token` через `hmac.compare_digest`. Верните `True` или `False`.",
+  "goal": "Проверить токен",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Пересчитайте ожидаемый токен.",
+    "Используйте ту же схему, что при выдаче.",
+    "Получите hex-строку.",
+    "Сравните её с полученным токеном.",
+    "Сравнение — hmac.compare_digest."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "check_token",
+    "cases": [
+      {
+        "args": [
+          "s1",
+          "k",
+          "38aeb20015af4b6ac8dccf4fdedf8ab01c83b980763c0710e75c25ee5c97d420"
+        ],
+        "id": "v1",
+        "expected": true
+      },
+      {
+        "args": [
+          "s1",
+          "k",
+          "94c78f62657026e9acadb369bb2e92b2da5e0c904a00674916293d528fa7af4b"
+        ],
+        "id": "v2",
+        "expected": false
+      },
+      {
+        "args": [
+          "s1",
+          "other",
+          "38aeb20015af4b6ac8dccf4fdedf8ab01c83b980763c0710e75c25ee5c97d420"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          "s1",
+          "k",
+          ""
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          "s1",
+          "k",
+          "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": false
+      }
+    ]
+  },
+  "solution": "import hashlib\nimport hmac\n\n\ndef check_token(session_id, secret, token):\n    expected = hmac.new(secret.encode(), session_id.encode(), hashlib.sha256).hexdigest()\n    return hmac.compare_digest(expected, token)\n",
+  "explanation": "Проверка не доверяет присланному токену: сервер сам вычисляет ожидаемое значение и сравнивает.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def check_token(session_id, secret, token):\n    return bool(token)\n",
+      "why": "Любой непустой токен принимается."
+    },
+    {
+      "code": "def check_token(session_id, secret, token):\n    return len(token) == 64\n",
+      "why": "Проверяется только длина."
+    }
+  ]
+}

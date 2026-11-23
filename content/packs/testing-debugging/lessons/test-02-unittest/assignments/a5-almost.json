@@ -1,0 +1,46 @@
+{
+  "id": "a5-almost",
+  "type": "predict",
+  "title": "Дроби в тестах",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Дроби в тестах",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "import unittest\n\n\nclass T(unittest.TestCase):\n    def test_equal(self):\n        self.assertEqual(0.1 + 0.2, 0.3)\n\n    def test_almost(self):\n        self.assertAlmostEqual(0.1 + 0.2, 0.3)\n\n    def test_places(self):\n        self.assertAlmostEqual(1.0, 1.01, places=1)\n\n\nresult = unittest.TestResult()\nunittest.defaultTestLoader.loadTestsFromTestCase(T).run(result)\nprint(result.testsRun, len(result.failures))\nprint(sorted(t.id().split(\".\")[-1] for t, _ in result.failures))\n",
+  "hints": [
+    "0.1 + 0.2 в двоичных дробях равно 0.30000000000000004.",
+    "assertEqual сравнивает точно — и падает.",
+    "assertAlmostEqual по умолчанию округляет до 7 знаков — проходит.",
+    "test_places: разница 0.01 при places=1 — округление до одного знака: проходит.",
+    "Один провал: test_equal."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "3 1\n['test_equal']\n"
+  },
+  "solution": "3 1\n['test_equal']\n",
+  "explanation": "Дроби нельзя сравнивать точно. assertAlmostEqual сравнивает с допуском: round(a - b, places) == 0.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "3 0\n[]",
+      "answer": "3 0\n[]",
+      "why": "0.1 + 0.2 не равно 0.3 точно: assertEqual падает."
+    },
+    {
+      "code": "3 2\n['test_almost', 'test_equal']",
+      "answer": "3 2\n['test_almost', 'test_equal']",
+      "why": "assertAlmostEqual по умолчанию допускает разницу в 7 знаков — пройдёт."
+    },
+    {
+      "code": "3 1\n['test_places']",
+      "answer": "3 1\n['test_places']",
+      "why": "Проваливается именно assertEqual."
+    }
+  ]
+}

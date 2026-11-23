@@ -1,0 +1,169 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Модуль unittest",
+      "narration": "Обычный assert останавливает программу на первой же неудаче, и мы не узнаем, сколько ещё проверок упало. Для серьёзной работы в стандартной библиотеке Python есть модуль unittest. Он запускает каждый тест отдельно, собирает все неудачи и сообщает итог: сколько проверок прошло и какие упали. На своём компьютере его запускают командой python минус m unittest. Здесь мы запустим тесты из кода и напечатаем итог сами, чтобы увидеть, как всё устроено.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`unittest` — тесты в стандартной библиотеке: каждый тест — отдельный метод класса",
+          "cue": 1
+        }
+      ]
+    },
+    {
+      "id": "case",
+      "title": "Класс с тестами",
+      "narration": "Тесты группируются в класс, наследующий от TestCase. Каждый метод, имя которого начинается с test, — отдельный тест. Внутри используются методы проверки: assertEqual сравнивает два значения. Напишем функцию сложения и два теста. Мы загрузим класс, запустим тесты и напечатаем итог. Оба теста проходят.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "import unittest\n\n\ndef run(case):\n    result = unittest.TestResult()\n    unittest.defaultTestLoader.loadTestsFromTestCase(case).run(result)\n    print(\"запущено\", result.testsRun, \"· провалено\", len(result.failures), \"· ошибок\", len(result.errors))\n\n\ndef add(a, b):\n    return a + b\n\n\n",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "class TestAdd(unittest.TestCase):\n    def test_positive(self):\n        self.assertEqual(add(2, 3), 5)\n\n    def test_negative(self):\n        self.assertEqual(add(-1, -1), -2)\n\n\nrun(TestAdd)\n",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "cue": 5
+        },
+        {
+          "type": "output",
+          "text": "запущено 2 · провалено 0 · ошибок 0\n",
+          "cue": 5
+        }
+      ]
+    },
+    {
+      "id": "methods",
+      "title": "Методы проверки",
+      "narration": "Кроме assertEqual есть и другие методы. assertTrue и assertFalse проверяют истинность. assertIn — что элемент входит в коллекцию. assertIsNone — что значение равно None. А для дробных чисел служит assertAlmostEqual: он сравнивает с небольшим допуском, потому что ноль целых одна десятая плюс две десятых не равно ровно трём десятым. Вот тест, в котором применены все эти методы.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "import unittest\n\n\ndef run(case):\n    result = unittest.TestResult()\n    unittest.defaultTestLoader.loadTestsFromTestCase(case).run(result)\n    print(\"запущено\", result.testsRun, \"· провалено\", len(result.failures), \"· ошибок\", len(result.errors))\n\n\n",
+          "cue": 0
+        },
+        {
+          "type": "type",
+          "text": "class TestMethods(unittest.TestCase):\n    def test_all(self):\n        self.assertTrue(5 > 3)\n        self.assertFalse(\"a\" in \"bcd\")\n        self.assertIn(2, [1, 2, 3])\n        self.assertIsNone({}.get(\"нет\"))\n        self.assertAlmostEqual(0.1 + 0.2, 0.3)\n\n\nrun(TestMethods)\n",
+          "cue": 5
+        },
+        {
+          "type": "run",
+          "cue": 5
+        },
+        {
+          "type": "output",
+          "text": "запущено 1 · провалено 0 · ошибок 0\n",
+          "cue": 5
+        }
+      ]
+    },
+    {
+      "id": "fail",
+      "title": "Провал и ошибка",
+      "narration": "Различают два вида неудач. Провал, по-английски failure, — это когда проверка не сошлась: ожидали пять, получили четыре. Ошибка, error, — когда в самом тесте или в коде произошло исключение, например деление на ноль. Для разработчика разница важна: провал говорит, что результат неверный, а ошибка — что код вообще упал. Итог показывает оба счётчика отдельно.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "import unittest\n\n\ndef run(case):\n    result = unittest.TestResult()\n    unittest.defaultTestLoader.loadTestsFromTestCase(case).run(result)\n    print(\"запущено\", result.testsRun, \"· провалено\", len(result.failures), \"· ошибок\", len(result.errors))\n\n\nclass TestMix(unittest.TestCase):\n    def test_ok(self):\n        self.assertEqual(2 + 2, 4)\n\n    def test_fail(self):\n        self.assertEqual(2 + 2, 5)\n\n    def test_error(self):\n        self.assertEqual(1 / 0, 1)\n\n\nrun(TestMix)\n",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "запущено 3 · провалено 1 · ошибок 1\n",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "raises",
+      "title": "Проверяем исключения",
+      "narration": "Иногда правильное поведение — это именно ошибка. Функция проверки возраста должна возбуждать ValueError для отрицательных значений. Проверить это помогает контекстный менеджер assertRaises: если внутри блока исключение произошло, тест проходит, а если нет — падает. Так мы проверяем и нормальную работу, и реакцию на неверные данные.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "import unittest\n\n\ndef run(case):\n    result = unittest.TestResult()\n    unittest.defaultTestLoader.loadTestsFromTestCase(case).run(result)\n    print(\"запущено\", result.testsRun, \"· провалено\", len(result.failures), \"· ошибок\", len(result.errors))\n\n\ndef check_age(age):\n    if age < 0:\n        raise ValueError(\"возраст отрицательный\")\n    return age\n\n\n",
+          "cue": 1
+        },
+        {
+          "type": "type",
+          "text": "class TestAge(unittest.TestCase):\n    def test_valid(self):\n        self.assertEqual(check_age(20), 20)\n\n    def test_negative(self):\n        with self.assertRaises(ValueError):\n            check_age(-1)\n\n\nrun(TestAge)\n",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "запущено 2 · провалено 0 · ошибок 0\n",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "setup",
+      "title": "Подготовка: setUp",
+      "narration": "Часто каждому тесту нужен свежий объект. Метод setUp запускается перед каждым тестом и готовит исходное состояние. Возьмём простую корзину покупок. Перед каждым тестом создаётся пустая корзина, поэтому тесты не влияют друг на друга. Это важное правило: тесты должны быть независимыми и проходить в любом порядке.",
+      "actions": [
+        {
+          "type": "clear"
+        },
+        {
+          "type": "type",
+          "text": "import unittest\n\n\ndef run(case):\n    result = unittest.TestResult()\n    unittest.defaultTestLoader.loadTestsFromTestCase(case).run(result)\n    print(\"запущено\", result.testsRun, \"· провалено\", len(result.failures), \"· ошибок\", len(result.errors))\n\n\nclass Cart:\n    def __init__(self):\n        self.items = []\n\n    def add(self, name):\n        self.items.append(name)\n\n\n",
+          "cue": 2
+        },
+        {
+          "type": "type",
+          "text": "class TestCart(unittest.TestCase):\n    def setUp(self):\n        self.cart = Cart()\n\n    def test_empty(self):\n        self.assertEqual(len(self.cart.items), 0)\n\n    def test_add(self):\n        self.cart.add(\"хлеб\")\n        self.assertEqual(self.cart.items, [\"хлеб\"])\n\n\nrun(TestCart)\n",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "запущено 2 · провалено 0 · ошибок 0\n",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. В unittest тесты — методы класса, имена которых начинаются с test. Для проверок есть набор методов assert, а для ошибок — контекстный менеджер assertRaises. Метод setUp готовит свежее состояние перед каждым тестом. Результат различает провалы и ошибки. На практике вы будете запускать тесты одной командой и читать итог. А сейчас — задания: от чтения результатов до тестов, которые ловят спрятанные ошибки.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`class T(unittest.TestCase)` · `test_...` · `assertEqual/True/In/Raises` · `setUp`",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}

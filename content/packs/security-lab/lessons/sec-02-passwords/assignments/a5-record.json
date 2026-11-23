@@ -1,0 +1,89 @@
+{
+  "id": "a5-record",
+  "type": "fix",
+  "title": "Не храните пароль в открытом виде",
+  "statement": "Функция создаёт запись пользователя для базы, но сохраняет пароль как есть. Исправьте: вместо пароля сохраните соль и хеш (`pbkdf2_hmac`, `sha256`, 5000 повторений, hex). Запись: `{\"name\": имя, \"salt\": соль, \"hash\": хеш}`.",
+  "goal": "Не храните пароль в открытом виде",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def make_record(name, password, salt):\n    return {\"name\": name, \"password\": password}\n",
+  "hints": [
+    "В записи не должно быть пароля.",
+    "Храните три поля: name, salt, hash.",
+    "Хеш считается через pbkdf2_hmac.",
+    "Пароль и соль переводятся в байты.",
+    "Результат хеширования — hex."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "make_record",
+    "cases": [
+      {
+        "args": [
+          "anna",
+          "qwerty",
+          "s1"
+        ],
+        "id": "v1",
+        "expected": {
+          "name": "anna",
+          "salt": "s1",
+          "hash": "53affc856fb6bc3fc2e312b221c844991eb5f5942734aa38d68fedc62d0e8152"
+        }
+      },
+      {
+        "args": [
+          "boris",
+          "qwerty",
+          "s2"
+        ],
+        "id": "v2",
+        "expected": {
+          "name": "boris",
+          "salt": "s2",
+          "hash": "efbb7d1f1255c92ac2e045ffeeed12cbaf378b13d53d904b25588054bf43a2ab"
+        }
+      },
+      {
+        "args": [
+          "v",
+          "",
+          "z"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": {
+          "name": "v",
+          "salt": "z",
+          "hash": "724cbc033c248c79acdc9218f5192233371e6457b20b73db75a19f4f4fed54f8"
+        }
+      },
+      {
+        "args": [
+          "i",
+          "пароль",
+          "соль"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": {
+          "name": "i",
+          "salt": "соль",
+          "hash": "6385104807da7e4c44049cc224f7512b388758b2571e9a1646a60cfd260d196d"
+        }
+      }
+    ]
+  },
+  "solution": "import hashlib\n\n\ndef make_record(name, password, salt):\n    raw = hashlib.pbkdf2_hmac(\"sha256\", password.encode(), salt.encode(), 5000)\n    return {\"name\": name, \"salt\": salt, \"hash\": raw.hex()}\n",
+  "explanation": "Запись содержит только то, что нужно для проверки: имя, соль и хеш. Сам пароль нигде не сохраняется.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import hashlib\n\n\ndef make_record(name, password, salt):\n    return {\"name\": name, \"salt\": salt, \"hash\": hashlib.sha256(password.encode()).hexdigest()}\n",
+      "why": "Хеш без соли и без медленной функции."
+    }
+  ]
+}

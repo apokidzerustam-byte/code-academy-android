@@ -1,0 +1,58 @@
+{
+  "id": "a5-strip",
+  "type": "fix",
+  "title": "Показать комментарии безопасно",
+  "statement": "Первая строка ввода — `n`, затем `n` строк-комментариев. Для каждого напечатайте `<p>ТЕКСТ</p>`, экранировав текст через `html.escape`. Исправьте программу.",
+  "goal": "Показать комментарии безопасно",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "n = int(input())\nfor _ in range(n):\n    text = input()\n    print(f\"<p>{text}</p>\")\n",
+  "hints": [
+    "Прочитайте число комментариев и обработайте каждый.",
+    "Печатайте строку с тегом p.",
+    "Текст нужно экранировать.",
+    "Функция escape находится в модуле html.",
+    "Не забудьте подключить модуль html."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "2\nПривет\n<b>жирный</b>\n",
+        "expected_stdout": "<p>Привет</p>\n<p>&lt;b&gt;жирный&lt;/b&gt;</p>\n"
+      },
+      {
+        "id": "h2",
+        "stdin": "1\nTom & Jerry\n",
+        "expected_stdout": "<p>Tom &amp; Jerry</p>\n",
+        "hidden": true
+      },
+      {
+        "id": "h3",
+        "stdin": "1\n<script>alert(1)</script>\n",
+        "expected_stdout": "<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>\n",
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "stdin": "0\n",
+        "expected_stdout": "",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "import html\n\nn = int(input())\nfor _ in range(n):\n    text = input()\n    print(f\"<p>{html.escape(text)}</p>\")\n",
+  "explanation": "Экранирование применяется к каждому значению в момент вывода.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "n = int(input())\nfor _ in range(n):\n    text = input()\n    print(f\"<p>{text}</p>\")\n",
+      "why": "Текст не экранирован."
+    }
+  ]
+}

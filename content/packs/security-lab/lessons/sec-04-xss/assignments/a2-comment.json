@@ -1,0 +1,81 @@
+{
+  "id": "a2-comment",
+  "type": "function",
+  "title": "Безопасный комментарий",
+  "statement": "Напишите `render_comment(author, text)`: верните строку `<p><b>АВТОР</b>: ТЕКСТ</p>`, где и автор, и текст **экранированы** (`html.escape`).",
+  "goal": "Безопасный комментарий",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Экранировать нужно каждое значение, которое пришло от пользователя.",
+    "В модуле html есть функция escape.",
+    "Вызовите её для автора и для текста.",
+    "Разметку (<p>, <b>) экранировать не нужно — она ваша.",
+    "Соберите строку f-строкой."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "render_comment",
+    "cases": [
+      {
+        "args": [
+          "Анна",
+          "Привет!"
+        ],
+        "id": "v1",
+        "expected": "<p><b>Анна</b>: Привет!</p>"
+      },
+      {
+        "args": [
+          "<i>Bob</i>",
+          "<script>alert(1)</script>"
+        ],
+        "id": "v2",
+        "expected": "<p><b>&lt;i&gt;Bob&lt;/i&gt;</b>: &lt;script&gt;alert(1)&lt;/script&gt;</p>"
+      },
+      {
+        "args": [
+          "Tom",
+          "Tom & Jerry"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "<p><b>Tom</b>: Tom &amp; Jerry</p>"
+      },
+      {
+        "args": [
+          "x",
+          "\"quoted\""
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "<p><b>x</b>: &quot;quoted&quot;</p>"
+      },
+      {
+        "args": [
+          "",
+          ""
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": "<p><b></b>: </p>"
+      }
+    ]
+  },
+  "solution": "import html\n\n\ndef render_comment(author, text):\n    return f\"<p><b>{html.escape(author)}</b>: {html.escape(text)}</p>\"\n",
+  "explanation": "Экранируются данные, а не шаблон: теги `<p>` и `<b>` написаны программистом, поэтому остаются как есть.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def render_comment(author, text):\n    return f\"<p><b>{author}</b>: {text}</p>\"\n",
+      "why": "Ничего не экранируется."
+    },
+    {
+      "code": "import html\n\n\ndef render_comment(author, text):\n    return f\"<p><b>{author}</b>: {html.escape(text)}</p>\"\n",
+      "why": "Автор не экранирован."
+    }
+  ]
+}

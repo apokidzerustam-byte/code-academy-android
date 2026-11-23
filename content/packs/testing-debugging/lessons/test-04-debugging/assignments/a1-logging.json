@@ -1,0 +1,41 @@
+{
+  "id": "a1-logging",
+  "type": "predict",
+  "title": "Что покажет logging",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Что покажет logging",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "import logging\nimport sys\n\nlogging.basicConfig(level=logging.WARNING, stream=sys.stdout, format=\"%(levelname)s: %(message)s\")\n\nlogging.debug(\"шаг 1\")\nlogging.info(\"шаг 2\")\nlogging.warning(\"шаг 3\")\nlogging.error(\"шаг 4\")\n",
+  "hints": [
+    "Порог — WARNING: ниже его сообщения не показываются.",
+    "debug и info ниже порога.",
+    "warning равно порогу — показывается.",
+    "error выше порога — показывается.",
+    "Формат: УРОВЕНЬ: текст."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "WARNING: шаг 3\nERROR: шаг 4\n"
+  },
+  "solution": "WARNING: шаг 3\nERROR: шаг 4\n",
+  "explanation": "Показываются сообщения уровня не ниже заданного: WARNING и ERROR.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "DEBUG: шаг 1\nINFO: шаг 2\nWARNING: шаг 3\nERROR: шаг 4",
+      "answer": "DEBUG: шаг 1\nINFO: шаг 2\nWARNING: шаг 3\nERROR: шаг 4",
+      "why": "Уровень WARNING скрывает debug и info."
+    },
+    {
+      "code": "WARNING: шаг 3",
+      "answer": "WARNING: шаг 3",
+      "why": "Сообщение error тоже выше порога — оно будет показано."
+    }
+  ]
+}

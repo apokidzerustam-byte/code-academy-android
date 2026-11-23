@@ -1,0 +1,45 @@
+{
+  "id": "sec-02-passwords",
+  "title": "Хеширование паролей",
+  "goal": "Хранить пароли безопасно: соль, медленный хеш, постоянное по времени сравнение.",
+  "skills": [
+    "sec.hash",
+    "sec.salt",
+    "sec.pbkdf2"
+  ],
+  "prerequisites": [
+    "sec-01-threat-model"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-hash-props.json",
+    "assignments/a2-hash-password.json",
+    "assignments/a3-verify.json",
+    "assignments/a4-salt-demo.json",
+    "assignments/a5-record.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Хранят пароль или его обратимое «шифрование»",
+      "fix": "Храните соль и хеш; пароль восстановить нельзя и не нужно."
+    },
+    {
+      "mistake": "Используют быстрый sha256 без соли",
+      "fix": "Берите pbkdf2_hmac (или bcrypt/argon2) и случайную соль для каждого пользователя."
+    },
+    {
+      "mistake": "Генерируют соль через random",
+      "fix": "random предсказуем; для безопасных значений — модуль secrets."
+    },
+    {
+      "mistake": "Сравнивают хеши через ==",
+      "fix": "Используйте hmac.compare_digest."
+    }
+  ]
+}

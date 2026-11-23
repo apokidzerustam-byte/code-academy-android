@@ -1,0 +1,45 @@
+{
+  "id": "sec-05-secrets-csrf",
+  "title": "Секреты и CSRF",
+  "goal": "Хранить секреты вне кода и защищать запросы CSRF-токенами.",
+  "skills": [
+    "sec.secrets",
+    "sec.csrf",
+    "sec.hmac"
+  ],
+  "prerequisites": [
+    "sec-04-xss"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-env.json",
+    "assignments/a2-require.json",
+    "assignments/a3-mask.json",
+    "assignments/a4-csrf-make.json",
+    "assignments/a5-csrf-check.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Записывают ключ прямо в код",
+      "fix": "Берите секреты из окружения и добавьте файл с ними в .gitignore."
+    },
+    {
+      "mistake": "Удаляют утёкший ключ из файла и считают проблему решённой",
+      "fix": "Ключ остаётся в истории: замените его у поставщика."
+    },
+    {
+      "mistake": "Печатают секреты в журнал",
+      "fix": "Показывайте маску."
+    },
+    {
+      "mistake": "Проверяют CSRF-токен только на форме входа",
+      "fix": "Токен нужен на каждом запросе, меняющем данные."
+    }
+  ]
+}

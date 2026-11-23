@@ -1,0 +1,88 @@
+{
+  "id": "a3-safe-average",
+  "type": "function",
+  "title": "Среднее для любого списка",
+  "statement": "Напишите `safe_average(numbers)`: среднее арифметическое списка; для **пустого** списка верните `0`.",
+  "goal": "Среднее для любого списка",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Главный особый случай — пустой список.",
+    "Для пустого списка вернуть 0, не делить.",
+    "Проверка пустоты: if not numbers.",
+    "Для остальных — sum делим на len.",
+    "Деление обычное, не целочисленное."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "safe_average",
+    "cases": [
+      {
+        "args": [
+          [
+            2,
+            4,
+            6
+          ]
+        ],
+        "id": "v1",
+        "expected": 4.0
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "v2",
+        "expected": 0
+      },
+      {
+        "args": [
+          [
+            5
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 5.0
+      },
+      {
+        "args": [
+          [
+            -3,
+            3
+          ]
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 0.0
+      },
+      {
+        "args": [
+          [
+            1,
+            2
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 1.5
+      }
+    ]
+  },
+  "solution": "def safe_average(numbers):\n    if not numbers:\n        return 0\n    return sum(numbers) / len(numbers)\n",
+  "explanation": "Особое значение (пустой список) обрабатывается отдельной веткой до деления.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def safe_average(numbers):\n    return sum(numbers) / len(numbers)\n",
+      "why": "Пустой список вызывает ZeroDivisionError."
+    },
+    {
+      "code": "def safe_average(numbers):\n    if not numbers:\n        return 0\n    return sum(numbers) // len(numbers)\n",
+      "why": "Целочисленное деление искажает дробные средние."
+    }
+  ]
+}

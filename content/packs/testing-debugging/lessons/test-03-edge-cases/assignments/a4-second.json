@@ -1,0 +1,126 @@
+{
+  "id": "a4-second",
+  "type": "function",
+  "title": "Второй по величине",
+  "statement": "Напишите `second_largest(nums)`: второе по величине **различное** значение списка; если различных значений меньше двух — `None`.\n\nПримеры: `[3, 1, 2]` → `2`; `[5, 5, 5]` → `None`; `[4, 4, 3]` → `3`.",
+  "goal": "Второй по величине",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Повторяющиеся значения нужно объединить.",
+    "set убирает повторы.",
+    "Отсортируйте по убыванию.",
+    "Если различных меньше двух — None.",
+    "Иначе — элемент с индексом 1."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "second_largest",
+    "cases": [
+      {
+        "args": [
+          [
+            3,
+            1,
+            2
+          ]
+        ],
+        "id": "v1",
+        "expected": 2
+      },
+      {
+        "args": [
+          [
+            5,
+            5,
+            5
+          ]
+        ],
+        "id": "v2",
+        "expected": null
+      },
+      {
+        "args": [
+          [
+            4,
+            4,
+            3
+          ]
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 3
+      },
+      {
+        "args": [
+          []
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": null
+      },
+      {
+        "args": [
+          [
+            7
+          ]
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": null
+      },
+      {
+        "args": [
+          [
+            1,
+            2
+          ]
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": 1
+      },
+      {
+        "args": [
+          [
+            -1,
+            -5,
+            -3
+          ]
+        ],
+        "id": "h7",
+        "hidden": true,
+        "expected": -3
+      },
+      {
+        "args": [
+          [
+            10,
+            10,
+            9,
+            9
+          ]
+        ],
+        "id": "h8",
+        "hidden": true,
+        "expected": 9
+      }
+    ]
+  },
+  "solution": "def second_largest(nums):\n    unique = sorted(set(nums), reverse=True)\n    if len(unique) < 2:\n        return None\n    return unique[1]\n",
+  "explanation": "Особые случаи: повторы, один элемент, пустой список. Различные значения получаем через set.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def second_largest(nums):\n    ordered = sorted(nums, reverse=True)\n    return ordered[1] if len(ordered) > 1 else None\n",
+      "why": "Повторы считаются разными значениями."
+    },
+    {
+      "code": "def second_largest(nums):\n    unique = sorted(set(nums), reverse=True)\n    return unique[1]\n",
+      "why": "Для коротких списков падает IndexError."
+    }
+  ]
+}

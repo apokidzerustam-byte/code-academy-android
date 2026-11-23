@@ -1,0 +1,41 @@
+{
+  "id": "a1-sql-text",
+  "type": "predict",
+  "title": "Во что превратился запрос",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Во что превратился запрос",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "def build(name):\n    return f\"SELECT role FROM users WHERE name = '{name}'\"\n\nprint(build(\"anna\"))\nprint(build(\"x' OR '1'='1\"))\n",
+  "hints": [
+    "f-строка подставляет значение внутрь шаблона без изменений.",
+    "Вокруг значения в шаблоне уже стоят одинарные кавычки.",
+    "Для «anna» получится обычный запрос.",
+    "Для второй строки внутри остаются свои кавычки.",
+    "Условие превращается в name = 'x' OR '1'='1'."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "SELECT role FROM users WHERE name = 'anna'\nSELECT role FROM users WHERE name = 'x' OR '1'='1'\n"
+  },
+  "solution": "SELECT role FROM users WHERE name = 'anna'\nSELECT role FROM users WHERE name = 'x' OR '1'='1'\n",
+  "explanation": "Подстановка не отличает данные от кода: кавычка во вводе закрывает строку, и остаток становится частью SQL.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "SELECT role FROM users WHERE name = 'anna'\nSELECT role FROM users WHERE name = 'x\\' OR \\'1\\'=\\'1'",
+      "answer": "SELECT role FROM users WHERE name = 'anna'\nSELECT role FROM users WHERE name = 'x\\' OR \\'1\\'=\\'1'",
+      "why": "Кавычки не экранируются: строка вставляется как есть."
+    },
+    {
+      "code": "SELECT role FROM users WHERE name = anna\nSELECT role FROM users WHERE name = x' OR '1'='1",
+      "answer": "SELECT role FROM users WHERE name = anna\nSELECT role FROM users WHERE name = x' OR '1'='1",
+      "why": "Одинарные кавычки вокруг подставляемого значения остаются в шаблоне."
+    }
+  ]
+}

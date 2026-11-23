@@ -1,0 +1,40 @@
+{
+  "id": "a2-fix-test",
+  "type": "fix",
+  "title": "Тесты красные: найдите баг",
+  "statement": "В программе есть функция `average(numbers)` и несколько проверок. Сейчас они падают. Исправьте **функцию** (не проверки), чтобы программа напечатала `все тесты пройдены`.",
+  "goal": "Тесты красные: найдите баг",
+  "input": "Определяется условием.",
+  "expectedResult": "Вывод, указанный в условии.",
+  "constraints": [],
+  "starterCode": "def average(numbers):\n    return sum(numbers) // len(numbers)\n\n\nassert average([2, 4, 6]) == 4\nassert average([5]) == 5\nassert average([1, 2]) == 1.5\nassert average([-3, 3]) == 0\nprint(\"все тесты пройдены\")\n",
+  "hints": [
+    "Запустите программу и прочитайте, какое именно утверждение упало.",
+    "Падает проверка с дробным результатом.",
+    "Среднее — сумма, делённая на количество.",
+    "Обычное деление в Python — одна косая черта.",
+    "Исправляется одна строка внутри функции."
+  ],
+  "tests": {
+    "kind": "stdout",
+    "match": "strip",
+    "cases": [
+      {
+        "id": "v1",
+        "stdin": "",
+        "expected_stdout": "все тесты пройдены\n"
+      }
+    ]
+  },
+  "solution": "def average(numbers):\n    return sum(numbers) / len(numbers)\n\n\nassert average([2, 4, 6]) == 4\nassert average([5]) == 5\nassert average([1, 2]) == 1.5\nassert average([-3, 3]) == 0\nprint(\"все тесты пройдены\")\n",
+  "explanation": "Функция делила нацело: `//` отбрасывает дробную часть. Падающий тест сразу указал на строку с проверкой 1.5.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def average(numbers):\n    return sum(numbers) // len(numbers)\n\n\nassert average([2, 4, 6]) == 4\nassert average([5]) == 5\nassert average([1, 2]) == 1.5\nassert average([-3, 3]) == 0\nprint(\"все тесты пройдены\")\n",
+      "why": "Целочисленное деление не даёт 1.5 — тест падает."
+    }
+  ]
+}

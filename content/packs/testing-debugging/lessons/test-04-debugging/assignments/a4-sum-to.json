@@ -1,0 +1,73 @@
+{
+  "id": "a4-sum-to",
+  "type": "fix",
+  "title": "Сумма от 1 до n",
+  "statement": "Функция должна вернуть сумму чисел от 1 до `n` включительно. Сейчас результат всегда меньше нужного. Найдите ошибку границы и исправьте.",
+  "goal": "Сумма от 1 до n",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "starterCode": "def sum_to(n):\n    total = 0\n    for i in range(1, n):\n        total += i\n    return total\n",
+  "hints": [
+    "Проверьте вручную: сумма от 1 до 5 равна 15.",
+    "Что даёт range(1, 5)?",
+    "Конец диапазона не включается.",
+    "Чтобы включить n, конец должен быть на единицу больше.",
+    "range(1, n + 1)."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "sum_to",
+    "cases": [
+      {
+        "args": [
+          5
+        ],
+        "id": "v1",
+        "expected": 15
+      },
+      {
+        "args": [
+          1
+        ],
+        "id": "v2",
+        "expected": 1
+      },
+      {
+        "args": [
+          0
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          10
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": 55
+      },
+      {
+        "args": [
+          100
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": 5050
+      }
+    ]
+  },
+  "solution": "def sum_to(n):\n    total = 0\n    for i in range(1, n + 1):\n        total += i\n    return total\n",
+  "explanation": "range(a, b) не включает b. Чтобы включить n, конец диапазона — n + 1.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def sum_to(n):\n    total = 0\n    for i in range(1, n):\n        total += i\n    return total\n",
+      "why": "Последнее число n не попадает в сумму."
+    }
+  ]
+}

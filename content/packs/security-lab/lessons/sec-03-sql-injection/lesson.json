@@ -1,0 +1,45 @@
+{
+  "id": "sec-03-sql-injection",
+  "title": "SQL-инъекции",
+  "goal": "Понимать, как возникает SQL-инъекция, и писать безопасные параметризованные запросы.",
+  "skills": [
+    "sec.injection",
+    "sec.params",
+    "sec.whitelist"
+  ],
+  "prerequisites": [
+    "sec-02-passwords"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-sql-text.json",
+    "assignments/a2-find-role.json",
+    "assignments/a3-count.json",
+    "assignments/a4-sorted.json",
+    "assignments/a5-count-demo.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Собирают запрос через f-строку или +",
+      "fix": "Используйте знаки ? и передавайте значения вторым аргументом execute."
+    },
+    {
+      "mistake": "Думают, что достаточно экранировать кавычки",
+      "fix": "Параметры надёжнее ручного экранирования."
+    },
+    {
+      "mistake": "Подставляют имя столбца из ввода",
+      "fix": "Белый список разрешённых имён."
+    },
+    {
+      "mistake": "Забывают запятую в кортеже из одного элемента",
+      "fix": "(name,) — кортеж; (name) — просто значение."
+    }
+  ]
+}

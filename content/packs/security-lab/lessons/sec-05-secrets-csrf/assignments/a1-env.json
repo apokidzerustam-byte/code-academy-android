@@ -1,0 +1,41 @@
+{
+  "id": "a1-env",
+  "type": "predict",
+  "title": "Читаем окружение",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Читаем окружение",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "import os\n\nenv = {\"PORT\": \"8080\", \"DEBUG\": \"\"}\nprint(env.get(\"PORT\", \"80\"))\nprint(env.get(\"HOST\", \"localhost\"))\nprint(env.get(\"DEBUG\", \"off\") or \"off\")\ntry:\n    env[\"TOKEN\"]\nexcept KeyError as e:\n    print(\"нет\", e)\n",
+  "hints": [
+    "get возвращает значение по умолчанию только если ключа нет.",
+    "PORT есть: 8080.",
+    "HOST нет: localhost.",
+    "DEBUG есть, но пустой: пустая строка ложна, поэтому `or` даёт «off».",
+    "env[\"TOKEN\"] вызывает KeyError: сообщение — имя ключа в кавычках."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "8080\nlocalhost\noff\nнет 'TOKEN'\n"
+  },
+  "solution": "8080\nlocalhost\noff\nнет 'TOKEN'\n",
+  "explanation": "get подставляет умолчание лишь для отсутствующего ключа; пустая строка — значение, но в `or` она ложна.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "80\nlocalhost\noff\nнет 'TOKEN'",
+      "answer": "80\nlocalhost\noff\nнет 'TOKEN'",
+      "why": "PORT задан, поэтому значение по умолчанию не используется."
+    },
+    {
+      "code": "8080\nlocalhost\n\nнет 'TOKEN'",
+      "answer": "8080\nlocalhost\n\nнет 'TOKEN'",
+      "why": "Пустая строка ложна, и `or` подставит «off»."
+    }
+  ]
+}

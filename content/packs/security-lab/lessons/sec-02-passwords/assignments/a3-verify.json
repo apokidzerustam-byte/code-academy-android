@@ -1,0 +1,86 @@
+{
+  "id": "a3-verify",
+  "type": "function",
+  "title": "Проверка пароля",
+  "statement": "Напишите `verify_password(password, salt, stored)`: пересчитайте хеш пароля с солью (`pbkdf2_hmac`, `sha256`, 5000 повторений, результат в hex) и сравните с `stored` функцией `hmac.compare_digest`. Верните `True` или `False`.",
+  "goal": "Проверка пароля",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Сначала пересчитайте хеш так же, как при регистрации.",
+    "Тот же алгоритм, та же соль, то же число повторений.",
+    "Результат приведите к hex.",
+    "Сравните с сохранённым значением.",
+    "Для сравнения используйте hmac.compare_digest."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "verify_password",
+    "cases": [
+      {
+        "args": [
+          "qwerty",
+          "s1",
+          "53affc856fb6bc3fc2e312b221c844991eb5f5942734aa38d68fedc62d0e8152"
+        ],
+        "id": "v1",
+        "expected": true
+      },
+      {
+        "args": [
+          "qwerty",
+          "s1",
+          "22d11139568dbf2c0a47e9eeb1d85ffe912c265c30b3e11a1ad4946518e99889"
+        ],
+        "id": "v2",
+        "expected": false
+      },
+      {
+        "args": [
+          "qwerty",
+          "s2",
+          "53affc856fb6bc3fc2e312b221c844991eb5f5942734aa38d68fedc62d0e8152"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": false
+      },
+      {
+        "args": [
+          "",
+          "s",
+          "94865f264c810cfcfb2241035edbd57f5447df617c20c15794a08772a27643d4"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": true
+      },
+      {
+        "args": [
+          "x",
+          "s",
+          "00"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": false
+      }
+    ]
+  },
+  "solution": "import hashlib\nimport hmac\n\n\ndef verify_password(password, salt, stored):\n    raw = hashlib.pbkdf2_hmac(\"sha256\", password.encode(), salt.encode(), 5000)\n    return hmac.compare_digest(raw.hex(), stored)\n",
+  "explanation": "Проверка повторяет вычисление хеша и сравнивает результат с сохранённым за постоянное время.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def verify_password(password, salt, stored):\n    return True\n",
+      "why": "Любой пароль подходит."
+    },
+    {
+      "code": "import hashlib\n\n\ndef verify_password(password, salt, stored):\n    return hashlib.sha256(password.encode()).hexdigest() == stored\n",
+      "why": "Другая схема хеширования: сравнение никогда не сходится."
+    }
+  ]
+}

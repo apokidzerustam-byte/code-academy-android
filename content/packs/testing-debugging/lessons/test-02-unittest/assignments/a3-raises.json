@@ -1,0 +1,90 @@
+{
+  "id": "a3-raises",
+  "type": "function",
+  "title": "Функция, которая бросает исключение",
+  "statement": "Тест ожидает: `withdraw(balance, amount)` возвращает новый баланс; если `amount` больше `balance` или `amount <= 0`, возбуждает `ValueError`.\n\n```python\nwith self.assertRaises(ValueError):\n    withdraw(100, 500)\n```",
+  "goal": "Функция, которая бросает исключение",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Есть два недопустимых случая: сумма не положительна и сумма больше баланса.",
+    "Недопустимое — raise ValueError.",
+    "Допустимое — вернуть остаток.",
+    "Условия можно объединить через or.",
+    "Снять весь баланс (amount == balance) — допустимо."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "withdraw",
+    "cases": [
+      {
+        "args": [
+          100,
+          30
+        ],
+        "id": "v1",
+        "expected": 70
+      },
+      {
+        "args": [
+          100,
+          500
+        ],
+        "expected_error": "ValueError",
+        "id": "v2"
+      },
+      {
+        "args": [
+          100,
+          100
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": 0
+      },
+      {
+        "args": [
+          100,
+          0
+        ],
+        "expected_error": "ValueError",
+        "id": "h4",
+        "hidden": true
+      },
+      {
+        "args": [
+          50,
+          -5
+        ],
+        "expected_error": "ValueError",
+        "id": "h5",
+        "hidden": true
+      },
+      {
+        "args": [
+          10,
+          1
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": 9
+      }
+    ]
+  },
+  "solution": "def withdraw(balance, amount):\n    if amount <= 0 or amount > balance:\n        raise ValueError(\"неверная сумма\")\n    return balance - amount\n",
+  "explanation": "Исключение — часть контракта функции. Граница (ровно весь баланс) — типичное место для ошибок, поэтому её нужно проверить.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def withdraw(balance, amount):\n    if amount > balance:\n        raise ValueError(\"неверная сумма\")\n    return balance - amount\n",
+      "why": "Нулевая и отрицательная суммы принимаются."
+    },
+    {
+      "code": "def withdraw(balance, amount):\n    if amount <= 0 or amount >= balance:\n        raise ValueError(\"неверная сумма\")\n    return balance - amount\n",
+      "why": "Снять ровно весь баланс нельзя — ошибочная граница."
+    }
+  ]
+}

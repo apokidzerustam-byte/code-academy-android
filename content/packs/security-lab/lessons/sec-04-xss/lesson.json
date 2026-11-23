@@ -1,0 +1,45 @@
+{
+  "id": "sec-04-xss",
+  "title": "XSS и экранирование",
+  "goal": "Понимать XSS и безопасно выводить пользовательский текст в HTML.",
+  "skills": [
+    "sec.xss",
+    "sec.escape",
+    "sec.urls"
+  ],
+  "prerequisites": [
+    "sec-03-sql-injection"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-escape.json",
+    "assignments/a2-comment.json",
+    "assignments/a3-link.json",
+    "assignments/a4-list.json",
+    "assignments/a5-strip.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Экранируют при сохранении, а не при выводе",
+      "fix": "Храните исходный текст, а экранируйте при выводе в нужный контекст."
+    },
+    {
+      "mistake": "Забывают экранировать значения в атрибутах",
+      "fix": "В атрибутах экранируйте и кавычки."
+    },
+    {
+      "mistake": "Пропускают ссылки со схемой javascript:",
+      "fix": "Разрешайте только http и https."
+    },
+    {
+      "mistake": "Используют innerHTML для текста",
+      "fix": "В JS для текста применяйте textContent."
+    }
+  ]
+}

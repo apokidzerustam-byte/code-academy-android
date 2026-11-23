@@ -1,0 +1,43 @@
+{
+  "id": "test-01-assert",
+  "title": "Тесты и assert",
+  "goal": "Писать проверки assert, таблицы тестов и тесты, способные поймать ошибку.",
+  "skills": [
+    "test.assert",
+    "test.table",
+    "test.mutation"
+  ],
+  "prerequisites": [],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-assert.json",
+    "assignments/a2-fix-test.json",
+    "assignments/a3-leap-tests.json",
+    "assignments/a4-clamp.json",
+    "assignments/a5-runner.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Проверяют функцию одним примером",
+      "fix": "Добавьте границы: ноль, равные значения, отрицательные числа, пустой ввод."
+    },
+    {
+      "mistake": "Меняют тест, чтобы он «позеленел», вместо исправления кода",
+      "fix": "Сначала убедитесь, что ожидаемое значение верно; тест — это спецификация."
+    },
+    {
+      "mistake": "Сравнивают дроби через ==",
+      "fix": "Для чисел с плавающей точкой сравнивайте с допуском: abs(a - b) < 1e-9."
+    },
+    {
+      "mistake": "Пишут тесты, которые никогда не падают",
+      "fix": "Сломайте код нарочно — тест обязан это заметить."
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "id": "a4-salt-demo",
+  "type": "predict",
+  "title": "Одинаковые пароли",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Одинаковые пароли",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "import hashlib\n\n\ndef h(password, salt=\"\"):\n    return hashlib.sha256((salt + password).encode()).hexdigest()\n\n\nanna = h(\"qwerty\")\nboris = h(\"qwerty\")\nprint(anna == boris)\nanna = h(\"qwerty\", \"x1\")\nboris = h(\"qwerty\", \"y2\")\nprint(anna == boris)\nprint(h(\"qwerty\", \"x1\") == anna)\n",
+  "hints": [
+    "Без соли h(\"qwerty\") вычисляется одинаково.",
+    "Первое сравнение: True.",
+    "С разными солями хеши разные: False.",
+    "Третье: тот же пароль и та же соль — тот же хеш.",
+    "Результат: True, False, True."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "True\nFalse\nTrue\n"
+  },
+  "solution": "True\nFalse\nTrue\n",
+  "explanation": "Соль делает хеши одинаковых паролей разными, а повторный расчёт с той же солью — воспроизводимым.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "False\nFalse\nTrue",
+      "answer": "False\nFalse\nTrue",
+      "why": "Без соли хеши одинаковых паролей совпадают."
+    },
+    {
+      "code": "True\nTrue\nTrue",
+      "answer": "True\nTrue\nTrue",
+      "why": "С разной солью хеши отличаются."
+    },
+    {
+      "code": "True\nFalse\nFalse",
+      "answer": "True\nFalse\nFalse",
+      "why": "Один и тот же пароль с той же солью даёт тот же хеш."
+    }
+  ]
+}

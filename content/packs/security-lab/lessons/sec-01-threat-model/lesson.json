@@ -1,0 +1,43 @@
+{
+  "id": "sec-01-threat-model",
+  "title": "Модель угроз и принципы",
+  "goal": "Описывать активы, угрозы и меры, оценивать риск и применять принципы безопасной разработки.",
+  "skills": [
+    "sec.model",
+    "sec.access",
+    "sec.validation"
+  ],
+  "prerequisites": [],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-risk.json",
+    "assignments/a2-level.json",
+    "assignments/a3-allowed.json",
+    "assignments/a4-username.json",
+    "assignments/a5-policy.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Скрывают кнопку вместо проверки прав на сервере",
+      "fix": "Права проверяет серверный код; интерфейс лишь удобство."
+    },
+    {
+      "mistake": "Составляют чёрный список запрещённых символов",
+      "fix": "Описывайте допустимое — белый список."
+    },
+    {
+      "mistake": "Защищают всё одинаково",
+      "fix": "Оцените риски и начните с самых высоких."
+    },
+    {
+      "mistake": "Доверяют входным данным из «своего» источника",
+      "fix": "Проверяйте всё, что пришло извне, включая файлы и ответы API."
+    }
+  ]
+}

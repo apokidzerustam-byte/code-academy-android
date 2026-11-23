@@ -1,0 +1,90 @@
+{
+  "id": "a3-link",
+  "type": "function",
+  "title": "Безопасная ссылка",
+  "statement": "Напишите `link(label, url)`: если `url` начинается с `http://` или `https://`, верните `<a href=\"URL\">ТЕКСТ</a>` (URL и ТЕКСТ экранированы). Иначе верните просто экранированный текст `label` без ссылки.",
+  "goal": "Безопасная ссылка",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Сначала проверьте начало адреса.",
+    "Допустимые схемы: http:// и https://.",
+    "Метод startswith принимает кортеж вариантов.",
+    "Недопустимый адрес — вывести только текст.",
+    "Допустимый — собрать тег a, экранировав обе части."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "link",
+    "cases": [
+      {
+        "args": [
+          "сайт",
+          "https://example.com/?a=1&b=2"
+        ],
+        "id": "v1",
+        "expected": "<a href=\"https://example.com/?a=1&amp;b=2\">сайт</a>"
+      },
+      {
+        "args": [
+          "клик",
+          "javascript:alert(1)"
+        ],
+        "id": "v2",
+        "expected": "клик"
+      },
+      {
+        "args": [
+          "x<y",
+          "http://a.b/"
+        ],
+        "id": "h3",
+        "hidden": true,
+        "expected": "<a href=\"http://a.b/\">x&lt;y</a>"
+      },
+      {
+        "args": [
+          "z",
+          "https://x.com/\" onclick=\"evil()"
+        ],
+        "id": "h4",
+        "hidden": true,
+        "expected": "<a href=\"https://x.com/&quot; onclick=&quot;evil()\">z</a>"
+      },
+      {
+        "args": [
+          "w",
+          "ftp://files"
+        ],
+        "id": "h5",
+        "hidden": true,
+        "expected": "w"
+      },
+      {
+        "args": [
+          "обычный",
+          ""
+        ],
+        "id": "h6",
+        "hidden": true,
+        "expected": "обычный"
+      }
+    ]
+  },
+  "solution": "import html\n\n\ndef link(label, url):\n    if not url.startswith((\"http://\", \"https://\")):\n        return html.escape(label)\n    return f'<a href=\"{html.escape(url)}\">{html.escape(label)}</a>'\n",
+  "explanation": "Экранирования мало: схема javascript: выполнит код по клику. Адрес нужно проверять по белому списку схем.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "def link(label, url):\n    return f'<a href=\"{url}\">{label}</a>'\n",
+      "why": "Нет экранирования и проверки схемы."
+    },
+    {
+      "code": "import html\n\n\ndef link(label, url):\n    return f'<a href=\"{html.escape(url)}\">{html.escape(label)}</a>'\n",
+      "why": "Опасная схема javascript: не отфильтрована."
+    }
+  ]
+}

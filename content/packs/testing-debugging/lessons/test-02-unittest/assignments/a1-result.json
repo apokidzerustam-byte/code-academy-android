@@ -1,0 +1,46 @@
+{
+  "id": "a1-result",
+  "type": "predict",
+  "title": "Итог прогона",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Итог прогона",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "import unittest\n\n\nclass T(unittest.TestCase):\n    def test_a(self):\n        self.assertEqual(len(\"abc\"), 3)\n\n    def test_b(self):\n        self.assertEqual(\"a\" * 2, \"aaa\")\n\n    def test_c(self):\n        self.assertEqual(10 // 0, 0)\n\n    def test_d(self):\n        self.assertTrue([])\n\n\nresult = unittest.TestResult()\nunittest.defaultTestLoader.loadTestsFromTestCase(T).run(result)\nprint(result.testsRun, len(result.failures), len(result.errors))\nprint(result.wasSuccessful())\n",
+  "hints": [
+    "Прогон выполнит четыре теста: test_a, test_b, test_c, test_d.",
+    "test_a проходит.",
+    "test_b не сходится: провал. test_d тоже: пустой список ложен.",
+    "test_c падает с ZeroDivisionError — это ошибка, а не провал.",
+    "Печатается: запущено, провалов, ошибок; затем успешность."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "4 2 1\nFalse\n"
+  },
+  "solution": "4 2 1\nFalse\n",
+  "explanation": "Failure — не сошлась проверка (test_b, test_d); error — исключение внутри теста (test_c). Успех — только если нет ни того, ни другого.",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "4 3 0\nFalse",
+      "answer": "4 3 0\nFalse",
+      "why": "Деление на ноль — это ошибка (error), а не провал."
+    },
+    {
+      "code": "4 2 1\nTrue",
+      "answer": "4 2 1\nTrue",
+      "why": "Раз есть неудачи, итог не успешен."
+    },
+    {
+      "code": "3 2 1\nFalse",
+      "answer": "3 2 1\nFalse",
+      "why": "Тестов четыре."
+    }
+  ]
+}

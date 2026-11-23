@@ -1,0 +1,45 @@
+{
+  "id": "test-04-debugging",
+  "title": "Отладка и logging",
+  "goal": "Читать сообщения об ошибках, находить причину печатью и logging, избегать классических ловушек.",
+  "skills": [
+    "debug.traceback",
+    "debug.logging",
+    "debug.traps"
+  ],
+  "prerequisites": [
+    "test-03-edge-cases"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-logging.json",
+    "assignments/a2-errors.json",
+    "assignments/a3-mutable.json",
+    "assignments/a4-sum-to.json",
+    "assignments/a5-log-negative.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Меняют код наугад",
+      "fix": "Сначала воспроизведите ошибку и сформулируйте гипотезу."
+    },
+    {
+      "mistake": "Читают traceback сверху",
+      "fix": "Смотрите на последнюю строку: там тип и причина."
+    },
+    {
+      "mistake": "Оставляют отладочные print в коде",
+      "fix": "Используйте logging: уровнем управляют настройкой."
+    },
+    {
+      "mistake": "Лечат симптом, а не причину",
+      "fix": "Найдите, почему значение стало неверным, и добавьте тест."
+    }
+  ]
+}

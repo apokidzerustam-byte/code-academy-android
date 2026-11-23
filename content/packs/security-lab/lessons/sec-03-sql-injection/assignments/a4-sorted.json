@@ -1,0 +1,80 @@
+{
+  "id": "a4-sorted",
+  "type": "function",
+  "title": "Сортировка по выбору пользователя",
+  "statement": "Напишите `names_sorted(column)`: верните список имён из `users`, отсортированных по столбцу `column`. Допустимы только `name` и `role` (при сортировке по `role` порядок внутри роли — по имени); для любого другого значения — `ValueError`.",
+  "goal": "Сортировка по выбору пользователя",
+  "input": "Аргументы функции из условия.",
+  "expectedResult": "Значение, которое возвращает функция.",
+  "constraints": [],
+  "hints": [
+    "Имя столбца параметром не передать — нужна проверка.",
+    "Перечислите допустимые названия в множестве.",
+    "Если столбца нет в множестве — raise ValueError.",
+    "Проверенное имя можно подставить в запрос.",
+    "Для порядка внутри роли добавьте второй ключ сортировки."
+  ],
+  "tests": {
+    "kind": "function",
+    "function": "names_sorted",
+    "cases": [
+      {
+        "args": [
+          "name"
+        ],
+        "id": "v1",
+        "expected": [
+          "anna",
+          "boris",
+          "clara"
+        ]
+      },
+      {
+        "args": [
+          "role"
+        ],
+        "id": "v2",
+        "expected": [
+          "anna",
+          "boris",
+          "clara"
+        ]
+      },
+      {
+        "args": [
+          "password"
+        ],
+        "expected_error": "ValueError",
+        "id": "h3",
+        "hidden": true
+      },
+      {
+        "args": [
+          "name; DROP TABLE users"
+        ],
+        "expected_error": "ValueError",
+        "id": "h4",
+        "hidden": true
+      },
+      {
+        "args": [
+          ""
+        ],
+        "expected_error": "ValueError",
+        "id": "h5",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "import sqlite3\n\nconn = sqlite3.connect(\":memory:\")\nconn.execute(\"CREATE TABLE users (name TEXT, role TEXT)\")\nconn.executemany(\"INSERT INTO users VALUES (?, ?)\", [(\"anna\", \"admin\"), (\"boris\", \"user\"), (\"clara\", \"user\")])\n\n\n\nALLOWED = {\"name\", \"role\"}\n\n\ndef names_sorted(column):\n    if column not in ALLOWED:\n        raise ValueError(\"недопустимый столбец\")\n    rows = conn.execute(f\"SELECT name FROM users ORDER BY {column}, name\").fetchall()\n    return [r[0] for r in rows]\n",
+  "explanation": "Белый список — единственный надёжный способ принимать имена столбцов: подставляется только то, что программист разрешил заранее.",
+  "criteria": [
+    "Все проверки пройдены, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "import sqlite3\n\nconn = sqlite3.connect(\":memory:\")\nconn.execute(\"CREATE TABLE users (name TEXT, role TEXT)\")\nconn.executemany(\"INSERT INTO users VALUES (?, ?)\", [(\"anna\", \"admin\"), (\"boris\", \"user\"), (\"clara\", \"user\")])\n\n\n\ndef names_sorted(column):\n    rows = conn.execute(f\"SELECT name FROM users ORDER BY {column}, name\").fetchall()\n    return [r[0] for r in rows]\n",
+      "why": "Нет проверки: недопустимый столбец доходит до базы."
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "id": "a5-policy",
+  "type": "predict",
+  "title": "Политика паролей",
+  "statement": "Что выведет программа? Запишите вывод построчно, не запуская код.",
+  "goal": "Политика паролей",
+  "input": "Нет.",
+  "expectedResult": "Вывод программы.",
+  "constraints": [
+    "Ответьте без запуска."
+  ],
+  "code": "def problems(password):\n    found = []\n    if len(password) < 8:\n        found.append(\"короткий\")\n    if password.lower() == password:\n        found.append(\"нет заглавных\")\n    if not any(c.isdigit() for c in password):\n        found.append(\"нет цифр\")\n    return found\n\nfor p in [\"abc\", \"Password1\", \"longpassword\", \"Ab1\"]:\n    print(p, problems(p) or \"ок\")\n",
+  "hints": [
+    "Для каждого пароля собирается список проблем.",
+    "«abc»: короткий, нет заглавных, нет цифр.",
+    "«Password1»: длина 9, есть заглавная и цифра — проблем нет.",
+    "«longpassword»: длинный, но нет заглавных и цифр.",
+    "«Ab1»: есть заглавная и цифра, но короткий. Пустой список печатается как «ок»."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "abc ['короткий', 'нет заглавных', 'нет цифр']\nPassword1 ок\nlongpassword ['нет заглавных', 'нет цифр']\nAb1 ['короткий']\n"
+  },
+  "solution": "abc ['короткий', 'нет заглавных', 'нет цифр']\nPassword1 ок\nlongpassword ['нет заглавных', 'нет цифр']\nAb1 ['короткий']\n",
+  "explanation": "Проверки независимы, поэтому у одного пароля может быть сразу несколько проблем; пустой список в `or` заменяется строкой «ок».",
+  "criteria": [
+    "Все строки вывода верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "abc ['короткий', 'нет цифр']\nPassword1 ок\nlongpassword ['нет заглавных', 'нет цифр']\nAb1 ок",
+      "answer": "abc ['короткий', 'нет цифр']\nPassword1 ок\nlongpassword ['нет заглавных', 'нет цифр']\nAb1 ок",
+      "why": "У «abc» нет заглавных; «Ab1» слишком короткий."
+    },
+    {
+      "code": "abc ['короткий', 'нет заглавных', 'нет цифр']\nPassword1 ок\nlongpassword ['нет заглавных', 'нет цифр']\nAb1 ок",
+      "answer": "abc ['короткий', 'нет заглавных', 'нет цифр']\nPassword1 ок\nlongpassword ['нет заглавных', 'нет цифр']\nAb1 ок",
+      "why": "«Ab1» короче восьми символов — это проблема."
+    }
+  ]
+}

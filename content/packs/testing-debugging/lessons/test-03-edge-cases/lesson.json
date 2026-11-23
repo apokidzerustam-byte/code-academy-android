@@ -1,0 +1,45 @@
+{
+  "id": "test-03-edge-cases",
+  "title": "Граничные случаи",
+  "goal": "Выбирать тестовые данные: границы, классы эквивалентности, особые значения.",
+  "skills": [
+    "test.boundary",
+    "test.classes",
+    "test.special"
+  ],
+  "prerequisites": [
+    "test-02-unittest"
+  ],
+  "runner": "W",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-boundary.json",
+    "assignments/a2-discount-tests.json",
+    "assignments/a3-safe-average.json",
+    "assignments/a4-second.json",
+    "assignments/a5-last-word.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 4,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Проверяют только «середину» диапазона",
+      "fix": "Добавьте границы: чуть меньше, ровно, чуть больше."
+    },
+    {
+      "mistake": "Забывают пустой список или пустую строку",
+      "fix": "Для каждого типа заведите чек-лист особых значений."
+    },
+    {
+      "mistake": "Не решили заранее, что должна делать функция на краю",
+      "fix": "Запишите ожидаемое поведение в тесте до реализации."
+    },
+    {
+      "mistake": "Берут много однотипных данных",
+      "fix": "Достаточно одного представителя от класса и значений на границах."
+    }
+  ]
+}
