@@ -1,0 +1,45 @@
+{
+  "id": "js-05-dom",
+  "title": "JavaScript: страница и список дел",
+  "goal": "Находить и менять элементы страницы, создавать новые, обрабатывать события и собрать рабочий список дел.",
+  "skills": [
+    "js.dom2",
+    "js.events2",
+    "js.safe-html"
+  ],
+  "prerequisites": [
+    "js-04-async"
+  ],
+  "runner": "html",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-add.json",
+    "assignments/a2-toggle.json",
+    "assignments/a3-delete.json",
+    "assignments/a4-fix.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Значение поля читают вне обработчика",
+      "fix": "Читайте input.value внутри обработчика нажатия."
+    },
+    {
+      "mistake": "innerHTML для пользовательского текста",
+      "fix": "Используйте textContent: innerHTML выполнит чужую разметку (XSS)."
+    },
+    {
+      "mistake": "Обработчик только на первом элементе",
+      "fix": "querySelector находит один элемент; для всех — querySelectorAll и forEach или делегирование."
+    },
+    {
+      "mistake": "classList.add вместо toggle",
+      "fix": "toggle переключает класс туда и обратно."
+    }
+  ]
+}

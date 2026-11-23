@@ -1,0 +1,77 @@
+{
+  "id": "a2-sum-async",
+  "type": "write",
+  "title": "Сумма из двух запросов",
+  "statement": "Дана функция `getNumber(n)`: она возвращает `Promise` с числом `n` (через 10 мс). Напишите **async**-функцию `sumAsync(a, b)`: получает оба числа через `getNumber` и возвращает их сумму.",
+  "goal": "Использовать await.",
+  "input": "Два числа.",
+  "expectedResult": "Возвращаемое значение.",
+  "constraints": [],
+  "starterCode": "const getNumber = (n) => new Promise((resolve) => setTimeout(() => resolve(n), 10));\n\nasync function sumAsync(a, b) {\n  // ваш код\n}\n",
+  "hints": [
+    "Слово await ставят перед обещанием: оно отдаёт значение.",
+    "Дождитесь первого числа: const x = await getNumber(a).",
+    "Так же получите второе число.",
+    "Верните сумму получившихся чисел.",
+    "return x + y;"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "sumAsync",
+        "args": [
+          2,
+          3
+        ],
+        "expected": 5
+      },
+      {
+        "id": "v2",
+        "function": "sumAsync",
+        "args": [
+          10,
+          -4
+        ],
+        "expected": 6
+      },
+      {
+        "id": "h3",
+        "function": "sumAsync",
+        "args": [
+          0,
+          0
+        ],
+        "expected": 0,
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "function": "sumAsync",
+        "args": [
+          1.5,
+          2.5
+        ],
+        "expected": 4,
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "const getNumber = (n) => new Promise((resolve) => setTimeout(() => resolve(n), 10));\n\nasync function sumAsync(a, b) {\n  const x = await getNumber(a);\n  const y = await getNumber(b);\n  return x + y;\n}\n",
+  "explanation": "await приостанавливает функцию до результата обещания и возвращает число; async-функция вернёт Promise с суммой.",
+  "criteria": [
+    "Результат верен на всех наборах, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "const getNumber = (n) => new Promise((resolve) => setTimeout(() => resolve(n), 10));\n\nasync function sumAsync(a, b) {\n  return getNumber(a) + getNumber(b);\n}\n",
+      "why": "Без await складываются обещания: результат — строка «[object Promise]…»."
+    },
+    {
+      "code": "const getNumber = (n) => new Promise((resolve) => setTimeout(() => resolve(n), 10));\n\nasync function sumAsync(a, b) {\n  const x = await getNumber(a);\n  return x;\n}\n",
+      "why": "Второе число потеряно."
+    }
+  ]
+}

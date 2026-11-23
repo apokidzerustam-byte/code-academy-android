@@ -1,0 +1,120 @@
+{
+  "id": "a2-sorted",
+  "type": "write",
+  "title": "Числа по возрастанию",
+  "statement": "Напишите функцию `sortedNumbers(numbers)`: **возвращает** новый массив чисел по возрастанию. Исходный массив менять не нужно.",
+  "goal": "Сортировать числа правильно.",
+  "input": "Аргументы функции.",
+  "expectedResult": "Новый отсортированный массив.",
+  "constraints": [],
+  "starterCode": "function sortedNumbers(numbers) {\n  // ваш код\n}\n",
+  "hints": [
+    "Метод sort сортирует массив.",
+    "Без аргументов он сравнивает элементы как строки.",
+    "Передайте функцию сравнения двух чисел.",
+    "(a, b) => a - b даёт порядок по возрастанию.",
+    "Копию сделайте через [...numbers]."
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "sortedNumbers",
+        "args": [
+          [
+            3,
+            1,
+            2
+          ]
+        ],
+        "expected": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "id": "v2",
+        "function": "sortedNumbers",
+        "args": [
+          [
+            10,
+            9,
+            100,
+            1
+          ]
+        ],
+        "expected": [
+          1,
+          9,
+          10,
+          100
+        ]
+      },
+      {
+        "id": "h3",
+        "function": "sortedNumbers",
+        "args": [
+          []
+        ],
+        "expected": [],
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "function": "sortedNumbers",
+        "args": [
+          [
+            -1,
+            -10,
+            5
+          ]
+        ],
+        "expected": [
+          -10,
+          -1,
+          5
+        ],
+        "hidden": true
+      },
+      {
+        "id": "h5",
+        "function": "sortedNumbers",
+        "args": [
+          [
+            2,
+            2,
+            1
+          ]
+        ],
+        "expected": [
+          1,
+          2,
+          2
+        ],
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "function sortedNumbers(numbers) {\n  return [...numbers].sort((a, b) => a - b);\n}\n",
+  "explanation": "sort((a, b) => a - b) сравнивает числа по значению; копия [...numbers] защищает исходный массив.",
+  "criteria": [
+    "Результат верен на всех наборах, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "function sortedNumbers(numbers) {\n  return [...numbers].sort();\n}\n",
+      "why": "sort без функции сравнивает как строки: 10 раньше 9."
+    },
+    {
+      "code": "function sortedNumbers(numbers) {\n  return [...numbers].sort((a, b) => b - a);\n}\n",
+      "why": "Порядок по убыванию."
+    },
+    {
+      "code": "function sortedNumbers(numbers) {\n  return numbers.slice(0, 1);\n}\n",
+      "why": "Возвращается не весь массив."
+    }
+  ]
+}

@@ -1,0 +1,214 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Страница как дерево",
+      "narration": "Браузер превращает HTML в дерево объектов, которое называется DOM. Каждый тег — узел дерева, и из JavaScript его можно найти, прочитать и изменить: поменять текст, добавить элемент, убрать класс. Так работают все живые страницы. Сегодня на этой основе соберём настоящий список дел.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "**DOM** — дерево элементов страницы. JavaScript находит узлы и меняет их.",
+          "cue": 1
+        }
+      ]
+    },
+    {
+      "id": "find",
+      "title": "Найти и изменить",
+      "narration": "Метод querySelector находит первый элемент по CSS-селектору, а querySelectorAll — все подходящие. Меняем текст заголовка свойством textContent. Для каждого пункта списка дописываем номер. Свойство children даёт дочерние элементы, у списка их два. Запускаем и смотрим результат.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "index.html"
+        },
+        {
+          "type": "type",
+          "text": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <h1>Заголовок</h1>\n  <ul id=\"list\">\n    <li>Хлеб</li>\n    <li>Чай</li>\n  </ul>\n  <p>Пунктов: <span id=\"count\"></span></p>\n  <script>\n  const h = document.querySelector(\"h1\");\n  h.textContent = \"Новый заголовок\";\n  document.querySelectorAll(\"li\").forEach((li, i) => {\n    li.textContent = (i + 1) + \". \" + li.textContent;\n  });\n  document.getElementById(\"count\").textContent = document.getElementById(\"list\").children.length;\n</script>\n</body>\n</html>\n",
+          "file": "index.html",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            15
+          ],
+          "file": "index.html",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            16
+          ],
+          "file": "index.html",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            17,
+            18,
+            19
+          ],
+          "file": "index.html",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            20
+          ],
+          "file": "index.html",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "index.html",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "Предпросмотр страницы:\nНовый заголовок\n1. Хлеб\n2. Чай\n\nПунктов: 2",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "create",
+      "title": "Создать элемент",
+      "narration": "Новые элементы создают методом createElement, заполняют текстом и добавляют на страницу через appendChild. Обратите внимание: пользовательский текст всегда кладите через textContent. Свойство innerHTML разберёт текст как разметку, и если в нём окажется чужой тег или скрипт, страница выполнит его. Это основа уязвимости XSS. Запишем строку с тегом через textContent: он останется просто текстом.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "index.html"
+        },
+        {
+          "type": "type",
+          "text": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <div id=\"box\"></div>\n  <script>\n    const text = \"<b>жирный</b>\";\n    document.getElementById(\"box\").textContent = text;\n  </script>\n</body>\n</html>\n",
+          "file": "index.html",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            10,
+            11
+          ],
+          "file": "index.html",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "index.html",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "Предпросмотр страницы:\n<b>жирный</b>",
+          "cue": 4
+        },
+        {
+          "type": "note",
+          "md": "textContent сохранил: `&lt;b&gt;жирный&lt;/b&gt;`. Через innerHTML тег стал бы настоящей разметкой.",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "todo",
+      "title": "Собираем список дел",
+      "narration": "Теперь соберём всё вместе. По нажатию кнопки читаем поле, убираем лишние пробелы и пропускаем пустую строку. Создаём пункт списка, подписываем его на нажатие: клик переключает класс done, и CSS зачёркивает текст. Добавляем пункт в список, очищаем поле и обновляем счётчик оставшихся дел. Нажмём добавление дважды и отметим первое дело выполненным.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "index.html"
+        },
+        {
+          "type": "type",
+          "text": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n  <style>\n    li.done { text-decoration: line-through; color: gray; }\n  </style>\n</head>\n<body>\n  <h1>Мои дела</h1>\n  <input id=\"title\" placeholder=\"Что сделать?\">\n  <button id=\"add\">Добавить</button>\n  <ul id=\"list\"></ul>\n  <p>Осталось: <span id=\"left\">0</span></p>\n  <script>\n    const input = document.getElementById(\"title\");\n    const list = document.getElementById(\"list\");\n    const left = document.getElementById(\"left\");\n\n    function update() {\n      left.textContent = list.querySelectorAll(\"li:not(.done)\").length;\n    }\n\n    document.getElementById(\"add\").addEventListener(\"click\", () => {\n      const text = input.value.trim();\n      if (text === \"\") return;\n      const li = document.createElement(\"li\");\n      li.textContent = text;\n      li.addEventListener(\"click\", () => {\n        li.classList.toggle(\"done\");\n        update();\n      });\n      list.appendChild(li);\n      input.value = \"\";\n      update();\n    });\n  </script>\n\n</body>\n</html>\n",
+          "file": "index.html",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            26,
+            27
+          ],
+          "file": "index.html",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            28,
+            29
+          ],
+          "file": "index.html",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            30,
+            31,
+            32,
+            33
+          ],
+          "file": "index.html",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            34,
+            35,
+            36
+          ],
+          "file": "index.html",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "index.html",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "Предпросмотр страницы:\nМои дела\n Добавить\n\nОсталось: 0",
+          "cue": 4
+        },
+        {
+          "type": "note",
+          "md": "После двух добавлений и отметки первого: пунктов — **2**, осталось — **1**, выполнено — **1**.",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "mistake",
+      "title": "Частая ошибка: значение читают не в обработчике",
+      "narration": "Типичная ошибка: прочитать значение поля один раз при загрузке страницы, в самом начале скрипта. Тогда оно навсегда останется пустым, и каждое нажатие добавит пустой пункт. Читайте поле внутри обработчика, в момент нажатия.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "Читаем `input.value` **внутри** обработчика — тогда берётся текущее значение.",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. DOM — дерево элементов страницы. Находим узлы через querySelector и querySelectorAll, меняем через textContent и classList, создаём через createElement и appendChild. События ловим через addEventListener. Пользовательский текст вставляем через textContent, а не innerHTML.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`querySelector` · `textContent` · `createElement` · `appendChild` · `classList.toggle` · `addEventListener`",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}

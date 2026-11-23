@@ -43,3 +43,7 @@ def merge_pack(pack_id, lesson_id, skills, description=None):
 
 def computed(selector, prop):
     return f"getComputedStyle(document.querySelector('{selector}')).{prop}"
+
+
+def merge_js_lesson(lesson_id, skills, pack_id="javascript"):
+    merge_pack(pack_id, lesson_id, skills)

@@ -1,0 +1,84 @@
+{
+  "id": "a1-add",
+  "type": "write",
+  "title": "Добавить дело",
+  "statement": "На странице есть поле `#title`, кнопка `#add` и пустой список `#list`. Напишите скрипт: по нажатию на кнопку в **конец списка** добавляется пункт `li` с введённым текстом (без пробелов по краям), а поле очищается. **Пустой** текст (в том числе из одних пробелов) не добавляется.",
+  "goal": "Создавать элементы и реагировать на нажатие.",
+  "input": "Страница с полем, кнопкой и списком.",
+  "expectedResult": "Дело появляется в списке, поле очищается.",
+  "constraints": [
+    "Разметку не меняйте — только скрипт."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <h1>Мои дела</h1>\n  <input id=\"title\" placeholder=\"Что сделать?\">\n  <button id=\"add\">Добавить</button>\n  <ul id=\"list\"></ul>\n  <p>Осталось: <span id=\"left\">0</span></p>\n  <script>\n    // ваш код\n  </script>\n\n</body>\n</html>\n",
+  "hints": [
+    "Найдите кнопку через getElementById и подпишитесь на click.",
+    "Внутри обработчика прочитайте input.value и уберите пробелы: trim().",
+    "Пустую строку пропустите: return.",
+    "Создайте пункт: document.createElement(\"li\"), задайте textContent, добавьте appendChild.",
+    "После добавления очистите поле: input.value = \"\"."
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "one",
+        "before": "document.getElementById('title').value = 'Молоко'; document.getElementById('add').click();",
+        "expr": "[...document.querySelectorAll('#list li')].map(li => li.textContent).join('|')",
+        "expected": "Молоко"
+      },
+      {
+        "id": "two",
+        "before": "document.getElementById('title').value = 'Молоко'; document.getElementById('add').click();document.getElementById('title').value = 'Отчёт'; document.getElementById('add').click();",
+        "expr": "[...document.querySelectorAll('#list li')].map(li => li.textContent).join('|')",
+        "expected": "Молоко|Отчёт"
+      },
+      {
+        "id": "clear",
+        "before": "document.getElementById('title').value = 'Хлеб'; document.getElementById('add').click();",
+        "expr": "document.getElementById('title').value",
+        "expected": "",
+        "hint": "После добавления поле очищается"
+      },
+      {
+        "id": "empty",
+        "hidden": true,
+        "before": "document.getElementById('title').value = ''; document.getElementById('add').click();document.getElementById('title').value = '   '; document.getElementById('add').click();",
+        "expr": "document.querySelectorAll('#list li').length",
+        "expected": 0,
+        "hint": "Пустые дела не добавляются"
+      },
+      {
+        "id": "trim",
+        "hidden": true,
+        "before": "document.getElementById('title').value = '  Чай  '; document.getElementById('add').click();",
+        "expr": "document.querySelector('#list li').textContent",
+        "expected": "Чай",
+        "hint": "Пробелы по краям убираются"
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <h1>Мои дела</h1>\n  <input id=\"title\" placeholder=\"Что сделать?\">\n  <button id=\"add\">Добавить</button>\n  <ul id=\"list\"></ul>\n  <p>Осталось: <span id=\"left\">0</span></p>\n  <script>\n    const input = document.getElementById(\"title\");\n    const list = document.getElementById(\"list\");\n    document.getElementById(\"add\").addEventListener(\"click\", () => {\n      const text = input.value.trim();\n      if (text === \"\") return;\n      const li = document.createElement(\"li\");\n      li.textContent = text;\n      list.appendChild(li);\n      input.value = \"\";\n    });\n  </script>\n\n</body>\n</html>\n",
+  "explanation": "Читаем поле внутри обработчика, проверяем пустоту, создаём li, добавляем в ul и очищаем поле.",
+  "criteria": [
+    "Пункты добавляются, пустые — нет, поле очищается."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <h1>Мои дела</h1>\n  <input id=\"title\" placeholder=\"Что сделать?\">\n  <button id=\"add\">Добавить</button>\n  <ul id=\"list\"></ul>\n  <p>Осталось: <span id=\"left\">0</span></p>\n  <script>\n    const input = document.getElementById(\"title\");\n    const list = document.getElementById(\"list\");\n    document.getElementById(\"add\").addEventListener(\"click\", () => {\n      const text = input.value.trim();\n      const li = document.createElement(\"li\");\n      li.textContent = text;\n      list.appendChild(li);\n      input.value = \"\";\n    });\n  </script>\n\n</body>\n</html>\n",
+      "why": "Нет проверки: добавляются пустые дела."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <h1>Мои дела</h1>\n  <input id=\"title\" placeholder=\"Что сделать?\">\n  <button id=\"add\">Добавить</button>\n  <ul id=\"list\"></ul>\n  <p>Осталось: <span id=\"left\">0</span></p>\n  <script>\n    const input = document.getElementById(\"title\");\n    const list = document.getElementById(\"list\");\n    document.getElementById(\"add\").addEventListener(\"click\", () => {\n      const text = input.value.trim();\n      if (text === \"\") return;\n      const li = document.createElement(\"li\");\n      li.textContent = text;\n      list.appendChild(li);\n    });\n  </script>\n\n</body>\n</html>\n",
+      "why": "Поле не очищается."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <h1>Мои дела</h1>\n  <input id=\"title\" placeholder=\"Что сделать?\">\n  <button id=\"add\">Добавить</button>\n  <ul id=\"list\"></ul>\n  <p>Осталось: <span id=\"left\">0</span></p>\n  <script>\n    const input = document.getElementById(\"title\");\n    const list = document.getElementById(\"list\");\n    document.getElementById(\"add\").addEventListener(\"click\", () => {\n      const text = input.value;\n      if (text === \"\") return;\n      const li = document.createElement(\"li\");\n      li.textContent = text;\n      list.appendChild(li);\n      input.value = \"\";\n    });\n  </script>\n\n</body>\n</html>\n",
+      "why": "Пробелы по краям не убираются."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <h1>Мои дела</h1>\n  <input id=\"title\" placeholder=\"Что сделать?\">\n  <button id=\"add\">Добавить</button>\n  <ul id=\"list\"></ul>\n  <p>Осталось: <span id=\"left\">0</span></p>\n  <script>\n    const input = document.getElementById(\"title\");\n    const list = document.getElementById(\"list\");\n    document.getElementById(\"add\").addEventListener(\"click\", () => {\n      const text = input.value.trim();\n      if (text === \"\") return;\n      const li = document.createElement(\"li\");\n      li.textContent = \"дело\";\n      list.appendChild(li);\n      input.value = \"\";\n    });\n  </script>\n\n</body>\n</html>\n",
+      "why": "Текст пункта не из поля."
+    }
+  ]
+}

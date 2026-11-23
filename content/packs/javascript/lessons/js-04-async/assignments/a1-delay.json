@@ -1,0 +1,78 @@
+{
+  "id": "a1-delay",
+  "type": "write",
+  "title": "Своя задержка",
+  "statement": "Напишите функцию `delay(ms, value)`: **возвращает** `Promise`, который через `ms` миллисекунд выполняется значением `value`.",
+  "goal": "Создавать Promise с таймером.",
+  "input": "Аргументы функции.",
+  "expectedResult": "Promise со значением value.",
+  "constraints": [],
+  "starterCode": "function delay(ms, value) {\n  // ваш код\n}\n",
+  "hints": [
+    "Нужно вернуть новый Promise.",
+    "new Promise((resolve) => { … }) — внутри вызовите resolve, когда результат готов.",
+    "Отложить вызов поможет setTimeout.",
+    "Передайте resolve значение value.",
+    "setTimeout(() => resolve(value), ms)"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "delay",
+        "args": [
+          10,
+          "ok"
+        ],
+        "expected": "ok"
+      },
+      {
+        "id": "v2",
+        "function": "delay",
+        "args": [
+          0,
+          5
+        ],
+        "expected": 5
+      },
+      {
+        "id": "h3",
+        "function": "delay",
+        "args": [
+          20,
+          [
+            1,
+            2
+          ]
+        ],
+        "expected": [
+          1,
+          2
+        ],
+        "hidden": true,
+        "hint": "Значение любого типа"
+      }
+    ]
+  },
+  "solution": "function delay(ms, value) {\n  return new Promise((resolve) => setTimeout(() => resolve(value), ms));\n}\n",
+  "explanation": "Promise выполняется, когда вызван resolve(value); setTimeout откладывает этот вызов на ms миллисекунд.",
+  "criteria": [
+    "Результат верен на всех наборах, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "function delay(ms, value) {\n  return new Promise((resolve) => setTimeout(resolve, ms));\n}\n",
+      "why": "Обещание выполняется без значения: undefined."
+    },
+    {
+      "code": "function delay(ms, value) {\n  return new Promise((resolve) => {});\n}\n",
+      "why": "Обещание никогда не выполняется."
+    },
+    {
+      "code": "function delay(ms, value) {\n  return new Promise((resolve) => setTimeout(() => resolve(ms), ms));\n}\n",
+      "why": "Вместо value передаётся ms."
+    }
+  ]
+}

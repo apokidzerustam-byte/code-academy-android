@@ -1,0 +1,87 @@
+{
+  "id": "a1-count-words",
+  "type": "write",
+  "title": "Частота слов",
+  "statement": "Напишите функцию `countWords(text)`: **возвращает** объект, где ключ — слово (в нижнем регистре), значение — сколько раз оно встретилось. Слова разделены пробелами (возможно, несколькими). Для пустой строки — пустой объект.",
+  "goal": "Собирать счётчики в объекте.",
+  "input": "Аргументы функции.",
+  "expectedResult": "Объект со счётчиками.",
+  "constraints": [],
+  "starterCode": "function countWords(text) {\n  // ваш код\n}\n",
+  "hints": [
+    "Заведите пустой объект для счётчиков.",
+    "Разрежьте строку на слова: toLowerCase() и split(/\\s+/).",
+    "Пустые «слова» от лишних пробелов пропустите.",
+    "Для каждого слова: счётчик = прежний счётчик (или 0) плюс один.",
+    "counts[w] = (counts[w] || 0) + 1;"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "countWords",
+        "args": [
+          "a b a"
+        ],
+        "expected": {
+          "a": 2,
+          "b": 1
+        }
+      },
+      {
+        "id": "v2",
+        "function": "countWords",
+        "args": [
+          "Да да нет"
+        ],
+        "expected": {
+          "да": 2,
+          "нет": 1
+        }
+      },
+      {
+        "id": "h3",
+        "function": "countWords",
+        "args": [
+          ""
+        ],
+        "expected": {},
+        "hidden": true,
+        "hint": "Пустая строка"
+      },
+      {
+        "id": "h4",
+        "function": "countWords",
+        "args": [
+          "  x   x "
+        ],
+        "expected": {
+          "x": 2
+        },
+        "hidden": true,
+        "hint": "Лишние пробелы"
+      }
+    ]
+  },
+  "solution": "function countWords(text) {\n  const counts = {};\n  for (const w of text.toLowerCase().split(/\\s+/)) {\n    if (w === \"\") continue;\n    counts[w] = (counts[w] || 0) + 1;\n  }\n  return counts;\n}\n",
+  "explanation": "Для каждого слова увеличиваем счётчик: (counts[w] || 0) + 1 даёт единицу при первой встрече.",
+  "criteria": [
+    "Результат верен на всех наборах, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "function countWords(text) {\n  const counts = {};\n  for (const w of text.split(/\\s+/)) {\n    if (w === \"\") continue;\n    counts[w] = (counts[w] || 0) + 1;\n  }\n  return counts;\n}\n",
+      "why": "Регистр не учтён: «Да» и «да» разные."
+    },
+    {
+      "code": "function countWords(text) {\n  const counts = {};\n  for (const w of text.toLowerCase().split(\" \")) {\n    counts[w] = (counts[w] || 0) + 1;\n  }\n  return counts;\n}\n",
+      "why": "Лишние пробелы дают слово «пусто»."
+    },
+    {
+      "code": "function countWords(text) {\n  const counts = {};\n  for (const w of text.toLowerCase().split(/\\s+/)) {\n    if (w === \"\") continue;\n    counts[w] = 1;\n  }\n  return counts;\n}\n",
+      "why": "Счётчик не увеличивается."
+    }
+  ]
+}

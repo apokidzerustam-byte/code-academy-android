@@ -1,0 +1,69 @@
+{
+  "id": "a3-fix-await",
+  "type": "fix",
+  "title": "Забытый await",
+  "statement": "Функция `doubleAsync(n)` должна вернуть число, **удвоенное** результатом `getNumber(n)`, но возвращает `NaN`. Найдите причину.",
+  "goal": "Находить пропущенный await.",
+  "input": "Аргументы функции.",
+  "expectedResult": "Возвращаемое значение.",
+  "constraints": [],
+  "starterCode": "const getNumber = (n) => new Promise((resolve) => setTimeout(() => resolve(n), 10));\n\nasync function doubleAsync(n) {\n  const x = getNumber(n);\n  return x * 2;\n}\n",
+  "hints": [
+    "Выведите x в консоль: что в нём лежит?",
+    "getNumber возвращает не число, а обещание.",
+    "Умножать обещание на 2 нельзя — получается NaN.",
+    "Перед вызовом, который возвращает обещание, нужен await.",
+    "const x = await getNumber(n);"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "doubleAsync",
+        "args": [
+          4
+        ],
+        "expected": 8
+      },
+      {
+        "id": "v2",
+        "function": "doubleAsync",
+        "args": [
+          0
+        ],
+        "expected": 0
+      },
+      {
+        "id": "h3",
+        "function": "doubleAsync",
+        "args": [
+          -3
+        ],
+        "expected": -6,
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "function": "doubleAsync",
+        "args": [
+          2.5
+        ],
+        "expected": 5,
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "const getNumber = (n) => new Promise((resolve) => setTimeout(() => resolve(n), 10));\n\nasync function doubleAsync(n) {\n  const x = await getNumber(n);\n  return x * 2;\n}\n",
+  "explanation": "Без await переменная x хранит Promise, а Promise * 2 — это NaN. await достаёт из обещания само число.",
+  "criteria": [
+    "Результат верен на всех наборах, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "const getNumber = (n) => new Promise((resolve) => setTimeout(() => resolve(n), 10));\n\nasync function doubleAsync(n) {\n  const x = getNumber(n);\n  return await (x * 2);\n}\n",
+      "why": "await стоит не там: умножается само обещание."
+    }
+  ]
+}

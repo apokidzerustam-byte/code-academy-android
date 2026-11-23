@@ -1,0 +1,78 @@
+{
+  "id": "a4-price",
+  "type": "write",
+  "title": "Цена с копейками",
+  "statement": "Напишите функцию `formatPrice(amount)`: **возвращает** строку с ценой, двумя знаками после запятой и суффиксом ` zł`.\n\n`formatPrice(12.5)` → `\"12.50 zł\"`.",
+  "goal": "Форматировать число и собирать строку.",
+  "input": "Аргументы функции.",
+  "expectedResult": "Возвращаемое значение.",
+  "constraints": [],
+  "starterCode": "function formatPrice(amount) {\n  // ваш код\n}\n",
+  "hints": [
+    "Нужны два знака после запятой — у чисел есть метод toFixed.",
+    "toFixed возвращает строку: (12.5).toFixed(2) даёт \"12.50\".",
+    "Допишите суффикс: пробел и zł.",
+    "Удобно собрать строку шаблоном в обратных кавычках.",
+    "Внутри шаблона: ${amount.toFixed(2)} zł"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "formatPrice",
+        "args": [
+          12.5
+        ],
+        "expected": "12.50 zł"
+      },
+      {
+        "id": "v2",
+        "function": "formatPrice",
+        "args": [
+          5
+        ],
+        "expected": "5.00 zł"
+      },
+      {
+        "id": "h3",
+        "function": "formatPrice",
+        "args": [
+          0.456
+        ],
+        "expected": "0.46 zł",
+        "hidden": true,
+        "hint": "Округляется до сотых"
+      },
+      {
+        "id": "h4",
+        "function": "formatPrice",
+        "args": [
+          1000
+        ],
+        "expected": "1000.00 zł",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "function formatPrice(amount) {\n  return `${amount.toFixed(2)} zł`;\n}\n",
+  "explanation": "toFixed(2) округляет число и возвращает строку с двумя знаками, а шаблонная строка добавляет суффикс.",
+  "criteria": [
+    "Результат верен на всех наборах, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "function formatPrice(amount) {\n  return amount + \" zł\";\n}\n",
+      "why": "Нет двух знаков после запятой."
+    },
+    {
+      "code": "function formatPrice(amount) {\n  return `${Math.round(amount)}.00 zł`;\n}\n",
+      "why": "Копейки потеряны."
+    },
+    {
+      "code": "function formatPrice(amount) {\n  return amount.toFixed(2) + \"zł\";\n}\n",
+      "why": "Нет пробела перед zł."
+    }
+  ]
+}

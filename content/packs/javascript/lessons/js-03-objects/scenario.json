@@ -1,0 +1,236 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Объект: данные с названиями",
+      "narration": "Массив хранит значения по номерам. А если нужно описать вещь с названными свойствами: пользователя с именем, возрастом и навыками? Для этого есть объект. Это набор пар «ключ и значение» в фигурных скобках. Почти все данные в программах и в интернете устроены как объекты и массивы объектов.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "Объект — набор пар **ключ: значение**. Читаем `user.name` или `user[\"name\"]`.",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "basic",
+      "title": "Читаем и меняем объект",
+      "narration": "Создадим пользователя. К свойству обращаются через точку или через квадратные скобки с именем в кавычках. Новое свойство появляется простым присваиванием. Функция Object точка keys возвращает массив имён свойств. Слово delete удаляет свойство, а оператор in проверяет, есть ли оно. Запускаем.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.js"
+        },
+        {
+          "type": "type",
+          "text": "const user = { name: \"Аня\", age: 25, skills: [\"js\", \"sql\"] };\nuser.city = \"Краков\";\nconsole.log(user.name, user[\"age\"]);\nconsole.log(Object.keys(user));\nconsole.log(user.skills.length);\ndelete user.age;\nconsole.log(\"age\" in user);\n",
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            3
+          ],
+          "file": "main.js",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            2
+          ],
+          "file": "main.js",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            4
+          ],
+          "file": "main.js",
+          "cue": 3
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            6
+          ],
+          "file": "main.js",
+          "cue": 4
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            7
+          ],
+          "file": "main.js",
+          "cue": 4
+        },
+        {
+          "type": "run",
+          "file": "main.js",
+          "cue": 5
+        },
+        {
+          "type": "output",
+          "text": "Аня 25\n[\"name\", \"age\", \"skills\", \"city\"]\n2\nfalse",
+          "cue": 5
+        }
+      ]
+    },
+    {
+      "id": "spread",
+      "title": "Копирование и деструктуризация",
+      "narration": "Три точки раскрывают содержимое объекта. Так делают копию с изменениями: сначала раскрываем базовые настройки, затем перекрываем размер и добавляем язык. Правое значение побеждает. Это не меняет исходный объект. А деструктуризация достаёт сразу несколько свойств в отдельные переменные: тема и размер. Запускаем.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.js"
+        },
+        {
+          "type": "type",
+          "text": "const base = { theme: \"light\", size: 12 };\nconst custom = { ...base, size: 16, lang: \"ru\" };\nconst { theme, size } = custom;\nconsole.log(JSON.stringify(custom));\nconsole.log(theme, size);\n",
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            2
+          ],
+          "file": "main.js",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            3
+          ],
+          "file": "main.js",
+          "cue": 4
+        },
+        {
+          "type": "run",
+          "file": "main.js",
+          "cue": 5
+        },
+        {
+          "type": "output",
+          "text": "{\"theme\":\"light\",\"size\":16,\"lang\":\"ru\"}\nlight 16",
+          "cue": 5
+        }
+      ]
+    },
+    {
+      "id": "entries",
+      "title": "Обход объекта",
+      "narration": "Чтобы пройтись по объекту, используют Object точка entries: он возвращает массив пар из имени и значения. Цикл for of сразу раскладывает каждую пару на две переменные. Посмотрим остатки на складе: если число больше нуля, фрукт есть. Запускаем.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.js"
+        },
+        {
+          "type": "type",
+          "text": "const stock = { яблоки: 3, груши: 0, сливы: 7 };\nfor (const [name, n] of Object.entries(stock)) {\n  console.log(name, n > 0 ? \"есть\" : \"нет\");\n}\n",
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            2
+          ],
+          "file": "main.js",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            3
+          ],
+          "file": "main.js",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "main.js",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "яблоки есть\nгруши нет\nсливы есть",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "json",
+      "title": "JSON: обмен данными",
+      "narration": "Чтобы сохранить данные или передать их другой программе, объект превращают в текст формата JSON. Функция stringify делает текст, а parse возвращает объект обратно. Если текст не является корректным JSON, parse бросает исключение, и поймать его нужно блоком try и catch. Без этого программа упала бы. Запускаем.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.js"
+        },
+        {
+          "type": "type",
+          "text": "const text = JSON.stringify({ id: 1, tags: [\"a\", \"b\"] });\nconsole.log(text);\nconst back = JSON.parse(text);\nconsole.log(back.tags[1]);\ntry {\n  JSON.parse(\"{oops\");\n} catch (e) {\n  console.log(\"Ошибка:\", e.name);\n}\n",
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            1
+          ],
+          "file": "main.js",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            3
+          ],
+          "file": "main.js",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "file": "main.js",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "main.js",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "{\"id\":1,\"tags\":[\"a\",\"b\"]}\nb\nОшибка: SyntaxError",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. Объект хранит пары ключ и значение. Свойства читают через точку, перебирают через Object entries, копируют через три точки. Деструктуризация достаёт нужные поля. JSON превращает объекты в текст и обратно, а ошибки разбора ловят через try и catch.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`obj.key` · `Object.keys/values/entries` · `{ ...a, ...b }` · `JSON.stringify/parse` · `try/catch`",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}

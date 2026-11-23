@@ -1,0 +1,70 @@
+{
+  "id": "a2-toggle",
+  "type": "write",
+  "title": "Отметить сделанным",
+  "statement": "На странице список из трёх пунктов. Напишите скрипт: нажатие на любой пункт **переключает** у него класс `done` (есть — убрать, нет — добавить). Остальные пункты не меняются.",
+  "goal": "Подписывать на событие несколько элементов.",
+  "input": "Страница со списком.",
+  "expectedResult": "Нажатие переключает класс done у своего пункта.",
+  "constraints": [
+    "Разметку не меняйте."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <ul id=\"list\">\n    <li>Хлеб</li>\n    <li>Чай</li>\n    <li>Сыр</li>\n  </ul>\n  <script>\n    // ваш код\n  </script>\n\n</body>\n</html>\n",
+  "hints": [
+    "Нужно подписать на click каждый пункт.",
+    "Найти все пункты: querySelectorAll(\"#list li\"), обойти forEach.",
+    "Внутри обработчика работаем с тем же li.",
+    "У элемента есть classList.",
+    "li.classList.toggle(\"done\")"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "none",
+        "expr": "[...document.querySelectorAll('#list li')].map(li => li.classList.contains('done') ? 1 : 0).join('')",
+        "expected": "000"
+      },
+      {
+        "id": "one",
+        "before": "document.querySelectorAll('#list li')[1].click();",
+        "expr": "[...document.querySelectorAll('#list li')].map(li => li.classList.contains('done') ? 1 : 0).join('')",
+        "expected": "010"
+      },
+      {
+        "id": "twice",
+        "before": "document.querySelectorAll('#list li')[1].click();document.querySelectorAll('#list li')[1].click();",
+        "expr": "[...document.querySelectorAll('#list li')].map(li => li.classList.contains('done') ? 1 : 0).join('')",
+        "expected": "000",
+        "hint": "Повторное нажатие снимает отметку"
+      },
+      {
+        "id": "two",
+        "hidden": true,
+        "before": "document.querySelectorAll('#list li')[0].click();document.querySelectorAll('#list li')[2].click();",
+        "expr": "[...document.querySelectorAll('#list li')].map(li => li.classList.contains('done') ? 1 : 0).join('')",
+        "expected": "101"
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <ul id=\"list\">\n    <li>Хлеб</li>\n    <li>Чай</li>\n    <li>Сыр</li>\n  </ul>\n  <script>\n    document.querySelectorAll(\"#list li\").forEach((li) => {\n      li.addEventListener(\"click\", () => {\n        li.classList.toggle(\"done\");\n      });\n    });\n  </script>\n\n</body>\n</html>\n",
+  "explanation": "classList.toggle добавляет класс, если его нет, и убирает, если есть. Каждый пункт получает свой обработчик.",
+  "criteria": [
+    "Нажатие переключает done только у своего пункта."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <ul id=\"list\">\n    <li>Хлеб</li>\n    <li>Чай</li>\n    <li>Сыр</li>\n  </ul>\n  <script>\n    document.querySelectorAll(\"#list li\").forEach((li) => {\n      li.addEventListener(\"click\", () => {\n        li.classList.add(\"done\");\n      });\n    });\n  </script>\n\n</body>\n</html>\n",
+      "why": "add не снимает отметку при повторном нажатии."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <ul id=\"list\">\n    <li>Хлеб</li>\n    <li>Чай</li>\n    <li>Сыр</li>\n  </ul>\n  <script>\n    document.querySelector(\"#list li\").addEventListener(\"click\", (e) => {\n      e.target.classList.toggle(\"done\");\n    });\n  </script>\n\n</body>\n</html>\n",
+      "why": "Обработчик только у первого пункта."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <ul id=\"list\">\n    <li>Хлеб</li>\n    <li>Чай</li>\n    <li>Сыр</li>\n  </ul>\n  <script>\n    document.querySelectorAll(\"#list li\").forEach((li) => {\n      li.addEventListener(\"click\", () => {\n        document.querySelectorAll(\"#list li\").forEach((x) => x.classList.toggle(\"done\"));\n      });\n    });\n  </script>\n\n</body>\n</html>\n",
+      "why": "Переключаются все пункты, а не нажатый."
+    }
+  ]
+}

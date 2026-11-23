@@ -1,0 +1,44 @@
+{
+  "id": "a5-predict",
+  "type": "predict",
+  "title": "Странности типов",
+  "statement": "Что выведет программа? Каждая строка вывода — с новой строки.",
+  "goal": "Странности типов",
+  "input": "—",
+  "expectedResult": "Строки вывода.",
+  "constraints": [],
+  "code": "console.log(typeof null);\nconsole.log(0.1 + 0.2 === 0.3);\nconsole.log(\"5\" * \"2\");\nconsole.log(\"5\" + 2);\nconsole.log(Number(\"12px\"));\n",
+  "hints": [
+    "Разберите строки по одной.",
+    "typeof null — историческая странность.",
+    "Дробные числа хранятся приближённо.",
+    "Умножение переводит строки в числа, а плюс со строкой склеивает.",
+    "Number(\"12px\") не может разобрать запись целиком."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "object\nfalse\n10\n52\nNaN"
+  },
+  "solution": "object\nfalse\n10\n52\nNaN",
+  "explanation": "typeof null → object; 0.1+0.2 не равно 0.3; \"5\"*\"2\" → 10; \"5\"+2 → «52»; Number(\"12px\") → NaN.",
+  "criteria": [
+    "Все строки верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "object\ntrue\n10\n52\n12",
+      "answer": "object\ntrue\n10\n52\n12",
+      "why": "0.1 + 0.2 не равно ровно 0.3, а Number(\"12px\") — не число."
+    },
+    {
+      "code": "null\nfalse\n10\n7\nNaN",
+      "answer": "null\nfalse\n10\n7\nNaN",
+      "why": "typeof null — «object», а плюс со строкой склеивает: «52»."
+    },
+    {
+      "code": "object\nfalse\n7\n52\nNaN",
+      "answer": "object\nfalse\n7\n52\nNaN",
+      "why": "Умножение переводит строки в числа: 5 * 2 = 10."
+    }
+  ]
+}

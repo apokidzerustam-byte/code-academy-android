@@ -1,0 +1,233 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Почему нужна асинхронность",
+      "narration": "Представьте, что программа запросила данные из сети и ждёт ответа секунду. Если бы всё остановилось, страница замерла бы: кнопки не нажимались бы. В JavaScript долгие действия запускаются, а программа идёт дальше и вернётся к результату, когда он будет готов. Это называется асинхронностью. Сегодня разберём таймеры, обещания и слова async и await.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "Асинхронность: **запустили и пошли дальше**, результат придёт позже.",
+          "cue": 2
+        }
+      ]
+    },
+    {
+      "id": "timer",
+      "title": "Таймер и порядок выполнения",
+      "narration": "Функция setTimeout откладывает действие. Даже с задержкой ноль миллисекунд оно выполнится не сразу, а когда закончится текущий код. Поэтому сначала напечатаются первая и вторая строки, и только потом таймер. Запускаем: порядок вывода не совпадает с порядком строк в коде.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.js"
+        },
+        {
+          "type": "type",
+          "text": "console.log(\"1: старт\");\nsetTimeout(() => console.log(\"3: таймер\"), 0);\nconsole.log(\"2: конец кода\");\n",
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            2
+          ],
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "run",
+          "file": "main.js",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "1: старт\n2: конец кода\n3: таймер",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "promise",
+      "title": "Promise — обещание результата",
+      "narration": "Promise, обещание, представляет результат, которого ещё нет. Мы создаём вспомогательную функцию wait: она возвращает обещание, которое выполнится через заданное время. Метод then принимает функцию, которую вызовут, когда обещание будет выполнено. Запускаем: сначала «ждём», а через пятьдесят миллисекунд сообщение из then.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.js"
+        },
+        {
+          "type": "type",
+          "text": "const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));\n\nwait(50).then(() => console.log(\"прошло 50 мс\"));\nconsole.log(\"ждём…\");\n",
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            1
+          ],
+          "file": "main.js",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            3
+          ],
+          "file": "main.js",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "main.js",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "ждём…\nпрошло 50 мс",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "await",
+      "title": "async и await",
+      "narration": "Цепочки then быстро становятся громоздкими. Слова async и await делают асинхронный код похожим на обычный. Функция с async возвращает обещание. А await приостанавливает только её, пока обещание не выполнится, и отдаёт значение. Запускаем: main запущена печатается сразу, не дожидаясь, а результат склеенных букв приходит позже.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.js"
+        },
+        {
+          "type": "type",
+          "text": "const wait = (ms, value) => new Promise((r) => setTimeout(() => r(value), ms));\n\nasync function main() {\n  const a = await wait(30, \"A\");\n  const b = await wait(10, \"B\");\n  console.log(a + b);\n}\n\nmain();\nconsole.log(\"main запущена\");\n",
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            3
+          ],
+          "file": "main.js",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            4,
+            5
+          ],
+          "file": "main.js",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "main.js",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "main запущена\nAB",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "errors",
+      "title": "Ошибки в async-коде",
+      "narration": "Если внутри async-функции бросить исключение, обещание завершится отказом, а await превратит этот отказ в обычное исключение. Поэтому ловить ошибки можно привычным try и catch. Здесь первая загрузка проходит, вторая выбрасывает ошибку, и мы видим сообщение. Запускаем.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.js"
+        },
+        {
+          "type": "type",
+          "text": "async function load(id) {\n  if (id < 0) throw new Error(\"плохой id\");\n  return id * 2;\n}\n\nasync function run() {\n  try {\n    console.log(await load(2));\n    console.log(await load(-1));\n  } catch (e) {\n    console.log(\"Ошибка:\", e.message);\n  }\n}\n\nrun();\n",
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            2
+          ],
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            8,
+            9,
+            10,
+            11,
+            12
+          ],
+          "file": "main.js",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "main.js",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "4\nОшибка: плохой id",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "all",
+      "title": "Несколько обещаний сразу",
+      "narration": "Если запросы не зависят друг от друга, их можно запускать одновременно. Promise точка all принимает массив обещаний и выполняется, когда готовы все. Результаты приходят в том же порядке, как в массиве, даже если второе обещание готово раньше. Запускаем.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.js"
+        },
+        {
+          "type": "type",
+          "text": "const wait = (ms, value) => new Promise((r) => setTimeout(() => r(value), ms));\n\nPromise.all([wait(30, \"x\"), wait(10, \"y\")]).then((r) => console.log(r));\n",
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            3
+          ],
+          "file": "main.js",
+          "cue": 1
+        },
+        {
+          "type": "run",
+          "file": "main.js",
+          "cue": 3
+        },
+        {
+          "type": "output",
+          "text": "[\"x\", \"y\"]",
+          "cue": 3
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. Долгие действия не блокируют программу: сначала выполняется весь текущий код, а отложенное идёт после. Promise представляет будущий результат. Async и await позволяют писать ожидание как обычный код, а ошибки ловятся через try и catch. Promise точка all ждёт несколько обещаний одновременно.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`setTimeout` · `new Promise` · `.then` · `async/await` · `try/catch` · `Promise.all`",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}

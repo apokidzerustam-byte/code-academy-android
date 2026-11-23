@@ -1,0 +1,45 @@
+{
+  "id": "js-04-async",
+  "title": "JavaScript: асинхронность",
+  "goal": "Понимать порядок выполнения кода, создавать Promise и писать async/await с обработкой ошибок.",
+  "skills": [
+    "js.async",
+    "js.promise",
+    "js.await"
+  ],
+  "prerequisites": [
+    "js-03-objects"
+  ],
+  "runner": "js",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-delay.json",
+    "assignments/a2-sum-async.json",
+    "assignments/a3-fix-await.json",
+    "assignments/a4-safe.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Забыт await перед вызовом async-функции",
+      "fix": "Без await вместо значения получите Promise."
+    },
+    {
+      "mistake": "try/catch без await",
+      "fix": "Ошибка async-функции попадёт в catch только вместе с await."
+    },
+    {
+      "mistake": "Ожидание, что setTimeout остановит программу",
+      "fix": "Код после таймера выполняется сразу; результат придёт позже."
+    },
+    {
+      "mistake": "await вне async-функции",
+      "fix": "await работает только внутри функции с async."
+    }
+  ]
+}

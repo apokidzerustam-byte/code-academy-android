@@ -1,0 +1,75 @@
+{
+  "id": "a4-describe",
+  "type": "write",
+  "title": "Пользователь из JSON",
+  "statement": "Напишите функцию `describeUser(json)`: получает **текст JSON** вида `{\"name\":\"Аня\",\"age\":25}` и **возвращает** строку `Аня (25)`. Если текст — не корректный JSON, вернуть строку `ошибка`.",
+  "goal": "Разбирать JSON и ловить ошибки.",
+  "input": "Строка с JSON.",
+  "expectedResult": "Возвращаемое значение.",
+  "constraints": [],
+  "starterCode": "function describeUser(json) {\n  // ваш код\n}\n",
+  "hints": [
+    "Текст в объект превращает JSON.parse.",
+    "На неверном тексте parse бросает ошибку — её нужно перехватить.",
+    "Оберните разбор в try, а в catch верните \"ошибка\".",
+    "Достаньте поля: const { name, age } = …",
+    "Строка: `${name} (${age})`."
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "describeUser",
+        "args": [
+          "{\"name\":\"Аня\",\"age\":25}"
+        ],
+        "expected": "Аня (25)"
+      },
+      {
+        "id": "v2",
+        "function": "describeUser",
+        "args": [
+          "{oops"
+        ],
+        "expected": "ошибка"
+      },
+      {
+        "id": "h3",
+        "function": "describeUser",
+        "args": [
+          "{\"name\":\"Ли\",\"age\":7}"
+        ],
+        "expected": "Ли (7)",
+        "hidden": true,
+        "hint": "Подставляются любые значения"
+      },
+      {
+        "id": "h4",
+        "function": "describeUser",
+        "args": [
+          ""
+        ],
+        "expected": "ошибка",
+        "hidden": true,
+        "hint": "Пустой текст — тоже ошибка"
+      }
+    ]
+  },
+  "solution": "function describeUser(json) {\n  try {\n    const { name, age } = JSON.parse(json);\n    return `${name} (${age})`;\n  } catch (e) {\n    return \"ошибка\";\n  }\n}\n",
+  "explanation": "try ловит исключение от JSON.parse, а деструктуризация достаёт name и age для шаблонной строки.",
+  "criteria": [
+    "Результат верен на всех наборах, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "function describeUser(json) {\n  const { name, age } = JSON.parse(json);\n  return `${name} (${age})`;\n}\n",
+      "why": "Нет try/catch: на неверном JSON функция падает."
+    },
+    {
+      "code": "function describeUser(json) {\n  try {\n    const { name, age } = JSON.parse(json);\n    return name + age;\n  } catch (e) {\n    return \"ошибка\";\n  }\n}\n",
+      "why": "Строка собрана неверно: нет скобок и пробела."
+    }
+  ]
+}

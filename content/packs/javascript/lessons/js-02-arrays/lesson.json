@@ -1,0 +1,45 @@
+{
+  "id": "js-02-arrays",
+  "title": "JavaScript: массивы",
+  "goal": "Обрабатывать списки методами map, filter, reduce, find и sort и не попадать в ловушки сортировки.",
+  "skills": [
+    "js.arrays",
+    "js.hof",
+    "js.sort"
+  ],
+  "prerequisites": [
+    "js-01-values"
+  ],
+  "runner": "js",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-sum-even.json",
+    "assignments/a2-sorted.json",
+    "assignments/a3-last.json",
+    "assignments/a4-best.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "sort() для чисел без функции сравнения",
+      "fix": "Передавайте (a, b) => a - b."
+    },
+    {
+      "mistake": "Номер последнего элемента равен length",
+      "fix": "Последний элемент имеет номер length - 1."
+    },
+    {
+      "mistake": "reduce без начального значения",
+      "fix": "Передайте вторым аргументом 0 (или другое начальное значение)."
+    },
+    {
+      "mistake": "sort меняет исходный массив",
+      "fix": "Сначала скопируйте: [...arr].sort(...)."
+    }
+  ]
+}

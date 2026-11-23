@@ -1,0 +1,44 @@
+{
+  "id": "a5-predict",
+  "type": "predict",
+  "title": "Порядок вывода",
+  "statement": "Что выведет программа? Каждая строка вывода — с новой строки.",
+  "goal": "Порядок вывода",
+  "input": "—",
+  "expectedResult": "Строки вывода.",
+  "constraints": [],
+  "code": "console.log(\"A\");\nsetTimeout(() => console.log(\"B\"), 0);\nPromise.resolve().then(() => console.log(\"C\"));\n(async () => {\n  console.log(\"D\");\n  await null;\n  console.log(\"E\");\n})();\nconsole.log(\"F\");\n",
+  "hints": [
+    "Сначала выполняется весь синхронный код.",
+    "Тело async-функции идёт синхронно до первого await.",
+    "Затем выполняются обещания (then, продолжение после await).",
+    "Таймеры — в самом конце.",
+    "Порядок: A, D, F, затем C и E, затем B."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "A\nD\nF\nC\nE\nB"
+  },
+  "solution": "A\nD\nF\nC\nE\nB",
+  "explanation": "Синхронно: A, D (до await), F. Потом микрозадачи: C, затем E. Последним таймер: B.",
+  "criteria": [
+    "Все строки верны."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "A\nB\nC\nD\nE\nF",
+      "answer": "A\nB\nC\nD\nE\nF",
+      "why": "Это порядок строк в коде, а выполнение идёт иначе."
+    },
+    {
+      "code": "A\nD\nF\nB\nC\nE",
+      "answer": "A\nD\nF\nB\nC\nE",
+      "why": "Таймер выполняется после обещаний."
+    },
+    {
+      "code": "A\nF\nD\nC\nE\nB",
+      "answer": "A\nF\nD\nC\nE\nB",
+      "why": "Тело async-функции работает синхронно до первого await: D раньше F."
+    }
+  ]
+}

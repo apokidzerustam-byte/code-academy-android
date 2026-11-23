@@ -1,0 +1,87 @@
+{
+  "id": "a3-last",
+  "type": "fix",
+  "title": "Последний элемент",
+  "statement": "Функция `last(items)` должна вернуть **последний элемент** непустого массива, но всегда возвращает `undefined`. Исправьте.",
+  "goal": "Находить ошибку в индексе.",
+  "input": "Аргументы функции.",
+  "expectedResult": "Возвращаемое значение.",
+  "constraints": [],
+  "starterCode": "function last(items) {\n  return items[items.length];\n}\n",
+  "hints": [
+    "Вызовите last([1, 2, 3]) и посмотрите на результат.",
+    "Номера элементов начинаются с нуля.",
+    "У массива из трёх элементов номера 0, 1 и 2.",
+    "Номер последнего — на единицу меньше длины.",
+    "items[items.length - 1]"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "last",
+        "args": [
+          [
+            1,
+            2,
+            3
+          ]
+        ],
+        "expected": 3
+      },
+      {
+        "id": "v2",
+        "function": "last",
+        "args": [
+          [
+            "а",
+            "б"
+          ]
+        ],
+        "expected": "б"
+      },
+      {
+        "id": "h3",
+        "function": "last",
+        "args": [
+          [
+            7
+          ]
+        ],
+        "expected": 7,
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "function": "last",
+        "args": [
+          [
+            "x",
+            "y",
+            "z",
+            "w"
+          ]
+        ],
+        "expected": "w",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "function last(items) {\n  return items[items.length - 1];\n}\n",
+  "explanation": "Длина массива равна числу элементов, а номера идут с нуля: последний элемент имеет номер length - 1.",
+  "criteria": [
+    "Результат верен на всех наборах, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "function last(items) {\n  return items[items.length - 2];\n}\n",
+      "why": "Это предпоследний элемент."
+    },
+    {
+      "code": "function last(items) {\n  return items[0];\n}\n",
+      "why": "Это первый элемент."
+    }
+  ]
+}

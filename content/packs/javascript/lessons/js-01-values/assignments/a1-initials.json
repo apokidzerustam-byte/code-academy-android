@@ -1,0 +1,79 @@
+{
+  "id": "a1-initials",
+  "type": "write",
+  "title": "Инициалы",
+  "statement": "Напишите функцию `initials(fullName)`: она получает строку из нескольких слов (имя, фамилия…) и **возвращает** первые буквы слов в верхнем регистре, каждая с точкой.\n\n`initials(\"Анна Сидорова\")` → `\"А.С.\"`.",
+  "goal": "Разрезать строку и собрать результат.",
+  "input": "Строка из слов.",
+  "expectedResult": "Строка вида «А.С.».",
+  "constraints": [],
+  "starterCode": "function initials(fullName) {\n  // ваш код\n}\n",
+  "hints": [
+    "Сначала разрежьте строку на слова.",
+    "split(\" \") делит по пробелу; для нескольких пробелов подойдёт split(/\\s+/) после trim().",
+    "Первая буква слова — w[0].",
+    "Перевод в верхний регистр — toUpperCase().",
+    "Соберите массив map-ом и склейте join(\"\")."
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "initials",
+        "args": [
+          "Анна Сидорова"
+        ],
+        "expected": "А.С."
+      },
+      {
+        "id": "v2",
+        "function": "initials",
+        "args": [
+          "иван петрович сидоров"
+        ],
+        "expected": "И.П.С."
+      },
+      {
+        "id": "h3",
+        "function": "initials",
+        "args": [
+          "Ли"
+        ],
+        "expected": "Л.",
+        "hidden": true,
+        "hint": "Слово может быть одно"
+      },
+      {
+        "id": "h4",
+        "function": "initials",
+        "args": [
+          "  Ольга   Ким "
+        ],
+        "expected": "О.К.",
+        "hidden": true,
+        "hint": "Лишние пробелы не мешают"
+      }
+    ]
+  },
+  "solution": "function initials(fullName) {\n  return fullName\n    .trim()\n    .split(/\\s+/)\n    .map((w) => w[0].toUpperCase() + \".\")\n    .join(\"\");\n}\n",
+  "explanation": "trim убирает пробелы по краям, split(/\\s+/) делит по любым пробелам, map берёт первую букву каждого слова, join склеивает без разделителя.",
+  "criteria": [
+    "Результат верен на всех наборах, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "function initials(fullName) {\n  return fullName.split(\" \").map((w) => w[0].toUpperCase() + \".\").join(\"\");\n}\n",
+      "why": "Лишние пробелы дают пустые слова и ошибку."
+    },
+    {
+      "code": "function initials(fullName) {\n  return fullName.trim().split(/\\s+/).map((w) => w[0] + \".\").join(\"\");\n}\n",
+      "why": "Буква не переведена в верхний регистр."
+    },
+    {
+      "code": "function initials(fullName) {\n  return fullName.trim().split(/\\s+/).map((w) => w[0].toUpperCase()).join(\".\");\n}\n",
+      "why": "Нет точки после последней буквы."
+    }
+  ]
+}

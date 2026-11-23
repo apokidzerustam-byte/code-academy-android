@@ -1,0 +1,72 @@
+{
+  "id": "a4-fix",
+  "type": "fix",
+  "title": "Всегда пустые дела",
+  "statement": "Скрипт добавляет дела, но каждый новый пункт получается **пустым**, а проверка на пустоту всегда срабатывает. Найдите причину и исправьте.",
+  "goal": "Читать значение поля в нужный момент.",
+  "input": "Страница с ошибкой в скрипте.",
+  "expectedResult": "Дело добавляется с введённым текстом.",
+  "constraints": [
+    "Разметку не меняйте."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <h1>Мои дела</h1>\n  <input id=\"title\" placeholder=\"Что сделать?\">\n  <button id=\"add\">Добавить</button>\n  <ul id=\"list\"></ul>\n  <p>Осталось: <span id=\"left\">0</span></p>\n  <script>\n    const input = document.getElementById(\"title\");\n    const list = document.getElementById(\"list\");\n    const text = input.value.trim();\n    document.getElementById(\"add\").addEventListener(\"click\", () => {\n      if (text === \"\") return;\n      const li = document.createElement(\"li\");\n      li.textContent = text;\n      list.appendChild(li);\n      input.value = \"\";\n    });\n  </script>\n\n</body>\n</html>\n",
+  "hints": [
+    "Введите дело и нажмите кнопку: что происходит?",
+    "Посмотрите, где именно читается input.value.",
+    "Строка с чтением значения стоит вне обработчика.",
+    "Она выполняется один раз при загрузке страницы, когда поле ещё пусто.",
+    "Перенесите чтение внутрь обработчика нажатия."
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "one",
+        "before": "document.getElementById('title').value = 'Молоко'; document.getElementById('add').click();",
+        "expr": "[...document.querySelectorAll('#list li')].map(li => li.textContent).join('|')",
+        "expected": "Молоко"
+      },
+      {
+        "id": "two",
+        "before": "document.getElementById('title').value = 'Молоко'; document.getElementById('add').click();document.getElementById('title').value = 'Отчёт'; document.getElementById('add').click();",
+        "expr": "[...document.querySelectorAll('#list li')].map(li => li.textContent).join('|')",
+        "expected": "Молоко|Отчёт"
+      },
+      {
+        "id": "clear",
+        "before": "document.getElementById('title').value = 'Хлеб'; document.getElementById('add').click();",
+        "expr": "document.getElementById('title').value",
+        "expected": "",
+        "hint": "После добавления поле очищается"
+      },
+      {
+        "id": "empty",
+        "hidden": true,
+        "before": "document.getElementById('title').value = ''; document.getElementById('add').click();document.getElementById('title').value = '   '; document.getElementById('add').click();",
+        "expr": "document.querySelectorAll('#list li').length",
+        "expected": 0,
+        "hint": "Пустые дела не добавляются"
+      },
+      {
+        "id": "trim",
+        "hidden": true,
+        "before": "document.getElementById('title').value = '  Чай  '; document.getElementById('add').click();",
+        "expr": "document.querySelector('#list li').textContent",
+        "expected": "Чай",
+        "hint": "Пробелы по краям убираются"
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <h1>Мои дела</h1>\n  <input id=\"title\" placeholder=\"Что сделать?\">\n  <button id=\"add\">Добавить</button>\n  <ul id=\"list\"></ul>\n  <p>Осталось: <span id=\"left\">0</span></p>\n  <script>\n    const input = document.getElementById(\"title\");\n    const list = document.getElementById(\"list\");\n    document.getElementById(\"add\").addEventListener(\"click\", () => {\n      const text = input.value.trim();\n      if (text === \"\") return;\n      const li = document.createElement(\"li\");\n      li.textContent = text;\n      list.appendChild(li);\n      input.value = \"\";\n    });\n  </script>\n\n</body>\n</html>\n",
+  "explanation": "Значение читалось при загрузке страницы (оно пустое) и больше не обновлялось. Чтение внутри обработчика берёт текущий текст.",
+  "criteria": [
+    "Дела добавляются с введённым текстом."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <h1>Мои дела</h1>\n  <input id=\"title\" placeholder=\"Что сделать?\">\n  <button id=\"add\">Добавить</button>\n  <ul id=\"list\"></ul>\n  <p>Осталось: <span id=\"left\">0</span></p>\n  <script>\n    const input = document.getElementById(\"title\");\n    const list = document.getElementById(\"list\");\n    document.getElementById(\"add\").addEventListener(\"click\", () => {\n      const text = input.value;\n      const li = document.createElement(\"li\");\n      li.textContent = text;\n      list.appendChild(li);\n      input.value = \"\";\n    });\n  </script>\n\n</body>\n</html>\n",
+      "why": "Чтение внутри обработчика, но пропали проверка и trim."
+    }
+  ]
+}

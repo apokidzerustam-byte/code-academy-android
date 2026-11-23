@@ -1,0 +1,84 @@
+{
+  "id": "a2-merge",
+  "type": "write",
+  "title": "Настройки по умолчанию",
+  "statement": "Напишите функцию `withDefaults(options)`: **возвращает** новый объект настроек. По умолчанию `{ theme: \"light\", size: 12 }`, а значения из `options` их **перекрывают**; новые ключи из `options` тоже попадают в результат.",
+  "goal": "Объединять объекты через spread.",
+  "input": "Аргументы функции.",
+  "expectedResult": "Новый объект настроек.",
+  "constraints": [],
+  "starterCode": "function withDefaults(options) {\n  // ваш код\n}\n",
+  "hints": [
+    "Нужен новый объект из двух частей.",
+    "Три точки раскрывают объект внутри фигурных скобок.",
+    "Правое значение перекрывает левое.",
+    "Сначала значения по умолчанию, потом options.",
+    "{ theme: \"light\", size: 12, ...options }"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "withDefaults",
+        "args": [
+          {}
+        ],
+        "expected": {
+          "theme": "light",
+          "size": 12
+        }
+      },
+      {
+        "id": "v2",
+        "function": "withDefaults",
+        "args": [
+          {
+            "size": 16
+          }
+        ],
+        "expected": {
+          "theme": "light",
+          "size": 16
+        }
+      },
+      {
+        "id": "h3",
+        "function": "withDefaults",
+        "args": [
+          {
+            "theme": "dark",
+            "lang": "ru"
+          }
+        ],
+        "expected": {
+          "theme": "dark",
+          "size": 12,
+          "lang": "ru"
+        },
+        "hidden": true,
+        "hint": "Новые ключи сохраняются"
+      }
+    ]
+  },
+  "solution": "function withDefaults(options) {\n  return { theme: \"light\", size: 12, ...options };\n}\n",
+  "explanation": "Порядок важен: сначала значения по умолчанию, затем ...options — они перекроют одноимённые ключи.",
+  "criteria": [
+    "Результат верен на всех наборах, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "function withDefaults(options) {\n  return { ...options, theme: \"light\", size: 12 };\n}\n",
+      "why": "Значения по умолчанию перекрывают настройки пользователя."
+    },
+    {
+      "code": "function withDefaults(options) {\n  return options;\n}\n",
+      "why": "Значения по умолчанию потеряны."
+    },
+    {
+      "code": "function withDefaults(options) {\n  return { theme: \"light\", size: 12 };\n}\n",
+      "why": "Настройки пользователя игнорируются."
+    }
+  ]
+}

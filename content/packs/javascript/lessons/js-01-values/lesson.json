@@ -1,0 +1,44 @@
+{
+  "id": "js-01-values",
+  "title": "JavaScript: значения, строки и числа",
+  "goal": "Работать со строками и числами, понимать типы и преобразования, сравнивать строго и форматировать значения.",
+  "skills": [
+    "js.strings",
+    "js.types",
+    "js.numbers"
+  ],
+  "prerequisites": [],
+  "runner": "js",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-initials.json",
+    "assignments/a2-palindrome.json",
+    "assignments/a3-add-strings.json",
+    "assignments/a4-price.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Нестрогое сравнение ==",
+      "fix": "Используйте === и !==: они не преобразуют типы."
+    },
+    {
+      "mistake": "Плюс со строками вместо сложения чисел",
+      "fix": "Переведите значения в числа: Number(a) + Number(b)."
+    },
+    {
+      "mistake": "Сравнение дробей на равенство",
+      "fix": "0.1 + 0.2 не равно 0.3: округляйте через toFixed."
+    },
+    {
+      "mistake": "Обращение к свойству undefined",
+      "fix": "Проверьте, что значение существует, до обращения к его свойству.",
+      "errorType": "TypeError"
+    }
+  ]
+}

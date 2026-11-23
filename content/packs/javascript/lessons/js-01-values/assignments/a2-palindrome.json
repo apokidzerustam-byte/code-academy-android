@@ -1,0 +1,88 @@
+{
+  "id": "a2-palindrome",
+  "type": "write",
+  "title": "Палиндром",
+  "statement": "Напишите функцию `isPalindrome(text)`: **возвращает** `true`, если строка читается одинаково слева направо и справа налево, **без учёта регистра и пробелов**.\n\n`isPalindrome(\"А роза упала на лапу Азора\")` → `true`.",
+  "goal": "Приводить строку к общему виду и сравнивать.",
+  "input": "Аргументы функции.",
+  "expectedResult": "true или false.",
+  "constraints": [],
+  "starterCode": "function isPalindrome(text) {\n  // ваш код\n}\n",
+  "hints": [
+    "Сначала приведите строку к одному виду: без пробелов и в нижнем регистре.",
+    "toLowerCase() и split(\" \").join(\"\").",
+    "Развернуть строку: split(\"\").reverse().join(\"\").",
+    "Сравните исходную очищенную строку с развёрнутой через ===.",
+    "Верните результат сравнения."
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "isPalindrome",
+        "args": [
+          "А роза упала на лапу Азора"
+        ],
+        "expected": true
+      },
+      {
+        "id": "v2",
+        "function": "isPalindrome",
+        "args": [
+          "Привет"
+        ],
+        "expected": false
+      },
+      {
+        "id": "h3",
+        "function": "isPalindrome",
+        "args": [
+          ""
+        ],
+        "expected": true,
+        "hidden": true,
+        "hint": "Пустая строка — палиндром"
+      },
+      {
+        "id": "h4",
+        "function": "isPalindrome",
+        "args": [
+          "Madam"
+        ],
+        "expected": true,
+        "hidden": true,
+        "hint": "Регистр не важен"
+      },
+      {
+        "id": "h5",
+        "function": "isPalindrome",
+        "args": [
+          "ab ba x"
+        ],
+        "expected": false,
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "function isPalindrome(text) {\n  const s = text.toLowerCase().split(\" \").join(\"\");\n  return s === s.split(\"\").reverse().join(\"\");\n}\n",
+  "explanation": "После очистки строка палиндром, если совпадает со своей перевёрнутой копией.",
+  "criteria": [
+    "Результат верен на всех наборах, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "function isPalindrome(text) {\n  const s = text.split(\" \").join(\"\");\n  return s === s.split(\"\").reverse().join(\"\");\n}\n",
+      "why": "Регистр не учтён: «А» и «а» разные."
+    },
+    {
+      "code": "function isPalindrome(text) {\n  const s = text.toLowerCase();\n  return s === s.split(\"\").reverse().join(\"\");\n}\n",
+      "why": "Пробелы мешают сравнению."
+    },
+    {
+      "code": "function isPalindrome(text) {\n  return text.length > 0;\n}\n",
+      "why": "Подгонка под примеры."
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "id": "a5-predict",
+  "type": "predict",
+  "title": "Сколько дел отмечено?",
+  "statement": "Что произойдёт, когда скрипт отработает? Сколько пунктов будет с классом `done`? Ответьте числом.",
+  "goal": "Читать код, работающий с DOM.",
+  "input": "—",
+  "expectedResult": "Одно число.",
+  "constraints": [],
+  "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <ul id=\"list\"></ul>\n  <script>\n    const list = document.getElementById(\"list\");\n    for (const t of [\"а\", \"б\", \"в\", \"г\"]) {\n      const li = document.createElement(\"li\");\n      li.textContent = t;\n      list.appendChild(li);\n    }\n    list.children[0].classList.add(\"done\");\n    list.children[2].classList.add(\"done\");\n    list.children[1].remove();\n    list.lastElementChild.classList.add(\"done\");\n  </script>\n</body>\n</html>\n",
+  "hints": [
+    "Идите по строкам скрипта по порядку.",
+    "Сначала создаются четыре пункта: а, б, в, г.",
+    "Класс done получают первый и третий (а и в).",
+    "Второй пункт (б) удаляется, остаются а, в, г.",
+    "Последний (г) тоже получает done."
+  ],
+  "tests": {
+    "kind": "answer",
+    "expected_answer": "3"
+  },
+  "solution": "3",
+  "explanation": "Остаются а, в, г: у а и в класс добавлен раньше, у г — последним действием. Итого три.",
+  "criteria": [
+    "Верное число."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "2",
+      "answer": "2",
+      "why": "Последняя строка тоже добавляет класс (пункту г)."
+    },
+    {
+      "code": "4",
+      "answer": "4",
+      "why": "Пункт «б» удалён, и пунктов только три."
+    },
+    {
+      "code": "1",
+      "answer": "1",
+      "why": "Отмечены не один, а три пункта."
+    }
+  ]
+}

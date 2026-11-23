@@ -1,0 +1,46 @@
+{
+  "id": "js-03-objects",
+  "title": "JavaScript: объекты и JSON",
+  "goal": "Описывать данные объектами, копировать их через spread, обходить через Object.entries и работать с JSON.",
+  "skills": [
+    "js.objects",
+    "js.spread",
+    "js.json"
+  ],
+  "prerequisites": [
+    "js-02-arrays"
+  ],
+  "runner": "js",
+  "scenario": "scenario.json",
+  "notes": "notes.md",
+  "assignments": [
+    "assignments/a1-count-words.json",
+    "assignments/a2-merge.json",
+    "assignments/a3-total-stock.json",
+    "assignments/a4-describe.json",
+    "assignments/a5-predict.json"
+  ],
+  "passCriteria": {
+    "minAssignmentsPassed": 3,
+    "minScorePercent": 80
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Имя из переменной читают через точку",
+      "fix": "obj[name], а не obj.name — точка ищет свойство с буквальным именем."
+    },
+    {
+      "mistake": "Порядок в { ...a, ...b } перепутан",
+      "fix": "Правое значение побеждает: сначала умолчания, потом пользовательские."
+    },
+    {
+      "mistake": "JSON.parse без try/catch",
+      "fix": "Неверный текст бросает SyntaxError — ловите его.",
+      "errorType": "SyntaxError"
+    },
+    {
+      "mistake": "Object.keys вместо Object.values",
+      "fix": "keys — имена, values — значения, entries — пары."
+    }
+  ]
+}

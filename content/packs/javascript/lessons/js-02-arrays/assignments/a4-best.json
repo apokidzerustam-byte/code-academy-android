@@ -1,0 +1,122 @@
+{
+  "id": "a4-best",
+  "type": "write",
+  "title": "Лучшие результаты",
+  "statement": "Напишите функцию `bestScores(scores, n)`: **возвращает** `n` наибольших значений из массива по убыванию. Если элементов меньше `n`, вернуть сколько есть. Исходный массив не меняйте.",
+  "goal": "Копировать, сортировать и обрезать массив.",
+  "input": "Аргументы функции.",
+  "expectedResult": "Массив лучших значений.",
+  "constraints": [],
+  "starterCode": "function bestScores(scores, n) {\n  // ваш код\n}\n",
+  "hints": [
+    "Сначала упорядочите значения от большего к меньшему.",
+    "Сортируйте копию: [...scores].",
+    "Для убывания в функции сравнения поменяйте a и b местами.",
+    "Нужные n штук — метод slice(0, n).",
+    "[...scores].sort((a, b) => b - a).slice(0, n)"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "bestScores",
+        "args": [
+          [
+            5,
+            9,
+            1,
+            7
+          ],
+          2
+        ],
+        "expected": [
+          9,
+          7
+        ]
+      },
+      {
+        "id": "v2",
+        "function": "bestScores",
+        "args": [
+          [
+            3,
+            1
+          ],
+          5
+        ],
+        "expected": [
+          3,
+          1
+        ]
+      },
+      {
+        "id": "h3",
+        "function": "bestScores",
+        "args": [
+          [
+            10,
+            9,
+            100,
+            1
+          ],
+          3
+        ],
+        "expected": [
+          100,
+          10,
+          9
+        ],
+        "hidden": true,
+        "hint": "Сравнивайте как числа"
+      },
+      {
+        "id": "h4",
+        "function": "bestScores",
+        "args": [
+          [],
+          3
+        ],
+        "expected": [],
+        "hidden": true
+      },
+      {
+        "id": "h5",
+        "function": "bestScores",
+        "args": [
+          [
+            4,
+            4,
+            1
+          ],
+          2
+        ],
+        "expected": [
+          4,
+          4
+        ],
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "function bestScores(scores, n) {\n  return [...scores].sort((a, b) => b - a).slice(0, n);\n}\n",
+  "explanation": "Сортировка по убыванию ставит лучшие вперёд, slice(0, n) берёт первые n; для короткого массива берётся сколько есть.",
+  "criteria": [
+    "Результат верен на всех наборах, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "function bestScores(scores, n) {\n  return [...scores].sort().reverse().slice(0, n);\n}\n",
+      "why": "sort без сравнения ставит 10 раньше 9."
+    },
+    {
+      "code": "function bestScores(scores, n) {\n  return [...scores].sort((a, b) => a - b).slice(0, n);\n}\n",
+      "why": "Берутся наименьшие, а не наибольшие."
+    },
+    {
+      "code": "function bestScores(scores, n) {\n  return [...scores].sort((a, b) => b - a).slice(0, n - 1);\n}\n",
+      "why": "На один элемент меньше."
+    }
+  ]
+}

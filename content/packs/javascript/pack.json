@@ -1,0 +1,33 @@
+{
+  "id": "javascript",
+  "version": "0.1.0",
+  "stage": 7,
+  "title": "JavaScript",
+  "description": "Язык браузера: значения, массивы, объекты, асинхронность и работа со страницей.",
+  "language": "javascript",
+  "minAppVersion": 1,
+  "lessons": [
+    "js-01-values",
+    "js-02-arrays",
+    "js-03-objects",
+    "js-04-async",
+    "js-05-dom"
+  ],
+  "skills": {
+    "js.strings": "Строки и их методы",
+    "js.types": "Типы и преобразования",
+    "js.numbers": "Числа, округление и форматирование",
+    "js.arrays": "Массивы и их основные операции",
+    "js.hof": "map, filter и reduce",
+    "js.sort": "Сортировка и копирование массивов",
+    "js.objects": "Объекты: свойства и методы Object",
+    "js.spread": "Spread и деструктуризация",
+    "js.json": "JSON и обработка ошибок разбора",
+    "js.async": "Таймеры и порядок выполнения",
+    "js.promise": "Promise",
+    "js.await": "async/await и обработка ошибок",
+    "js.dom2": "DOM: поиск и изменение элементов",
+    "js.events2": "События и делегирование",
+    "js.safe-html": "textContent и безопасность (XSS)"
+  }
+}

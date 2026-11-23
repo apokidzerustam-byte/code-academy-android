@@ -1,0 +1,74 @@
+{
+  "id": "a4-safe",
+  "type": "write",
+  "title": "Безопасная загрузка",
+  "statement": "Дана async-функция `load(id)`: для отрицательного `id` она бросает ошибку, иначе возвращает `id * 2`. Напишите **async**-функцию `safeLoad(id)`: возвращает результат `load(id)`, а если случилась ошибка — строку `\"ошибка\"`.",
+  "goal": "Ловить ошибки в async-коде.",
+  "input": "Аргументы функции.",
+  "expectedResult": "Возвращаемое значение.",
+  "constraints": [],
+  "starterCode": "async function load(id) {\n  if (id < 0) throw new Error(\"плохой id\");\n  return id * 2;\n}\n\nasync function safeLoad(id) {\n  // ваш код\n}\n",
+  "hints": [
+    "Ошибки ловят блоком try и catch.",
+    "Вызов load(id) положите внутрь try.",
+    "Перед load нужен await — иначе ошибка до catch не дойдёт.",
+    "В catch верните строку \"ошибка\".",
+    "try { return await load(id); } catch (e) { return \"ошибка\"; }"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "safeLoad",
+        "args": [
+          2
+        ],
+        "expected": 4
+      },
+      {
+        "id": "v2",
+        "function": "safeLoad",
+        "args": [
+          -1
+        ],
+        "expected": "ошибка"
+      },
+      {
+        "id": "h3",
+        "function": "safeLoad",
+        "args": [
+          0
+        ],
+        "expected": 0,
+        "hidden": true,
+        "hint": "Ноль — не ошибка"
+      },
+      {
+        "id": "h4",
+        "function": "safeLoad",
+        "args": [
+          -100
+        ],
+        "expected": "ошибка",
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "async function load(id) {\n  if (id < 0) throw new Error(\"плохой id\");\n  return id * 2;\n}\n\nasync function safeLoad(id) {\n  try {\n    return await load(id);\n  } catch (e) {\n    return \"ошибка\";\n  }\n}\n",
+  "explanation": "await превращает отказ обещания в исключение, поэтому try/catch его перехватывает; без await блок catch не сработает.",
+  "criteria": [
+    "Результат верен на всех наборах, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "async function load(id) {\n  if (id < 0) throw new Error(\"плохой id\");\n  return id * 2;\n}\n\nasync function safeLoad(id) {\n  return await load(id);\n}\n",
+      "why": "Нет try/catch: ошибка вылетает наружу."
+    },
+    {
+      "code": "async function load(id) {\n  if (id < 0) throw new Error(\"плохой id\");\n  return id * 2;\n}\n\nasync function safeLoad(id) {\n  try {\n    return load(id);\n  } catch (e) {\n    return \"ошибка\";\n  }\n}\n",
+      "why": "Без await ошибка не попадает в catch: обещание отклоняется уже снаружи."
+    }
+  ]
+}

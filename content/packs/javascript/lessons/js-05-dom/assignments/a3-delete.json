@@ -1,0 +1,67 @@
+{
+  "id": "a3-delete",
+  "type": "write",
+  "title": "Удалить дело",
+  "statement": "В каждом пункте списка есть кнопка `×`. Напишите скрипт: нажатие на кнопку **удаляет её пункт** целиком. Нажатие на сам текст пункта ничего не делает. Сделайте это **одним обработчиком на список** (делегирование событий).",
+  "goal": "Использовать event.target и closest.",
+  "input": "Список с кнопками.",
+  "expectedResult": "Нажатая кнопка удаляет свой пункт.",
+  "constraints": [
+    "Один обработчик на ul."
+  ],
+  "starterCode": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <ul id=\"list\">\n    <li>Хлеб <button>×</button></li>\n    <li>Чай <button>×</button></li>\n    <li>Сыр <button>×</button></li>\n  </ul>\n  <script>\n    // ваш код\n  </script>\n\n</body>\n</html>\n",
+  "hints": [
+    "Событие нажатия всплывает от кнопки вверх до списка.",
+    "Подпишитесь на click у самого списка.",
+    "Нажатый элемент — e.target; проверьте, что это кнопка: tagName === \"BUTTON\".",
+    "Пункт, в котором кнопка, находит closest(\"li\").",
+    "Удаляет элемент метод remove()."
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "html",
+    "cases": [
+      {
+        "id": "start",
+        "expr": "[...document.querySelectorAll('#list li')].map(li => li.firstChild.textContent.trim()).join(',')",
+        "expected": "Хлеб,Чай,Сыр"
+      },
+      {
+        "id": "del-mid",
+        "before": "document.querySelectorAll('#list button')[1].click();",
+        "expr": "[...document.querySelectorAll('#list li')].map(li => li.firstChild.textContent.trim()).join(',')",
+        "expected": "Хлеб,Сыр"
+      },
+      {
+        "id": "del-two",
+        "before": "document.querySelectorAll('#list button')[0].click();document.querySelectorAll('#list button')[0].click();",
+        "expr": "[...document.querySelectorAll('#list li')].map(li => li.firstChild.textContent.trim()).join(',')",
+        "expected": "Сыр",
+        "hint": "После удаления кнопки сдвигаются"
+      },
+      {
+        "id": "text-click",
+        "hidden": true,
+        "before": "document.querySelectorAll('#list li')[0].click();",
+        "expr": "[...document.querySelectorAll('#list li')].map(li => li.firstChild.textContent.trim()).join(',')",
+        "expected": "Хлеб,Чай,Сыр",
+        "hint": "Удалять нужно только по нажатию на кнопку, а не на текст пункта"
+      }
+    ]
+  },
+  "solution": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <ul id=\"list\">\n    <li>Хлеб <button>×</button></li>\n    <li>Чай <button>×</button></li>\n    <li>Сыр <button>×</button></li>\n  </ul>\n  <script>\n    document.getElementById(\"list\").addEventListener(\"click\", (e) => {\n      if (e.target.tagName === \"BUTTON\") {\n        e.target.closest(\"li\").remove();\n      }\n    });\n  </script>\n\n</body>\n</html>\n",
+  "explanation": "Событие всплывает: обработчик на ul видит нажатие на любую кнопку внутри. closest(\"li\") находит пункт, remove() убирает.",
+  "criteria": [
+    "Кнопка удаляет только свой пункт."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <ul id=\"list\">\n    <li>Хлеб <button>×</button></li>\n    <li>Чай <button>×</button></li>\n    <li>Сыр <button>×</button></li>\n  </ul>\n  <script>\n    document.getElementById(\"list\").addEventListener(\"click\", (e) => {\n      e.target.closest(\"li\").remove();\n    });\n  </script>\n\n</body>\n</html>\n",
+      "why": "Удаляется пункт и при нажатии на текст."
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Задание</title>\n</head>\n<body>\n  <ul id=\"list\">\n    <li>Хлеб <button>×</button></li>\n    <li>Чай <button>×</button></li>\n    <li>Сыр <button>×</button></li>\n  </ul>\n  <script>\n    document.getElementById(\"list\").addEventListener(\"click\", (e) => {\n      if (e.target.tagName === \"BUTTON\") {\n        document.getElementById(\"list\").innerHTML = \"\";\n      }\n    });\n  </script>\n\n</body>\n</html>\n",
+      "why": "Удаляется весь список."
+    }
+  ]
+}

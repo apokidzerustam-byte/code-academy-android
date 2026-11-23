@@ -1,0 +1,78 @@
+{
+  "id": "a3-add-strings",
+  "type": "fix",
+  "title": "Сумма из формы",
+  "statement": "Из полей формы числа приходят **строками**. Функция `addStrings(a, b)` должна вернуть **число** — сумму, но `addStrings(\"2\", \"3\")` даёт `\"23\"`. Исправьте.",
+  "goal": "Преобразовывать строки в числа.",
+  "input": "Аргументы функции.",
+  "expectedResult": "Возвращаемое значение.",
+  "constraints": [],
+  "starterCode": "function addStrings(a, b) {\n  return a + b;\n}\n",
+  "hints": [
+    "Выполните addStrings(\"2\", \"3\") и посмотрите на результат.",
+    "Плюс со строками склеивает их.",
+    "Нужно сначала превратить каждую строку в число.",
+    "Функция Number превращает строку в число.",
+    "Number(a) + Number(b)"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "addStrings",
+        "args": [
+          "2",
+          "3"
+        ],
+        "expected": 5
+      },
+      {
+        "id": "v2",
+        "function": "addStrings",
+        "args": [
+          "10",
+          "-4"
+        ],
+        "expected": 6
+      },
+      {
+        "id": "h3",
+        "function": "addStrings",
+        "args": [
+          "1.5",
+          "2.5"
+        ],
+        "expected": 4,
+        "hidden": true,
+        "hint": "Дробные числа тоже бывают"
+      },
+      {
+        "id": "h4",
+        "function": "addStrings",
+        "args": [
+          "0",
+          "0"
+        ],
+        "expected": 0,
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "function addStrings(a, b) {\n  return Number(a) + Number(b);\n}\n",
+  "explanation": "Плюс при строках склеивает, поэтому перед сложением каждое значение переводим в число функцией Number.",
+  "criteria": [
+    "Результат верен на всех наборах, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "function addStrings(a, b) {\n  return parseInt(a) + parseInt(b);\n}\n",
+      "why": "parseInt отбрасывает дробную часть: 1.5 + 2.5 даёт 3."
+    },
+    {
+      "code": "function addStrings(a, b) {\n  return Number(a + b);\n}\n",
+      "why": "Сначала склеиваются строки: «2» и «3» дают «23»."
+    }
+  ]
+}

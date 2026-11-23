@@ -1,0 +1,82 @@
+{
+  "id": "a3-total-stock",
+  "type": "fix",
+  "title": "Остатки на складе",
+  "statement": "Функция `totalStock(stock)` должна вернуть **сумму значений** объекта (`{ яблоки: 3, груши: 0 }` → `3`), но возвращает странную строку. Найдите ошибку.",
+  "goal": "Отличать ключи от значений.",
+  "input": "Аргументы функции.",
+  "expectedResult": "Возвращаемое значение.",
+  "constraints": [],
+  "starterCode": "function totalStock(stock) {\n  let sum = 0;\n  for (const key of Object.keys(stock)) {\n    sum += key;\n  }\n  return sum;\n}\n",
+  "hints": [
+    "Вызовите totalStock({ a: 1 }) и посмотрите на результат.",
+    "Что хранит переменная key: имя свойства или его значение?",
+    "К сумме прибавляется имя, а не число.",
+    "Значение по имени из переменной берут через квадратные скобки.",
+    "sum += stock[key];"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "totalStock",
+        "args": [
+          {
+            "яблоки": 3,
+            "груши": 0
+          }
+        ],
+        "expected": 3
+      },
+      {
+        "id": "v2",
+        "function": "totalStock",
+        "args": [
+          {
+            "a": 1,
+            "b": 2,
+            "c": 3
+          }
+        ],
+        "expected": 6
+      },
+      {
+        "id": "h3",
+        "function": "totalStock",
+        "args": [
+          {}
+        ],
+        "expected": 0,
+        "hidden": true
+      },
+      {
+        "id": "h4",
+        "function": "totalStock",
+        "args": [
+          {
+            "x": 10
+          }
+        ],
+        "expected": 10,
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "function totalStock(stock) {\n  let sum = 0;\n  for (const key of Object.keys(stock)) {\n    sum += stock[key];\n  }\n  return sum;\n}\n",
+  "explanation": "Object.keys даёт имена свойств. Чтобы получить значение по имени из переменной, нужны квадратные скобки: stock[key].",
+  "criteria": [
+    "Результат верен на всех наборах, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "function totalStock(stock) {\n  return Object.keys(stock).length;\n}\n",
+      "why": "Считается число ключей, а не сумма значений."
+    },
+    {
+      "code": "function totalStock(stock) {\n  let sum = 0;\n  for (const key of Object.keys(stock)) {\n    sum += stock.key;\n  }\n  return sum;\n}\n",
+      "why": "stock.key ищет свойство с именем key; нужны квадратные скобки."
+    }
+  ]
+}

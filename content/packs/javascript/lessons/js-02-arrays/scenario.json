@@ -1,0 +1,233 @@
+{
+  "voice": "author",
+  "scenes": [
+    {
+      "id": "intro",
+      "title": "Массив — список значений",
+      "narration": "Массив хранит упорядоченный список значений в квадратных скобках. Элементы нумеруются с нуля: первый имеет номер ноль, последний — длина минус один. Но настоящая сила массивов в методах, которые обрабатывают сразу весь список без написания циклов вручную. Сегодня познакомимся с самыми нужными.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "Номера элементов начинаются с **нуля**: `a[0]` — первый, `a[a.length - 1]` — последний.",
+          "cue": 1
+        }
+      ]
+    },
+    {
+      "id": "basic",
+      "title": "Основные операции",
+      "narration": "Метод push добавляет элемент в конец. Свойство length даёт число элементов, а по номеру берём нужный. Метод includes проверяет, есть ли значение, а indexOf возвращает его номер или минус один. Метод slice вырезает кусок от первого номера до второго, не включая второй, и не меняет исходный массив. Запускаем.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.js"
+        },
+        {
+          "type": "type",
+          "text": "const nums = [5, 2, 8, 1];\nnums.push(10);\nconsole.log(nums.length, nums[0], nums[nums.length - 1]);\nconsole.log(nums.includes(8), nums.indexOf(8));\nconsole.log(nums.slice(1, 3));\n",
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            2
+          ],
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            3
+          ],
+          "file": "main.js",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            4
+          ],
+          "file": "main.js",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            5
+          ],
+          "file": "main.js",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "main.js",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "5 5 10\ntrue 2\n[2, 8]",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "hof",
+      "title": "map, filter, reduce",
+      "narration": "Три главных метода. Метод map превращает каждый элемент по правилу и возвращает новый массив: удвоим цены. Метод filter оставляет только те элементы, для которых правило даёт истину: цены ниже двадцати. Метод reduce сворачивает массив в одно значение: сумму. Он получает функцию из накопленного значения и очередного элемента, а вторым аргументом начальное значение, ноль. Запускаем.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.js"
+        },
+        {
+          "type": "type",
+          "text": "const prices = [10, 25, 7, 40];\nconst doubled = prices.map((p) => p * 2);\nconst cheap = prices.filter((p) => p < 20);\nconst total = prices.reduce((sum, p) => sum + p, 0);\nconsole.log(doubled);\nconsole.log(cheap);\nconsole.log(total);\n",
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            2
+          ],
+          "file": "main.js",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            3
+          ],
+          "file": "main.js",
+          "cue": 2
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            4
+          ],
+          "file": "main.js",
+          "cue": 3
+        },
+        {
+          "type": "run",
+          "file": "main.js",
+          "cue": 5
+        },
+        {
+          "type": "output",
+          "text": "[20, 50, 14, 80]\n[10, 7]\n82",
+          "cue": 5
+        }
+      ]
+    },
+    {
+      "id": "search",
+      "title": "Поиск и проверки",
+      "narration": "Метод find возвращает первый подходящий элемент или undefined. Метод some отвечает, подходит ли хотя бы один, а every — подходят ли все. Метод sort сортирует массив. Обратите внимание на копию через три точки: sort меняет сам массив, а исходные данные часто хочется сохранить. Запускаем.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.js"
+        },
+        {
+          "type": "type",
+          "text": "const names = [\"Яна\", \"Борис\", \"Анна\"];\nconsole.log(names.find((n) => n.startsWith(\"Б\")));\nconsole.log(names.some((n) => n.length > 4), names.every((n) => n.length > 4));\nconsole.log([...names].sort());\n",
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            2
+          ],
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            3
+          ],
+          "file": "main.js",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            4
+          ],
+          "file": "main.js",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "main.js",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "Борис\ntrue false\n[\"Анна\", \"Борис\", \"Яна\"]",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "sort",
+      "title": "Ловушка сортировки",
+      "narration": "Самая известная ловушка. Метод sort без аргументов сравнивает элементы как строки, поэтому десять окажется раньше девяти. Для чисел нужно передать функцию сравнения: если разность икс минус игрек отрицательна, икс идёт раньше. Тогда порядок правильный. Запускаем: сначала неверный порядок, потом верный.",
+      "actions": [
+        {
+          "type": "clear",
+          "file": "main.js"
+        },
+        {
+          "type": "type",
+          "text": "const a = [10, 9, 100, 1];\nconsole.log([...a].sort());\nconsole.log([...a].sort((x, y) => x - y));\n",
+          "file": "main.js",
+          "cue": 0
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            2
+          ],
+          "file": "main.js",
+          "cue": 1
+        },
+        {
+          "type": "highlight",
+          "lines": [
+            3
+          ],
+          "file": "main.js",
+          "cue": 2
+        },
+        {
+          "type": "run",
+          "file": "main.js",
+          "cue": 4
+        },
+        {
+          "type": "output",
+          "text": "[1, 10, 100, 9]\n[1, 9, 10, 100]",
+          "cue": 4
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Итог",
+      "narration": "Подведём итог. Массив — упорядоченный список с нумерацией с нуля. Метод map преобразует, filter отбирает, reduce сворачивает в одно значение. find, some и every ищут и проверяют. А sort для чисел всегда нужна функция сравнения. Копируйте массив через три точки, если не хотите его менять.",
+      "actions": [
+        {
+          "type": "note",
+          "md": "`map` · `filter` · `reduce` · `find` · `some/every` · `sort((a, b) => a - b)` · `[...arr]`",
+          "cue": 0
+        }
+      ]
+    }
+  ]
+}

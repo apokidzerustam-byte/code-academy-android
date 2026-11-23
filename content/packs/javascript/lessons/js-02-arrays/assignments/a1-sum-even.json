@@ -1,0 +1,103 @@
+{
+  "id": "a1-sum-even",
+  "type": "write",
+  "title": "Сумма чётных",
+  "statement": "Напишите функцию `sumEven(numbers)`: **возвращает** сумму только чётных чисел массива. Для пустого массива и без чётных — `0`.",
+  "goal": "Сочетать filter и reduce.",
+  "input": "Массив чисел.",
+  "expectedResult": "Возвращаемое значение.",
+  "constraints": [],
+  "starterCode": "function sumEven(numbers) {\n  // ваш код\n}\n",
+  "hints": [
+    "Сначала отберите нужные числа, затем сложите.",
+    "Чётное число делится на 2 без остатка: n % 2 === 0.",
+    "Отбирает filter.",
+    "Складывает reduce с начальным значением 0.",
+    "Объедините: numbers.filter(…).reduce(…, 0)"
+  ],
+  "tests": {
+    "kind": "web",
+    "lang": "js",
+    "cases": [
+      {
+        "id": "v1",
+        "function": "sumEven",
+        "args": [
+          [
+            1,
+            2,
+            3,
+            4
+          ]
+        ],
+        "expected": 6
+      },
+      {
+        "id": "v2",
+        "function": "sumEven",
+        "args": [
+          [
+            5,
+            7
+          ]
+        ],
+        "expected": 0
+      },
+      {
+        "id": "h3",
+        "function": "sumEven",
+        "args": [
+          []
+        ],
+        "expected": 0,
+        "hidden": true,
+        "hint": "Пустой массив"
+      },
+      {
+        "id": "h4",
+        "function": "sumEven",
+        "args": [
+          [
+            -2,
+            4,
+            -6
+          ]
+        ],
+        "expected": -4,
+        "hidden": true,
+        "hint": "Отрицательные чётные тоже считаются"
+      },
+      {
+        "id": "h5",
+        "function": "sumEven",
+        "args": [
+          [
+            0,
+            1
+          ]
+        ],
+        "expected": 0,
+        "hidden": true
+      }
+    ]
+  },
+  "solution": "function sumEven(numbers) {\n  return numbers.filter((n) => n % 2 === 0).reduce((s, n) => s + n, 0);\n}\n",
+  "explanation": "filter оставляет чётные, reduce с начальным нулём складывает их; нулевой старт даёт 0 для пустого результата.",
+  "criteria": [
+    "Результат верен на всех наборах, включая скрытые."
+  ],
+  "wrongSolutions": [
+    {
+      "code": "function sumEven(numbers) {\n  return numbers.reduce((s, n) => s + n, 0);\n}\n",
+      "why": "Суммируются все числа."
+    },
+    {
+      "code": "function sumEven(numbers) {\n  return numbers.filter((n) => n % 2 === 0).reduce((s, n) => s + n);\n}\n",
+      "why": "reduce без начального значения падает на пустом массиве."
+    },
+    {
+      "code": "function sumEven(numbers) {\n  return numbers.filter((n) => n % 2 === 1).reduce((s, n) => s + n, 0);\n}\n",
+      "why": "Отбираются нечётные: у отрицательных остаток −1."
+    }
+  ]
+}
